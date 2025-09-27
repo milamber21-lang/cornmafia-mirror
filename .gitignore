@@ -1,0 +1,37 @@
+# Git ignores (NOT Docker)
+.git
+**/.git
+
+# dependencies & builds
+node_modules/
+apps/cms/node_modules/
+apps/web/node_modules/
+.pnpm-store/
+.turbo/
+.next/
+dist/
+build/
+coverage/
+
+# data & logs
+data/
+logs/
+uploads/
+*.log
+
+# env files
+.env
+**/.env
+**/*.env
+!.env.example
+!**/.env.example
+!example.env
+!**/example.env
+
+# misc
+mirror_key
+mirror_key.pub
+.DS_Store
+.vscodelogs/
+*.log
+uploads/

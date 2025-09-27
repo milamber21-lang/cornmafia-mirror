@@ -1,0 +1,4 @@
+# FILE: apps/cms/public/robots.txt
+# CornMafia — CMS (do not index)
+User-agent: *
+Disallow: /

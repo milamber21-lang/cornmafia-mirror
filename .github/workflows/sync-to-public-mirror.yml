@@ -1,0 +1,85 @@
+name: Sync to Public Mirror (single-commit snapshot)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    if: github.repository == 'milamber21-lang/cornmafia'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare sanitized copy
+        run: |
+          set -euo pipefail
+          mkdir -p mirror
+          rsync -av \
+            --exclude '.git' \
+            --exclude 'mirror' \
+            --exclude 'node_modules' \
+            --exclude '.pnpm-store' \
+            --exclude '.turbo' \
+            --exclude '.next' \
+            --exclude 'dist' \
+            --exclude 'build' \
+            --exclude 'coverage' \
+            --exclude 'data' \
+            --exclude 'uploads' \
+            --exclude 'apps/cms/seed-data' \
+            --exclude '**/.env' \
+            --exclude '**/.env.*' \
+            --exclude '*.env' \
+            ./ mirror/
+          # belt-and-suspenders: nuke any env remnants
+          find mirror -type f -name ".env*" -delete || true
+          find mirror -type f -name "*.env" -delete || true
+
+      - name: Initialize orphan 'main' (no history)
+        working-directory: mirror
+        run: |
+          set -euo pipefail
+          git init
+          git config user.name "mirror-bot"
+          git config user.email "mirror-bot@users.noreply.github.com"
+          git checkout -B main
+          git add .
+          git commit -m "chore(mirror): snapshot $(date -u +'%Y-%m-%dT%H:%M:%SZ')" || true
+
+      - name: Configure SSH from base64 secret
+        env:
+          KEY_B64: ${{ secrets.MIRROR_DEPLOY_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          test -n "${KEY_B64:-}" || { echo "MIRROR_DEPLOY_KEY_B64 is missing"; exit 1; }
+          mkdir -p ~/.ssh
+          echo "$KEY_B64" | base64 -d > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Trust GitHub host key
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
+          # Ensure we use this identity only
+          cat >> ~/.ssh/config <<'CFG'
+          Host github.com
+            HostName github.com
+            User git
+            IdentitiesOnly yes
+            IdentityFile ~/.ssh/id_ed25519
+          CFG
+          chmod 600 ~/.ssh/config
+
+      - name: Push snapshot to mirror (force)
+        working-directory: mirror
+        env:
+          MIRROR_REPO: git@github.com:milamber21-lang/cornmafia-mirror.git
+        run: |
+          set -euo pipefail
+          git remote add mirror "$MIRROR_REPO" || git remote set-url mirror "$MIRROR_REPO"
+          # Optional: verify auth (will print a greeting on success)
+          ssh -o StrictHostKeyChecking=yes -T git@github.com || true
+          git push -f mirror main:main
+ 

@@ -1,0 +1,70 @@
+services:
+  cm-db:
+    image: postgres:16-alpine
+    container_name: cm-db
+    environment:
+      POSTGRES_USER: cm
+      POSTGRES_PASSWORD: cm_pw
+      POSTGRES_DB: cm_core
+    volumes:
+      - /home/lilyserver/docker/cm/data/postgres:/var/lib/postgresql/data
+      - /home/lilyserver/docker/cm/infra/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # target a DB that always exists to avoid "database cm does not exist" spam
+      test: ["CMD-SHELL", "pg_isready -U cm -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+    logging: &default-logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  cm-cms:
+    build: ./apps/cms
+    container_name: cm-cms
+    env_file: ./apps/cms/.env
+    environment:
+      PORT: 5322
+    volumes:
+      - ./data/cms_uploads:/app/media
+    depends_on:
+      cm-db:
+        condition: service_healthy
+    ports:
+      - "5322:5322"
+    # Generate DB schema, run migrations (if any), then start Next.js
+    # IMPORTANT: do NOT run "migrate:create" automatically — it breaks on existing DBs.
+    command: ["npm","run","start"]
+    healthcheck:
+      # BusyBox wget is present in alpine-based Node images
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5322/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    logging: *default-logging
+
+  cm-web:
+    build: ./apps/web
+    container_name: cm-web
+    env_file: ./apps/web/.env
+    environment:
+      PORT: 5323
+    depends_on:
+      cm-db:
+        condition: service_healthy
+      cm-cms:
+        condition: service_started
+    ports:
+      - "5323:5323"
+    command: ["npm","run","start"]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5323/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    logging: *default-logging

@@ -1,0 +1,229 @@
+#!/usr/bin/env bash
+# Path: /home/lilyserver/docker/cm/scripts/upload-and-mirror.sh
+# Purpose: Safely create/update a single-source snapshot file that includes (almost) the entire repo,
+#          commit & push local changes to the PRIVATE repo, and trigger the public mirror sync.
+# Usage:
+#   scripts/upload-and-mirror.sh "feat: my message"
+#   scripts/upload-and-mirror.sh --trigger-only           # no local changes? empty commit to run mirror
+#   scripts/upload-and-mirror.sh --force                  # force empty commit even if no changes
+#   scripts/upload-and-mirror.sh --no-snapshot "msg"      # skip snapshot generation
+#
+# Notes:
+# - Snapshot file: support/_snapshot.txt (plain text, concatenated sources)
+# - File list:     support/_filelist.txt (one path per line)
+# - We include ALL tracked files that look like text/code (broad set of extensions + Dockerfiles).
+# - We still block real .env files and private keys from being tracked/staged.
+# - The mirror sync is handled by your GitHub Actions workflow on push to main.
+
+set -euo pipefail
+
+# --- move to repo root (works no matter where you run it from) ---
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${SCRIPT_DIR}/.."  # repo root: /home/lilyserver/docker/cm
+
+# --- config / inputs ---
+MSG="${1:-}"
+TRIGGER_ONLY="false"
+FORCE_EMPTY="false"
+DO_SNAPSHOT="true"
+
+if [[ "${MSG:-}" == "--trigger-only" ]]; then TRIGGER_ONLY="true"; MSG="chore: trigger mirror sync"; fi
+if [[ "${MSG:-}" == "--force" ]]; then FORCE_EMPTY="true"; MSG="chore: force mirror sync"; fi
+if [[ "${MSG:-}" == "--no-snapshot" ]]; then DO_SNAPSHOT="false"; shift || true; MSG="${1:-}"; fi
+if [[ -z "${MSG}" ]]; then
+  MSG="chore: sync $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+fi
+
+# --- sanity checks ---
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "ERROR: Not inside a git repo. Run this from your project folder." >&2
+  exit 1
+fi
+
+# Ensure 'origin' is set
+if ! git remote get-url origin >/dev/null 2>&1; then
+  echo "ERROR: No 'origin' remote found. Add it with:" >&2
+  echo "  git remote add origin git@github.com:<you>/<private-repo>.git" >&2
+  exit 1
+fi
+
+# --- helper: generate snapshot file (no extra deps) ---
+SNAPSHOT_DIR="support"
+SNAPSHOT_PATH="${SNAPSHOT_DIR}/_snapshot.txt"
+FILELIST_PATH="${SNAPSHOT_DIR}/_filelist.txt"
+
+# Treat these extensions as text/code. Add more anytime.
+is_allowed_ext() {
+  case "$1" in
+    *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.json|*.jsonc|*.md|*.markdown|*.mdx|*.txt|*.csv|*.tsv|*.toml|*.ini|*.conf|*.cfg|*.env.example|*.sample|*.properties|*.editorconfig|*.prettierrc|*.eslintrc|*.stylelintrc|*.browserslistrc|*.npmrc|*.nvmrc|*.gitattributes|*.gitignore|*.gitkeep|*.dockerignore|*.yml|*.yaml|*.yml.dist|*.yaml.dist|*.graphql|*.gql|*.sql|*.prisma|*.proto|*.xml|*.html|*.htm|*.css|*.scss|*.sass|*.less|*.styl|*.patch|*.diff|Dockerfile|*dockerfile)
+      return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# Exclude obviously huge/binary things by extension (still only considering tracked files)
+is_blocked_ext() {
+  case "$1" in
+    *.tar|*.tgz|*.gz|*.zip|*.rar|*.7z|*.bz2|*.xz|*.lz|*.zst|*.png|*.jpg|*.jpeg|*.gif|*.webp|*.avif|*.ico|*.bmp|*.svgz|*.pdf|*.woff|*.woff2|*.ttf|*.otf|*.eot|*.mp4|*.webm|*.mov|*.mp3|*.wav|*.flac|*.aac|*.aiff|*.wasm|*.node)
+      return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+generate_snapshot() {
+  echo "Generating ${SNAPSHOT_PATH} ..."
+  mkdir -p "${SNAPSHOT_DIR}"
+
+  # Collect all tracked files
+  # (We don't include untracked files to avoid accidental secrets.)
+  mapfile -d '' ALL_TRACKED < <(git ls-files -z -- '**')
+
+  # Filter to text-like, exclude binaries
+  INCLUDED=()
+  for f in "${ALL_TRACKED[@]}"; do
+    # normalize path
+    rel="${f%$'\0'}"
+    # skip snapshot outputs themselves to avoid recursion
+    if [[ "${rel}" == "${SNAPSHOT_PATH}" || "${rel}" == "${FILELIST_PATH}" ]]; then
+      continue
+    fi
+    # skip vendor lockfiles that can be huge (but still text) if you want:
+    # (uncomment if needed)
+    # if [[ "${rel}" == "package-lock.json" || "${rel}" == "pnpm-lock.yaml" || "${rel}" == "yarn.lock" ]]; then
+    #   continue
+    # fi
+
+    # block obvious binaries
+    if is_blocked_ext "${rel}"; then
+      continue
+    fi
+
+    # allow known text/code
+    if is_allowed_ext "${rel}"; then
+      INCLUDED+=("${rel}")
+      continue
+    fi
+
+    # fallback: include small files with no extension guess (<= 512 KB) to be generous
+    # (prevents missing e.g. Caddyfile, Procfile, Makefile, etc.)
+    if [[ ! "${rel}" =~ \. ]]; then
+      size=$(wc -c < "${rel}" 2>/dev/null || echo 0)
+      if [[ "${size}" -le 524288 ]]; then
+        INCLUDED+=("${rel}")
+      fi
+    fi
+  done
+
+  # Sort unique
+  IFS=$'\n' INCLUDED_SORTED=($(printf "%s\n" "${INCLUDED[@]}" | sort -u)); unset IFS
+
+  # Write file list
+  printf "%s\n" "${INCLUDED_SORTED[@]}" > "${FILELIST_PATH}"
+
+  {
+    echo "# CornMafia support snapshot (autogenerated)"
+    echo "# Generated: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+    echo "# Repo: $(basename "$(git rev-parse --show-toplevel)")"
+    echo "# Commit: $(git rev-parse --short HEAD || echo 'uncommitted')"
+    echo "# Files included: ${#INCLUDED_SORTED[@]}"
+    echo "# List: $(basename "${FILELIST_PATH}")"
+    echo
+
+    for rel in "${INCLUDED_SORTED[@]}"; do
+      # extra safety: skip if missing
+      [[ -f "${rel}" ]] || continue
+      echo
+      echo "===== FILE: ${rel} ====="
+      # Normalize line endings; tolerate odd chars
+      sed -e 's/\r$//' -- "${rel}" || true
+      echo "===== END FILE: ${rel} ====="
+    done
+    echo
+  } > "${SNAPSHOT_PATH}"
+
+  echo "Snapshot written to ${SNAPSHOT_PATH}"
+  echo "File list written to ${FILELIST_PATH}"
+}
+
+# --- secret/keys guardrails (refuse to commit them) ---
+# 1) refuse if any .env-like files are already tracked
+TRACKED_ENVS="$(git ls-files | grep -E '(^|/)\.env(\..*)?$|(^|/)[^/]+\.env$' | grep -v '\.env\.example$' || true)"
+if [[ -n "${TRACKED_ENVS}" ]]; then
+  echo "ERROR: Real env files are tracked by git:" >&2
+  echo "${TRACKED_ENVS}" >&2
+  echo "Fix: run 'git rm --cached <file>' and ensure .gitignore excludes them." >&2
+  exit 1
+fi
+
+# 2) refuse if env files are staged
+STAGED_ENVS="$(git diff --cached --name-only | grep -E '(^|/)\.env(\..*)?$|(^|/)[^/]+\.env$' | grep -v '\.env\.example$' || true)"
+if [[ -n "${STAGED_ENVS}" ]]; then
+  echo "ERROR: Real env files are staged:" >&2
+  echo "${STAGED_ENVS}" >&2
+  echo "Fix: git reset -- <file>; keep .envs local only." >&2
+  exit 1
+fi
+
+# 3) refuse if SSH keys are tracked/staged
+for PATTERN in '(^|/)mirror_key(\.pub)?$' '(\.key|\.pem|\.p12|\.pfx)$'; do
+  if git ls-files | grep -E "${PATTERN}" >/dev/null 2>&1; then
+    echo "ERROR: Sensitive key material is tracked (pattern ${PATTERN})." >&2
+    exit 1
+  fi
+  if git diff --cached --name-only | grep -E "${PATTERN}" >/dev/null 2>&1; then
+    echo "ERROR: Sensitive key material is staged (pattern ${PATTERN})." >&2
+    exit 1
+  fi
+done
+
+# --- create/update snapshot (unless skipped or trigger-only) ---
+if [[ "${DO_SNAPSHOT}" == "true" && "${TRIGGER_ONLY}" == "false" ]]; then
+  generate_snapshot
+fi
+
+# --- add/commit/push (unless --trigger-only) ---
+CHANGES="$(git status --porcelain)"
+if [[ "${TRIGGER_ONLY}" == "true" ]]; then
+  echo "No local changes will be added; creating an empty commit to trigger mirror..."
+  git commit --allow-empty -m "${MSG}" || true
+else
+  if [[ -n "${CHANGES}" ]]; then
+    echo "Staging and committing local changes..."
+    git add .
+    # re-check staged envs after add (belt and suspenders)
+    STAGED_ENVS2="$(git diff --cached --name-only | grep -E '(^|/)\.env(\..*)?$|(^|/)[^/]+\.env$' | grep -v '\.env\.example$' || true)"
+    if [[ -n "${STAGED_ENVS2}" ]]; then
+      echo "ERROR: Real env files ended up staged after 'git add .':" >&2
+      echo "${STAGED_ENVS2}" >&2
+      echo "Fix: git reset -- <file>; commit again." >&2
+      exit 1
+    fi
+    git commit -m "${MSG}" || true
+  else
+    if [[ "${FORCE_EMPTY}" == "true" ]]; then
+      echo "No changes detected; forcing an empty commit to trigger mirror..."
+      git commit --allow-empty -m "${MSG}" || true
+    else
+      echo "No changes to commit. Will still push to ensure mirror runs if previous push failed."
+    fi
+  fi
+fi
+
+# ensure upstream is set to origin/main
+if ! git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+  echo "Setting upstream to origin/main..."
+  git push -u origin main
+else
+  git push
+fi
+
+echo
+echo "✅ Pushed to PRIVATE repo. The GitHub Action will now sync the PUBLIC mirror."
+PRIV_URL="$(git remote get-url origin | sed 's|git@github.com:|https://github.com/|' | sed 's|\.git$||')"
+echo "Check Actions runs here:"
+echo "  ${PRIV_URL}/actions"
+echo
+echo "Mirror repo (if using the default name):"
+echo "  https://github.com/milamber21-lang/cornmafia-mirror"
+echo
+echo "Done."
