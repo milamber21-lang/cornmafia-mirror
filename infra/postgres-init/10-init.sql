@@ -1,0 +1,2 @@
+CREATE DATABASE cm_web;
+CREATE DATABASE cm_cms;

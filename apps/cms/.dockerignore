@@ -1,0 +1,14 @@
+node_modules
+dist
+.next
+uploads
+.git
+.gitignore
+Dockerfile
+*.log
+.env*
+.vscode
+coverage
+.git
+.gitignore
+.gitattributes
