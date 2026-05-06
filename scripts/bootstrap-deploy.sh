@@ -18,11 +18,19 @@ fi
 
 readonly CM_REPO_URL_DEFAULT="https://github.com/milamber21-lang/cornmafia-mirror.git"
 readonly CM_REPO_BRANCH_DEFAULT="main"
+readonly CM_REPO_ARCHIVE_URL_DEFAULT="https://github.com/milamber21-lang/cornmafia-mirror/archive/refs/heads/main.tar.gz"
+readonly CM_REPO_ARCHIVE_FALLBACK_URL_DEFAULT="https://codeload.github.com/milamber21-lang/cornmafia-mirror/tar.gz/refs/heads/main"
+readonly CM_REPO_ARCHIVE_FILE_DEFAULT=""
+readonly CM_SOURCE_MODE_DEFAULT="archive"
 readonly COMPOSE_PROJECT_NAME_DEFAULT="cm"
-readonly CM_DB_SERVICE_NAME_DEFAULT="cm-db"
-readonly CM_WEB_SERVICE_NAME_DEFAULT="cm-web"
+readonly CM_DB_SERVICE_KEY="cm-db"
+readonly CM_WEB_SERVICE_KEY="cm-web"
+readonly CM_DB_SERVICE_NAME_DEFAULT="$CM_DB_SERVICE_KEY"
+readonly CM_WEB_SERVICE_NAME_DEFAULT="$CM_WEB_SERVICE_KEY"
 readonly CM_DB_CONTAINER_NAME_DEFAULT="cm-db"
 readonly CM_WEB_CONTAINER_NAME_DEFAULT="cm-web"
+readonly CM_DB_NETWORK_ALIAS_DEFAULT="cm-db"
+readonly CM_WEB_NETWORK_ALIAS_DEFAULT="cm-web"
 readonly CM_NETWORK_NAME_DEFAULT="cm-internal"
 readonly CM_WEB_UID_DEFAULT="10001"
 readonly CM_WEB_GID_DEFAULT="10001"
@@ -34,6 +42,10 @@ REPO_ROOT="$(pwd -P)"
 ENV_FILE="$REPO_ROOT/.env"
 REPO_URL="${CM_REPO_URL:-$CM_REPO_URL_DEFAULT}"
 REPO_BRANCH="${CM_REPO_BRANCH:-$CM_REPO_BRANCH_DEFAULT}"
+REPO_ARCHIVE_URL="${CM_REPO_ARCHIVE_URL:-$CM_REPO_ARCHIVE_URL_DEFAULT}"
+REPO_ARCHIVE_FALLBACK_URL="${CM_REPO_ARCHIVE_FALLBACK_URL:-$CM_REPO_ARCHIVE_FALLBACK_URL_DEFAULT}"
+REPO_ARCHIVE_FILE="${CM_REPO_ARCHIVE_FILE:-$CM_REPO_ARCHIVE_FILE_DEFAULT}"
+SOURCE_MODE="${CM_SOURCE_MODE:-$CM_SOURCE_MODE_DEFAULT}"
 CM_WEB_UID="${CM_WEB_UID:-$CM_WEB_UID_DEFAULT}"
 CM_WEB_GID="${CM_WEB_GID:-$CM_WEB_GID_DEFAULT}"
 CADDYFILE_PATH="${CM_CADDYFILE_PATH:-$CADDYFILE_PATH_DEFAULT}"
@@ -79,11 +91,15 @@ function compose_project_name() {
 }
 
 function db_service_name() {
-	printf '%s\n' "${CM_DB_SERVICE_NAME:-$CM_DB_SERVICE_NAME_DEFAULT}"
+	# Docker Compose service keys are YAML map keys and are intentionally fixed in docker-compose.yml.
+	# Container names, project names, network names, and network aliases remain configurable.
+	printf '%s\n' "$CM_DB_SERVICE_KEY"
 }
 
 function web_service_name() {
-	printf '%s\n' "${CM_WEB_SERVICE_NAME:-$CM_WEB_SERVICE_NAME_DEFAULT}"
+	# Docker Compose service keys are YAML map keys and are intentionally fixed in docker-compose.yml.
+	# Container names, project names, network names, and network aliases remain configurable.
+	printf '%s\n' "$CM_WEB_SERVICE_KEY"
 }
 
 function db_container_name() {
@@ -92,6 +108,14 @@ function db_container_name() {
 
 function web_container_name() {
 	printf '%s\n' "${CM_WEB_CONTAINER_NAME:-$CM_WEB_CONTAINER_NAME_DEFAULT}"
+}
+
+function db_network_alias() {
+	printf '%s\n' "${CM_DB_NETWORK_ALIAS:-$CM_DB_NETWORK_ALIAS_DEFAULT}"
+}
+
+function web_network_alias() {
+	printf '%s\n' "${CM_WEB_NETWORK_ALIAS:-$CM_WEB_NETWORK_ALIAS_DEFAULT}"
 }
 
 function docker_compose() {
@@ -118,7 +142,7 @@ function apt_install_packages() {
 function ensure_basic_commands() {
 	local missing=()
 	local command_name
-	for command_name in git rsync curl awk sed grep tar; do
+	for command_name in rsync curl awk sed grep tar find; do
 		if ! command_exists "$command_name"; then
 			missing+=("$command_name")
 		fi
@@ -203,6 +227,98 @@ function script_relative_path() {
 	esac
 }
 
+function ensure_git_for_git_mode() {
+	if command_exists git; then
+		return 0
+	fi
+
+	apt_install_packages git
+}
+
+function rsync_repo_payload() {
+	local source_root="$1"
+	[[ -d "$source_root" ]] || fail "Repository payload directory does not exist: $source_root"
+
+	rsync -a --delete \
+		--exclude '.git/' \
+		--exclude '.env' \
+		--exclude '.env.*' \
+		--exclude 'data/' \
+		--exclude 'logs/' \
+		"$source_root/" "$REPO_ROOT/"
+}
+
+function extract_repo_archive_payload() {
+	local archive_file="$1"
+	local temp_dir="$2"
+
+	mkdir -p "$temp_dir/extract"
+	tar -xzf "$archive_file" -C "$temp_dir/extract"
+
+	local archive_root
+	archive_root="$(find "$temp_dir/extract" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+	[[ -n "$archive_root" ]] || fail "Repository archive did not contain a repository directory."
+	[[ -f "$archive_root/docker-compose.yml" ]] || fail "Repository archive does not look like the Corn Mafia repo. Missing docker-compose.yml."
+
+	info "Syncing archive payload into $REPO_ROOT while preserving .env, data/, logs/, and .git/."
+	rsync_repo_payload "$archive_root"
+}
+
+function download_one_repo_archive_url() {
+	local archive_url="$1"
+	local output_file="$2"
+	[[ -n "$archive_url" ]] || return 1
+
+	info "Trying repository archive URL: $archive_url"
+	curl -fL --retry 2 --retry-delay 2 -o "$output_file" "$archive_url"
+}
+
+function download_repo_archive_into_current_directory() {
+	info "Downloading repository archive. GitHub login is not required only when the archive URL is publicly downloadable."
+	local temp_dir
+	temp_dir="$(mktemp -d)"
+	local archive_file="$temp_dir/repo.tar.gz"
+	local downloaded="0"
+	local archive_url
+
+	for archive_url in "$REPO_ARCHIVE_URL" "$REPO_ARCHIVE_FALLBACK_URL"; do
+		if [[ -z "$archive_url" ]]; then
+			continue
+		fi
+		if download_one_repo_archive_url "$archive_url" "$archive_file"; then
+			downloaded="1"
+			break
+		fi
+		warn "Archive URL failed: $archive_url"
+	done
+
+	if [[ "$downloaded" != "1" ]]; then
+		rm -rf "$temp_dir"
+		fail "Could not download a public repo archive. The repo page may be visible while source archives still return 404. Publish a GitHub release/source tarball and set CM_REPO_ARCHIVE_URL, or set CM_SOURCE_MODE=file with CM_REPO_ARCHIVE_FILE=/path/to/repo.tar.gz."
+	fi
+
+	extract_repo_archive_payload "$archive_file" "$temp_dir"
+	rm -rf "$temp_dir"
+}
+
+function sync_repo_archive_file_into_current_directory() {
+	[[ -n "$REPO_ARCHIVE_FILE" ]] || fail "CM_SOURCE_MODE=file requires CM_REPO_ARCHIVE_FILE=/absolute/or/relative/path/to/repo.tar.gz"
+	local archive_file
+	archive_file="$(resolve_repo_path "$REPO_ARCHIVE_FILE")"
+	[[ -f "$archive_file" ]] || fail "Repository archive file does not exist: $archive_file"
+
+	info "Using local repository archive file: $archive_file"
+	local temp_dir
+	temp_dir="$(mktemp -d)"
+	extract_repo_archive_payload "$archive_file" "$temp_dir"
+	rm -rf "$temp_dir"
+}
+
+function use_current_directory_as_repo_payload() {
+	info "CM_SOURCE_MODE=local selected. Skipping repo download/sync and using current directory contents."
+	[[ -f "$REPO_ROOT/docker-compose.yml" ]] || fail "Current directory is not a complete Corn Mafia repo. Missing docker-compose.yml. Use archive/file/git mode to fetch repo contents first."
+}
+
 function update_existing_git_repo() {
 	info "Updating existing git repository from $REPO_URL ($REPO_BRANCH)."
 	git config --global --add safe.directory "$REPO_ROOT" >/dev/null 2>&1 || true
@@ -234,26 +350,33 @@ function clone_repo_into_current_directory() {
 	temp_dir="$(mktemp -d)"
 
 	git clone --branch "$REPO_BRANCH" --depth 1 "$REPO_URL" "$temp_dir/repo"
-
-	local script_rel
-	script_rel="$(script_relative_path)"
-	rsync -a --delete \
-		--exclude '.env' \
-		--exclude '.env.*' \
-		--exclude 'data/' \
-		--exclude 'logs/' \
-		--exclude "$script_rel" \
-		--exclude "$(basename "$script_rel")" \
-		"$temp_dir/repo/" "$REPO_ROOT/"
+	rsync_repo_payload "$temp_dir/repo"
 	rm -rf "$temp_dir"
 }
 
 function sync_repo_from_main() {
-	if [[ -d "$REPO_ROOT/.git" ]]; then
-		update_existing_git_repo
-	else
-		clone_repo_into_current_directory
-	fi
+	case "$SOURCE_MODE" in
+		archive)
+			download_repo_archive_into_current_directory
+			;;
+		file)
+			sync_repo_archive_file_into_current_directory
+			;;
+		local|none|skip)
+			use_current_directory_as_repo_payload
+			;;
+		git)
+			ensure_git_for_git_mode
+			if [[ -d "$REPO_ROOT/.git" ]]; then
+				update_existing_git_repo
+			else
+				clone_repo_into_current_directory
+			fi
+			;;
+		*)
+			fail "Unsupported CM_SOURCE_MODE=$SOURCE_MODE. Use archive, file, local, or git."
+			;;
+	esac
 
 	restore_repo_file_ownership
 }
@@ -264,6 +387,15 @@ function load_env() {
 	# shellcheck source=/dev/null
 	source "$ENV_FILE"
 	set +a
+}
+
+function apply_source_env_values() {
+	REPO_URL="${CM_REPO_URL:-$CM_REPO_URL_DEFAULT}"
+	REPO_BRANCH="${CM_REPO_BRANCH:-$CM_REPO_BRANCH_DEFAULT}"
+	REPO_ARCHIVE_URL="${CM_REPO_ARCHIVE_URL:-$CM_REPO_ARCHIVE_URL_DEFAULT}"
+	REPO_ARCHIVE_FALLBACK_URL="${CM_REPO_ARCHIVE_FALLBACK_URL:-$CM_REPO_ARCHIVE_FALLBACK_URL_DEFAULT}"
+	REPO_ARCHIVE_FILE="${CM_REPO_ARCHIVE_FILE:-$CM_REPO_ARCHIVE_FILE_DEFAULT}"
+	SOURCE_MODE="${CM_SOURCE_MODE:-$CM_SOURCE_MODE_DEFAULT}"
 }
 
 function backup_env_once() {
@@ -413,12 +545,30 @@ function ensure_url_env_values() {
 	db_service="$(db_service_name)"
 	local web_service
 	web_service="$(web_service_name)"
+	local db_alias
+	db_alias="$(db_network_alias)"
+	local web_alias
+	web_alias="$(web_network_alias)"
 
+	if [[ "${CM_DB_SERVICE_NAME:-}" != "" && "${CM_DB_SERVICE_NAME:-}" != "$CM_DB_SERVICE_KEY" ]]; then
+		warn "CM_DB_SERVICE_NAME is a Compose service key, not a container name. Resetting it to $CM_DB_SERVICE_KEY. Use CM_DB_CONTAINER_NAME for visible container naming."
+	fi
+	if [[ "${CM_WEB_SERVICE_NAME:-}" != "" && "${CM_WEB_SERVICE_NAME:-}" != "$CM_WEB_SERVICE_KEY" ]]; then
+		warn "CM_WEB_SERVICE_NAME is a Compose service key, not a container name. Resetting it to $CM_WEB_SERVICE_KEY. Use CM_WEB_CONTAINER_NAME for visible container naming."
+	fi
+
+	ensure_env_value CM_SOURCE_MODE "$SOURCE_MODE"
+	ensure_env_value CM_REPO_BRANCH "$REPO_BRANCH"
+	ensure_env_value CM_REPO_ARCHIVE_URL "$REPO_ARCHIVE_URL"
+	ensure_env_value CM_REPO_ARCHIVE_FALLBACK_URL "$REPO_ARCHIVE_FALLBACK_URL"
+	ensure_env_value CM_REPO_ARCHIVE_FILE "$REPO_ARCHIVE_FILE"
 	ensure_env_value COMPOSE_PROJECT_NAME "$(compose_project_name)"
 	ensure_env_value CM_DB_SERVICE_NAME "$db_service"
 	ensure_env_value CM_WEB_SERVICE_NAME "$web_service"
 	ensure_env_value CM_DB_CONTAINER_NAME "$(db_container_name)"
 	ensure_env_value CM_WEB_CONTAINER_NAME "$(web_container_name)"
+	ensure_env_value CM_DB_NETWORK_ALIAS "$db_alias"
+	ensure_env_value CM_WEB_NETWORK_ALIAS "$web_alias"
 	ensure_env_value CM_NETWORK_NAME "${CM_NETWORK_NAME:-$CM_NETWORK_NAME_DEFAULT}"
 	ensure_env_value CM_DB_IMAGE "${CM_DB_IMAGE:-postgres:16-alpine@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50}"
 	ensure_env_value CM_WEB_IMAGE_NAME "${CM_WEB_IMAGE_NAME:-cm-web:local}"
@@ -427,7 +577,7 @@ function ensure_url_env_values() {
 	ensure_env_value WEB_PUBLIC_URL "$public_url"
 	ensure_env_value NEXTAUTH_URL "$public_url"
 	ensure_env_value NEXT_PUBLIC_BASE_URL "$public_url"
-	ensure_env_value WEB_INTERNAL_URL "http://$web_service:$internal_port"
+	ensure_env_value WEB_INTERNAL_URL "http://$web_alias:$internal_port"
 	ensure_env_value WEB_HOST_BIND "${WEB_HOST_BIND:-127.0.0.1}"
 	ensure_env_value WEB_INTERNAL_PORT "$internal_port"
 	ensure_env_value WEB_EXTERNAL_PORT "$external_port"
@@ -453,11 +603,17 @@ function require_env_key() {
 function validate_required_env() {
 	local key
 	for key in \
+		CM_SOURCE_MODE \
+		CM_REPO_BRANCH \
+		CM_REPO_ARCHIVE_URL \
+		CM_REPO_ARCHIVE_FALLBACK_URL \
 		COMPOSE_PROJECT_NAME \
 		CM_DB_SERVICE_NAME \
 		CM_WEB_SERVICE_NAME \
 		CM_DB_CONTAINER_NAME \
 		CM_WEB_CONTAINER_NAME \
+		CM_DB_NETWORK_ALIAS \
+		CM_WEB_NETWORK_ALIAS \
 		CM_NETWORK_NAME \
 		CM_DB_IMAGE \
 		CM_WEB_IMAGE_NAME \
@@ -502,11 +658,14 @@ function validate_required_env() {
 		"$CM_WEB_SERVICE_NAME" \
 		"$CM_DB_CONTAINER_NAME" \
 		"$CM_WEB_CONTAINER_NAME" \
+		"$CM_DB_NETWORK_ALIAS" \
+		"$CM_WEB_NETWORK_ALIAS" \
 		"$CM_NETWORK_NAME"; do
 		[[ "$name_value" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]] || fail "Unsafe Docker/Compose name: $name_value"
 	done
 
 	[[ "$PORT" == "$WEB_INTERNAL_PORT" ]] || fail "PORT must match WEB_INTERNAL_PORT for the Next.js container runtime."
+	[[ "$WEB_DATABASE_URL" == *@"$CM_DB_NETWORK_ALIAS":5432/* ]] || warn "WEB_DATABASE_URL does not use the stable DB network alias '$CM_DB_NETWORK_ALIAS'. Current value may fail inside Docker if the host is not resolvable."
 	[[ "${POSTGRES_USER:-}" == "cm" ]] || fail "POSTGRES_USER must be cm for the current bootstrap contract."
 	[[ "${POSTGRES_DB:-}" == "cm_web" ]] || fail "POSTGRES_DB must be cm_web unless bootstrap SQL has been regenerated."
 	[[ "${CM_CLIENT_DB_USER:-}" == "cm_client" ]] || fail "CM_CLIENT_DB_USER must be cm_client for the current runtime contract."
@@ -565,6 +724,26 @@ function ensure_caddy_import() {
 		printf '# Corn Mafia managed site snippets.\n'
 		printf 'import conf.d/*.caddy\n'
 	} >> "$CADDYFILE_PATH"
+}
+
+function assert_no_caddy_domain_conflict() {
+	install -d -m 0755 "$CADDY_CONF_DIR"
+	local matches
+	matches="$(grep -RIn --exclude='*.bak' --exclude='*.backup' --exclude='*.tmp' \
+		-e "$DEPLOY_DOMAIN" \
+		-e "www.$DEPLOY_DOMAIN" \
+		"$(dirname "$CADDYFILE_PATH")" 2>/dev/null || true)"
+
+	if [[ -z "$matches" ]]; then
+		return 0
+	fi
+
+	local conflicts
+	conflicts="$(printf '%s\n' "$matches" | grep -v -F "$CADDY_MANAGED_FILE:" || true)"
+	if [[ -n "$conflicts" ]]; then
+		printf '%s\n' "$conflicts" >&2
+		fail "The deployment domain already appears in an existing Caddy config outside $CADDY_MANAGED_FILE. Review/remove the old block first so this script does not break your working Caddy setup."
+	fi
 }
 
 function write_caddy_managed_config() {
@@ -647,6 +826,10 @@ function run_docker_deploy() {
 	db_service="$(db_service_name)"
 	local web_service
 	web_service="$(web_service_name)"
+	local db_alias
+	db_alias="$(db_network_alias)"
+	local web_alias
+	web_alias="$(web_network_alias)"
 	local db_container
 	db_container="$(db_container_name)"
 	local web_container
@@ -705,9 +888,12 @@ function main() {
 	require_root
 	require_safe_repo_root
 	ensure_basic_commands
+	load_env
+	apply_source_env_values
 	sync_repo_from_main
 
 	load_env
+	apply_source_env_values
 	choose_domain
 	ensure_url_env_values
 	load_env
@@ -719,6 +905,7 @@ function main() {
 	require_bootstrap_files
 	sync_bootstrap_media
 	ensure_caddy_import
+	assert_no_caddy_domain_conflict
 	write_caddy_managed_config
 	run_docker_deploy
 	reload_caddy

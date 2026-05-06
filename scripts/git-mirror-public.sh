@@ -137,6 +137,9 @@ is_allowed_public_mirror_path() {
 		.env.example|*/.env.example)
 			return 0
 			;;
+		apps/web/src/lib/data/*)
+			return 0
+			;;
 		infra/bootstrap/sql/*)
 			return 0
 			;;
