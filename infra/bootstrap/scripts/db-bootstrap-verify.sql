@@ -109,7 +109,7 @@ BEGIN
 	JOIN pg_catalog.pg_namespace ns ON ns.oid = proc.pronamespace
 	WHERE ns.nspname = 'web_api'
 	  AND EXISTS (SELECT 1
-				  FROM pg_catalog.aclexplode(pg_catalog.COALESCE(proc.proacl,
+				  FROM pg_catalog.aclexplode(COALESCE(proc.proacl,
 												 pg_catalog.acldefault('f', proc.proowner))) acl
 				  WHERE acl.grantee = 0::oid
 					AND acl.privilege_type = 'EXECUTE')
@@ -126,7 +126,7 @@ BEGIN
 	WHERE ns.nspname IN ('web_priv', 'web_api', 'web_view')
 	  AND proc.prosecdef = true
 	  AND NOT EXISTS (SELECT 1
-				  FROM pg_catalog.unnest(pg_catalog.COALESCE(proc.proconfig, ARRAY[]::text[])) cfg(value)
+				  FROM pg_catalog.unnest(COALESCE(proc.proconfig, ARRAY[]::text[])) cfg(value)
 				  WHERE cfg.value = 'search_path=pg_catalog')
 	;
 
