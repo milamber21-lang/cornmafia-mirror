@@ -1,12 +1,13 @@
 --//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
---//// FILE: infra/bootstrap/scripts/db-bootstrap-verify.sql                                                                    ////
---//// Language: SQL                                                                                            ////
---//// Verifies the DB-first bootstrap security boundary and imported current data shape.                        ////
+--//// FILE: infra/bootstrap/scripts/db-bootstrap-verify.sql                                                     ////
+--//// Language: SQL                                                                                             ////
+--//// Verifies the DB-first bootstrap security boundary and imported current data shape.                         ////
 --//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 --//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 DO $$
-DECLARE v_count integer;
+DECLARE
+	v_count integer;
 BEGIN
 	SELECT COUNT(*)
 	INTO v_count
@@ -68,9 +69,9 @@ BEGIN
 	WHERE ns.nspname = 'web_priv'
 	  AND cls.relkind IN ('r', 'p', 'v', 'm')
 	  AND (pg_catalog.has_table_privilege('cm_client', cls.oid, 'SELECT')
-		   OR pg_catalog.has_table_privilege('cm_client', cls.oid, 'INSERT')
-		   OR pg_catalog.has_table_privilege('cm_client', cls.oid, 'UPDATE')
-		   OR pg_catalog.has_table_privilege('cm_client', cls.oid, 'DELETE'))
+		OR pg_catalog.has_table_privilege('cm_client', cls.oid, 'INSERT')
+		OR pg_catalog.has_table_privilege('cm_client', cls.oid, 'UPDATE')
+		OR pg_catalog.has_table_privilege('cm_client', cls.oid, 'DELETE'))
 	;
 
 	IF v_count <> 0 THEN
@@ -107,7 +108,11 @@ BEGIN
 	FROM pg_catalog.pg_proc proc
 	JOIN pg_catalog.pg_namespace ns ON ns.oid = proc.pronamespace
 	WHERE ns.nspname = 'web_api'
-	  AND pg_catalog.has_function_privilege('PUBLIC', proc.oid, 'EXECUTE')
+	  AND EXISTS (SELECT 1
+				  FROM pg_catalog.aclexplode(pg_catalog.COALESCE(proc.proacl,
+												 pg_catalog.acldefault('f', proc.proowner))) acl
+				  WHERE acl.grantee = 0::oid
+					AND acl.privilege_type = 'EXECUTE')
 	;
 
 	IF v_count <> 0 THEN
