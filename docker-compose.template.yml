@@ -1,7 +1,8 @@
 # FILE: docker-compose.template.yml
 # Language: YAML
 # Hardened DB + web runtime for the DB-first Corn Mafia stack.
-# Rendered by scripts/bootstrap-deploy.sh into .cm-deploy/docker-compose.generated.yml.
+# Rendered by scripts/bootstrap-deploy.sh into a generated Compose file.
+# Host paths are rendered as absolute paths so the file may safely live under .cm-deploy/.
 
 name: ${COMPOSE_PROJECT_NAME:-cm}
 
@@ -18,9 +19,9 @@ services:
       CM_CLIENT_DB_USER: ${CM_CLIENT_DB_USER:?CM_CLIENT_DB_USER must be set}
       CM_CLIENT_DB_PASSWORD: ${CM_CLIENT_DB_PASSWORD:?CM_CLIENT_DB_PASSWORD must be set}
     volumes:
-      - ${POSTGRES_DATA_DIR:-./data/postgres}:/var/lib/postgresql/data
-      - ${POSTGRES_INIT_DIR:-./infra/postgres-init}:/docker-entrypoint-initdb.d:ro
-      - ${CM_BOOTSTRAP_DIR:-./infra/bootstrap}:/cm-bootstrap:ro
+      - "__CM_POSTGRES_DATA_DIR__:/var/lib/postgresql/data"
+      - "__CM_POSTGRES_INIT_DIR__:/docker-entrypoint-initdb.d:ro"
+      - "__CM_BOOTSTRAP_DIR__:/cm-bootstrap:ro"
     ports:
       - "${POSTGRES_HOST_BIND:-127.0.0.1}:${POSTGRES_EXTERNAL_PORT:-5432}:5432"
     healthcheck:
@@ -42,7 +43,7 @@ services:
           - ${CM_DB_CONTAINER_NAME:-cm-db}
 
   __CM_WEB_SERVICE_NAME__:
-    build: ./apps/web
+    build: "__CM_WEB_BUILD_CONTEXT__"
     image: ${CM_WEB_IMAGE_NAME:-cm-web:local}
     container_name: ${CM_WEB_CONTAINER_NAME:-cm-web}
     environment:
@@ -80,8 +81,8 @@ services:
     user: "${CM_WEB_UID:-10001}:${CM_WEB_GID:-10001}"
     read_only: true
     volumes:
-      - ${WEB_CACHE_HOST_DIR:-./data/web_cache}:/app/.next/cache:rw
-      - ${WEB_MEDIA_HOST_DIR:-./data/media}:/app/data/media:rw
+      - "__CM_WEB_CACHE_HOST_DIR__:/app/.next/cache:rw"
+      - "__CM_WEB_MEDIA_HOST_DIR__:/app/data/media:rw"
     tmpfs:
       - /tmp:rw,nosuid,nodev,noexec,mode=1777,size=${WEB_TMP_SIZE:-128m}
       - /var/tmp:rw,nosuid,nodev,noexec,mode=1777,size=${WEB_TMP_SIZE:-128m}

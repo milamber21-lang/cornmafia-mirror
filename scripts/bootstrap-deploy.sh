@@ -23,15 +23,15 @@ readonly CM_REPO_ARCHIVE_FALLBACK_URL_DEFAULT="https://codeload.github.com/milam
 readonly CM_REPO_ARCHIVE_FILE_DEFAULT=""
 readonly CM_SOURCE_MODE_DEFAULT="archive"
 readonly COMPOSE_PROJECT_NAME_DEFAULT="cm"
-readonly CM_DB_SERVICE_KEY="cm-db"
-readonly CM_WEB_SERVICE_KEY="cm-web"
-readonly CM_DB_SERVICE_NAME_DEFAULT="$CM_DB_SERVICE_KEY"
-readonly CM_WEB_SERVICE_NAME_DEFAULT="$CM_WEB_SERVICE_KEY"
+readonly CM_DB_SERVICE_NAME_DEFAULT="cm-db"
+readonly CM_WEB_SERVICE_NAME_DEFAULT="cm-web"
 readonly CM_DB_CONTAINER_NAME_DEFAULT="cm-db"
 readonly CM_WEB_CONTAINER_NAME_DEFAULT="cm-web"
 readonly CM_DB_NETWORK_ALIAS_DEFAULT="cm-db"
 readonly CM_WEB_NETWORK_ALIAS_DEFAULT="cm-web"
 readonly CM_NETWORK_NAME_DEFAULT="cm-internal"
+readonly CM_COMPOSE_TEMPLATE_FILE_DEFAULT="./docker-compose.template.yml"
+readonly CM_COMPOSE_GENERATED_FILE_DEFAULT="./.cm-deploy/docker-compose.generated.yml"
 readonly CM_WEB_UID_DEFAULT="10001"
 readonly CM_WEB_GID_DEFAULT="10001"
 readonly CADDYFILE_PATH_DEFAULT="/etc/caddy/Caddyfile"
@@ -91,15 +91,19 @@ function compose_project_name() {
 }
 
 function db_service_name() {
-	# Docker Compose service keys are YAML map keys and are intentionally fixed in docker-compose.yml.
-	# Container names, project names, network names, and network aliases remain configurable.
-	printf '%s\n' "$CM_DB_SERVICE_KEY"
+	printf '%s\n' "${CM_DB_SERVICE_NAME:-$CM_DB_SERVICE_NAME_DEFAULT}"
 }
 
 function web_service_name() {
-	# Docker Compose service keys are YAML map keys and are intentionally fixed in docker-compose.yml.
-	# Container names, project names, network names, and network aliases remain configurable.
-	printf '%s\n' "$CM_WEB_SERVICE_KEY"
+	printf '%s\n' "${CM_WEB_SERVICE_NAME:-$CM_WEB_SERVICE_NAME_DEFAULT}"
+}
+
+function compose_template_file() {
+	resolve_repo_path "${CM_COMPOSE_TEMPLATE_FILE:-$CM_COMPOSE_TEMPLATE_FILE_DEFAULT}"
+}
+
+function compose_generated_file() {
+	resolve_repo_path "${CM_COMPOSE_GENERATED_FILE:-$CM_COMPOSE_GENERATED_FILE_DEFAULT}"
 }
 
 function db_container_name() {
@@ -119,7 +123,11 @@ function web_network_alias() {
 }
 
 function docker_compose() {
-	docker compose --env-file "$ENV_FILE" --project-name "$(compose_project_name)" "$@"
+	docker compose --env-file "$ENV_FILE" --project-name "$(compose_project_name)" -f "$(compose_generated_file)" "$@"
+}
+
+function docker_compose_display_command() {
+	printf 'docker compose --env-file .env --project-name %s -f %s' "$(compose_project_name)" "${CM_COMPOSE_GENERATED_FILE:-$CM_COMPOSE_GENERATED_FILE_DEFAULT}"
 }
 
 function have_apt() {
@@ -550,13 +558,6 @@ function ensure_url_env_values() {
 	local web_alias
 	web_alias="$(web_network_alias)"
 
-	if [[ "${CM_DB_SERVICE_NAME:-}" != "" && "${CM_DB_SERVICE_NAME:-}" != "$CM_DB_SERVICE_KEY" ]]; then
-		warn "CM_DB_SERVICE_NAME is a Compose service key, not a container name. Resetting it to $CM_DB_SERVICE_KEY. Use CM_DB_CONTAINER_NAME for visible container naming."
-	fi
-	if [[ "${CM_WEB_SERVICE_NAME:-}" != "" && "${CM_WEB_SERVICE_NAME:-}" != "$CM_WEB_SERVICE_KEY" ]]; then
-		warn "CM_WEB_SERVICE_NAME is a Compose service key, not a container name. Resetting it to $CM_WEB_SERVICE_KEY. Use CM_WEB_CONTAINER_NAME for visible container naming."
-	fi
-
 	ensure_env_value CM_SOURCE_MODE "$SOURCE_MODE"
 	ensure_env_value CM_REPO_BRANCH "$REPO_BRANCH"
 	ensure_env_value CM_REPO_ARCHIVE_URL "$REPO_ARCHIVE_URL"
@@ -573,6 +574,8 @@ function ensure_url_env_values() {
 	ensure_env_value CM_DB_IMAGE "${CM_DB_IMAGE:-postgres:16-alpine@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50}"
 	ensure_env_value CM_WEB_IMAGE_NAME "${CM_WEB_IMAGE_NAME:-cm-web:local}"
 	ensure_env_value CM_BOOTSTRAP_DIR "${CM_BOOTSTRAP_DIR:-./infra/bootstrap}"
+	ensure_env_value CM_COMPOSE_TEMPLATE_FILE "${CM_COMPOSE_TEMPLATE_FILE:-$CM_COMPOSE_TEMPLATE_FILE_DEFAULT}"
+	ensure_env_value CM_COMPOSE_GENERATED_FILE "${CM_COMPOSE_GENERATED_FILE:-$CM_COMPOSE_GENERATED_FILE_DEFAULT}"
 
 	ensure_env_value WEB_PUBLIC_URL "$public_url"
 	ensure_env_value NEXTAUTH_URL "$public_url"
@@ -618,6 +621,8 @@ function validate_required_env() {
 		CM_DB_IMAGE \
 		CM_WEB_IMAGE_NAME \
 		CM_BOOTSTRAP_DIR \
+		CM_COMPOSE_TEMPLATE_FILE \
+		CM_COMPOSE_GENERATED_FILE \
 		POSTGRES_USER \
 		POSTGRES_PASSWORD \
 		POSTGRES_DB \
@@ -664,6 +669,8 @@ function validate_required_env() {
 		[[ "$name_value" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]] || fail "Unsafe Docker/Compose name: $name_value"
 	done
 
+	[[ "$CM_DB_SERVICE_NAME" != "$CM_WEB_SERVICE_NAME" ]] || fail "CM_DB_SERVICE_NAME and CM_WEB_SERVICE_NAME must be different."
+	[[ "$CM_DB_CONTAINER_NAME" != "$CM_WEB_CONTAINER_NAME" ]] || fail "CM_DB_CONTAINER_NAME and CM_WEB_CONTAINER_NAME must be different."
 	[[ "$PORT" == "$WEB_INTERNAL_PORT" ]] || fail "PORT must match WEB_INTERNAL_PORT for the Next.js container runtime."
 	[[ "$WEB_DATABASE_URL" == *@"$CM_DB_NETWORK_ALIAS":5432/* ]] || warn "WEB_DATABASE_URL does not use the stable DB network alias '$CM_DB_NETWORK_ALIAS'. Current value may fail inside Docker if the host is not resolvable."
 	[[ "${POSTGRES_USER:-}" == "cm" ]] || fail "POSTGRES_USER must be cm for the current bootstrap contract."
@@ -809,6 +816,7 @@ function wait_for_container_health() {
 
 function require_bootstrap_files() {
 	[[ -f "$REPO_ROOT/docker-compose.yml" ]] || fail "Missing docker-compose.yml after repo sync."
+	[[ -f "$(compose_template_file)" ]] || fail "Missing Compose template after repo sync: $(compose_template_file)"
 	[[ -f "$REPO_ROOT/infra/bootstrap/scripts/db-bootstrap.sh" ]] || fail "Missing infra/bootstrap/scripts/db-bootstrap.sh after repo sync."
 
 	local required_bootstrap_file
@@ -819,6 +827,59 @@ function require_bootstrap_files() {
 		"$REPO_ROOT/infra/bootstrap/manifests/MANIFEST.tsv"; do
 		[[ -f "$required_bootstrap_file" ]] || fail "Missing bootstrap file required for deploy: $required_bootstrap_file"
 	done
+}
+
+function sed_escape_replacement() {
+	printf '%s' "$1" | sed -e 's/[\\&]/\\&/g'
+}
+
+function render_compose_file() {
+	local template_file
+	template_file="$(compose_template_file)"
+	local generated_file
+	generated_file="$(compose_generated_file)"
+	[[ -f "$template_file" ]] || fail "Compose template file does not exist: $template_file"
+
+	local generated_dir
+	generated_dir="$(dirname "$generated_file")"
+	mkdir -p "$generated_dir"
+
+	local db_service
+	db_service="$(db_service_name)"
+	local web_service
+	web_service="$(web_service_name)"
+	local web_build_context
+	web_build_context="$(resolve_repo_path ./apps/web)"
+	local postgres_data_dir
+	postgres_data_dir="$(resolve_repo_path "${POSTGRES_DATA_DIR:-./data/postgres}")"
+	local postgres_init_dir
+	postgres_init_dir="$(resolve_repo_path "${POSTGRES_INIT_DIR:-./infra/postgres-init}")"
+	local bootstrap_dir
+	bootstrap_dir="$(resolve_repo_path "${CM_BOOTSTRAP_DIR:-./infra/bootstrap}")"
+	local web_cache_host_dir
+	web_cache_host_dir="$(resolve_repo_path "${WEB_CACHE_HOST_DIR:-./data/web_cache}")"
+	local web_media_host_dir
+	web_media_host_dir="$(resolve_repo_path "${WEB_MEDIA_HOST_DIR:-./data/media}")"
+
+	info "Rendering Docker Compose file for services $db_service and $web_service."
+	sed \
+		-e "s/__CM_DB_SERVICE_NAME__/$(sed_escape_replacement "$db_service")/g" \
+		-e "s/__CM_WEB_SERVICE_NAME__/$(sed_escape_replacement "$web_service")/g" \
+		-e "s#__CM_WEB_BUILD_CONTEXT__#$(sed_escape_replacement "$web_build_context")#g" \
+		-e "s#__CM_POSTGRES_DATA_DIR__#$(sed_escape_replacement "$postgres_data_dir")#g" \
+		-e "s#__CM_POSTGRES_INIT_DIR__#$(sed_escape_replacement "$postgres_init_dir")#g" \
+		-e "s#__CM_BOOTSTRAP_DIR__#$(sed_escape_replacement "$bootstrap_dir")#g" \
+		-e "s#__CM_WEB_CACHE_HOST_DIR__#$(sed_escape_replacement "$web_cache_host_dir")#g" \
+		-e "s#__CM_WEB_MEDIA_HOST_DIR__#$(sed_escape_replacement "$web_media_host_dir")#g" \
+		"$template_file" > "$generated_file.tmp"
+	mv "$generated_file.tmp" "$generated_file"
+	chmod 0644 "$generated_file"
+
+	if grep -q '__CM_' "$generated_file"; then
+		fail "Generated Compose file still contains unresolved placeholders: $generated_file"
+	fi
+
+	docker_compose config >/dev/null
 }
 
 function run_docker_deploy() {
@@ -857,7 +918,7 @@ function local_smoke_test() {
 	if curl -fsS "http://$upstream_host:$port_value/" >/dev/null; then
 		info "Local web smoke test passed."
 	else
-		warn "Local web smoke test failed. Check: docker compose --env-file .env --project-name $(compose_project_name) logs --tail=120 $(web_service_name)"
+		warn "Local web smoke test failed. Check: $(docker_compose_display_command) logs --tail=120 $(web_service_name)"
 	fi
 }
 
@@ -872,9 +933,9 @@ Public URL:
 
 Useful commands:
   cd "$REPO_ROOT"
-  docker compose --env-file .env --project-name $(compose_project_name) ps
-  docker compose --env-file .env --project-name $(compose_project_name) logs --tail=120 $(web_service_name)
-  docker compose --env-file .env --project-name $(compose_project_name) logs --tail=120 $(db_service_name)
+  $(docker_compose_display_command) ps
+  $(docker_compose_display_command) logs --tail=120 $(web_service_name)
+  $(docker_compose_display_command) logs --tail=120 $(db_service_name)
   sudo systemctl status caddy --no-pager
   sudo caddy validate --config "$CADDYFILE_PATH"
 
@@ -903,6 +964,7 @@ function main() {
 	ensure_psql
 	ensure_caddy
 	require_bootstrap_files
+	render_compose_file
 	sync_bootstrap_media
 	ensure_caddy_import
 	assert_no_caddy_domain_conflict
