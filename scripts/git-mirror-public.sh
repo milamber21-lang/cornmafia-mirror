@@ -130,8 +130,30 @@ list_source_branches() {
 	fi
 }
 
+is_allowed_public_mirror_path() {
+	local path="$1"
+
+	case "$path" in
+		.env.example|*/.env.example)
+			return 0
+			;;
+		infra/bootstrap/sql/*)
+			return 0
+			;;
+		infra/bootstrap/scripts/db-reset-sequences.sql|infra/bootstrap/scripts/db-bootstrap-verify.sql)
+			return 0
+			;;
+	esac
+
+	return 1
+}
+
 should_skip_mirror_path() {
 	local path="$1"
+
+	if is_allowed_public_mirror_path "$path"; then
+		return 1
+	fi
 
 	case "$path" in
 		.env|.env.*|*/.env|*/.env.*)
