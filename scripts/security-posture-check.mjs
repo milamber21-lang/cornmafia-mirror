@@ -99,10 +99,15 @@ function checkRevalidationEndpoint() {
 
 function checkMutationOriginGuard() {
 	const helperPath = "apps/web/src/lib/server/mutation-origin.ts";
-	const middlewarePath = "apps/web/src/middleware.ts";
+	const proxyPath = "apps/web/src/proxy.ts";
+	const deprecatedMiddlewarePath = "apps/web/src/middleware.ts";
 
 	assertCondition(existsSync(join(REPO_ROOT, helperPath)), `${helperPath} must exist.`);
-	assertCondition(existsSync(join(REPO_ROOT, middlewarePath)), `${middlewarePath} must exist.`);
+	assertCondition(existsSync(join(REPO_ROOT, proxyPath)), `${proxyPath} must exist.`);
+	assertCondition(
+		!existsSync(join(REPO_ROOT, deprecatedMiddlewarePath)),
+		`${deprecatedMiddlewarePath} must be removed; use ${proxyPath}.`,
+	);
 
 	if (existsSync(join(REPO_ROOT, helperPath))) {
 		const helper = readProjectFile(helperPath);
@@ -117,11 +122,12 @@ function checkMutationOriginGuard() {
 		assertCondition(helper.includes("Mutation requests require same-origin proof."), `${helperPath} must fail closed when mutation origin proof is missing.`);
 	}
 
-	if (existsSync(join(REPO_ROOT, middlewarePath))) {
-		const middleware = readProjectFile(middlewarePath);
+	if (existsSync(join(REPO_ROOT, proxyPath))) {
+		const proxy = readProjectFile(proxyPath);
 
-		assertCondition(middleware.includes("assertSameOriginMutation"), `${middlewarePath} must call assertSameOriginMutation.`);
-		assertCondition(middleware.includes("/api/:path*"), `${middlewarePath} must match API routes.`);
+		assertCondition(proxy.includes("export function proxy"), `${proxyPath} must export proxy.`);
+		assertCondition(proxy.includes("assertSameOriginMutation"), `${proxyPath} must call assertSameOriginMutation.`);
+		assertCondition(proxy.includes("/api/:path*"), `${proxyPath} must match API routes.`);
 	}
 }
 

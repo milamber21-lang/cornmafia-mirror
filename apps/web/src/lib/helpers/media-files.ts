@@ -53,7 +53,10 @@ export function assertSafeMediaRelativePath(input: string): string {
 export function resolveMediaAbsolutePath(storageRelPath: string): string {
 	const root = getRequiredMediaRoot();
 	const safeRelativePath = assertSafeMediaRelativePath(storageRelPath);
-	const absolutePath = path.join(root, ...safeRelativePath.split("/"));
+	const absolutePath = path.join(
+		/*turbopackIgnore: true*/ root,
+		...safeRelativePath.split("/"),
+	);
 	const normalizedRoot = path.normalize(root);
 	const normalizedAbsolutePath = path.normalize(absolutePath);
 
