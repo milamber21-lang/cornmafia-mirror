@@ -8,8 +8,22 @@
 
 set -Eeuo pipefail
 
+if [[ "${CM_BOOTSTRAP_SELF_REEXECED:-0}" != "1" ]]; then
+	self_copy="$(mktemp /tmp/cm-bootstrap-deploy.XXXXXX.sh)"
+	cp "$0" "$self_copy"
+	chmod 0700 "$self_copy"
+	export CM_BOOTSTRAP_SELF_REEXECED="1"
+	exec bash "$self_copy" "$@"
+fi
+
 readonly CM_REPO_URL_DEFAULT="https://github.com/milamber21-lang/cornmafia-mirror.git"
 readonly CM_REPO_BRANCH_DEFAULT="main"
+readonly COMPOSE_PROJECT_NAME_DEFAULT="cm"
+readonly CM_DB_SERVICE_NAME_DEFAULT="cm-db"
+readonly CM_WEB_SERVICE_NAME_DEFAULT="cm-web"
+readonly CM_DB_CONTAINER_NAME_DEFAULT="cm-db"
+readonly CM_WEB_CONTAINER_NAME_DEFAULT="cm-web"
+readonly CM_NETWORK_NAME_DEFAULT="cm-internal"
 readonly CM_WEB_UID_DEFAULT="10001"
 readonly CM_WEB_GID_DEFAULT="10001"
 readonly CADDYFILE_PATH_DEFAULT="/etc/caddy/Caddyfile"
@@ -58,6 +72,30 @@ function require_safe_repo_root() {
 
 function command_exists() {
 	command -v "$1" >/dev/null 2>&1
+}
+
+function compose_project_name() {
+	printf '%s\n' "${COMPOSE_PROJECT_NAME:-$COMPOSE_PROJECT_NAME_DEFAULT}"
+}
+
+function db_service_name() {
+	printf '%s\n' "${CM_DB_SERVICE_NAME:-$CM_DB_SERVICE_NAME_DEFAULT}"
+}
+
+function web_service_name() {
+	printf '%s\n' "${CM_WEB_SERVICE_NAME:-$CM_WEB_SERVICE_NAME_DEFAULT}"
+}
+
+function db_container_name() {
+	printf '%s\n' "${CM_DB_CONTAINER_NAME:-$CM_DB_CONTAINER_NAME_DEFAULT}"
+}
+
+function web_container_name() {
+	printf '%s\n' "${CM_WEB_CONTAINER_NAME:-$CM_WEB_CONTAINER_NAME_DEFAULT}"
+}
+
+function docker_compose() {
+	docker compose --env-file "$ENV_FILE" --project-name "$(compose_project_name)" "$@"
 }
 
 function have_apt() {
@@ -323,6 +361,19 @@ function normalize_domain() {
 	printf '%s\n' "$raw_value"
 }
 
+
+function postgres_operator_host() {
+	local bind_host="${POSTGRES_HOST_BIND:-127.0.0.1}"
+	case "$bind_host" in
+		0.0.0.0|::|'' )
+			printf '127.0.0.1\n'
+			;;
+		*)
+			printf '%s\n' "$bind_host"
+			;;
+	esac
+}
+
 function choose_domain() {
 	local detected_domain=""
 	if [[ -n "${WEB_PUBLIC_URL:-}" ]]; then
@@ -352,18 +403,45 @@ function choose_domain() {
 
 function ensure_url_env_values() {
 	local public_url="https://$DEPLOY_DOMAIN"
-	local port_value="${PORT:-5323}"
+	local internal_port="${WEB_INTERNAL_PORT:-${PORT:-5323}}"
+	local external_port="${WEB_EXTERNAL_PORT:-${PORT:-5323}}"
+	local postgres_external_port="${POSTGRES_EXTERNAL_PORT:-5432}"
+	local postgres_host_bind="${POSTGRES_HOST_BIND:-127.0.0.1}"
+	local postgres_host
+	postgres_host="$(POSTGRES_HOST_BIND="$postgres_host_bind" postgres_operator_host)"
+	local db_service
+	db_service="$(db_service_name)"
+	local web_service
+	web_service="$(web_service_name)"
+
+	ensure_env_value COMPOSE_PROJECT_NAME "$(compose_project_name)"
+	ensure_env_value CM_DB_SERVICE_NAME "$db_service"
+	ensure_env_value CM_WEB_SERVICE_NAME "$web_service"
+	ensure_env_value CM_DB_CONTAINER_NAME "$(db_container_name)"
+	ensure_env_value CM_WEB_CONTAINER_NAME "$(web_container_name)"
+	ensure_env_value CM_NETWORK_NAME "${CM_NETWORK_NAME:-$CM_NETWORK_NAME_DEFAULT}"
+	ensure_env_value CM_DB_IMAGE "${CM_DB_IMAGE:-postgres:16-alpine@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50}"
+	ensure_env_value CM_WEB_IMAGE_NAME "${CM_WEB_IMAGE_NAME:-cm-web:local}"
+	ensure_env_value CM_BOOTSTRAP_DIR "${CM_BOOTSTRAP_DIR:-./infra/bootstrap}"
 
 	ensure_env_value WEB_PUBLIC_URL "$public_url"
 	ensure_env_value NEXTAUTH_URL "$public_url"
 	ensure_env_value NEXT_PUBLIC_BASE_URL "$public_url"
-	ensure_env_value WEB_INTERNAL_URL "http://cm-web:$port_value"
+	ensure_env_value WEB_INTERNAL_URL "http://$web_service:$internal_port"
 	ensure_env_value WEB_HOST_BIND "${WEB_HOST_BIND:-127.0.0.1}"
-	ensure_env_value PORT "$port_value"
-	ensure_env_value POSTGRES_PORT_BIND "${POSTGRES_PORT_BIND:-127.0.0.1:5432}"
+	ensure_env_value WEB_INTERNAL_PORT "$internal_port"
+	ensure_env_value WEB_EXTERNAL_PORT "$external_port"
+	ensure_env_value PORT "$internal_port"
+	ensure_env_value POSTGRES_HOST_BIND "$postgres_host_bind"
+	ensure_env_value POSTGRES_EXTERNAL_PORT "$postgres_external_port"
+	ensure_env_value CM_POSTGRES_HOST "$postgres_host"
+	ensure_env_value CM_POSTGRES_PORT "$postgres_external_port"
+	ensure_env_value POSTGRES_PORT_BIND "$postgres_host:$postgres_external_port"
 	ensure_env_value POSTGRES_DATA_DIR "${POSTGRES_DATA_DIR:-./data/postgres}"
 	ensure_env_value WEB_MEDIA_HOST_DIR "${WEB_MEDIA_HOST_DIR:-./data/media}"
 	ensure_env_value WEB_CACHE_HOST_DIR "${WEB_CACHE_HOST_DIR:-./data/web_cache}"
+	ensure_env_value CM_WEB_UID "${CM_WEB_UID:-$CM_WEB_UID_DEFAULT}"
+	ensure_env_value CM_WEB_GID "${CM_WEB_GID:-$CM_WEB_GID_DEFAULT}"
 }
 
 function require_env_key() {
@@ -375,6 +453,15 @@ function require_env_key() {
 function validate_required_env() {
 	local key
 	for key in \
+		COMPOSE_PROJECT_NAME \
+		CM_DB_SERVICE_NAME \
+		CM_WEB_SERVICE_NAME \
+		CM_DB_CONTAINER_NAME \
+		CM_WEB_CONTAINER_NAME \
+		CM_NETWORK_NAME \
+		CM_DB_IMAGE \
+		CM_WEB_IMAGE_NAME \
+		CM_BOOTSTRAP_DIR \
 		POSTGRES_USER \
 		POSTGRES_PASSWORD \
 		POSTGRES_DB \
@@ -392,13 +479,34 @@ function validate_required_env() {
 		DISCORD_BOT_TOKEN \
 		DISCORD_GUILD_ID \
 		WEB_HOST_BIND \
+		WEB_INTERNAL_PORT \
+		WEB_EXTERNAL_PORT \
 		PORT \
+		POSTGRES_HOST_BIND \
+		POSTGRES_EXTERNAL_PORT \
+		CM_POSTGRES_HOST \
+		CM_POSTGRES_PORT \
+		POSTGRES_PORT_BIND \
 		POSTGRES_DATA_DIR \
 		WEB_MEDIA_HOST_DIR \
-		WEB_CACHE_HOST_DIR; do
+		WEB_CACHE_HOST_DIR \
+		CM_WEB_UID \
+		CM_WEB_GID; do
 		require_env_key "$key"
 	done
 
+	local name_value
+	for name_value in \
+		"$COMPOSE_PROJECT_NAME" \
+		"$CM_DB_SERVICE_NAME" \
+		"$CM_WEB_SERVICE_NAME" \
+		"$CM_DB_CONTAINER_NAME" \
+		"$CM_WEB_CONTAINER_NAME" \
+		"$CM_NETWORK_NAME"; do
+		[[ "$name_value" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]] || fail "Unsafe Docker/Compose name: $name_value"
+	done
+
+	[[ "$PORT" == "$WEB_INTERNAL_PORT" ]] || fail "PORT must match WEB_INTERNAL_PORT for the Next.js container runtime."
 	[[ "${POSTGRES_USER:-}" == "cm" ]] || fail "POSTGRES_USER must be cm for the current bootstrap contract."
 	[[ "${POSTGRES_DB:-}" == "cm_web" ]] || fail "POSTGRES_DB must be cm_web unless bootstrap SQL has been regenerated."
 	[[ "${CM_CLIENT_DB_USER:-}" == "cm_client" ]] || fail "CM_CLIENT_DB_USER must be cm_client for the current runtime contract."
@@ -462,7 +570,7 @@ function ensure_caddy_import() {
 function write_caddy_managed_config() {
 	local upstream_host
 	upstream_host="$(caddy_upstream_host)"
-	local upstream_port="${PORT:-5323}"
+	local upstream_port="${WEB_EXTERNAL_PORT:-${PORT:-5323}}"
 
 	info "Writing managed Caddy config for $DEPLOY_DOMAIN -> $upstream_host:$upstream_port"
 	install -d -m 0755 "$(dirname "$CADDY_MANAGED_FILE")"
@@ -535,27 +643,38 @@ function require_bootstrap_files() {
 }
 
 function run_docker_deploy() {
-	info "Building and starting Corn Mafia Docker services."
+	local db_service
+	db_service="$(db_service_name)"
+	local web_service
+	web_service="$(web_service_name)"
+	local db_container
+	db_container="$(db_container_name)"
+	local web_container
+	web_container="$(web_container_name)"
+
+	info "Building and starting Corn Mafia Docker services with Compose project $(compose_project_name)."
 	cd "$REPO_ROOT"
-	docker compose --env-file "$ENV_FILE" pull cm-db || warn "Could not pull cm-db image now; Docker may use the local image/cache."
-	docker compose --env-file "$ENV_FILE" build cm-web
-	docker compose --env-file "$ENV_FILE" up -d cm-db
-	wait_for_container_health cm-db "PostgreSQL" 90
+	docker_compose pull "$db_service" || warn "Could not pull $db_service image now; Docker may use the local image/cache."
+	docker_compose build "$web_service"
+	docker_compose up -d "$db_service"
+	wait_for_container_health "$db_container" "PostgreSQL" 90
 
 	info "Running database bootstrap/verification."
 	CM_BOOTSTRAP_ENV="$ENV_FILE" bash "$REPO_ROOT/infra/bootstrap/scripts/db-bootstrap.sh"
 
-	docker compose --env-file "$ENV_FILE" up -d cm-web
-	wait_for_container_health cm-web "Web" 90
+	docker_compose up -d "$web_service"
+	wait_for_container_health "$web_container" "Web" 90
 }
 
 function local_smoke_test() {
-	local port_value="${PORT:-5323}"
-	info "Running local web smoke test on http://127.0.0.1:$port_value/"
-	if curl -fsS "http://127.0.0.1:$port_value/" >/dev/null; then
+	local upstream_host
+	upstream_host="$(caddy_upstream_host)"
+	local port_value="${WEB_EXTERNAL_PORT:-${PORT:-5323}}"
+	info "Running local web smoke test on http://$upstream_host:$port_value/"
+	if curl -fsS "http://$upstream_host:$port_value/" >/dev/null; then
 		info "Local web smoke test passed."
 	else
-		warn "Local web smoke test failed. Check: docker compose logs --tail=120 cm-web"
+		warn "Local web smoke test failed. Check: docker compose --env-file .env --project-name $(compose_project_name) logs --tail=120 $(web_service_name)"
 	fi
 }
 
@@ -570,9 +689,9 @@ Public URL:
 
 Useful commands:
   cd "$REPO_ROOT"
-  docker compose ps
-  docker compose logs --tail=120 cm-web
-  docker compose logs --tail=120 cm-db
+  docker compose --env-file .env --project-name $(compose_project_name) ps
+  docker compose --env-file .env --project-name $(compose_project_name) logs --tail=120 $(web_service_name)
+  docker compose --env-file .env --project-name $(compose_project_name) logs --tail=120 $(db_service_name)
   sudo systemctl status caddy --no-pager
   sudo caddy validate --config "$CADDYFILE_PATH"
 
