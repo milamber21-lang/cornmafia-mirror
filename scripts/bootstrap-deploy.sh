@@ -248,12 +248,21 @@ function rsync_repo_payload() {
 	[[ -d "$source_root" ]] || fail "Repository payload directory does not exist: $source_root"
 
 	rsync -a --delete \
-		--exclude '.git/' \
-		--exclude '.env' \
-		--exclude '.env.*' \
-		--exclude 'data/' \
-		--exclude 'logs/' \
+		--exclude '/.git/' \
+		--exclude '/.env' \
+		--exclude '/.env.*' \
+		--exclude '/data/' \
+		--exclude '/logs/' \
 		"$source_root/" "$REPO_ROOT/"
+}
+
+function verify_synced_repo_payload() {
+	local required_source_file
+	for required_source_file in \
+		"$REPO_ROOT/apps/web/src/lib/data/admin-discord.ts" \
+		"$REPO_ROOT/apps/web/src/lib/data/admin-web-actions.ts"; do
+		[[ -f "$required_source_file" ]] || fail "Repository sync is incomplete. Missing required app source file: $required_source_file"
+	done
 }
 
 function extract_repo_archive_payload() {
@@ -386,6 +395,7 @@ function sync_repo_from_main() {
 			;;
 	esac
 
+	verify_synced_repo_payload
 	restore_repo_file_ownership
 }
 
