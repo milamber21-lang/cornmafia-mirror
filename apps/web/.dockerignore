@@ -44,3 +44,8 @@ data
 data/**
 uploads
 uploads/**
+
+# Keep app source data helpers in the Docker build context.
+# The broad host-data exclusions above must not hide src/lib/data/* imports.
+!src/lib/data
+!src/lib/data/**
