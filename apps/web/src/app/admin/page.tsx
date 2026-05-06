@@ -20,7 +20,7 @@ import {
 	Shield,
 	Star,
 	Users,
-	Youtube,
+	Video,
 	type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -109,7 +109,7 @@ const webStructureLinks: AdminLink[] = [
 		title: "YouTube Channels",
 		description: "Allow trusted YouTube channels for future video validation.",
 		href: "/admin/web/youtube-channels",
-		icon: Youtube,
+		icon: Video,
 		minimumAccess: "admin",
 	},
 	{

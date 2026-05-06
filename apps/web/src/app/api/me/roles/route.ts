@@ -41,11 +41,6 @@ type RolesOkResponse = {
 	isRoleRefreshDue: boolean;
 };
 
-type RolesErrorResponse = {
-	ok: false;
-	error: string;
-};
-
 function toRoleResponse(role: DiscordRoleDoc): RoleResponse {
 	return {
 		id: role.id,
