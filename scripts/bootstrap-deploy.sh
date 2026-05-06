@@ -30,8 +30,7 @@ readonly CM_WEB_CONTAINER_NAME_DEFAULT="cm-web"
 readonly CM_DB_NETWORK_ALIAS_DEFAULT="cm-db"
 readonly CM_WEB_NETWORK_ALIAS_DEFAULT="cm-web"
 readonly CM_NETWORK_NAME_DEFAULT="cm-internal"
-readonly CM_COMPOSE_TEMPLATE_FILE_DEFAULT="./docker-compose.template.yml"
-readonly CM_COMPOSE_GENERATED_FILE_DEFAULT="./.cm-deploy/docker-compose.generated.yml"
+readonly CM_COMPOSE_FILE_DEFAULT="./docker-compose.yml"
 readonly CM_WEB_UID_DEFAULT="10001"
 readonly CM_WEB_GID_DEFAULT="10001"
 readonly CADDYFILE_PATH_DEFAULT="/etc/caddy/Caddyfile"
@@ -98,12 +97,8 @@ function web_service_name() {
 	printf '%s\n' "${CM_WEB_SERVICE_NAME:-$CM_WEB_SERVICE_NAME_DEFAULT}"
 }
 
-function compose_template_file() {
-	resolve_repo_path "${CM_COMPOSE_TEMPLATE_FILE:-$CM_COMPOSE_TEMPLATE_FILE_DEFAULT}"
-}
-
-function compose_generated_file() {
-	resolve_repo_path "${CM_COMPOSE_GENERATED_FILE:-$CM_COMPOSE_GENERATED_FILE_DEFAULT}"
+function compose_file() {
+	resolve_repo_path "$CM_COMPOSE_FILE_DEFAULT"
 }
 
 function db_container_name() {
@@ -123,11 +118,11 @@ function web_network_alias() {
 }
 
 function docker_compose() {
-	docker compose --env-file "$ENV_FILE" --project-name "$(compose_project_name)" -f "$(compose_generated_file)" "$@"
+	docker compose --env-file "$ENV_FILE" --project-name "$(compose_project_name)" -f "$(compose_file)" "$@"
 }
 
 function docker_compose_display_command() {
-	printf 'docker compose --env-file .env --project-name %s -f %s' "$(compose_project_name)" "${CM_COMPOSE_GENERATED_FILE:-$CM_COMPOSE_GENERATED_FILE_DEFAULT}"
+	printf 'docker compose --env-file .env --project-name %s -f ./docker-compose.yml' "$(compose_project_name)"
 }
 
 function have_apt() {
@@ -253,6 +248,11 @@ function rsync_repo_payload() {
 		--exclude '/.env.*' \
 		--exclude '/data/' \
 		--exclude '/logs/' \
+		--exclude '/.cm-deploy/' \
+		--exclude '/.env.bootstrap' \
+		--exclude '/.env.bootstrap-deploy.*.bak' \
+		--exclude '/docker-compose.yml' \
+		--exclude '/docker-compose.template.yml' \
 		"$source_root/" "$REPO_ROOT/"
 }
 
@@ -275,7 +275,7 @@ function extract_repo_archive_payload() {
 	local archive_root
 	archive_root="$(find "$temp_dir/extract" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
 	[[ -n "$archive_root" ]] || fail "Repository archive did not contain a repository directory."
-	[[ -f "$archive_root/docker-compose.yml" ]] || fail "Repository archive does not look like the Corn Mafia repo. Missing docker-compose.yml."
+	[[ -f "$archive_root/apps/web/package.json" ]] || fail "Repository archive does not look like the Corn Mafia repo. Missing apps/web/package.json."
 
 	info "Syncing archive payload into $REPO_ROOT while preserving .env, data/, logs/, and .git/."
 	rsync_repo_payload "$archive_root"
@@ -333,7 +333,7 @@ function sync_repo_archive_file_into_current_directory() {
 
 function use_current_directory_as_repo_payload() {
 	info "CM_SOURCE_MODE=local selected. Skipping repo download/sync and using current directory contents."
-	[[ -f "$REPO_ROOT/docker-compose.yml" ]] || fail "Current directory is not a complete Corn Mafia repo. Missing docker-compose.yml. Use archive/file/git mode to fetch repo contents first."
+	[[ -f "$REPO_ROOT/apps/web/package.json" ]] || fail "Current directory is not a complete Corn Mafia repo. Missing apps/web/package.json. Use archive/file/git mode to fetch repo contents first."
 }
 
 function update_existing_git_repo() {
@@ -421,8 +421,11 @@ function backup_env_once() {
 		return 0
 	fi
 
+	local backup_dir
 	local backup_path
-	backup_path="$ENV_FILE.bootstrap-deploy.$(date +%Y%m%d%H%M%S).bak"
+	backup_dir="$REPO_ROOT/logs/bootstrap-deploy"
+	mkdir -p "$backup_dir"
+	backup_path="$backup_dir/env.$(date +%Y%m%d%H%M%S).bak"
 	cp -a "$ENV_FILE" "$backup_path"
 	info "Backed up .env to $backup_path"
 	ENV_BACKUP_CREATED="1"
@@ -452,6 +455,26 @@ function set_env_value() {
 				print line
 			}
 		}
+	' "$ENV_FILE" > "$temp_file"
+	cat "$temp_file" > "$ENV_FILE"
+	rm -f "$temp_file"
+}
+
+function remove_env_key() {
+	local key="$1"
+	[[ "$key" =~ ^[A-Z0-9_]+$ ]] || fail "Invalid env key for removal: $key"
+
+	if ! grep -Eq "^[[:space:]]*$key=" "$ENV_FILE"; then
+		return 0
+	fi
+
+	backup_env_once
+	info "Removing obsolete .env key: $key"
+	local temp_file
+	temp_file="$(mktemp)"
+	awk -v key="$key" '
+		$0 ~ "^[[:space:]]*" key "=" { next }
+		{ print }
 	' "$ENV_FILE" > "$temp_file"
 	cat "$temp_file" > "$ENV_FILE"
 	rm -f "$temp_file"
@@ -584,8 +607,8 @@ function ensure_url_env_values() {
 	ensure_env_value CM_DB_IMAGE "${CM_DB_IMAGE:-postgres:16-alpine@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50}"
 	ensure_env_value CM_WEB_IMAGE_NAME "${CM_WEB_IMAGE_NAME:-cm-web:local}"
 	ensure_env_value CM_BOOTSTRAP_DIR "${CM_BOOTSTRAP_DIR:-./infra/bootstrap}"
-	ensure_env_value CM_COMPOSE_TEMPLATE_FILE "${CM_COMPOSE_TEMPLATE_FILE:-$CM_COMPOSE_TEMPLATE_FILE_DEFAULT}"
-	ensure_env_value CM_COMPOSE_GENERATED_FILE "${CM_COMPOSE_GENERATED_FILE:-$CM_COMPOSE_GENERATED_FILE_DEFAULT}"
+	remove_env_key CM_COMPOSE_TEMPLATE_FILE
+	remove_env_key CM_COMPOSE_GENERATED_FILE
 
 	ensure_env_value WEB_PUBLIC_URL "$public_url"
 	ensure_env_value NEXTAUTH_URL "$public_url"
@@ -631,8 +654,6 @@ function validate_required_env() {
 		CM_DB_IMAGE \
 		CM_WEB_IMAGE_NAME \
 		CM_BOOTSTRAP_DIR \
-		CM_COMPOSE_TEMPLATE_FILE \
-		CM_COMPOSE_GENERATED_FILE \
 		POSTGRES_USER \
 		POSTGRES_PASSWORD \
 		POSTGRES_DB \
@@ -688,6 +709,18 @@ function validate_required_env() {
 	[[ "${CM_CLIENT_DB_USER:-}" == "cm_client" ]] || fail "CM_CLIENT_DB_USER must be cm_client for the current runtime contract."
 }
 
+function assert_tar_archive_safe() {
+	local archive_file="$1"
+	local member
+	while IFS= read -r member; do
+		case "$member" in
+			''|/*|../*|*/../*|*/..)
+				fail "Unsafe path in bootstrap media archive $archive_file: $member"
+				;;
+		esac
+	done < <(tar -tzf "$archive_file")
+}
+
 function sync_bootstrap_media() {
 	local target_dir
 	target_dir="$(resolve_repo_path "${WEB_MEDIA_HOST_DIR:-./data/media}")"
@@ -698,12 +731,17 @@ function sync_bootstrap_media() {
 
 	mkdir -p "$target_dir" "$cache_dir" "$postgres_dir"
 
+	local source_archive="$REPO_ROOT/infra/bootstrap/media.tar.gz"
 	local source_dir="$REPO_ROOT/infra/bootstrap/media"
-	if [[ -d "$source_dir" ]]; then
+	if [[ -f "$source_archive" ]]; then
+		info "Extracting bootstrap media exception archive into $target_dir"
+		assert_tar_archive_safe "$source_archive"
+		tar -xzf "$source_archive" --skip-old-files --no-same-owner -C "$target_dir"
+	elif [[ -d "$source_dir" ]]; then
 		info "Syncing bootstrap media exception payload into $target_dir"
 		rsync -a --ignore-existing "$source_dir/" "$target_dir/"
 	else
-		warn "No infra/bootstrap/media directory found. Continuing; DB media verification may fail if bootstrap media is required."
+		warn "No infra/bootstrap/media.tar.gz or infra/bootstrap/media directory found. Continuing; DB media verification may fail if bootstrap media is required."
 	fi
 
 	info "Granting web container ownership on media/cache directories."
@@ -825,8 +863,8 @@ function wait_for_container_health() {
 }
 
 function require_bootstrap_files() {
-	[[ -f "$REPO_ROOT/docker-compose.yml" ]] || fail "Missing docker-compose.yml after repo sync."
-	[[ -f "$(compose_template_file)" ]] || fail "Missing Compose template after repo sync: $(compose_template_file)"
+	[[ -f "$REPO_ROOT/apps/web/Dockerfile" ]] || fail "Missing apps/web/Dockerfile after repo sync."
+	[[ -f "$REPO_ROOT/apps/web/package.json" ]] || fail "Missing apps/web/package.json after repo sync."
 	[[ -f "$REPO_ROOT/infra/bootstrap/scripts/db-bootstrap.sh" ]] || fail "Missing infra/bootstrap/scripts/db-bootstrap.sh after repo sync."
 
 	local required_bootstrap_file
@@ -844,16 +882,8 @@ function sed_escape_replacement() {
 }
 
 function render_compose_file() {
-	local template_file
-	template_file="$(compose_template_file)"
-	local generated_file
-	generated_file="$(compose_generated_file)"
-	[[ -f "$template_file" ]] || fail "Compose template file does not exist: $template_file"
-
-	local generated_dir
-	generated_dir="$(dirname "$generated_file")"
-	mkdir -p "$generated_dir"
-
+	local compose_path
+	compose_path="$(compose_file)"
 	local db_service
 	db_service="$(db_service_name)"
 	local web_service
@@ -871,24 +901,121 @@ function render_compose_file() {
 	local web_media_host_dir
 	web_media_host_dir="$(resolve_repo_path "${WEB_MEDIA_HOST_DIR:-./data/media}")"
 
-	info "Rendering Docker Compose file for services $db_service and $web_service."
-	sed \
-		-e "s/__CM_DB_SERVICE_NAME__/$(sed_escape_replacement "$db_service")/g" \
-		-e "s/__CM_WEB_SERVICE_NAME__/$(sed_escape_replacement "$web_service")/g" \
-		-e "s#__CM_WEB_BUILD_CONTEXT__#$(sed_escape_replacement "$web_build_context")#g" \
-		-e "s#__CM_POSTGRES_DATA_DIR__#$(sed_escape_replacement "$postgres_data_dir")#g" \
-		-e "s#__CM_POSTGRES_INIT_DIR__#$(sed_escape_replacement "$postgres_init_dir")#g" \
-		-e "s#__CM_BOOTSTRAP_DIR__#$(sed_escape_replacement "$bootstrap_dir")#g" \
-		-e "s#__CM_WEB_CACHE_HOST_DIR__#$(sed_escape_replacement "$web_cache_host_dir")#g" \
-		-e "s#__CM_WEB_MEDIA_HOST_DIR__#$(sed_escape_replacement "$web_media_host_dir")#g" \
-		"$template_file" > "$generated_file.tmp"
-	mv "$generated_file.tmp" "$generated_file"
-	chmod 0644 "$generated_file"
+	info "Rendering root Docker Compose file for services $db_service and $web_service."
+	cat > "$compose_path.tmp" <<COMPOSE
+# FILE: docker-compose.yml
+# Language: YAML
+# Generated by scripts/bootstrap-deploy.sh from .env. Manual changes may be overwritten.
 
-	if grep -q '__CM_' "$generated_file"; then
-		fail "Generated Compose file still contains unresolved placeholders: $generated_file"
-	fi
+name: \${COMPOSE_PROJECT_NAME:-cm}
 
+services:
+  $db_service:
+    image: \${CM_DB_IMAGE:-postgres:16-alpine@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50}
+    container_name: \${CM_DB_CONTAINER_NAME:-cm-db}
+    environment:
+      POSTGRES_USER: \${POSTGRES_USER:?POSTGRES_USER must be set}
+      POSTGRES_PASSWORD: \${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      POSTGRES_DB: \${POSTGRES_DB:?POSTGRES_DB must be set}
+      CM_CLIENT_DB_USER: \${CM_CLIENT_DB_USER:?CM_CLIENT_DB_USER must be set}
+      CM_CLIENT_DB_PASSWORD: \${CM_CLIENT_DB_PASSWORD:?CM_CLIENT_DB_PASSWORD must be set}
+    volumes:
+      - "$postgres_data_dir:/var/lib/postgresql/data"
+      - "$postgres_init_dir:/docker-entrypoint-initdb.d:ro"
+      - "$bootstrap_dir:/cm-bootstrap:ro"
+    ports:
+      - "\${POSTGRES_HOST_BIND:-127.0.0.1}:\${POSTGRES_EXTERNAL_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"\$\${POSTGRES_USER}\" -d \"\$\${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+    logging: &default-logging
+      driver: json-file
+      options:
+        max-size: \${LOG_MAX_SIZE:-10m}
+        max-file: "\${LOG_MAX_FILE:-5}"
+    networks:
+      cm-internal:
+        aliases:
+          - cm-db
+          - \${CM_DB_NETWORK_ALIAS:-cm-db}
+          - \${CM_DB_CONTAINER_NAME:-cm-db}
+
+  $web_service:
+    build: "$web_build_context"
+    image: \${CM_WEB_IMAGE_NAME:-cm-web:local}
+    container_name: \${CM_WEB_CONTAINER_NAME:-cm-web}
+    environment:
+      NODE_ENV: \${NODE_ENV:-production}
+      PORT: \${WEB_INTERNAL_PORT:-5323}
+      WEB_INTERNAL_PORT: \${WEB_INTERNAL_PORT:-5323}
+      WEB_EXTERNAL_PORT: \${WEB_EXTERNAL_PORT:-5323}
+      WEB_INTERNAL_URL: \${WEB_INTERNAL_URL:?WEB_INTERNAL_URL must be set}
+      WEB_PUBLIC_URL: \${WEB_PUBLIC_URL:?WEB_PUBLIC_URL must be set}
+      NEXTAUTH_URL: \${NEXTAUTH_URL:?NEXTAUTH_URL must be set}
+      NEXT_PUBLIC_BASE_URL: \${NEXT_PUBLIC_BASE_URL:?NEXT_PUBLIC_BASE_URL must be set}
+      NEXTAUTH_SECRET: \${NEXTAUTH_SECRET:?NEXTAUTH_SECRET must be set}
+      REVALIDATE_TOKEN: \${REVALIDATE_TOKEN:?REVALIDATE_TOKEN must be set}
+      DISCORD_CLIENT_ID: \${DISCORD_CLIENT_ID:?DISCORD_CLIENT_ID must be set}
+      DISCORD_CLIENT_SECRET: \${DISCORD_CLIENT_SECRET:?DISCORD_CLIENT_SECRET must be set}
+      DISCORD_BOT_TOKEN: \${DISCORD_BOT_TOKEN:?DISCORD_BOT_TOKEN must be set}
+      DISCORD_GUILD_ID: \${DISCORD_GUILD_ID:?DISCORD_GUILD_ID must be set}
+      WEB_DATABASE_URL: \${WEB_DATABASE_URL:?WEB_DATABASE_URL must be set}
+      DATABASE_URL: \${WEB_DATABASE_URL:?WEB_DATABASE_URL must be set}
+      WEB_MEDIA_ROOT: \${WEB_MEDIA_ROOT:-/app/data/media}
+      WEB_CACHE_ROOT: \${WEB_CACHE_ROOT:-/app/.next/cache}
+      CM_TILES_ROOT: \${CM_TILES_ROOT:-}
+      CM_PUBLIC_ROOT: \${CM_PUBLIC_ROOT:-}
+      YOUTUBE_DATA_API_KEY: \${YOUTUBE_DATA_API_KEY:-}
+      GOOGLE_YOUTUBE_DATA_API_KEY: \${GOOGLE_YOUTUBE_DATA_API_KEY:-}
+      FEATURE_WALLETS: \${FEATURE_WALLETS:-false}
+      FEATURE_MAPS: \${FEATURE_MAPS:-false}
+    depends_on:
+      $db_service:
+        condition: service_healthy
+    ports:
+      - "\${WEB_HOST_BIND:-127.0.0.1}:\${WEB_EXTERNAL_PORT:-5323}:\${WEB_INTERNAL_PORT:-5323}"
+    command: ["npm", "run", "start"]
+    init: true
+    user: "\${CM_WEB_UID:-10001}:\${CM_WEB_GID:-10001}"
+    read_only: true
+    volumes:
+      - "$web_cache_host_dir:/app/.next/cache:rw"
+      - "$web_media_host_dir:/app/data/media:rw"
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,noexec,mode=1777,size=\${WEB_TMP_SIZE:-128m}
+      - /var/tmp:rw,nosuid,nodev,noexec,mode=1777,size=\${WEB_TMP_SIZE:-128m}
+      - /run:rw,nosuid,nodev,size=\${WEB_RUN_SIZE:-16m}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: \${WEB_PIDS_LIMIT:-256}
+    cpus: "\${WEB_CPUS:-2.0}"
+    mem_limit: \${WEB_MEM_LIMIT:-2g}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:\$\${PORT}/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      cm-internal:
+        aliases:
+          - cm-web
+          - \${CM_WEB_NETWORK_ALIAS:-cm-web}
+          - \${CM_WEB_CONTAINER_NAME:-cm-web}
+
+networks:
+  cm-internal:
+    name: \${CM_NETWORK_NAME:-cm-internal}
+    driver: bridge
+COMPOSE
+	mv "$compose_path.tmp" "$compose_path"
+	chmod 0644 "$compose_path"
 	docker_compose config >/dev/null
 }
 
@@ -955,6 +1082,25 @@ and that ports 80 and 443 are open.
 SUCCESS
 }
 
+
+function cleanup_obsolete_deploy_artifacts() {
+	local obsolete_path
+	for obsolete_path in \
+		"$REPO_ROOT/.cm-deploy" \
+		"$REPO_ROOT/docker-compose.template.yml" \
+		"$REPO_ROOT/.env.bootstrap"; do
+		if [[ -e "$obsolete_path" ]]; then
+			info "Removing obsolete deploy artifact: $obsolete_path"
+			rm -rf "$obsolete_path"
+		fi
+	done
+
+	find "$REPO_ROOT" -maxdepth 1 -type f -name '.env.bootstrap-deploy.*.bak' -print -delete \
+		| while IFS= read -r old_backup; do
+			info "Removed old root env backup: $old_backup"
+		done
+}
+
 function main() {
 	require_root
 	require_safe_repo_root
@@ -962,6 +1108,7 @@ function main() {
 	load_env
 	apply_source_env_values
 	sync_repo_from_main
+	cleanup_obsolete_deploy_artifacts
 
 	load_env
 	apply_source_env_values
