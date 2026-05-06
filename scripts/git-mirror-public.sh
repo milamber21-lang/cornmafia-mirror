@@ -140,6 +140,9 @@ is_allowed_public_mirror_path() {
 		apps/web/src/lib/data/*)
 			return 0
 			;;
+		infra/bootstrap/media.tar.gz)
+			return 0
+			;;
 		infra/bootstrap/sql/*)
 			return 0
 			;;
@@ -159,6 +162,9 @@ should_skip_mirror_path() {
 	fi
 
 	case "$path" in
+		.github/*|.editorconfig|.tarignore|docker-compose.yml|docker-compose.template.yml)
+			return 0
+			;;
 		.env|.env.*|*/.env|*/.env.*)
 			return 0
 			;;
