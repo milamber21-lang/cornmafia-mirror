@@ -598,6 +598,7 @@ function ensure_url_env_values() {
 	ensure_env_value CM_DB_IMAGE "${CM_DB_IMAGE:-postgres:16-alpine@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50}"
 	ensure_env_value CM_WEB_IMAGE_NAME "${CM_WEB_IMAGE_NAME:-cm-web:local}"
 	ensure_env_value CM_BOOTSTRAP_DIR "${CM_BOOTSTRAP_DIR:-./infra/bootstrap}"
+	ensure_env_value CM_CADDY_REQUEST_BODY_MAX_SIZE "${CM_CADDY_REQUEST_BODY_MAX_SIZE:-25MB}"
 	remove_env_key CM_COMPOSE_TEMPLATE_FILE
 	remove_env_key CM_COMPOSE_GENERATED_FILE
 
@@ -645,6 +646,7 @@ function validate_required_env() {
 		CM_DB_IMAGE \
 		CM_WEB_IMAGE_NAME \
 		CM_BOOTSTRAP_DIR \
+		CM_CADDY_REQUEST_BODY_MAX_SIZE \
 		POSTGRES_USER \
 		POSTGRES_PASSWORD \
 		POSTGRES_DB \
@@ -796,18 +798,54 @@ function write_caddy_managed_config() {
 	local upstream_host
 	upstream_host="$(caddy_upstream_host)"
 	local upstream_port="${WEB_EXTERNAL_PORT:-${PORT:-5323}}"
+	local request_body_max_size="${CM_CADDY_REQUEST_BODY_MAX_SIZE:-25MB}"
+	local template_path="$REPO_ROOT/infra/bootstrap/caddy/cornmafia.caddy.template"
 
 	info "Writing managed Caddy config for $DEPLOY_DOMAIN -> $upstream_host:$upstream_port"
 	install -d -m 0755 "$(dirname "$CADDY_MANAGED_FILE")"
-	cat > "$CADDY_MANAGED_FILE" <<CADDY
-# FILE: $CADDY_MANAGED_FILE
-# Managed by Corn Mafia scripts/bootstrap-deploy.sh. Manual changes here may be overwritten.
 
+	if [[ -f "$template_path" ]]; then
+		local domain_repl
+		local upstream_host_repl
+		local upstream_port_repl
+		local request_body_repl
+		domain_repl="$(sed_escape_replacement "$DEPLOY_DOMAIN")"
+		upstream_host_repl="$(sed_escape_replacement "$upstream_host")"
+		upstream_port_repl="$(sed_escape_replacement "$upstream_port")"
+		request_body_repl="$(sed_escape_replacement "$request_body_max_size")"
+
+		sed \
+			-e "s/{{CM_CADDY_DOMAIN}}/$domain_repl/g" \
+			-e "s/{{CM_CADDY_UPSTREAM_HOST}}/$upstream_host_repl/g" \
+			-e "s/{{CM_CADDY_UPSTREAM_PORT}}/$upstream_port_repl/g" \
+			-e "s/{{CM_CADDY_REQUEST_BODY_MAX_SIZE}}/$request_body_repl/g" \
+			"$template_path" > "$CADDY_MANAGED_FILE.tmp"
+		mv "$CADDY_MANAGED_FILE.tmp" "$CADDY_MANAGED_FILE"
+	else
+		cat > "$CADDY_MANAGED_FILE" <<CADDY
+# CornMafia - Web
 $DEPLOY_DOMAIN, www.$DEPLOY_DOMAIN {
 	encode zstd gzip
+
+	request_body {
+		max_size $request_body_max_size
+	}
+
+	header {
+		defer
+		-X-Powered-By
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+	}
+
 	reverse_proxy $upstream_host:$upstream_port
 }
 CADDY
+	fi
+	chmod 0644 "$CADDY_MANAGED_FILE"
 }
 
 function reload_caddy() {
