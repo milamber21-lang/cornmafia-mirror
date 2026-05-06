@@ -74,6 +74,10 @@ mirror_key.pub
 
 data
 data/**
+
+!src/lib/data
+!src/lib/data/**
+
 uploads
 uploads/**
 logs
