@@ -1,0 +1,47 @@
+{
+  "name": "cm",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write \"apps/**/*.{ts,tsx,js,jsx,json,md,css}\"",
+    "format:check": "prettier --check .",
+    "headers:add": "node scripts/add-headers.mjs",
+    "jsdoc:add": "node scripts/add-jsdoc.mjs",
+    "lint": "eslint \"apps/web/**/*.{ts,tsx,js,jsx}\"",
+    "lint:fix": "eslint \"apps/web/**/*.{ts,tsx,js,jsx}\" --fix",
+    "lint:web": "npm run lint",
+    "lint:web:fix": "npm run lint:fix",
+    "test": "npm run test:security",
+    "test:security": "node scripts/security-posture-check.mjs",
+    "audit:web:prod": "node scripts/audit-production-dependencies.mjs",
+    "ci:security": "npm run test:security && npm run audit:web:prod"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/milamber21-lang/cornmafia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/milamber21-lang/cornmafia/issues"
+  },
+  "homepage": "https://github.com/milamber21-lang/cornmafia#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@next/eslint-plugin-next": "^16.2.4",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "comment-parser": "^1.4.1",
+    "eslint": "^9.38.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "fs-extra": "^11.3.2",
+    "globby": "^15.0.0",
+    "globals": "^15.12.0",
+    "prettier": "^3.6.2",
+    "typescript-eslint": "^8.46.2"
+  }
+}

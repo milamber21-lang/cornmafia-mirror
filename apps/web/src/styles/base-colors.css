@@ -1,0 +1,175 @@
+/* FILE: apps/web/src/styles/base-colors.css
+   Fixed Corn Mafia brand, base app palette, support palette, and debug color primitives.
+*/
+
+:root {
+	/* Official Corn Mafia Guild brand palette. */
+	--brand-red: #cc262d;
+	--brand-black: #000000;
+	--brand-white: #ffffff;
+
+	/* Official Corn Mafia Guild complementary palette. */
+	--brand-red-bright: #ff0000;
+	--brand-red-secondary: var(--brand-red-bright);
+	--brand-green: #094201;
+	--brand-gold: #cea658;
+
+	/* Official Wise Guys palette. */
+	--brand-wise-guys-yellow: #ffb400;
+	--wise-guys-yellow: var(--brand-wise-guys-yellow);
+
+	/* Brand support palette. */
+	--brand-red-strong: #a11e24;
+
+	/* Base neutral palette. */
+	--base-black: #000000;
+	--base-ink-980: #030304;
+	--base-ink-950: #050506;
+	--base-ink-925: #080809;
+	--base-ink-910: #0a0a0a;
+	--base-ink-900: #0b0b0c;
+	--base-ink-850: #111113;
+	--base-ink-825: #141416;
+	--base-ink-800: #17171a;
+	--base-ink-750: #1d1d21;
+	--base-ink-700: #242428;
+	--base-ink-650: #2a2a2a;
+	--base-ink-600: #34343a;
+
+	--base-gray-700: #4b4c54;
+	--base-gray-600: #5c5d66;
+	--base-gray-500: #6f7078;
+	--base-gray-400: #9698a3;
+	--base-gray-350: #b7b7b7;
+	--base-gray-300: #c5c7d0;
+	--base-gray-200: #e2e3e8;
+	--base-gray-100: #f4f5f7;
+	--base-gray-50: #f5f6f7;
+	--base-white: #ffffff;
+
+	/* Base red palette. */
+	--base-red-900: #4c0519;
+	--base-red-800: #7f1d1d;
+	--base-red-700: #8f171f;
+	--base-red-600: var(--brand-red-strong);
+	--base-red-500: var(--brand-red);
+	--base-red-400: #ef4444;
+	--base-red-300: #ff737a;
+	--base-red-200: #fda4af;
+	--base-red-100: #fecaca;
+	--base-red-50: #ffe4e6;
+
+	/* Base gold and amber palette. */
+	--base-gold-900: #451a03;
+	--base-gold-800: #7a5620;
+	--base-gold-700: #a8782d;
+	--base-gold-500: var(--brand-gold);
+	--base-gold-400: #fbbf24;
+	--base-gold-300: #fcd34d;
+	--base-gold-200: #fde047;
+	--base-gold-100: #fef3c7;
+	--base-gold-50: #fef9c3;
+
+	/* Base green palette. */
+	--base-green-900: #052e16;
+	--base-green-800: #063001;
+	--base-green-700: var(--brand-green);
+	--base-green-500: #0f7a18;
+	--base-green-400: #22c55e;
+	--base-green-300: #4ade80;
+	--base-green-200: #86efac;
+	--base-green-100: #bbf7d0;
+	--base-green-50: #dcfce7;
+
+	/* Base blue and cyan palette. */
+	--base-blue-900: #082f49;
+	--base-blue-700: #118ab2;
+	--base-blue-500: #4da3ff;
+	--base-blue-400: #38bdf8;
+	--base-blue-300: #67e8f9;
+	--base-blue-100: #bae6fd;
+	--base-blue-50: #cffafe;
+	--base-cyan: #40d7ff;
+
+	/* Base purple, pink, and orange support palette. */
+	--base-purple-900: #2e1065;
+	--base-purple-700: #8338ec;
+	--base-purple-500: #a78bfa;
+	--base-purple-300: #c4b5fd;
+	--base-purple-50: #ede9fe;
+	--base-indigo-900: #1e1b4b;
+	--base-indigo-500: #6366f1;
+	--base-indigo-400: #818cf8;
+	--base-indigo-300: #a5b4fc;
+	--base-indigo-50: #e0e7ff;
+	--base-pink-900: #500724;
+	--base-pink-500: #f472b6;
+	--base-pink-400: #ec4899;
+	--base-pink-300: #f9a8d4;
+	--base-pink-50: #fce7f3;
+	--base-orange: #f59e0b;
+
+	/* General debug palette. */
+	--debug-red: #ff3b3b;
+	--debug-orange: #ff9f1c;
+	--debug-yellow: #ffd166;
+	--debug-green: #06d6a0;
+	--debug-blue: #118ab2;
+	--debug-purple: #8338ec;
+	--debug-pink: #ff4d8d;
+
+	/* Renderer debug palette. */
+	--render-debug-rose-border-base: #fb7185;
+	--render-debug-rose-bg-base: #f43f5e;
+	--render-debug-rose-badge-border: var(--base-red-200);
+	--render-debug-rose-badge-bg-base: var(--base-red-900);
+	--render-debug-rose-badge-text: var(--base-red-50);
+
+	--render-debug-amber-border-base: var(--base-gold-400);
+	--render-debug-amber-bg-base: var(--base-orange);
+	--render-debug-amber-badge-border: var(--base-gold-300);
+	--render-debug-amber-badge-bg-base: var(--base-gold-900);
+	--render-debug-amber-badge-text: var(--base-gold-100);
+
+	--render-debug-violet-border-base: var(--base-purple-500);
+	--render-debug-violet-bg-base: #8b5cf6;
+	--render-debug-violet-badge-border: var(--base-purple-300);
+	--render-debug-violet-badge-bg-base: var(--base-purple-900);
+	--render-debug-violet-badge-text: var(--base-purple-50);
+
+	--render-debug-emerald-border-base: var(--base-green-300);
+	--render-debug-emerald-bg-base: var(--base-green-400);
+	--render-debug-emerald-badge-border: var(--base-green-200);
+	--render-debug-emerald-badge-bg-base: var(--base-green-900);
+	--render-debug-emerald-badge-text: var(--base-green-50);
+
+	--render-debug-cyan-border-base: #22d3ee;
+	--render-debug-cyan-bg-base: #06b6d4;
+	--render-debug-cyan-badge-border: var(--base-blue-300);
+	--render-debug-cyan-badge-bg-base: #083344;
+	--render-debug-cyan-badge-text: var(--base-blue-50);
+
+	--render-debug-pink-border-base: var(--base-pink-500);
+	--render-debug-pink-bg-base: var(--base-pink-400);
+	--render-debug-pink-badge-border: var(--base-pink-300);
+	--render-debug-pink-badge-bg-base: var(--base-pink-900);
+	--render-debug-pink-badge-text: var(--base-pink-50);
+
+	--render-debug-yellow-border-base: #facc15;
+	--render-debug-yellow-bg-base: #eab308;
+	--render-debug-yellow-badge-border: var(--base-gold-200);
+	--render-debug-yellow-badge-bg-base: #422006;
+	--render-debug-yellow-badge-text: var(--base-gold-50);
+
+	--render-debug-indigo-border-base: var(--base-indigo-400);
+	--render-debug-indigo-bg-base: var(--base-indigo-500);
+	--render-debug-indigo-badge-border: var(--base-indigo-300);
+	--render-debug-indigo-badge-bg-base: var(--base-indigo-900);
+	--render-debug-indigo-badge-text: var(--base-indigo-50);
+
+	--render-debug-slate-border-base: #94a3b8;
+	--render-debug-slate-bg-base: #64748b;
+	--render-debug-slate-badge-border: #cbd5e1;
+	--render-debug-slate-badge-bg-base: #020617;
+	--render-debug-slate-badge-text: #f1f5f9;
+}

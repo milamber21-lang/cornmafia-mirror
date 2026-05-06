@@ -1,0 +1,6 @@
+path	purpose
+infra/bootstrap/scripts/db-bootstrap.sh	Repo-owned env-taxonomy-aware DB bootstrap runner.
+infra/bootstrap/scripts/db-reset-sequences.sql	Resets sequences after preserved-ID import.
+infra/bootstrap/scripts/db-bootstrap-verify.sql	Verifies DB-first schema, grants, and public residue boundaries.
+infra/bootstrap/sql/cm_web.bootstrap.sql	ID-preserving schema and data bootstrap SQL.
+infra/bootstrap/README.md	Bootstrap usage notes aligned to repo env taxonomy.

@@ -1,0 +1,358 @@
+/* FILE: apps/web/src/styles/tables.css
+   Table shell, admin table, column, loading, and empty-row classes reserved for upcoming style passes.
+*/
+
+/*
+Pass 1 intentionally creates this layer without moving TS/TSX-owned styles yet.
+Future passes should move matching visual rules here according to docs/style_ownership_rules.md.
+*/
+/* ===== Table column widths ===== */
+.table-col {
+	box-sizing: border-box;
+}
+
+.table-col--w-5 {
+	width: 5%;
+}
+
+.table-col--w-6 {
+	width: 6%;
+}
+
+.table-col--w-7 {
+	width: 7%;
+}
+
+.table-col--w-8 {
+	width: 8%;
+}
+
+.table-col--w-9 {
+	width: 9%;
+}
+
+.table-col--w-10 {
+	width: 10%;
+}
+
+.table-col--w-11 {
+	width: 11%;
+}
+
+.table-col--w-12 {
+	width: 12%;
+}
+
+.table-col--w-13 {
+	width: 13%;
+}
+
+.table-col--w-14 {
+	width: 14%;
+}
+
+.table-col--w-15 {
+	width: 15%;
+}
+
+.table-col--w-16 {
+	width: 16%;
+}
+
+.table-col--w-18 {
+	width: 18%;
+}
+
+.table-col--w-20 {
+	width: 20%;
+}
+
+.table-col--w-25 {
+	width: 25%;
+}
+
+
+
+/* ===== Admin table frame and search primitives ===== */
+.admin-table-frame {
+	overflow-x: auto;
+	border: 1px solid var(--theme-border);
+	border-radius: var(--radius, 0.75rem);
+}
+
+.admin-table-search {
+	width: 100%;
+}
+
+.admin-table-search--default {
+	max-width: 360px;
+}
+
+.admin-table-search--large {
+	max-width: 480px;
+}
+
+.admin-table-search--wide {
+	max-width: 520px;
+}
+
+.admin-table-search--center {
+	text-align: center;
+}
+
+.admin-table-search--center::placeholder {
+	text-align: center;
+}
+
+.admin-table-search--start {
+	text-align: start;
+}
+
+/* ===== Shared table primitive classes ===== */
+.ui-table {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: auto;
+	font-size: var(--font-size-sm);
+}
+
+.ui-table-head {
+	background: var(--theme-bg-surface-88);
+}
+
+.ui-table-row {
+	border-top: 1px solid var(--theme-border);
+}
+
+.ui-table-header-cell {
+	padding: var(--space-2) var(--space-3);
+	border-left: 1px solid var(--theme-border);
+	color: var(--theme-text);
+	font-size: var(--font-size-xs);
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.ui-table-header-cell:first-child {
+	border-left: 0;
+}
+
+.ui-table-cell {
+	padding: var(--space-2) var(--space-3);
+	border-left: 1px solid var(--theme-border);
+	vertical-align: middle;
+	color: var(--theme-text);
+}
+
+.ui-table-cell:first-child {
+	border-left: 0;
+}
+
+/* ===== Admin table layout helpers ===== */
+.admin-table-stack {
+	display: grid;
+	gap: var(--space-4);
+}
+
+.admin-table-toolbar {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: var(--space-3);
+}
+
+.admin-table-toolbar-spacer--action,
+.admin-table-toolbar-action {
+	min-width: 160px;
+}
+
+.admin-table-toolbar-filter {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.admin-table-toolbar-filter--category {
+	min-width: 220px;
+}
+
+.admin-table-toolbar-filter--type {
+	min-width: 180px;
+}
+
+.admin-table-filter-control {
+	width: 100%;
+	min-width: 180px;
+	flex-shrink: 0;
+}
+
+.admin-table-toolbar-search {
+	display: flex;
+	justify-content: center;
+}
+
+.admin-table-toolbar-action {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.admin-data-table {
+	min-width: 100%;
+	font-size: var(--font-size-sm);
+}
+
+.admin-table-cell--center {
+	text-align: center;
+}
+
+.admin-table-empty-cell {
+	color: var(--theme-text-muted);
+	text-align: center;
+}
+
+.admin-table-empty-cell--spacious {
+	padding-top: var(--space-8);
+	padding-bottom: var(--space-8);
+}
+
+.admin-table-icon-cell {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.admin-table-cell--muted {
+	color: var(--theme-text-muted);
+}
+
+.admin-table-break-all {
+	word-break: break-all;
+}
+
+.admin-table-toolbar-spacer {
+	min-width: 160px;
+}
+
+.admin-table-toolbar-spacer--wide,
+.admin-table-toolbar-action--wide {
+	min-width: 180px;
+}
+
+.admin-table-filter-control--compact {
+	min-width: 160px;
+}
+
+.admin-table-cell--mono {
+	font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+}
+
+.admin-table-icon-preview {
+	display: inline-flex;
+	width: var(--space-8);
+	height: var(--space-8);
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	border: 1px solid var(--theme-border);
+	border-radius: var(--radius-sm);
+}
+
+.admin-table-toolbar--series {
+	grid-template-columns: minmax(280px, 1fr) minmax(260px, 360px) minmax(160px, 1fr);
+}
+
+.admin-table-toolbar-filter--series {
+	min-width: 280px;
+	flex-wrap: wrap;
+}
+
+.admin-table-filter-control--subcategory {
+	min-width: 200px;
+}
+
+.admin-table-toolbar-filter--dual {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	width: min(100%, 420px);
+	min-width: min(100%, 340px);
+}
+
+.admin-table-toolbar-filter--series.admin-table-toolbar-filter--dual {
+	width: min(100%, 460px);
+}
+
+.admin-table-toolbar-filter--dual .admin-table-filter-control {
+	min-width: 0;
+	width: 100%;
+}
+
+.admin-table-toolbar-action--end {
+	justify-self: end;
+}
+
+.admin-table-toolbar-nav {
+	min-width: 260px;
+}
+
+.admin-table-cell--strong {
+	font-weight: 500;
+}
+
+.admin-template-nav {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.admin-table-status-toggle {
+	min-width: 72px;
+}
+
+/* ===== Discord admin table layouts ===== */
+.admin-table-toolbar--discord-roles {
+	grid-template-columns: auto minmax(260px, 1fr) auto;
+}
+
+.admin-table-toolbar--discord-users {
+	grid-template-columns: minmax(280px, 1fr) auto;
+}
+
+.admin-table-toolbar-search--start {
+	justify-content: flex-start;
+}
+
+.admin-table-pagination-centered {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.admin-table-row-actions {
+	display: inline-flex;
+	gap: var(--space-2);
+}
+
+@media (max-width: 900px) {
+	.admin-table-toolbar,
+	.admin-table-toolbar--series {
+		grid-template-columns: 1fr;
+		align-items: stretch;
+	}
+
+	.admin-table-toolbar-filter--dual {
+		width: 100%;
+		min-width: 0;
+		grid-template-columns: 1fr;
+	}
+
+	.admin-table-toolbar-search,
+	.admin-table-toolbar-action {
+		justify-content: stretch;
+	}
+
+	.admin-table-toolbar-action .ui-button {
+		width: 100%;
+	}
+}

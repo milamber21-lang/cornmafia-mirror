@@ -1,0 +1,46 @@
+# FILE: apps/web/.dockerignore
+# Language: Dockerignore
+# Web app Docker context exclusions for source-only, secret-safe image builds.
+
+node_modules
+node_modules/**
+dist
+dist/**
+.next
+.next/**
+.git
+.git/**
+.gitignore
+.gitattributes
+Dockerfile
+*.log
+.vscode
+coverage
+coverage/**
+
+.env
+.env.*
+*.env
+!.env.example
+
+*.sql
+**/*.sql
+*.dump
+**/*.dump
+*.backup
+**/*.backup
+*.tar
+**/*.tar
+*.tar.gz
+**/*.tar.gz
+*.tgz
+**/*.tgz
+*.zip
+**/*.zip
+
+public/tiles
+public/tiles/**
+data
+data/**
+uploads
+uploads/**
