@@ -173,8 +173,14 @@ function get_database_exists() {
 	psql_admin \
 		--tuples-only \
 		--no-align \
-		--set db_name="$CM_DB_NAME" \
-		--command "SELECT CASE WHEN EXISTS (SELECT 1 FROM pg_catalog.pg_database WHERE datname = :'db_name') THEN '1' ELSE '0' END;"
+		--set db_name="$CM_DB_NAME" <<'SQL'
+SELECT CASE
+		   WHEN EXISTS (SELECT 1
+						FROM pg_catalog.pg_database
+						WHERE datname = :'db_name') THEN '1'
+		   ELSE '0'
+END;
+SQL
 }
 
 function get_project_schema_count() {
