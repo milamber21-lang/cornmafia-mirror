@@ -162,7 +162,7 @@ should_skip_mirror_path() {
 	fi
 
 	case "$path" in
-		.github/*|.editorconfig|.tarignore|docker-compose.yml|docker-compose.template.yml)
+		.github/*|.gitignore|*/.gitignore|.editorconfig|.tarignore|docker-compose.yml|docker-compose.template.yml)
 			return 0
 			;;
 		.env|.env.*|*/.env|*/.env.*)

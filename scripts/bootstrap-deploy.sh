@@ -417,18 +417,9 @@ function apply_source_env_values() {
 }
 
 function backup_env_once() {
-	if [[ "$ENV_BACKUP_CREATED" == "1" ]]; then
-		return 0
-	fi
-
-	local backup_dir
-	local backup_path
-	backup_dir="$REPO_ROOT/logs/bootstrap-deploy"
-	mkdir -p "$backup_dir"
-	backup_path="$backup_dir/env.$(date +%Y%m%d%H%M%S).bak"
-	cp -a "$ENV_FILE" "$backup_path"
-	info "Backed up .env to $backup_path"
-	ENV_BACKUP_CREATED="1"
+	# Deliberately no-op. The deploy script edits .env in place and does not
+	# create backup/log artifacts in the repo root.
+	return 0
 }
 
 function set_env_value() {
@@ -1088,7 +1079,8 @@ function cleanup_obsolete_deploy_artifacts() {
 	for obsolete_path in \
 		"$REPO_ROOT/.cm-deploy" \
 		"$REPO_ROOT/docker-compose.template.yml" \
-		"$REPO_ROOT/.env.bootstrap"; do
+		"$REPO_ROOT/.env.bootstrap" \
+		"$REPO_ROOT/logs/bootstrap-deploy"; do
 		if [[ -e "$obsolete_path" ]]; then
 			info "Removing obsolete deploy artifact: $obsolete_path"
 			rm -rf "$obsolete_path"
