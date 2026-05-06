@@ -1,11 +1,12 @@
 # FILE: docker-compose.yml
 # Language: YAML
 # Hardened DB + web runtime for the DB-first Corn Mafia stack.
-# Values are interpolated from the repository root .env file.
+# Default fixed-service Compose file. The bootstrap deploy script renders docker-compose.template.yml when service keys are customized.
 
 name: ${COMPOSE_PROJECT_NAME:-cm}
 
 services:
+  # Service keys stay fixed. Configure container names, project name, network, ports, and aliases through .env.
   cm-db:
     # postgres:16-alpine pinned by digest for reproducible production pulls.
     image: ${CM_DB_IMAGE:-postgres:16-alpine@sha256:4e6e670bb069649261c9c18031f0aded7bb249a5b6664ddec29c013a89310d50}
