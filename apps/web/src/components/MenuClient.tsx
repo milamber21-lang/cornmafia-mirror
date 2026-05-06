@@ -1,160 +1,229 @@
-// FILE: apps/web/src/components/MenuClient.tsx
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/components/MenuClient.tsx                                                                  ////
+//// Language: TSX                                                                                                ////
+//// Client-side mega menu using CSS-compatible menu triggers and normalized icon objects                          ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
+import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import IconRender from "@/components/ui/IconRender";
+
 import type { MenuModel } from "./Menu";
-import { ChevronDown, Circle } from "lucide-react";
-import * as Lucide from "lucide-react";
-import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui";
 
-type Props = { model: MenuModel };
+type Props = {
+	model: MenuModel;
+};
 
-/** Render a lucide icon component by its PascalCase name, or a media icon by URL, with graceful fallback. */
-function MenuIcon(props: { name?: string; url?: string; className?: string; size?: number }) {
-  const { name, url, className, size = 16 } = props;
+type MenuPanelStyle = CSSProperties & {
+	"--menu-panel-left"?: string;
+	"--menu-panel-width"?: string;
+};
 
-  // Media icon takes precedence if provided
-  if (url) {
-    // Use next/image to avoid Next.js LCP warnings
-    return (
-      <span className={`cm-icon ${className || ""}`} aria-hidden>
-        <Image src={url} alt="" width={size} height={size} />
-      </span>
-    );
-  }
-
-  // Else lucide by dynamic name
-  type LucideCmp = React.ComponentType<React.ComponentProps<typeof Circle>>;
-  const lib = Lucide as unknown as Record<string, LucideCmp>;
-  if (name && Object.prototype.hasOwnProperty.call(lib, name)) {
-    const Cmp = lib[name];
-    return <Cmp className={className} size={size} aria-hidden />;
-  }
-
-  return <Circle className={className} size={size} aria-hidden />;
-}
+type MenuGridStyle = CSSProperties & {
+	"--menu-grid-template-columns"?: string;
+};
 
 export default function MenuClient({ model }: Props) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const btnRefs = useRef<Record<string, HTMLElement | null>>({});
-  const [openId, setOpenId] = useState<string | null>(null);
-  const [panelLeft, setPanelLeft] = useState(0);
-  const [panelWidth, setPanelWidth] = useState(0);
-  const hideTimer = useRef<number | null>(null);
+	const containerRef = useRef<HTMLDivElement | null>(null);
+	const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+	const hideTimerRef = useRef<number | null>(null);
 
-  const clearHide = () => { if (hideTimer.current) { clearTimeout(hideTimer.current); hideTimer.current = null; } };
-  const scheduleHide = () => { clearHide(); hideTimer.current = window.setTimeout(() => setOpenId(null), 130); };
+	const [openId, setOpenId] = useState<string | null>(null);
+	const [panelLeft, setPanelLeft] = useState(0);
+	const [panelWidth, setPanelWidth] = useState(0);
 
-  const current = useMemo(() => model.find(c => c.id === openId) || null, [model, openId]);
+	const current = useMemo(
+		() => model.find((category) => category.id === openId) ?? null,
+		[model, openId],
+	);
 
-  const recomputePanelMetrics = useCallback((catId: string) => {
-    const cont = containerRef.current;
-    const anchorEl = btnRefs.current[catId];
-    const item = model.find(c => c.id === catId);
-    if (!cont || !anchorEl || !item) return;
+	const clearHide = useCallback((): void => {
+		if (hideTimerRef.current !== null) {
+			window.clearTimeout(hideTimerRef.current);
+			hideTimerRef.current = null;
+		}
+	}, []);
 
-    const cols = Math.min(4, Math.max(1, item.columns.length));
-    const btnRect = anchorEl.getBoundingClientRect();
-    const contRect = cont.getBoundingClientRect();
+	const scheduleHide = useCallback((): void => {
+		clearHide();
+		hideTimerRef.current = window.setTimeout(() => setOpenId(null), 130);
+	}, [clearHide]);
 
-    const contentW = cols * 210 + (cols - 1) * 10;
-    const boxW = contentW + 20 + 2;
+	const recomputePanelMetrics = useCallback(
+		(categoryId: string): void => {
+			const container = containerRef.current;
+			const anchor = buttonRefs.current[categoryId];
+			const category = model.find((item) => item.id === categoryId);
 
-    let left = Math.round(btnRect.left - contRect.left);
-    const maxLeft = Math.max(0, contRect.width - boxW);
-    if (left > maxLeft) left = maxLeft;
-    if (left < 0) left = 0;
+			if (!container || !anchor || !category) {
+				return;
+			}
 
-    setPanelWidth(boxW);
-    setPanelLeft(left);
-  }, [model]);
+			const columnCount = Math.min(4, Math.max(1, category.columns.length));
+			const anchorRect = anchor.getBoundingClientRect();
+			const containerRect = container.getBoundingClientRect();
+			const contentWidth = columnCount * 210 + (columnCount - 1) * 10;
+			const nextWidth = contentWidth + 20 + 2;
 
-  const openFor = useCallback((catId: string) => {
-    clearHide();
-    recomputePanelMetrics(catId);
-    setOpenId(catId);
-  }, [recomputePanelMetrics]);
+			let nextLeft = Math.round(anchorRect.left - containerRect.left);
+			const maxLeft = Math.max(0, containerRect.width - nextWidth);
 
-  useEffect(() => {
-    const onResize = () => { if (openId) recomputePanelMetrics(openId); };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [openId, recomputePanelMetrics]);
+			if (nextLeft > maxLeft) {
+				nextLeft = maxLeft;
+			}
 
-  function ensureMinPages<T extends { title: string; href: string; iconName?: string; iconUrl?: string }>(items: T[] | undefined, min = 4): T[] {
-    const out: T[] = [...(items || [])];
-    for (let i = out.length; i < min; i++) out.push({ title: `Demo Page ${i + 1}`, href: "#" } as T);
-    return out;
-  }
+			if (nextLeft < 0) {
+				nextLeft = 0;
+			}
 
-  return (
-    <div ref={containerRef} className="menu-nav" onMouseLeave={scheduleHide} onMouseEnter={clearHide}>
-      <div className="menu-row">
-        {model.map(cat => (
-          <div className="menu-item" key={cat.id}>
-            <span ref={el => { btnRefs.current[cat.id] = el; }}>
-              <Button
-                size="lg"
-                variant="ghost"
-                onMouseEnter={() => openFor(cat.id)}
-                onFocus={() => openFor(cat.id)}
-                onClick={() => (openId === cat.id ? setOpenId(null) : openFor(cat.id))}
-                rightIcon={<ChevronDown size={16} className="chev" aria-hidden />}
-              >
-                {cat.title}
-              </Button>
-            </span>
-          </div>
-        ))}
-      </div>
+			setPanelWidth(nextWidth);
+			setPanelLeft(nextLeft);
+		},
+		[model],
+	);
 
-      <AnimatePresence>
-        {current && (
-          <motion.div
-            key={current.id}
-            className="menu-panel"
-            style={{ left: panelLeft, width: panelWidth }}
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.16, ease: "easeOut" }}
-            onMouseEnter={clearHide}
-            onMouseLeave={scheduleHide}
-          >
-            <div
-              className="menu-grid"
-              style={{ gridTemplateColumns: `repeat(${Math.min(4, Math.max(1, current.columns.length))}, 210px)` }}
-            >
-              {current.columns.map(col => {
-                const pages = ensureMinPages(col.pages, 4);
-                return (
-                  <div className="menu-col" key={col.id}>
-                    <a className="menu-col-title" href={col.seeAllHref}>
-                      <MenuIcon name={col.iconName} url={col.iconUrl} />
-                      <span>{col.title}</span>
-                    </a>
+	const openFor = useCallback(
+		(categoryId: string): void => {
+			clearHide();
+			recomputePanelMetrics(categoryId);
+			setOpenId(categoryId);
+		},
+		[clearHide, recomputePanelMetrics],
+	);
 
-                    {!!pages.length && (
-                      <ul className="menu-links">
-                        {pages.map(p => (
-                          <li key={`${col.id}::page::${p.href}::${p.title}`}>
-                            <a className="menu-link" href={p.href}>
-                              <MenuIcon name={p.iconName} url={p.iconUrl} />
-                              <span>{p.title}</span>
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+	useEffect(() => {
+		function handleResize(): void {
+			if (openId) {
+				recomputePanelMetrics(openId);
+			}
+		}
+
+		window.addEventListener("resize", handleResize);
+
+		return () => {
+			window.removeEventListener("resize", handleResize);
+		};
+	}, [openId, recomputePanelMetrics]);
+
+	useEffect(() => {
+		return () => {
+			if (hideTimerRef.current !== null) {
+				window.clearTimeout(hideTimerRef.current);
+			}
+		};
+	}, []);
+
+	const panelStyle: MenuPanelStyle = {
+		"--menu-panel-left": `${panelLeft}px`,
+		"--menu-panel-width": `${panelWidth}px`,
+	};
+
+	const gridStyle: MenuGridStyle | undefined = current
+		? {
+				"--menu-grid-template-columns": `repeat(${Math.min(4, Math.max(1, current.columns.length))}, var(--menu-column-width))`,
+			}
+		: undefined;
+
+	return (
+		<div
+			ref={containerRef}
+			className="menu-nav"
+			onMouseLeave={scheduleHide}
+			onMouseEnter={clearHide}
+		>
+			<div className="menu-row">
+				{model.map((category) => {
+					const isOpen = openId === category.id;
+
+					return (
+						<div className="menu-item" key={category.id}>
+							<button
+								ref={(element) => {
+									buttonRefs.current[category.id] = element;
+								}}
+								type="button"
+								className={`menu-button${isOpen ? " is-open" : ""}`}
+								onMouseEnter={() => openFor(category.id)}
+								onFocus={() => openFor(category.id)}
+								onClick={() => (isOpen ? setOpenId(null) : openFor(category.id))}
+								aria-haspopup="menu"
+								aria-expanded={isOpen}
+							>
+								{category.iconKey ? (
+									<IconRender
+										iconKey={category.iconKey}
+										iconColor={category.iconColor}
+										relationHint="pages"
+										size={16}
+												/>
+								) : null}
+								<span>{category.title}</span>
+								<ChevronDown size={16} className="chev" aria-hidden />
+							</button>
+						</div>
+					);
+				})}
+			</div>
+
+			<AnimatePresence>
+				{current ? (
+					<motion.div
+						key={current.id}
+						className="menu-panel"
+						style={panelStyle}
+						initial={{ opacity: 0, y: -6 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -6 }}
+						transition={{ duration: 0.16, ease: "easeOut" }}
+						onMouseEnter={clearHide}
+						onMouseLeave={scheduleHide}
+					>
+						<div className="menu-grid" style={gridStyle}>
+							{current.columns.map((column) => (
+								<div className="menu-col" key={column.id}>
+									<a className="menu-col-title" href={column.seeAllHref}>
+										<IconRender
+											iconKey={column.iconKey}
+											iconColor={column.iconColor}
+											relationHint="pages"
+											size={18}
+										/>
+										<span>{column.title}</span>
+									</a>
+
+									{column.pages.length > 0 ? (
+										<ul className="menu-links">
+											{column.pages.map((page) => (
+												<li key={`${column.id}::page::${page.href}::${page.title}`}>
+													<a
+														className="menu-link"
+														href={page.href}
+														target={page.target ?? undefined}
+														rel={page.rel ?? undefined}
+													>
+														<IconRender
+															iconKey={page.iconKey}
+															iconColor={page.iconColor}
+															relationHint={page.href.startsWith("/map/") ? "maps" : "pages"}
+															size={16}
+														/>
+														<span>{page.title}</span>
+													</a>
+												</li>
+											))}
+										</ul>
+									) : null}
+								</div>
+							))}
+						</div>
+					</motion.div>
+				) : null}
+			</AnimatePresence>
+		</div>
+	);
 }

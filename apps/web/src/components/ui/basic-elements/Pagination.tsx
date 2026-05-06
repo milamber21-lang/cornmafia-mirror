@@ -1,105 +1,139 @@
-// FILE: apps/web/src/components/ui/basic-elements/Pagination.tsx
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/components/ui/basic-elements/Pagination.tsx                                               ////
+//// Language: TSX                                                                                                 ////
+//// Shared pagination with centered pager, summary, and optional page-size selector                               ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 "use client";
 
 import * as React from "react";
+
 import { Button } from "./Button";
+import DropdownMenuSingle from "./DropdownMenuSingle";
 
 export type PaginationProps = {
-  total: number;            // total items
-  page: number;             // 1-based current page
-  pageSize: number;         // items per page
-  onPageChange: (p: number) => void;
-  className?: string;
-  showEdges?: boolean;      // show First/Last buttons (default true)
+	total: number;
+	page: number;
+	pageSize: number;
+	onPageChange: (page: number) => void;
+	className?: string;
+	showEdges?: boolean;
+	onPageSizeChange?: (pageSize: number) => void;
+	pageSizeOptions?: number[];
+	pageSizeLabel?: string;
 };
 
 export function Pagination({
-  total,
-  page,
-  pageSize,
-  onPageChange,
-  className,
-  showEdges = true,
-}: PaginationProps) {
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
-  const current = Math.min(Math.max(1, page), pageCount);
-  const canPrev = current > 1;
-  const canNext = current < pageCount;
+	total,
+	page,
+	pageSize,
+	onPageChange,
+	className,
+	showEdges = true,
+	onPageSizeChange,
+	pageSizeOptions = [20, 50, 100],
+	pageSizeLabel = "Rows",
+}: PaginationProps): React.JSX.Element {
+	const pageCount = Math.max(1, Math.ceil(total / pageSize));
+	const current = Math.min(Math.max(1, page), pageCount);
+	const canPrev = current > 1;
+	const canNext = current < pageCount;
 
-  function goto(p: number) {
-    if (p < 1 || p > pageCount) return;
-    onPageChange(p);
-  }
+	function goto(nextPage: number): void {
+		if (nextPage < 1 || nextPage > pageCount) {
+			return;
+		}
 
-  // Center controls + right-aligned summary
-  // Layout: [spacer] [pager buttons centered] [summary right]
-  return (
-    <div
-      className={[
-        "grid grid-cols-[1fr_auto_1fr] items-center gap-3",
-        className || "",
-      ].join(" ")}
-      role="navigation"
-      aria-label="Pagination"
-    >
-      {/* left spacer (keep empty so the middle can truly center) */}
-      <div />
+		onPageChange(nextPage);
+	}
 
-      {/* centered pager */}
-      <div className="flex items-center gap-2">
-        {showEdges && (
-          <Button
-            size="sm"
-            variant="neutral"
-            onClick={() => goto(1)}
-            disabled={!canPrev}
-            aria-label="First page"
-          >
-            First
-          </Button>
-        )}
-        <Button
-          size="sm"
-          variant="neutral"
-          onClick={() => goto(current - 1)}
-          disabled={!canPrev}
-          aria-label="Previous page"
-        >
-          Prev
-        </Button>
+	return (
+		<div
+			className={[
+				"ui-pagination",
+				className ?? "",
+			].join(" ")}
+			role="navigation"
+			aria-label="Pagination"
+		>
+			<div className="ui-pagination__page-size">
+				{typeof onPageSizeChange === "function" ? (
+					<>
+						<span className="ui-pagination__label">{pageSizeLabel}</span>
+						<DropdownMenuSingle
+							className="ui-pagination__page-size-select"
+							options={pageSizeOptions.map((value) => ({
+								value: String(value),
+								label: String(value),
+							}))}
+							value={String(pageSize)}
+							onChange={(value) => {
+								const nextPageSize = Number(value);
+								if (Number.isInteger(nextPageSize) && nextPageSize > 0) {
+									onPageSizeChange(nextPageSize);
+								}
+							}}
+							ariaLabel="Rows per page"
+						/>
+					</>
+				) : (
+					<div />
+				)}
+			</div>
 
-        <span className="text-xs text-white/70 select-none px-1">
-          {current} / {pageCount}
-        </span>
+			<div className="ui-pagination__controls">
+				{showEdges ? (
+					<Button
+						size="sm"
+						variant="neutral"
+						onClick={() => goto(1)}
+						disabled={!canPrev}
+						aria-label="First page"
+					>
+						First
+					</Button>
+				) : null}
 
-        <Button
-          size="sm"
-          variant="neutral"
-          onClick={() => goto(current + 1)}
-          disabled={!canNext}
-          aria-label="Next page"
-        >
-          Next
-        </Button>
-        {showEdges && (
-          <Button
-            size="sm"
-            variant="neutral"
-            onClick={() => goto(pageCount)}
-            disabled={!canNext}
-            aria-label="Last page"
-          >
-            Last
-          </Button>
-        )}
-      </div>
+				<Button
+					size="sm"
+					variant="neutral"
+					onClick={() => goto(current - 1)}
+					disabled={!canPrev}
+					aria-label="Previous page"
+				>
+					Prev
+				</Button>
 
-      {/* right summary */}
-      <div className="text-right">
-        <span className="text-xs text-white/70">
-          Page {current} of {pageCount} — {total} Items
-        </span>
-      </div>
-    </div>
-  );
+				<span className="ui-pagination__count">
+					{current} / {pageCount}
+				</span>
+
+				<Button
+					size="sm"
+					variant="neutral"
+					onClick={() => goto(current + 1)}
+					disabled={!canNext}
+					aria-label="Next page"
+				>
+					Next
+				</Button>
+
+				{showEdges ? (
+					<Button
+						size="sm"
+						variant="neutral"
+						onClick={() => goto(pageCount)}
+						disabled={!canNext}
+						aria-label="Last page"
+					>
+						Last
+					</Button>
+				) : null}
+			</div>
+
+			<div className="ui-pagination__summary">
+				Page {current} of {pageCount} - {total} items
+			</div>
+		</div>
+	);
 }

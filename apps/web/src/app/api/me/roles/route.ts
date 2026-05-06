@@ -1,89 +1,113 @@
-// FILE: apps/web/src/app/api/me/roles/route.ts
-// Returns roles for the signed-in user + computed effective rank.
-// Used by: apps/web/src/app/login/LoginClient.tsx
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/app/api/me/roles/route.ts                                                              ////
+//// Language: TS                                                                                               ////
+//// Returns DB-resolved role labels and access summary for the signed-in member profile surface.                ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { buildAuthOptions } from "@/lib/auth-options";
-import { getDiscordRolesIndex, rankFromRoleIds } from "@/lib/discord-roles-index";
-import { getGuildRoles, getMemberRoleIds, colorIntToHex } from "@/lib/discord-guild";
+
+import type { DiscordRoleDoc } from "@/lib/access/roles-index";
+import { resolveAccessForUser, type ResolvedAccess } from "@/lib/access/resolve";
+import { getAuthSession, verifyDiscordRolesIfDue } from "@/lib/auth/auth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  try {
-    const session = await getServerSession(buildAuthOptions());
-    const user = session?.user as { discordId?: string | null } | null;
+type SessionUserShape = {
+	id?: string | null;
+	discordId?: string | null;
+};
 
-    if (!user?.discordId) {
-      return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
-    }
+type RoleResponse = {
+	id: string;
+	name: string;
+	source: "discord" | "virtual";
+	roleId: string | null;
+	colorHex: string | null;
+	rank: number;
+	isPublicDefault: boolean;
+	isAuthenticatedDefault: boolean;
+	isAdmin: boolean;
+	isEditor: boolean;
+};
 
-    const guildId = process.env.DISCORD_GUILD_ID;
-    const botToken = process.env.DISCORD_BOT_TOKEN;
+type RolesOkResponse = {
+	ok: true;
+	roles: RoleResponse[];
+	roleIds: string[];
+	rank: number;
+	isAuthenticated: boolean;
+	isMember: boolean;
+	isRoleRefreshDue: boolean;
+};
 
-    if (!guildId || !botToken) {
-      return NextResponse.json(
-        { ok: false, error: "Discord env not configured (DISCORD_GUILD_ID / DISCORD_BOT_TOKEN)" },
-        { status: 500 }
-      );
-    }
+type RolesErrorResponse = {
+	ok: false;
+	error: string;
+};
 
-    // Fetch guild roles list and the member's role IDs
-    const [allRoles, roleIds, index] = await Promise.all([
-      getGuildRoles(guildId),                // Discord list of all roles (names, colors, etc.)
-      getMemberRoleIds(guildId, user.discordId), // Discord member's role IDs (may be empty)
-      getDiscordRolesIndex(),               // CMS role index (for rank mapping & defaults)
-    ]);
+function toRoleResponse(role: DiscordRoleDoc): RoleResponse {
+	return {
+		id: role.id,
+		name: role.name,
+		source: role.source,
+		roleId: role.roleId,
+		colorHex: role.colorHex,
+		rank: role.rank,
+		isPublicDefault: role.isPublicDefault,
+		isAuthenticatedDefault: role.isAuthenticatedDefault,
+		isAdmin: role.isAdmin,
+		isEditor: role.isEditor,
+	};
+}
 
-    // Compute effective numeric rank
-    const rank = Math.max(
-      index.authenticatedDefault?.rank ?? 0,
-      rankFromRoleIds(roleIds, index)
-    );
+async function resolveFreshAccess(user: SessionUserShape): Promise<ResolvedAccess> {
+	let access = await resolveAccessForUser(user.discordId);
 
-    // Build a friendly roles array for the client (names/colors from Discord)
-    const rolesDetailed = roleIds
-      .map((id) => allRoles.find((r) => r.id === id))
-      .filter(Boolean)
-      .map((r) => ({
-        id: r!.id,
-        name: r!.name,
-        source: "discord" as const,
-        roleId: r!.id,
-        colorHex: colorIntToHex(r!.color),
-        // We intentionally omit per-role rank (varies by your CMS mapping);
-        // the client only needs the overall computed rank above.
-      }));
+	if (access.isRoleRefreshDue && user.id && user.discordId) {
+		const refreshed = await verifyDiscordRolesIfDue({
+			authUserId: user.id,
+			discordUserId: user.discordId,
+		});
 
-    return NextResponse.json({
-      ok: true,
-      roleIds,
-      rank,
-      roles: rolesDetailed,
-      defaults: {
-        public: index.publicDefault
-          ? {
-              id: String(index.publicDefault.id ?? "public"),
-              name: index.publicDefault.name ?? "Public",
-              source: "virtual",
-              rank: index.publicDefault.rank ?? 0,
-              isPublicDefault: true,
-            }
-          : null,
-        authenticated: index.authenticatedDefault
-          ? {
-            id: String(index.authenticatedDefault.id ?? "authenticated"),
-            name: index.authenticatedDefault.name ?? "Authenticated",
-            source: "virtual",
-            rank: index.authenticatedDefault.rank ?? 0,
-            isAuthenticatedDefault: true,
-          }
-          : null,
-      },
-    });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ ok: false, error: msg }, { status: 500 });
-  }
+		if (refreshed) {
+			access = await resolveAccessForUser(user.discordId);
+		}
+	}
+
+	return access;
+}
+
+function buildRolesOkResponse(access: ResolvedAccess): RolesOkResponse {
+	return {
+		ok: true,
+		roles: access.matchedRoles.map(toRoleResponse),
+		roleIds: access.roleIds,
+		rank: access.effectiveRank,
+		isAuthenticated: access.isAuthenticated,
+		isMember: access.isMember,
+		isRoleRefreshDue: access.isRoleRefreshDue,
+	};
+}
+
+export async function GET(): Promise<NextResponse> {
+	try {
+		const session = await getAuthSession();
+		const user = (session?.user ?? null) as SessionUserShape | null;
+
+		if (!user?.discordId) {
+			return NextResponse.json(
+				{ ok: false, error: "Not signed in" },
+				{ status: 401 },
+			);
+		}
+
+		const access = await resolveFreshAccess(user);
+
+		return NextResponse.json(buildRolesOkResponse(access));
+	} catch (error: unknown) {
+		const message = error instanceof Error ? error.message : String(error);
+
+		return NextResponse.json({ ok: false, error: message }, { status: 500 });
+	}
 }

@@ -1,55 +1,53 @@
-// FILE: apps/web/src/components/ui/basic-elements/ReadOnlyTextarea.tsx
-// Language: TSX
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/components/ui/basic-elements/ReadOnlyTextarea.tsx                                          ////
+//// Language: TSX                                                                                                 ////
+//// Exports read-only textarea primitive                                                                           ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 "use client";
 
-import * as React from "react";
+import type { CSSProperties } from "react";
+
 import { cn } from "../../../lib/cn";
 
-/**
- * ReadOnlyTextarea
- * - Visual sibling of Textarea but non-editable
- * - Muted text; preserves line breaks
- */
+type ReadOnlyTextareaStyle = CSSProperties & {
+	"--ui-readonly-textarea-rows"?: number;
+};
+
 type Props = {
-  value?: string | number | null | undefined;
-  placeholder?: string;
-  rows?: number;
-  className?: string;
-  "aria-label"?: string;
+	value?: string | number | null | undefined;
+	placeholder?: string;
+	rows?: number;
+	className?: string;
+	"aria-label"?: string;
 };
 
 export default function ReadOnlyTextarea({
-  value,
-  placeholder,
-  rows = 4,
-  className,
-  ...rest
+	value,
+	placeholder,
+	rows = 4,
+	className,
+	...rest
 }: Props) {
-  const text =
-    value === null || value === undefined || value === ""
-      ? placeholder ?? "—"
-      : String(value);
+	const text =
+		value === null || value === undefined || value === ""
+			? (placeholder ?? "—")
+			: String(value);
+	const runtimeStyle: ReadOnlyTextareaStyle = {
+		"--ui-readonly-textarea-rows": rows,
+	};
 
-  return (
-    <div
-      role="textbox"
-      aria-readonly="true"
-      tabIndex={0}
-      className={cn(
-        "w-full rounded-[var(--radius)] border border-[var(--color-border)]",
-        "bg-[var(--color-surface)] text-[var(--color-muted)]",
-        "px-4 py-2 text-sm",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)]",
-        "whitespace-pre-wrap break-words",
-        className
-      )}
-      style={{
-        // Match typical textarea vertical sizing
-        minHeight: `calc(${rows} * 1.5rem)`,
-      }}
-      {...rest}
-    >
-      {text}
-    </div>
-  );
+	return (
+		<div
+			role="textbox"
+			aria-readonly="true"
+			tabIndex={0}
+			className={cn("ui-readonly-textarea", className)}
+			style={runtimeStyle}
+			{...rest}
+		>
+			{text}
+		</div>
+	);
 }

@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 OUT_ROOT = "/home/lilyserver/docker/cm/data/maps"
 BASE_URL = "https://s3images.cornucopias.io/maps"
-DEFAULT_LOCATIONS = ["solace-1", "solace-2", "solace-3"]
+DEFAULT_LOCATIONS = ["calido"]
 
 DEFAULT_WORKERS = 8
 RETRIES = 5

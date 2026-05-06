@@ -1,55 +1,34 @@
-// FILE: apps/web/src/app/me/page.tsx
-import Image from "next/image";
-import { getServerSession } from "next-auth";
-import { buildAuthOptions } from "@/lib/auth-options";
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/app/me/page.tsx                                                                           ////
+//// Language: TSX                                                                                                ////
+//// Member profile page that renders the signed-in user workspace surface.                                       ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+import { getAuthSession } from "@/lib/auth/auth";
 import LoginClient from "@/components/login/LoginClient";
-import RolesPanel from "@/components/login/RolesPanel";
+import MeTable from "@/components/me/MeTable";
 
 export const dynamic = "force-dynamic";
 
 export default async function MePage() {
-  const session = await getServerSession(buildAuthOptions());
+	const session = await getAuthSession();
 
-  if (!session?.user) {
-    return (
-      <main className="p-6 space-y-4">
-        <h1 className="text-2xl font-semibold">Profile</h1>
-        <p>You are not signed in.</p>
-        <LoginClient session={null} />
-      </main>
-    );
-  }
+	if (!session?.user) {
+		return (
+					<section className="card member-page-card">
+						<h1 className="member-page-title">Profile</h1>
+						<p>You are not signed in.</p>
+						<LoginClient session={null} />
+					</section>
+		);
+	}
 
-  const name = session.user.name ?? "User";
-  const img = session.user.image ?? null;
+	const name = session.user.name ?? "User";
+	const img = session.user.image ?? null;
 
-  return (
-    <section className="card">
-      <header className="flex items-center gap-4">
-        {img ? (
-          <Image
-            src={img}
-            alt={name}
-            width={80}
-            height={80}
-            unoptimized
-            className="rounded-full ring-1 ring-[var(--color-border)]"
-            style={{ width: 80, height: 80, objectFit: "cover" }}
-          />
-        ) : (
-          <div
-            className="rounded-full ring-1 ring-[var(--color-border)] grid place-items-center text-lg"
-            style={{ width: 80, height: 80, background: "var(--color-surface)" }}
-          >
-            {name.slice(0, 1).toUpperCase()}
-          </div>
-        )}
-        <div>
-          <h1 className="text-2xl font-semibold">{name}</h1>
-        </div>
-      </header>
-
-      <RolesPanel />
-    </section>
-  );
+	return (
+				<section className="card">
+					<MeTable name={name} image={img} />
+				</section>
+	);
 }

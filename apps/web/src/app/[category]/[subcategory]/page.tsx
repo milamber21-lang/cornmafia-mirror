@@ -1,73 +1,88 @@
-// FILE: apps/web/src/app/[category]/[subcategory]/page.tsx
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/app/[category]/[subcategory]/page.tsx                                                    ////
+//// Language: TSX                                                                                               ////
+//// Public collection hub route for DB-first role-aware content discovery                                        ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+import type { JSX } from "react";
 import { notFound } from "next/navigation";
-import { cmsFetchJson } from "@/lib/cms";
 
-type Id = string;
-type PL<T> = { docs: T[] };
+import PublicCollectionHub, {
+	type PublicCollectionSortCode,
+} from "@/components/public/PublicCollectionHub";
+import { findPublicCollectionByPath } from "@/lib/data/public-content";
+import { getCurrentActorDiscordId } from "@/lib/server/current-actor";
 
-type Category = { id: Id; slug: string; title?: string | null };
-type Subcategory = { id: Id; slug: string; title?: string | null; category: Id | { id: Id } };
-type PageItem = { id: Id; slug: string; title?: string | null };
+export const dynamic = "force-dynamic";
 
-async function getCategoryBySlug(slug: string): Promise<Category | null> {
-  const qs = new URLSearchParams();
-  qs.set("where[slug][equals]", slug);
-  qs.set("limit", "1");
-  qs.set("depth", "0");
-  const res = await cmsFetchJson<PL<Category>>(`/api/categories?${qs.toString()}`);
-  return res.docs?.[0] ?? null;
+type PageProps = {
+	params: Promise<{
+		category: string;
+		subcategory: string;
+	}>;
+	searchParams?: Promise<{
+		action?: string;
+		page?: string;
+		pageSize?: string;
+		search?: string;
+		sort?: string;
+	}>;
+};
+
+const SORT_CODES: readonly PublicCollectionSortCode[] = ["newest", "title"] as const;
+
+function parseSortCode(value: string | undefined): PublicCollectionSortCode {
+	return SORT_CODES.find((sortCode) => sortCode === value) ?? "newest";
 }
 
-async function getSubcategoryBySlugWithinCategory(subSlug: string, catId: string): Promise<Subcategory | null> {
-  const qs = new URLSearchParams();
-  qs.set("where[slug][equals]", subSlug);
-  qs.set("where[category][equals]", catId);
-  qs.set("limit", "1");
-  qs.set("depth", "0");
-  const res = await cmsFetchJson<PL<Subcategory>>(`/api/subcategories?${qs.toString()}`);
-  return res.docs?.[0] ?? null;
+function parsePositiveInteger(value: string | undefined, fallback: number): number {
+	if (!value) {
+		return fallback;
+	}
+
+	const parsed = Number(value);
+	return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
 
-async function getVisiblePages(subId: string): Promise<PageItem[]> {
-  const qs = new URLSearchParams();
-  qs.set("where[subcategory][equals]", subId);
-  qs.set("where[_status][equals]", "published");
-  qs.set("where[navHidden][not_equals]", "true");
-  qs.set("limit", "200");
-  qs.set("depth", "0");
-  const res = await cmsFetchJson<PL<PageItem>>(`/api/pages?${qs.toString()}`);
-  return res.docs || [];
-}
+export default async function PublicCollectionPage({
+	params,
+	searchParams,
+}: PageProps): Promise<JSX.Element> {
+	const resolvedParams = await params;
+	const categorySlug = resolvedParams.category.trim();
+	const subcategorySlug = resolvedParams.subcategory.trim();
 
-export default async function SubcategoryPage({
-  params,
-}: {
-  params: Promise<{ category: string; subcategory: string }>;
-}) {
-  const { category: catSlug, subcategory: subSlug } = await params;
+	if (!categorySlug || !subcategorySlug) {
+		notFound();
+	}
 
-  const cat = await getCategoryBySlug(catSlug);
-  if (!cat) return notFound();
+	const actorDiscordId = await getCurrentActorDiscordId();
+	const collection = await findPublicCollectionByPath({
+		actorDiscordId,
+		categorySlug,
+		subcategorySlug,
+	});
 
-  const sub = await getSubcategoryBySlugWithinCategory(subSlug, cat.id);
-  if (!sub) return notFound();
+	if (!collection) {
+		notFound();
+	}
 
-  const pages = await getVisiblePages(sub.id);
+	const resolvedSearchParams = searchParams ? await searchParams : {};
+	const action = (resolvedSearchParams.action ?? "").trim().toLowerCase();
+	const search = (resolvedSearchParams.search ?? "").trim();
+	const sort = parseSortCode(resolvedSearchParams.sort);
+	const page = parsePositiveInteger(resolvedSearchParams.page, 1);
+	const pageSize = parsePositiveInteger(resolvedSearchParams.pageSize, 9);
 
-  return (
-    <section className="container">
-      <h1>{sub.title || sub.slug}</h1>
-      {pages.length ? (
-        <ul style={{ marginTop: 12 }}>
-          {pages.map((p) => (
-            <li key={p.id}>
-              <a href={`/${cat.slug}/${sub.slug}/${p.slug}`}>{p.title || p.slug}</a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="muted">No pages in this subcategory yet.</p>
-      )}
-    </section>
-  );
+	return (
+		<PublicCollectionHub
+			collection={collection}
+			initialPage={page}
+			initialPageSize={pageSize}
+			initialCreateOpen={action === "create"}
+			initialSearch={search}
+			initialSort={sort}
+		/>
+	);
 }

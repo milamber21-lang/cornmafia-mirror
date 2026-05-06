@@ -1,50 +1,39 @@
 # FILE: apps/web/Dockerfile
-# Next.js 15 (CornMafia Web) — multi-stage build with non-root runtime
 
 # --- Build stage ---
-FROM node:22.17.0-alpine AS build
+# node:22.17.0-alpine pinned by digest for reproducible production builds.
+FROM node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed AS build
 ENV CI=1 NEXT_TELEMETRY_DISABLED=1
 WORKDIR /app
 
-# Install deps (dev deps included so Prisma/Next build works)
+RUN apk add --no-cache openssl libc6-compat
+
+# Install deps (lockfile preferred). CI owns dependency audit checks; image builds stay deterministic.
 COPY package*.json ./
-RUN if [ -f package-lock.json ]; then npm ci --no-audit --ignore-scripts; else npm install --no-audit --ignore-scripts; fi
+RUN if [ -f package-lock.json ]; then npm ci --no-audit; else npm install --no-audit; fi
 
 # Copy source
 COPY . .
 
-# ---- Map libraries + types installed INSIDE the image (no host install) ----
-# Pin to existing versions and include TypeScript types for Leaflet.
-RUN npm pkg set dependencies.leaflet="^1.9.4" \
- && npm pkg set dependencies.react-leaflet="^4.2.1" \
- && npm pkg set devDependencies.@types/leaflet="^1.9.12" \
- && npm install --no-audit --ignore-scripts --legacy-peer-deps
-# ---------------------------------------------------------------------------
-
-# Generate Prisma client (no-op if not present)
-RUN npx prisma generate || true
-
 # Build Next.js
 RUN npm run build
 
+
 # --- Runtime stage ---
-FROM node:22.17.0-alpine AS runner
+# node:22.17.0-alpine pinned by digest for reproducible production runtime pulls.
+FROM node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=5323
 WORKDIR /app
 
-# Prisma on Alpine often needs these
 RUN apk add --no-cache openssl libc6-compat
 
-# Create non-root user/group
 RUN addgroup -g 10001 -S nodegrp && adduser -S nodeusr -u 10001 -G nodegrp
 
-# Copy only what’s needed to run
 COPY --from=build --chown=nodeusr:nodegrp /app/package*.json ./
+COPY --from=build --chown=nodeusr:nodegrp /app/node_modules ./node_modules
 COPY --from=build --chown=nodeusr:nodegrp /app/.next ./.next
 COPY --from=build --chown=nodeusr:nodegrp /app/public ./public
-COPY --from=build --chown=nodeusr:nodegrp /app/node_modules ./node_modules
 
 USER nodeusr
 EXPOSE 5323
-# Assumes "start": "next start -p $PORT" in package.json
-CMD ["npm","start"]
+CMD ["sh", "-lc", "node_modules/.bin/next start -p ${PORT}"]

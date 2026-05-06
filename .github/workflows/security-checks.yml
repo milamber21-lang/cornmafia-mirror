@@ -1,0 +1,36 @@
+# FILE: .github/workflows/security-checks.yml
+# Purpose: Runs dependency and static security posture checks for the web app.
+
+name: Security checks
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.17.0"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install web dependencies
+        run: npm --prefix apps/web ci --no-audit
+
+      - name: Run static security posture checks
+        run: npm run test:security
+
+      - name: Run production dependency audit gate
+        run: npm run audit:web:prod

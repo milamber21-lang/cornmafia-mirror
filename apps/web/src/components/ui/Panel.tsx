@@ -1,180 +1,245 @@
-// FILE: apps/web/src/components/ui/Panel.tsx
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/components/ui/Panel.tsx                                                                   ////
+//// Language: TSX                                                                                                ////
+//// Slide-in panel shell with sticky header and close handling                                                   ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 "use client";
 
 import * as React from "react";
 import { useEffect, useRef } from "react";
-import { Button, Separator } from "@/components/ui";
+import { Button } from "@/components/ui/basic-elements/Button";
+import Separator from "@/components/ui/basic-elements/Separator";
+import { confirmAction } from "@/lib/client/confirm-dialog";
 
 type WidthPreset = "25%" | "50%" | "75%" | "100%";
 
-export interface PanelProps {
-  open: boolean;
-  onClose: () => void;
+type PanelConstrainedStyle = React.CSSProperties & {
+	"--ui-panel-content-max-width"?: string;
+};
 
-  /** Sheet width (presets). Default "50%". */
-  width?: WidthPreset;
+const EDITOR_PICKER_OPEN_ATTRIBUTE = "data-richtext-editor-picker-open";
+const EDITOR_FULLSCREEN_OPEN_ATTRIBUTE = "data-richtext-editor-fullscreen-open";
 
-  /** When true, clicking the backdrop will close (default true). */
-  backdropClosable?: boolean;
+function isEditorPickerOpen(): boolean {
+	if (typeof document === "undefined") {
+		return false;
+	}
 
-  /** Disable interactions and close while busy. */
-  loading?: boolean;
-
-  /** Center Save button visibility (if provided). */
-  showSave?: boolean;
-
-  /** Header title (left). */
-  title: React.ReactNode;
-
-  /** Render a Save button in the center (you control its click + disabled state). */
-  renderSave?: () => React.ReactNode;
-
-  /** Right-side header content (default Close button). */
-  renderRight?: () => React.ReactNode;
-
-  /** Panel content (below the header + separator). */
-  children?: React.ReactNode;
-
-  /** If true, prevent close and ask for confirmation when attempting to close. */
-  dirtyGuard?: boolean;
-
-  /** Optional aria-label/id wiring */
-  labelledById?: string;
+	return document.body.getAttribute(EDITOR_PICKER_OPEN_ATTRIBUTE) === "true";
 }
 
-/**
- * Slide-in sheet from the right with a sticky header:
- * Title (left) | Save (center) | Close (right)
- * Includes ESC/backdrop close (respecting loading + dirty guard).
- */
+function isEditorFullscreenOpen(): boolean {
+	if (typeof document === "undefined") {
+		return false;
+	}
+
+	return document.body.getAttribute(EDITOR_FULLSCREEN_OPEN_ATTRIBUTE) === "true";
+}
+
+function getPanelWidthClass(width: WidthPreset): string {
+	switch (width) {
+		case "25%":
+			return "ui-panel-sheet--width-25";
+		case "50%":
+			return "ui-panel-sheet--width-50";
+		case "75%":
+			return "ui-panel-sheet--width-75";
+		case "100%":
+			return "ui-panel-sheet--width-100";
+	}
+}
+
+export interface PanelProps {
+	open: boolean;
+	onClose: () => void;
+
+	/** Sheet width (presets). Default "50%". */
+	width?: WidthPreset;
+
+	/** When true, clicking the backdrop will close (default true). */
+	backdropClosable?: boolean;
+
+	/** Disable interactions and close while busy. */
+	loading?: boolean;
+
+	/** Center Save button visibility (if provided). */
+	showSave?: boolean;
+
+	/** Header title (left). */
+	title: React.ReactNode;
+
+	/** Render a Save button in the center (you control its click + disabled state). */
+	renderSave?: () => React.ReactNode;
+
+	/** Right-side header content (default Close button). */
+	renderRight?: () => React.ReactNode;
+
+	/** Panel content (below the header + separator). */
+	children?: React.ReactNode;
+
+	/** If true, prevent close and ask for confirmation when attempting to close. */
+	dirtyGuard?: boolean;
+
+	/** Optional aria-label/id wiring */
+	labelledById?: string;
+
+	/**
+	 * Constrain the inner content width and center it.
+	 * - Provide a pixel value (e.g., 960) to center content and cap its width.
+	 * - If `null` or `undefined`, content uses the full panel width.
+	 */
+	contentMaxWidthPx?: number | null;
+}
+
 export default function Panel({
-  open,
-  onClose,
-  width = "50%",
-  backdropClosable = true,
-  loading = false,
-  showSave = true,
-  title,
-  renderSave,
-  renderRight,
-  children,
-  dirtyGuard = false,
-  labelledById,
+	open,
+	onClose,
+	width = "50%",
+	backdropClosable = true,
+	loading = false,
+	showSave = true,
+	title,
+	renderSave,
+	renderRight,
+	children,
+	dirtyGuard = false,
+	labelledById,
+	contentMaxWidthPx,
 }: PanelProps) {
-  const previouslyFocused = useRef<HTMLElement | null>(null);
+	const previouslyFocused = useRef<HTMLElement | null>(null);
 
-  // Remember previously focused element to restore on close.
-  useEffect(() => {
-    if (open) {
-      previouslyFocused.current = (document.activeElement as HTMLElement) ?? null;
-      // Move focus to panel container on open (basic focus management).
-      setTimeout(() => {
-        const el = document.getElementById("__panel_root");
-        el?.focus();
-      }, 0);
-    } else {
-      // Restore focus when closing.
-      previouslyFocused.current?.focus?.();
-    }
-  }, [open]);
+	useEffect(() => {
+		if (open) {
+			previouslyFocused.current = (document.activeElement as HTMLElement) ?? null;
+			setTimeout(() => {
+				const el = document.getElementById("__panel_root");
+				el?.focus();
+			}, 0);
+		} else {
+			previouslyFocused.current?.focus?.();
+		}
+	}, [open]);
 
-  // ESC to close
-  useEffect(() => {
-    if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        attemptClose();
-      }
-    }
-    document.addEventListener("keydown", onKey, true);
-    return () => document.removeEventListener("keydown", onKey, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, loading, dirtyGuard]);
+	useEffect(() => {
+		if (!open) return;
+		function onKey(e: KeyboardEvent) {
+			if (e.key === "Escape") {
+				if (isEditorFullscreenOpen()) {
+					return;
+				}
 
-  function attemptClose() {
-    if (loading) return;
-    if (dirtyGuard) {
-      // Native confirm to avoid bringing in new UI; can be replaced by a custom Confirm later.
-      const ok = window.confirm("You have unsaved changes. Discard them and close?");
-      if (!ok) return;
-    }
-    onClose();
-  }
+				if (isEditorPickerOpen()) {
+					e.stopPropagation();
+					return;
+				}
 
-  return (
-    <div
-      aria-hidden={!open}
-      className={`fixed inset-0 z-50 transition ${
-        open ? "pointer-events-auto" : "pointer-events-none"
-      }`}
-    >
-      {/* Backdrop */}
-      <div
-        className={`absolute inset-0 bg-black/40 transition-opacity ${
-          open ? "opacity-100" : "opacity-0"
-        }`}
-        onClick={() => {
-          if (!open) return;
-          if (!backdropClosable) return;
-          attemptClose();
-        }}
-      />
+				e.stopPropagation();
+				void attemptClose();
+			}
+		}
+		document.addEventListener("keydown", onKey, true);
+		return () => document.removeEventListener("keydown", onKey, true);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [open, loading, dirtyGuard]);
 
-      {/* Panel */}
-      <div
-        id="__panel_root"
-        tabIndex={-1}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={labelledById}
-        className={[
-          "absolute right-0 top-0 h-full bg-neutral-950 shadow-xl transition-transform duration-200",
-          open ? "translate-x-0" : "translate-x-full",
-        ].join(" ")}
-        style={{ width }}
-        onClick={(e) => {
-          // Prevent backdrop close on inner clicks.
-          e.stopPropagation();
-        }}
-      >
-        {/* Header */}
-        <div className="sticky top-0 bg-neutral-950">
-          <div className="grid grid-cols-3 items-center p-4">
-            <div className="min-w-0">
-              <h2 id={labelledById} className="text-lg font-semibold truncate">
-                {title}
-              </h2>
-            </div>
+	async function attemptClose(): Promise<void> {
+		if (loading) return;
+		if (dirtyGuard) {
+			const ok = await confirmAction({
+				title: "Discard unsaved changes?",
+				message: "You have unsaved changes. Discard them and close?",
+				confirmLabel: "Discard",
+				destructive: true,
+			});
+			if (!ok) return;
+		}
+		onClose();
+	}
 
-            <div className="flex justify-center">
-              {showSave && typeof renderSave === "function" ? renderSave() : null}
-            </div>
+	const constrain =
+		typeof contentMaxWidthPx === "number" && contentMaxWidthPx > 0;
+	const constrainedStyle: PanelConstrainedStyle | undefined = constrain
+		? { "--ui-panel-content-max-width": `${contentMaxWidthPx}px` }
+		: undefined;
 
-            <div className="flex justify-end">
-              {typeof renderRight === "function" ? (
-                renderRight()
-              ) : (
-                <Button
-                  variant="neutral"
-                  onClick={attemptClose}
-                  disabled={loading}
-                  aria-label="Close panel"
-                >
-                  Close
-                </Button>
-              )}
-            </div>
-          </div>
+	return (
+		<div
+			aria-hidden={!open}
+			className={open ? "ui-panel-root ui-panel-root--open" : "ui-panel-root ui-panel-root--closed"}
+		>
+			{/* Backdrop */}
+			<div
+				className={open ? "ui-panel-backdrop ui-panel-backdrop--open" : "ui-panel-backdrop ui-panel-backdrop--closed"}
+				onClick={() => {
+					if (!open) return;
+					if (!backdropClosable) return;
+					void attemptClose();
+				}}
+			/>
 
-          <Separator />
-        </div>
+			{/* Panel */}
+			<div
+				id="__panel_root"
+				tabIndex={-1}
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby={labelledById}
+				className={
+					open
+						? `ui-panel-sheet ui-panel-sheet--open ${getPanelWidthClass(width)}`
+						: `ui-panel-sheet ui-panel-sheet--closed ${getPanelWidthClass(width)}`
+				}
+				onClick={(e) => e.stopPropagation()}
+			>
+				{/* Header (sticky) */}
+				<div className="ui-panel-header">
+					<div className="ui-panel-header__grid">
+						<div className="ui-panel-header__title-slot">
+							<h2 id={labelledById} className="ui-panel-title">
+								{title}
+							</h2>
+						</div>
 
-        {/* Body */}
-        <div className="p-4 h-[calc(100%-var(--header-height,64px))] overflow-auto">
-          {children}
-        </div>
-      </div>
-    </div>
-  );
+						<div className="ui-panel-header__save-slot">
+							{showSave && typeof renderSave === "function" ? renderSave() : null}
+						</div>
+
+						<div className="ui-panel-header__right-slot">
+							{typeof renderRight === "function" ? (
+								renderRight()
+							) : (
+								<Button
+									variant="neutral"
+									onClick={() => {
+										void attemptClose();
+									}}
+									disabled={loading}
+									aria-label="Close panel"
+								>
+									Close
+								</Button>
+							)}
+						</div>
+					</div>
+
+					<Separator />
+				</div>
+
+				{/* Body — the ONLY scroll container */}
+				<div className="ui-panel-body ui-scroll sb-stable">
+					{constrain ? (
+						<div
+							className="ui-panel-body__constrained"
+							style={constrainedStyle}
+						>
+							{children}
+						</div>
+					) : (
+						children
+					)}
+				</div>
+			</div>
+		</div>
+	);
 }

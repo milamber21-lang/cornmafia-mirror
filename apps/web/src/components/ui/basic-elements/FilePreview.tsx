@@ -1,181 +1,311 @@
-// FILE: apps/web/src/components/ui/basic-elements/FilePreview.tsx
-// Language: TSX
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/components/ui/basic-elements/FilePreview.tsx                                              ////
+//// Language: TSX                                                                                                ////
+//// Shared admin media preview for local files and stored media URLs                                             ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import * as React from "react";
 import Image from "next/image";
-import { cn } from "../../../lib/cn";
+
+import { cn } from "@/lib/cn";
 
 type Props = {
-  /** A File chosen locally (e.g., from Upload) */
-  file?: File | null;
-  /** Remote or local URL (e.g., CDN link). If `file` is provided, that takes precedence. */
-  src?: string | null;
-  /** Optional metadata shown under the thumbnail/tile */
-  filename?: string | null;
-  mimeType?: string | null;
-  sizeBytes?: number | null;
-  /** Alt text for images */
-  alt?: string;
-  /** Force “treat as image” or “treat as file”; if omitted, we infer from mimeType or file.type */
-  kind?: "image" | "file";
-  /** Size of the preview box (CSS width in px). Height auto for images; fixed for file tile. */
-  width?: number; // default 320
-  /** Rounded corners + bordered tile to match UI look */
-  rounded?: boolean;
-  bordered?: boolean;
-  /** Show metadata (filename / size / mime) under the preview */
-  showMeta?: boolean;
-  /** Optional href to allow download/open on click (applies to the preview area) */
-  href?: string | null;
-  /** Open link in new tab */
-  targetBlank?: boolean;
-  className?: string;
+	file?: File | null;
+	src?: string | null;
+	filename?: string | null;
+	mimeType?: string | null;
+	sizeBytes?: number | null;
+	alt?: string;
+	kind?: "image" | "file";
+	width?: number;
+	rounded?: boolean;
+	bordered?: boolean;
+	showMeta?: boolean;
+	href?: string | null;
+	targetBlank?: boolean;
+	className?: string;
 };
 
-function formatBytes(n?: number | null) {
-  if (!n || n <= 0) return "";
-  const units = ["B", "KB", "MB", "GB"];
-  let x = n;
-  let u = 0;
-  while (x >= 1024 && u < units.length - 1) {
-    x /= 1024;
-    u++;
-  }
-  return `${x.toFixed(1)} ${units[u]}`;
+type FilePreviewStyle = React.CSSProperties & {
+	"--media-preview-width"?: string;
+	"--media-preview-image-height"?: string;
+};
+
+function formatBytes(value?: number | null): string {
+	if (!value || value <= 0) {
+		return "";
+	}
+
+	const units = ["B", "KB", "MB", "GB"];
+	let nextValue = value;
+	let unitIndex = 0;
+
+	while (nextValue >= 1024 && unitIndex < units.length - 1) {
+		nextValue /= 1024;
+		unitIndex += 1;
+	}
+
+	return `${nextValue.toFixed(1)} ${units[unitIndex]}`;
 }
 
-function extFromName(name?: string | null) {
-  if (!name) return "";
-  const i = name.lastIndexOf(".");
-  return i >= 0 ? name.slice(i + 1).toUpperCase() : "";
+function extFromName(name?: string | null): string {
+	if (!name) {
+		return "";
+	}
+
+	const dotIndex = name.lastIndexOf(".");
+	return dotIndex >= 0 ? name.slice(dotIndex + 1).toUpperCase() : "";
+}
+
+function isBlobUrl(value: string | null): boolean {
+	return typeof value === "string" && value.startsWith("blob:");
+}
+
+function isSvgAsset(args: {
+	mimeType: string;
+	url: string | null;
+	filename: string | null;
+}): boolean {
+	const normalizedMimeType = args.mimeType.toLowerCase();
+	if (
+		normalizedMimeType === "image/svg+xml" ||
+		normalizedMimeType === "image/svg"
+	) {
+		return true;
+	}
+
+	const candidates = [args.url ?? "", args.filename ?? ""];
+	return candidates.some((candidate) => /\.svg(?:$|[?#])/i.test(candidate));
+}
+
+function isImageAsset(args: {
+	kind?: "image" | "file";
+	mimeType: string;
+	url: string | null;
+	filename: string | null;
+}): boolean {
+	if (args.kind === "image") {
+		return true;
+	}
+
+	if (args.kind === "file") {
+		return false;
+	}
+
+	if (args.mimeType.length > 0) {
+		return args.mimeType.startsWith("image/");
+	}
+
+	const candidates = [args.url ?? "", args.filename ?? ""];
+	return candidates.some((candidate) =>
+		/\.(png|jpe?g|gif|webp|bmp|svg)(?:$|[?#])/i.test(candidate),
+	);
+}
+
+function buildPreviewStyle(width: number): FilePreviewStyle {
+	const normalizedWidth = Number.isFinite(width) && width > 0 ? width : 320;
+	const imageHeight = Math.round((normalizedWidth * 9) / 16) || 180;
+
+	return {
+		"--media-preview-width": `${normalizedWidth}px`,
+		"--media-preview-image-height": `${imageHeight}px`,
+	};
+}
+
+function buildTileClassName(args: {
+	bordered: boolean;
+	rounded: boolean;
+	className?: string;
+}): string {
+	return cn(
+		"media-file-preview__tile",
+		args.bordered && "media-file-preview__tile--bordered",
+		args.rounded && "media-file-preview__tile--rounded",
+		args.className,
+	);
+}
+
+function FileTile(args: {
+	bordered: boolean;
+	rounded: boolean;
+	filename: string | null;
+	mimeType: string;
+}): React.JSX.Element {
+	const badgeText =
+		extFromName(args.filename) ||
+		(args.mimeType
+			? (args.mimeType.split("/")[1]?.toUpperCase() ?? "FILE")
+			: "FILE");
+
+	return (
+		<div
+			className={buildTileClassName({
+				bordered: args.bordered,
+				rounded: args.rounded,
+				className: "media-file-preview__tile--file",
+			})}
+		>
+			<div className="media-file-preview__fallback">
+				<div className="media-file-preview__fallback-icon">
+					<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+						<path
+							d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="1.6"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						/>
+						<path
+							d="M14 2v6h6"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="1.6"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						/>
+					</svg>
+				</div>
+				<div className="media-file-preview__fallback-label">{badgeText}</div>
+			</div>
+		</div>
+	);
 }
 
 export default function FilePreview({
-  file,
-  src,
-  filename,
-  mimeType,
-  sizeBytes,
-  alt = "",
-  kind,
-  width = 320,
-  rounded = true,
-  bordered = true,
-  showMeta = true,
-  href,
-  targetBlank,
-  className,
-}: Props) {
-  // Prefer object URL from File
-  const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
-  React.useEffect(() => {
-    if (!file) {
-      setObjectUrl(null);
-      return;
-    }
-    const u = URL.createObjectURL(file);
-    setObjectUrl(u);
-    return () => URL.revokeObjectURL(u);
-  }, [file]);
+	file,
+	src,
+	filename,
+	mimeType,
+	sizeBytes,
+	alt = "",
+	kind,
+	width = 320,
+	rounded = true,
+	bordered = true,
+	showMeta = true,
+	href,
+	targetBlank,
+	className,
+}: Props): React.JSX.Element {
+	const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
+	const [isBroken, setIsBroken] = React.useState(false);
 
-  const url = objectUrl || src || null;
+	React.useEffect(() => {
+		if (!file) {
+			setObjectUrl(null);
+			return undefined;
+		}
 
-  const mime = file?.type || mimeType || "";
-  const isImage = (() => {
-    if (kind === "image") return true;
-    if (kind === "file") return false;
-    if (mime) return mime.startsWith("image/");
-    // Fallback heuristic for URLs without mime
-    if (url) {
-      const lower = url.toLowerCase();
-      return /\.(png|jpe?g|gif|webp|bmp|svg)$/.test(lower);
-    }
-    // As a last resort: extension from filename
-    const ext = (filename || "").toLowerCase();
-    return /\.(png|jpe?g|gif|webp|bmp|svg)$/.test(ext);
-  })();
+		const nextObjectUrl = URL.createObjectURL(file);
+		setObjectUrl(nextObjectUrl);
 
-  const tileCls = cn(
-    bordered && "border border-[var(--color-border)]",
-    rounded && "rounded-md",
-    "overflow-hidden bg-[var(--color-surface)]"
-  );
+		return () => {
+			URL.revokeObjectURL(nextObjectUrl);
+		};
+	}, [file]);
 
-  const content =
-    isImage && url ? (
-      // Image preview (Next/Image)
-      <div className={cn(tileCls)} style={{ width }}>
-        <div className="relative" style={{ width, height: Math.round((width * 9) / 16) || 180 }}>
-          <Image
-            src={url}
-            alt={alt || filename || "preview"}
-            fill
-            sizes={`${width}px`}
-            style={{ objectFit: "contain" }}
-            // If your next.config doesn't allow the remote domain, add it there.
-            // Using fill keeps aspect without layout shift.
-          />
-        </div>
-      </div>
-    ) : (
-      // Generic file tile with extension badge
-      <div className={cn(tileCls, "flex items-center justify-center")} style={{ width, height: 180 }}>
-        <div className="text-center px-3">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-md border border-[var(--color-border)] mb-2">
-            {/* Simple document icon */}
-            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M14 2v6h6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <div className="text-xs text-[var(--color-muted)]">
-            {extFromName(filename) || (mime ? mime.split("/")[1]?.toUpperCase() : "FILE")}
-          </div>
-        </div>
-      </div>
-    );
+	React.useEffect(() => {
+		setIsBroken(false);
+	}, [file, src, mimeType, filename]);
 
-  const body = href ? (
-    <a
-      href={href}
-      target={targetBlank ? "_blank" : undefined}
-      rel={targetBlank ? "noreferrer noopener" : undefined}
-      className="block hover:brightness-110 transition"
-    >
-      {content}
-    </a>
-  ) : (
-    content
-  );
+	const url = objectUrl ?? src ?? null;
+	const normalizedMimeType = (file?.type ?? mimeType ?? "").trim();
+	const resolvedFilename = filename ?? file?.name ?? null;
+	const resolvedSizeBytes = sizeBytes ?? file?.size ?? null;
+	const isImage = isImageAsset({
+		kind,
+		mimeType: normalizedMimeType,
+		url,
+		filename: resolvedFilename,
+	});
+	const isSvg = isSvgAsset({
+		mimeType: normalizedMimeType,
+		url,
+		filename: resolvedFilename,
+	});
+	const previewStyle = buildPreviewStyle(width);
+	const tileClassName = buildTileClassName({ bordered, rounded });
 
-  return (
-    <div className={cn("inline-flex flex-col gap-2", className)} style={{ width }}>
-      {body}
-      {showMeta && (
-        <div className="text-xs text-[var(--color-muted)] break-all">
-          {filename ? <div className="truncate" title={filename}>{filename}</div> : null}
-          <div className="opacity-80">
-            {[formatBytes(sizeBytes ?? file?.size ?? null), mime || (file?.type ?? "")]
-              .filter(Boolean)
-              .join(" \u2014 ")}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+	let content: React.JSX.Element;
+
+	if (isImage && url && !isBroken) {
+		const imageAlt = alt || resolvedFilename || "preview";
+
+		if (isSvg || isBlobUrl(url)) {
+			content = (
+				<div className={tileClassName}>
+					<div className="media-file-preview__image-frame media-file-preview__image-frame--svg">
+						<img
+							src={url}
+							alt={imageAlt}
+							className="media-file-preview__image"
+							onError={() => setIsBroken(true)}
+						/>
+					</div>
+				</div>
+			);
+		} else {
+			content = (
+				<div className={tileClassName}>
+					<div className="media-file-preview__image-frame media-file-preview__image-frame--raster">
+						<Image
+							src={url}
+							alt={imageAlt}
+							fill
+							unoptimized
+							sizes={`${width}px`}
+							className="media-file-preview__image"
+							onError={() => setIsBroken(true)}
+						/>
+					</div>
+				</div>
+			);
+		}
+	} else {
+		content = (
+			<FileTile
+				bordered={bordered}
+				rounded={rounded}
+				filename={resolvedFilename}
+				mimeType={normalizedMimeType}
+			/>
+		);
+	}
+
+	const body = href ? (
+		<a
+			href={href}
+			target={targetBlank ? "_blank" : undefined}
+			rel={targetBlank ? "noreferrer noopener" : undefined}
+			className="media-file-preview__link"
+		>
+			{content}
+		</a>
+	) : (
+		content
+	);
+
+	return (
+		<div className={cn("media-file-preview", className)} style={previewStyle}>
+			{body}
+			{showMeta ? (
+				<div className="media-file-preview__meta">
+					{resolvedFilename ? (
+						<div className="media-file-preview__meta-name" title={resolvedFilename}>
+							{resolvedFilename}
+						</div>
+					) : null}
+					<div className="media-file-preview__meta-detail">
+						{[formatBytes(resolvedSizeBytes), normalizedMimeType]
+							.filter(Boolean)
+							.join(" - ")}
+					</div>
+				</div>
+			) : null}
+		</div>
+	);
 }

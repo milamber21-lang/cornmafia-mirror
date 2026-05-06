@@ -1,248 +1,213 @@
-// FILE: apps/web/src/components/ui/basic-elements/Upload.tsx
-// Language: TSX
-/* eslint-disable @next/next/no-img-element */
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/components/ui/basic-elements/Upload.tsx                                                   ////
+//// Language: TSX                                                                                                ////
+//// Upload control with centered shared FilePreview rendering for selected files                                 ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 "use client";
 
 import * as React from "react";
-import { cn } from "../../../lib/cn";
-import { Button } from "@/components/ui";
+
+import { Button } from "@/components/ui/basic-elements/Button";
+import FilePreview from "@/components/ui/basic-elements/FilePreview";
+import { cn } from "@/lib/cn";
 
 type Props = {
-  /** Called whenever user selects or drops files. Empty array means cleared. */
-  onFilesSelected: (files: File[]) => void;
-  /** Native accept attribute, e.g., "image/*,.png" */
-  accept?: string;
-  /** Allow selecting multiple files */
-  multiple?: boolean;
-  /** Disable all interactions */
-  disabled?: boolean;
-  /** Title text inside the box (left side) */
-  title?: string;
-  /** Helper/description text under the title */
-  description?: string;
-  /** Text for the action button (right side) */
-  buttonText?: string;
-  /** Optional aria-label for the overall region */
-  ariaLabel?: string;
-  /** Controlled selection coming from parent (useful with forms) */
-  selected?: File | File[] | null;
-  /** Show inline preview(s) below the control (images only) */
-  showPreview?: boolean;
-  className?: string;
+	onFilesSelected: (files: File[]) => void;
+	accept?: string;
+	multiple?: boolean;
+	disabled?: boolean;
+	title?: string;
+	description?: string;
+	buttonText?: string;
+	ariaLabel?: string;
+	selected?: File | File[] | null;
+	showPreview?: boolean;
+	className?: string;
 };
 
 export default function Upload({
-  onFilesSelected,
-  accept,
-  multiple = false,
-  disabled = false,
-  title = "Upload file",
-  description = "Drag & drop files here, or click to browse.",
-  buttonText = "Choose file",
-  ariaLabel = "File upload",
-  selected,
-  showPreview = true,
-  className,
-}: Props) {
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const [isDragging, setDragging] = React.useState(false);
-  // Local uncontrolled selection (used when `selected` prop is not provided)
-  const [localFiles, setLocalFiles] = React.useState<File[]>([]);
-  // Object URLs for image previews
-  const [previews, setPreviews] = React.useState<string[]>([]);
+	onFilesSelected,
+	accept,
+	multiple = false,
+	disabled = false,
+	title = "Upload file",
+	description = "Drag & drop files here, or click to browse.",
+	buttonText = "Choose file",
+	ariaLabel = "File upload",
+	selected,
+	showPreview = true,
+	className,
+}: Props): React.JSX.Element {
+	const inputRef = React.useRef<HTMLInputElement | null>(null);
+	const [isDragging, setIsDragging] = React.useState(false);
+	const [localFiles, setLocalFiles] = React.useState<File[]>([]);
 
-  const isControlled = selected !== undefined;
-  const files: File[] = React.useMemo(() => {
-    if (isControlled) {
-      if (!selected) return [];
-      return Array.isArray(selected) ? selected : [selected];
-    }
-    return localFiles;
-  }, [isControlled, selected, localFiles]);
+	const isControlled = selected !== undefined;
+	const files = React.useMemo(() => {
+		if (isControlled) {
+			if (!selected) {
+				return [];
+			}
 
-  React.useEffect(() => {
-    if (!showPreview) return;
-    // Revoke old URLs
-    previews.forEach((url) => URL.revokeObjectURL(url));
-    const next: string[] = [];
-    for (const f of files) {
-      if (f && typeof f.type === "string" && f.type.startsWith("image/")) {
-        next.push(URL.createObjectURL(f));
-      }
-    }
-    setPreviews(next);
-    return () => {
-      next.forEach((url) => URL.revokeObjectURL(url));
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [files, showPreview]);
+			return Array.isArray(selected) ? selected : [selected];
+		}
 
-  function pickFiles() {
-    if (disabled) return;
-    inputRef.current?.click();
-  }
+		return localFiles;
+	}, [isControlled, localFiles, selected]);
 
-  function applySelection(next: File[]) {
-    if (!multiple && next.length > 1) next = next.slice(0, 1);
-    if (!isControlled) setLocalFiles(next);
-    onFilesSelected(next);
-  }
+	function pickFiles(): void {
+		if (disabled) {
+			return;
+		}
 
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (disabled) return;
-    const sel = Array.from(e.currentTarget.files ?? []);
-    applySelection(sel);
-    // allow re-selecting the same file by clearing the input
-    e.currentTarget.value = "";
-  }
+		inputRef.current?.click();
+	}
 
-  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragging(false);
-    if (disabled) return;
-    const sel = Array.from(e.dataTransfer?.files ?? []);
-    applySelection(sel);
-  }
+	function applySelection(nextFiles: File[]): void {
+		const resolvedFiles =
+			!multiple && nextFiles.length > 1 ? nextFiles.slice(0, 1) : nextFiles;
 
-  function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    if (!disabled) setDragging(true);
-  }
+		if (!isControlled) {
+			setLocalFiles(resolvedFiles);
+		}
 
-  function handleDragLeave(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    setDragging(false);
-  }
+		onFilesSelected(resolvedFiles);
+	}
 
-  const hasSelection = files.length > 0;
+	function handleInputChange(event: React.ChangeEvent<HTMLInputElement>): void {
+		if (disabled) {
+			return;
+		}
 
-  return (
-    <div className="space-y-2">
-      <div
-        role="group"
-        aria-label={ariaLabel}
-        className={cn(
-          // Match Button's neutral variant shell
-          "bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)]",
-          "rounded-[var(--radius)] transition-all",
-          "focus-within:outline-none focus-within:ring-2 focus-within:ring-[var(--color-focus)]",
-          "hover:brightness-120",
-          "cursor-pointer", // <-- requested pointer for whole rectangle
-          disabled && "opacity-60 cursor-not-allowed",
-          isDragging && "ring-2 ring-[var(--color-focus)]",
-          "p-4",
-          className
-        )}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={(e) => {
-          if (disabled) return;
-          // Let clicking anywhere in the box open the file dialog (except when clicking the button which already does)
-          const el = e.target as HTMLElement;
-          if (el.tagName !== "BUTTON" && el.getAttribute("role") !== "button") {
-            pickFiles();
-          }
-        }}
-      >
-        <div className="flex items-center justify-between gap-4">
-          {/* Left: icon + texts */}
-          <div className="flex items-center gap-3 min-w-0">
-            <span
-              aria-hidden="true"
-              className={cn(
-                "inline-flex items-center justify-center rounded-md",
-                "w-10 h-10 border border-[var(--color-border)]",
-                "bg-[color-mix(in_oklab,var(--color-surface)_70%,var(--color-border))]"
-              )}
-            >
-              {/* Simple upload icon (no external deps) */}
-              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M12 16V7m0 0l-4 4m4-4l4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-            <div className="min-w-0">
-              <div className="font-medium truncate">{title}</div>
-              <div className="text-xs text-[var(--color-muted)] truncate">
-                {hasSelection
-                  ? multiple
-                    ? `${files.length} file${files.length > 1 ? "s" : ""} selected`
-                    : files[0]?.name || description
-                  : description}
-              </div>
-            </div>
-          </div>
+		applySelection(Array.from(event.currentTarget.files ?? []));
+		event.currentTarget.value = "";
+	}
 
-          {/* Right: button mirrors Button neutral variant */}
-          <div className="shrink-0">
-            <Button
-              type="button"
-              size="md"
-              variant="neutral"
-              onClick={pickFiles}
-              disabled={disabled}
-            >
-              {buttonText}
-            </Button>
-          </div>
-        </div>
+	function handleDrop(event: React.DragEvent<HTMLDivElement>): void {
+		event.preventDefault();
+		event.stopPropagation();
+		setIsDragging(false);
 
-        {/* Hidden native input */}
-        <input
-          ref={inputRef}
-          type="file"
-          accept={accept}
-          multiple={multiple}
-          onChange={handleInputChange}
-          disabled={disabled}
-          className="sr-only"
-          tabIndex={-1}
-        />
-      </div>
+		if (disabled) {
+			return;
+		}
 
-      {/* Preview area (names + image thumbnails) */}
-      {hasSelection && (
-        <div className="space-y-2">
-          {/* File names */}
-          <ul className="text-xs text-[var(--color-muted)]">
-            {files.map((f, i) => (
-              <li key={`${f.name}-${i}`} className="break-all">
-                {f.name}{" "}
-                <span className="opacity-70">
-                  ({(f.size / 1024).toFixed(1)} KB{f.type ? `, ${f.type}` : ""})
-                </span>
-              </li>
-            ))}
-          </ul>
+		applySelection(Array.from(event.dataTransfer?.files ?? []));
+	}
 
-          {/* Image previews */}
-          {showPreview && previews.length > 0 && (
-            <div className="flex flex-wrap gap-3">
-              {previews.map((src, i) => (
-                <div
-                  key={src}
-                  className="border border-[var(--color-border)] rounded-md overflow-hidden"
-                  style={{ width: 140 }}
-                >
-                  <img
-                    src={src}
-                    alt={files[i]?.name || `preview-${i}`}
-                    style={{ display: "block", width: "100%", height: "auto" }}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+	function handleDragOver(event: React.DragEvent<HTMLDivElement>): void {
+		event.preventDefault();
+
+		if (!disabled) {
+			setIsDragging(true);
+		}
+	}
+
+	function handleDragLeave(event: React.DragEvent<HTMLDivElement>): void {
+		event.preventDefault();
+		setIsDragging(false);
+	}
+
+	const hasSelection = files.length > 0;
+	const previewWidth = multiple ? 220 : 320;
+
+	return (
+		<div className="ui-upload">
+			<div
+				role="group"
+				aria-label={ariaLabel}
+				className={cn(
+					"ui-upload__dropzone",
+					disabled && "ui-upload__dropzone--disabled",
+					isDragging && "ui-upload__dropzone--dragging",
+					className,
+				)}
+				onDragOver={handleDragOver}
+				onDragLeave={handleDragLeave}
+				onDrop={handleDrop}
+				onClick={(event) => {
+					if (disabled) {
+						return;
+					}
+
+					const target = event.target as HTMLElement;
+					if (
+						target.tagName !== "BUTTON" &&
+						target.getAttribute("role") !== "button"
+					) {
+						pickFiles();
+					}
+				}}
+			>
+				<div className="ui-upload__content">
+					<div className="ui-upload__main">
+						<span aria-hidden="true" className="ui-upload__icon">
+							<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+								<path
+									d="M12 16V7m0 0l-4 4m4-4l4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="1.8"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+								/>
+							</svg>
+						</span>
+
+						<div className="ui-upload__copy">
+							<div className="ui-upload__title">{title}</div>
+							<div className="ui-upload__description">
+								{hasSelection
+									? multiple
+										? `${files.length} file${files.length > 1 ? "s" : ""} selected`
+										: files[0]?.name || description
+									: description}
+							</div>
+						</div>
+					</div>
+
+					<div className="ui-upload__actions">
+						<Button
+							type="button"
+							size="md"
+							variant="neutral"
+							onClick={pickFiles}
+							disabled={disabled}
+						>
+							{buttonText}
+						</Button>
+					</div>
+				</div>
+
+				<input
+					ref={inputRef}
+					type="file"
+					accept={accept}
+					multiple={multiple}
+					onChange={handleInputChange}
+					disabled={disabled}
+					className="ui-upload__input"
+					tabIndex={-1}
+				/>
+			</div>
+
+			{hasSelection && showPreview ? (
+				<div className="media-preview-list media-preview-list--centered">
+					{files.map((currentFile, index) => (
+						<FilePreview
+							key={`${currentFile.name}-${currentFile.size}-${index}`}
+							file={currentFile}
+							filename={currentFile.name}
+							mimeType={currentFile.type}
+							sizeBytes={currentFile.size}
+							alt={currentFile.name}
+							width={previewWidth}
+							showMeta
+						/>
+					))}
+				</div>
+			) : null}
+		</div>
+	);
 }

@@ -1,32 +1,37 @@
-// FILE: apps/web/src/lib/cn.ts
-// Simple className combiner with strict typing (no `any`).
-// Usage: cn("a", condition && "b", ["c", "d"], { e: true, f: false }) => "a b c d e"
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/lib/cn.ts                                                                                 ////
+//// Language: TS                                                                                                 ////
+//// Simple className combiner with strict typing                                                                 ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 export function cn(...args: unknown[]): string {
-  const out: string[] = [];
+	const out: string[] = [];
 
-  for (const a of args) {
-    if (!a) continue;
+	for (const value of args) {
+		if (!value) {
+			continue;
+		}
 
-    if (typeof a === "string") {
-      out.push(a);
-      continue;
-    }
+		if (typeof value === "string") {
+			out.push(value);
+			continue;
+		}
 
-    if (Array.isArray(a)) {
-      // Recursively flatten arrays of class values
-      out.push(cn(...(a as unknown[])));
-      continue;
-    }
+		if (Array.isArray(value)) {
+			out.push(cn(...value));
+			continue;
+		}
 
-    if (typeof a === "object") {
-      // Object form: { className: truthy }
-      for (const [key, val] of Object.entries(a as Record<string, unknown>)) {
-        if (val) out.push(key);
-      }
-      continue;
-    }
-  }
+		if (typeof value === "object") {
+			for (const [key, enabled] of Object.entries(
+				value as Record<string, unknown>,
+			)) {
+				if (enabled) {
+					out.push(key);
+				}
+			}
+		}
+	}
 
-  return out.join(" ");
+	return out.join(" ");
 }

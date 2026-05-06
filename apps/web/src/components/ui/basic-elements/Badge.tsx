@@ -1,24 +1,28 @@
-// FILE: apps/web/src/components/ui/basic-elements/Badge.tsx
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/components/ui/basic-elements/Badge.tsx                                                     ////
+//// Language: TSX                                                                                                 ////
+//// Exports the shared Badge primitive                                                                            ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+import type { HTMLAttributes } from "react";
+
 import { cn } from "../../../lib/cn";
-import { HTMLAttributes } from "react";
 
 type Variant = "neutral" | "accent" | "outline";
 
+type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
+	variant?: Variant;
+};
+
 export default function Badge({
-  variant = "neutral",
-  className,
-  ...rest
-}: HTMLAttributes<HTMLSpanElement> & { variant?: Variant }) {
-  const cls =
-    variant === "accent"
-      ? "bg-[var(--color-accent)] text-[var(--color-text)] border border-[color-mix(in_oklab,var(--color-accent)_70%,var(--color-border))]"
-      : variant === "outline"
-      ? "bg-transparent text-[var(--color-text)] border border-[var(--color-border)]"
-      : "bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)]";
-  return (
-    <span
-      {...rest}
-      className={cn("inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-full", cls, className)}
-    />
-  );
+	variant = "neutral",
+	className,
+	...rest
+}: BadgeProps) {
+	return (
+		<span
+			{...rest}
+			className={cn("ui-badge", `ui-badge--${variant}`, className)}
+		/>
+	);
 }
