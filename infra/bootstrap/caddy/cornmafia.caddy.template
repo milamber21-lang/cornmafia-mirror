@@ -1,8 +1,24 @@
 # FILE: infra/bootstrap/caddy/cornmafia.caddy.template
 # Language: Caddyfile
-# Template for the Corn Mafia host reverse proxy managed by scripts/bootstrap-deploy.sh.
+# Corn Mafia Caddy site template rendered by scripts/bootstrap-deploy.sh.
 
-{$CM_CADDY_DOMAIN}, www.{$CM_CADDY_DOMAIN} {
+# CornMafia - Web
+{{CM_CADDY_DOMAIN}}, www.{{CM_CADDY_DOMAIN}} {
 	encode zstd gzip
-	reverse_proxy {$CM_CADDY_UPSTREAM_HOST}:{$CM_CADDY_UPSTREAM_PORT}
+
+	request_body {
+		max_size {{CM_CADDY_REQUEST_BODY_MAX_SIZE}}
+	}
+
+	header {
+		defer
+		-X-Powered-By
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+	}
+
+	reverse_proxy {{CM_CADDY_UPSTREAM_HOST}}:{{CM_CADDY_UPSTREAM_PORT}}
 }
