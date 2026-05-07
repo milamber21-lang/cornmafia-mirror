@@ -1,0 +1,8 @@
+# FILE: infra/bootstrap/caddy/cornmafia.caddy.template
+# Language: Caddyfile
+# Template for the Corn Mafia host reverse proxy managed by scripts/bootstrap-deploy.sh.
+
+{$CM_CADDY_DOMAIN}, www.{$CM_CADDY_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy {$CM_CADDY_UPSTREAM_HOST}:{$CM_CADDY_UPSTREAM_PORT}
+}
