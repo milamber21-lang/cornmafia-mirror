@@ -6,12 +6,15 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 import type { JSX } from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import PublicCollectionHub, {
 	type PublicCollectionSortCode,
 } from "@/components/public/PublicCollectionHub";
-import { findPublicCollectionByPath } from "@/lib/data/public-content";
+import {
+	findPublicCollectionByPath,
+	findPublicSubcategoryAppHref,
+} from "@/lib/data/public-content";
 import { getCurrentActorDiscordId } from "@/lib/server/current-actor";
 
 export const dynamic = "force-dynamic";
@@ -58,6 +61,16 @@ export default async function PublicCollectionPage({
 	}
 
 	const actorDiscordId = await getCurrentActorDiscordId();
+	const appHref = await findPublicSubcategoryAppHref({
+		actorDiscordId,
+		categorySlug,
+		subcategorySlug,
+	});
+
+	if (appHref) {
+		redirect(appHref);
+	}
+
 	const collection = await findPublicCollectionByPath({
 		actorDiscordId,
 		categorySlug,

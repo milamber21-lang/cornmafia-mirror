@@ -40,11 +40,7 @@ function getPgPool(): Pool {
 	}
 
 	const pool = createPool();
-
-	if (process.env.NODE_ENV !== "production") {
-		globalForPg.__cmWebPgPool = pool;
-	}
-
+	globalForPg.__cmWebPgPool = pool;
 	return pool;
 }
 

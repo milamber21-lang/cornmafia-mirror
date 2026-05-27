@@ -715,6 +715,7 @@ export default function MemberContentCreatePanel({
 								categoryId={meta.collection.categoryId}
 								subcategoryId={meta.collection.subcategoryId}
 								editorSessionKey={`member-content:${mode}:${meta.collection.categoryId}:${meta.collection.subcategoryId}:${contentId ?? "new"}:${templateId}`}
+								editorMediaContext="member"
 								onChange={(fieldId, value) => {
 									setFieldValues((current) => ({ ...current, [fieldId]: value }));
 									markDirty();

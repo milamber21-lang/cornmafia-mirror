@@ -159,6 +159,72 @@ const publishingLinks: AdminLink[] = [
 	},
 ];
 
+const riseopediaLinks: AdminLink[] = [
+	{
+		title: "Riseopedia Sections",
+		description: "Manage public Riseopedia sections and hub grouping.",
+		href: "/admin/riseopedia/sections",
+		icon: Navigation,
+		minimumAccess: "admin",
+	},
+	{
+		title: "Riseopedia Rules",
+		description: "Configure automatic section rules for imported entities.",
+		href: "/admin/riseopedia/section-rules",
+		icon: ListTree,
+		minimumAccess: "admin",
+	},
+	{
+		title: "Riseopedia Manual Items",
+		description: "Pin or feature explicit entities inside Riseopedia sections.",
+		href: "/admin/riseopedia/section-items",
+		icon: Star,
+		minimumAccess: "admin",
+	},
+	{
+		title: "Riseopedia Visibility",
+		description: "Hide, force-show, or limit imported entities by public visibility state.",
+		href: "/admin/riseopedia/visibility",
+		icon: Shield,
+		minimumAccess: "admin",
+	},
+	{
+		title: "Riseopedia Properties",
+		description: "Manage the property catalog used by fixed Riseopedia detail layouts.",
+		href: "/admin/riseopedia/properties",
+		icon: FileText,
+		minimumAccess: "admin",
+	},
+	{
+		title: "Riseopedia Display Profiles",
+		description: "Manage display profiles and fixed-layout rendering contracts.",
+		href: "/admin/riseopedia/display-profiles",
+		icon: LayoutTemplate,
+		minimumAccess: "admin",
+	},
+	{
+		title: "Riseopedia Profile Bindings",
+		description: "Bind display profiles to entity types and imported classifications.",
+		href: "/admin/riseopedia/profile-bindings",
+		icon: Layers3,
+		minimumAccess: "admin",
+	},
+	{
+		title: "Riseopedia Profile Properties",
+		description: "Choose which properties render in overview, body, spec, and requirement slots.",
+		href: "/admin/riseopedia/profile-properties",
+		icon: Settings,
+		minimumAccess: "admin",
+	},
+	{
+		title: "Riseopedia Blocks",
+		description: "Control relationship, dependency, and changelog blocks for detail pages.",
+		href: "/admin/riseopedia/blocks",
+		icon: Folder,
+		minimumAccess: "admin",
+	},
+];
+
 const sections: AdminSection[] = [
 	{
 		title: "Discord",
@@ -174,6 +240,11 @@ const sections: AdminSection[] = [
 		title: "Publishing",
 		description: "Create, organize, and publish content to the public site.",
 		items: publishingLinks,
+	},
+	{
+		title: "Riseopedia",
+		description: "Configure Riseopedia sections, visibility, display profiles, property placement, and blocks.",
+		items: riseopediaLinks,
 	},
 ];
 

@@ -243,6 +243,30 @@ Future passes should move matching visual rules here according to docs/style_own
 	min-width: 160px;
 }
 
+.admin-table-toolbar-filter--riseopedia {
+	flex-wrap: wrap;
+	min-width: 0;
+}
+
+.admin-table-toolbar-filter--empty {
+	min-width: 0;
+	pointer-events: none;
+}
+
+.admin-table-filter-control--flexible {
+	width: fit-content;
+	min-width: 180px;
+	max-width: min(100%, 420px);
+}
+
+.admin-table-filter-control--flexible .ui-dropdown__button {
+	width: 100%;
+}
+
+.admin-table-filter-control--flexible .ui-dropdown__menu {
+	min-width: 100%;
+}
+
 .admin-table-cell--mono {
 	font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
 }
@@ -345,6 +369,13 @@ Future passes should move matching visual rules here according to docs/style_own
 		width: 100%;
 		min-width: 0;
 		grid-template-columns: 1fr;
+	}
+
+	.admin-table-toolbar-filter--riseopedia,
+	.admin-table-filter-control--flexible,
+	.admin-table-filter-control--flexible .ui-dropdown__button {
+		width: 100%;
+		max-width: none;
 	}
 
 	.admin-table-toolbar-search,

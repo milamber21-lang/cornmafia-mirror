@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/editors/richtext/nodes/ImagePickerPopup.tsx                                    ////
 //// Language: TSX                                                                                                 ////
-//// RichText image picker with source filtering, stable paging, and drag/drop upload                              ////
+//// RichText image picker with admin/member media context, stable paging, and drag/drop upload                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 "use client";
@@ -19,6 +19,7 @@ import Input from "@/components/ui/basic-elements/Input";
 import Label from "@/components/ui/basic-elements/Label";
 import { Pagination } from "@/components/ui/basic-elements/Pagination";
 import { readResponseMessage } from "@/lib/helpers/http-response";
+import type { RichTextEditorMediaContext } from "../RichTextEditor";
 
 type MediaItem = {
 	id: string;
@@ -56,6 +57,18 @@ type PickedImage = {
 	alt?: string | null;
 	width?: number | null;
 	height?: number | null;
+};
+
+type ImagePickerPopupProps = {
+	open: boolean;
+	onClose: () => void;
+	onPick: (item: PickedImage) => void;
+	categoryId: string;
+	subcategoryId: string;
+	accept?: string;
+	maxSizeMB?: number;
+	defaultShared?: boolean;
+	mediaContext?: RichTextEditorMediaContext;
 };
 
 function isMediaItem(value: unknown): value is MediaItem {
@@ -155,8 +168,45 @@ function stopEscapeAtSource(event: KeyboardEvent): void {
 	event.stopImmediatePropagation();
 }
 
+function buildMediaListUrl(args: {
+	mediaContext: RichTextEditorMediaContext;
+	categoryId: string;
+	subcategoryId: string;
+	search: string;
+	source: string;
+	page: number;
+	pageSize: number;
+	refreshSeq: number;
+}): string {
+	const params = new URLSearchParams({
+		page: String(args.page),
+		pageSize: String(args.pageSize),
+		kind: "image",
+		_r: String(args.refreshSeq),
+	});
+
+	if (args.categoryId.trim().length > 0) {
+		params.set("categoryId", args.categoryId.trim());
+	}
+
+	if (args.subcategoryId.trim().length > 0) {
+		params.set("subcategoryId", args.subcategoryId.trim());
+	}
+
+	if (args.search.trim().length > 0) {
+		params.set("search", args.search.trim());
+	}
+
+	if (args.mediaContext === "admin" && args.source.trim().length > 0) {
+		params.set("source", args.source.trim());
+	}
+
+	const basePath = args.mediaContext === "member" ? "/api/me/media-picker" : "/api/admin/web/media";
+	return `${basePath}?${params.toString()}`;
+}
 
 function useListMedia(
+	mediaContext: RichTextEditorMediaContext,
 	categoryId: string,
 	subcategoryId: string,
 	search: string,
@@ -180,34 +230,22 @@ function useListMedia(
 			setError("");
 
 			try {
-				const params = new URLSearchParams({
-					page: String(page),
-					pageSize: String(pageSize),
-				});
-
-				if (categoryId.trim().length > 0) {
-					params.set("categoryId", categoryId.trim());
-				}
-
-				if (subcategoryId.trim().length > 0) {
-					params.set("subcategoryId", subcategoryId.trim());
-				}
-
-				if (search.trim().length > 0) {
-					params.set("search", search.trim());
-				}
-
-				if (source.trim().length > 0) {
-					params.set("source", source.trim());
-				}
-
-				params.set("kind", "image");
-				params.set("_r", String(refreshSeq));
-
-				const response = await fetch(`/api/admin/web/media?${params.toString()}`, {
-					cache: "no-store",
-					credentials: "include",
-				});
+				const response = await fetch(
+					buildMediaListUrl({
+						mediaContext,
+						categoryId,
+						subcategoryId,
+						search,
+						source,
+						page,
+						pageSize,
+						refreshSeq,
+					}),
+					{
+						cache: "no-store",
+						credentials: "include",
+					},
+				);
 				if (!response.ok) {
 					throw new Error(
 						await readResponseMessage(response, "Failed to load media."),
@@ -253,7 +291,7 @@ function useListMedia(
 		return () => {
 			cancelled = true;
 		};
-	}, [categoryId, page, pageSize, refreshSeq, search, source, subcategoryId]);
+	}, [categoryId, mediaContext, page, pageSize, refreshSeq, search, source, subcategoryId]);
 
 	return { rows, loading, error, totalDocs, resolvedPage, sourceOptions };
 }
@@ -267,22 +305,16 @@ export default function ImagePickerPopup({
 	accept = "image/*",
 	maxSizeMB = 10,
 	defaultShared = false,
-}: {
-	open: boolean;
-	onClose: () => void;
-	onPick: (item: PickedImage) => void;
-	categoryId: string;
-	subcategoryId: string;
-	accept?: string;
-	maxSizeMB?: number;
-	defaultShared?: boolean;
-}) {
+	mediaContext = "admin",
+}: ImagePickerPopupProps) {
+	const adminMediaContext = mediaContext === "admin";
 	const [search, setSearch] = useState<string>("");
-	const [source, setSource] = useState<string>(defaultShared ? "shared" : "");
+	const [source, setSource] = useState<string>(adminMediaContext && defaultShared ? "shared" : "");
 	const [page, setPage] = useState<number>(1);
 	const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 	const [refreshSeq, setRefreshSeq] = useState(0);
 	const { rows, loading, error, totalDocs, resolvedPage, sourceOptions } = useListMedia(
+		mediaContext,
 		categoryId,
 		subcategoryId,
 		search,
@@ -302,7 +334,7 @@ export default function ImagePickerPopup({
 		(option) => option.value === "shared",
 	);
 
-	if (defaultShared && !hasSharedSourceOption) {
+	if (adminMediaContext && defaultShared && !hasSharedSourceOption) {
 		pickerSourceOptions.push({ value: "shared", label: "Shared" });
 	}
 
@@ -348,7 +380,7 @@ export default function ImagePickerPopup({
 
 	const [busy, setBusy] = useState<boolean>(false);
 	const [localAlt, setLocalAlt] = useState<string>("");
-	const [uploadShared, setUploadShared] = useState<boolean>(defaultShared);
+	const [uploadShared, setUploadShared] = useState<boolean>(adminMediaContext && defaultShared);
 	const [file, setFile] = useState<File | null>(null);
 	const [draggingUpload, setDraggingUpload] = useState<boolean>(false);
 	const [uploadError, setUploadError] = useState<string>("");
@@ -357,7 +389,7 @@ export default function ImagePickerPopup({
 	const maxBytes = Math.max(1, Math.floor(maxSizeMB * 1024 * 1024));
 	const altMissing = localAlt.trim().length === 0;
 	const hasUnsavedUploadChanges =
-		Boolean(file) || localAlt.trim().length > 0 || uploadShared !== defaultShared;
+		Boolean(file) || localAlt.trim().length > 0 || uploadShared !== (adminMediaContext && defaultShared);
 	const visibleError = closeWarning
 		? "You have unsaved image upload changes. Click Close again or press Escape again to close without saving."
 		: uploadError || error;
@@ -397,14 +429,14 @@ export default function ImagePickerPopup({
 
 	useEffect(() => {
 		if (open) {
-			setSource(defaultShared ? "shared" : "");
-			setUploadShared(defaultShared);
+			setSource(adminMediaContext && defaultShared ? "shared" : "");
+			setUploadShared(adminMediaContext && defaultShared);
 			setSelectedId("");
 			setPage(1);
 			setDraggingUpload(false);
 			setCloseWarning(false);
 		}
-	}, [defaultShared, open]);
+	}, [adminMediaContext, defaultShared, open]);
 
 	const requestClose = useCallback(() => {
 		if (busy) {
@@ -494,11 +526,19 @@ export default function ImagePickerPopup({
 			const formData = new FormData();
 			formData.set("file", file, file.name);
 			formData.set("alt", localAlt.trim());
-			formData.set("category", categoryId);
-			formData.set("subcategory", subcategoryId);
-			formData.set("shared", uploadShared ? "true" : "false");
 
-			const response = await fetch("/api/admin/web/media/upload", {
+			const uploadPath = adminMediaContext ? "/api/admin/web/media/upload" : "/api/me/media";
+			if (adminMediaContext) {
+				formData.set("category", categoryId);
+				formData.set("subcategory", subcategoryId);
+				formData.set("shared", uploadShared ? "true" : "false");
+			} else {
+				formData.set("categoryId", categoryId);
+				formData.set("subcategoryId", subcategoryId);
+				formData.set("credit", "");
+			}
+
+			const response = await fetch(uploadPath, {
 				method: "POST",
 				body: formData,
 				credentials: "include",
@@ -511,7 +551,7 @@ export default function ImagePickerPopup({
 			setLocalAlt("");
 			setCloseWarning(false);
 			setSelectedId("");
-			setSource(uploadShared ? "shared" : "");
+			setSource(adminMediaContext && uploadShared ? "shared" : "");
 			setPage(1);
 			setRefreshSeq((current) => current + 1);
 		} catch (errorValue: unknown) {
@@ -522,6 +562,7 @@ export default function ImagePickerPopup({
 			setBusy(false);
 		}
 	}, [
+		adminMediaContext,
 		categoryId,
 		file,
 		localAlt,
@@ -569,17 +610,19 @@ export default function ImagePickerPopup({
 						Select an image
 					</h3>
 					<div className="editor-image-picker-filters">
-						<div>
-							<Label className="editor-picker-label">Filter</Label>
-							<DropdownMenuSingle
-								className="editor-picker-control"
-								options={pickerSourceOptions}
-								value={source}
-								onChange={setSource}
-								placeholder="All sources"
-								ariaLabel="Image source"
-							/>
-						</div>
+						{adminMediaContext ? (
+							<div>
+								<Label className="editor-picker-label">Filter</Label>
+								<DropdownMenuSingle
+									className="editor-picker-control"
+									options={pickerSourceOptions}
+									value={source}
+									onChange={setSource}
+									placeholder="All sources"
+									ariaLabel="Image source"
+								/>
+							</div>
+						) : null}
 						<div>
 							<Label htmlFor="image-picker-search" className="editor-picker-label">
 								Search
@@ -656,9 +699,7 @@ export default function ImagePickerPopup({
 									No images found.
 								</div>
 							) : (
-								<div
-									className="editor-image-picker-grid"
-								>
+								<div className="editor-image-picker-grid">
 									{rows.map((row) => {
 										const canInsert = isInsertableImage(row);
 										const title = getMediaTitle(row);
@@ -813,17 +854,19 @@ export default function ImagePickerPopup({
 													Change
 												</Button>
 											</div>
-											<div className="editor-picker-action-center">
-												<Checkbox
-													checked={uploadShared}
-													onChange={(event) => {
-												setCloseWarning(false);
-												setUploadShared(event.currentTarget.checked);
-											}}
-													label="Shared"
-													size="md"
-												/>
-											</div>
+											{adminMediaContext ? (
+												<div className="editor-picker-action-center">
+													<Checkbox
+														checked={uploadShared}
+														onChange={(event) => {
+															setCloseWarning(false);
+															setUploadShared(event.currentTarget.checked);
+														}}
+														label="Shared"
+														size="md"
+													/>
+												</div>
+											) : null}
 											<div className="editor-picker-action-end">
 												<Button
 													size="md"

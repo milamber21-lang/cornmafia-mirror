@@ -9,6 +9,7 @@ import { notFound, redirect } from "next/navigation";
 
 import PublicContentRenderer from "@/components/public/PublicContentRenderer";
 import {
+	findPublicContentAppHrefByPath,
 	findPublicContentByPath,
 	findPublicContentRedirectByPath,
 	type PublicRoutePrefix,
@@ -40,6 +41,18 @@ export default async function PublicContentRoutePage({
 	}
 
 	const actorDiscordId = await getCurrentActorDiscordId();
+	const appHref = await findPublicContentAppHrefByPath({
+		actorDiscordId,
+		publicRoutePrefix,
+		categorySlug,
+		subcategorySlug,
+		contentSlug,
+	});
+
+	if (appHref) {
+		redirect(appHref);
+	}
+
 	const content = await findPublicContentByPath({
 		actorDiscordId,
 		publicRoutePrefix,
