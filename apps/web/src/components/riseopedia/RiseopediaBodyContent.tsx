@@ -14,7 +14,6 @@ import type {
 
 export type RiseopediaBodyContentProps = {
 	display: RiseopediaDisplayLayout;
-	fallbackDescription?: string | null;
 };
 
 function renderPropertyValue(row: RiseopediaDisplayProperty): string {
@@ -90,7 +89,6 @@ function RiseopediaSpecTable({
 
 export default function RiseopediaBodyContent({
 	display,
-	fallbackDescription,
 }: RiseopediaBodyContentProps): JSX.Element | null {
 	const hasDisplayBody =
 		display.bodyLead.length > 0 ||
@@ -99,7 +97,7 @@ export default function RiseopediaBodyContent({
 		display.specRows.length > 0 ||
 		display.requirementRows.length > 0;
 
-	if (!hasDisplayBody && !fallbackDescription) {
+	if (!hasDisplayBody) {
 		return null;
 	}
 
@@ -107,16 +105,6 @@ export default function RiseopediaBodyContent({
 		<div className="riseopedia-body-content">
 			<RiseopediaPropertyStack title="Highlights" rows={display.bodyLead} />
 			<RiseopediaPropertyStack title="Details" rows={display.bodyMain} />
-
-			{!hasDisplayBody && fallbackDescription ? (
-				<section className="riseopedia-body-section">
-					<h2 className="riseopedia-section-title">Description</h2>
-					<p className="riseopedia-body-content__description">
-						{fallbackDescription}
-					</p>
-				</section>
-			) : null}
-
 			<RiseopediaSpecTable title="Specs" rows={display.specRows} />
 			<RiseopediaSpecTable title="Requirements" rows={display.requirementRows} />
 			<RiseopediaPropertyStack title="Notes" rows={display.bodyNotes} />

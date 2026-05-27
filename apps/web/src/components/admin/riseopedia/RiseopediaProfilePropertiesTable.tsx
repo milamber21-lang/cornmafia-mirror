@@ -15,7 +15,6 @@ import {
 	buildOptionsFromRows,
 	ensureOption,
 	readRowValue,
-	toBoolean,
 	toDisplayText,
 } from "./RiseopediaAdminHelpers";
 import type {
@@ -65,8 +64,7 @@ function isAlreadySelectedProperty(args: {
 
 	return (
 		toDisplayText(readRowValue(args.row, "display_profile_id")) === args.displayProfileId &&
-		toDisplayText(readRowValue(args.row, "property_catalog_id")) === args.propertyCatalogId &&
-		toBoolean(readRowValue(args.row, "active_flag"))
+		toDisplayText(readRowValue(args.row, "property_catalog_id")) === args.propertyCatalogId
 	);
 }
 
@@ -101,15 +99,11 @@ function buildPropertyOptions(args: {
 		return ensureOption([], currentPropertyId, currentPropertyLabel);
 	}
 
-	const bindingAwareRows = args.meta.profilePropertyOptions ?? [];
-	const bindingAwareOptionsLoaded = bindingAwareRows.length > 0;
-	const candidateProperties = bindingAwareOptionsLoaded
-		? bindingAwareRows.filter(
-				(property) => toDisplayText(readRowValue(property, "display_profile_id")) === displayProfileId,
-			)
-		: args.propertyCatalog.filter(
-				(property) => toDisplayText(readRowValue(property, "entity_type_code")) === entityTypeCode,
-			);
+	const candidateProperties = (args.meta.profilePropertyOptions ?? []).filter(
+		(property) =>
+			toDisplayText(readRowValue(property, "display_profile_id")) === displayProfileId &&
+			toDisplayText(readRowValue(property, "entity_type_code")) === entityTypeCode,
+	);
 
 	const baseOptions = candidateProperties
 		.filter((property) => {
