@@ -25,10 +25,15 @@ export type RiseopediaAdminMeta = {
 	sectionModes: RiseopediaAdminRows;
 	ruleKinds: RiseopediaAdminRows;
 	assetClasses: RiseopediaAdminRows;
+	recipeBenches: RiseopediaAdminRows;
 	propertyOrigins: RiseopediaAdminRows;
+	propertyOriginOptions: RiseopediaAdminRows;
+	propertySourceOptions: RiseopediaAdminRows;
+	propertyDataTypes: RiseopediaAdminRows;
 	displaySlots: RiseopediaAdminRows;
 	profileSelectorKinds: RiseopediaAdminRows;
 	relationshipBlockTypes: RiseopediaAdminRows;
+	profilePropertyOptions: RiseopediaAdminRows;
 };
 
 function toPositiveInt(value: unknown): number | null {
@@ -48,6 +53,15 @@ function firstId(resultRows: IdRow[], column: string): number | null {
 	return toPositiveInt(resultRows[0]?.[column]);
 }
 
+async function queryRowsOrEmpty(sql: string): Promise<RiseopediaAdminRows> {
+	try {
+		const result = await query<DbRow>(sql);
+		return result.rows;
+	} catch {
+		return [];
+	}
+}
+
 export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 	const [
 		entityTypes,
@@ -55,10 +69,15 @@ export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 		sectionModes,
 		ruleKinds,
 		assetClasses,
+		recipeBenches,
 		propertyOrigins,
+		propertyOriginOptions,
+		propertySourceOptions,
+		propertyDataTypes,
 		displaySlots,
 		profileSelectorKinds,
 		relationshipBlockTypes,
+		profilePropertyOptions,
 	] = await Promise.all([
 		query<DbRow>(
 			`SELECT * FROM web_view.riseopedia_admin_entity_types ORDER BY sort_order, entity_type_name`,
@@ -76,8 +95,25 @@ export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 			`SELECT * FROM web_view.riseopedia_asset_classes ORDER BY sort_order, asset_class_name`,
 		),
 		query<DbRow>(
+			`SELECT DISTINCT bench_code,
+						bench_name
+			 FROM web_view.riseopedia_recipes
+			 WHERE bench_code IS NOT NULL
+			 ORDER BY bench_name,
+					  bench_code`,
+		),
+		query<DbRow>(
 			`SELECT * FROM web_view.riseopedia_admin_property_origins ORDER BY sort_order, property_origin_name`,
 		),
+		{ rows: await queryRowsOrEmpty(
+			`SELECT * FROM web_view.riseopedia_admin_property_origin_options ORDER BY entity_type_code, sort_order, property_origin_name`,
+		) },
+		{ rows: await queryRowsOrEmpty(
+			`SELECT * FROM web_view.riseopedia_admin_property_source_options ORDER BY entity_type_code, property_origin_code, source_selector_kind_code, cataloged_flag, source_label`,
+		) },
+		{ rows: await queryRowsOrEmpty(
+			`SELECT * FROM web_view.riseopedia_admin_property_data_types ORDER BY sort_order, data_type_name`,
+		) },
 		query<DbRow>(
 			`SELECT * FROM web_view.riseopedia_display_slots ORDER BY sort_order, display_slot_name`,
 		),
@@ -87,6 +123,9 @@ export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 		query<DbRow>(
 			`SELECT * FROM web_view.riseopedia_admin_relationship_block_types ORDER BY block_group_code, sort_order, relationship_block_type_name`,
 		),
+		{ rows: await queryRowsOrEmpty(
+			`SELECT * FROM web_view.riseopedia_admin_profile_property_options ORDER BY display_profile_name, sort_order, property_name`,
+		) },
 	]);
 
 	return {
@@ -95,10 +134,15 @@ export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 		sectionModes: sectionModes.rows,
 		ruleKinds: ruleKinds.rows,
 		assetClasses: assetClasses.rows,
+		recipeBenches: recipeBenches.rows,
 		propertyOrigins: propertyOrigins.rows,
+		propertyOriginOptions: propertyOriginOptions.rows,
+		propertySourceOptions: propertySourceOptions.rows,
+		propertyDataTypes: propertyDataTypes.rows,
 		displaySlots: displaySlots.rows,
 		profileSelectorKinds: profileSelectorKinds.rows,
 		relationshipBlockTypes: relationshipBlockTypes.rows,
+		profilePropertyOptions: profilePropertyOptions.rows,
 	};
 }
 
@@ -120,6 +164,28 @@ export async function listRiseopediaAdminSections(): Promise<{
 	]);
 
 	return { sections: sections.rows, rules: rules.rows, items: items.rows };
+}
+
+
+export async function listRiseopediaAdminEntities(args: {
+	search: string | null;
+	entityTypeCode: string | null;
+	limit: number;
+}): Promise<RiseopediaAdminRows> {
+	const search = args.search ? `%${args.search}%` : null;
+	const result = await query<DbRow>(
+		`SELECT *
+		 FROM web_view.riseopedia_admin_entities
+		 WHERE ($1::text IS NULL OR entity_name ILIKE $1 OR entity_key ILIKE $1)
+		   AND ($2::text IS NULL OR entity_type_code = $2)
+		 ORDER BY entity_type_code,
+				  entity_name,
+				  entity_key
+		 LIMIT $3`,
+		[search, args.entityTypeCode, args.limit],
+	);
+
+	return result.rows;
 }
 
 export async function listRiseopediaAdminVisibility(args: {
@@ -163,14 +229,19 @@ export async function listRiseopediaAdminProperties(args: {
 	const search = args.search ? `%${args.search}%` : null;
 	const [catalog, candidates, unmapped] = await Promise.all([
 		query<DbRow>(
-			`SELECT *
-			 FROM web_view.riseopedia_admin_property_catalog
-			 WHERE ($1::text IS NULL OR entity_type_code = $1)
-			   AND ($2::text IS NULL OR property_name ILIKE $2 OR property_code ILIKE $2)
-			 ORDER BY entity_type_code,
-					  sort_order,
-					  property_name,
-					  property_catalog_id
+			`SELECT catalog.*,
+					COALESCE(catalog.source_property_code, catalog.source_column_name) AS source_display_value
+			 FROM web_view.riseopedia_admin_property_catalog catalog
+			 WHERE ($1::text IS NULL OR catalog.entity_type_code = $1)
+			   AND ($2::text IS NULL
+					OR catalog.property_name ILIKE $2
+					OR catalog.property_code ILIKE $2
+					OR catalog.source_property_code ILIKE $2
+					OR catalog.source_column_name ILIKE $2)
+			 ORDER BY catalog.entity_type_code,
+					  catalog.sort_order,
+					  catalog.property_name,
+					  catalog.property_catalog_id
 			 LIMIT $3`,
 			[args.entityTypeCode, search, args.limit],
 		),

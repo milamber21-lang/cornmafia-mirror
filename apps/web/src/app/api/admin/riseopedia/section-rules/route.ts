@@ -12,7 +12,7 @@ import {
 	listRiseopediaAdminSections,
 	upsertRiseopediaSectionRuleAdmin,
 } from "@/lib/data/riseopedia-admin";
-import { jsonError, requireAdminResponse } from "@/lib/server/admin-route";
+import { jsonError, parsePositiveInt, requireAdminResponse } from "@/lib/server/admin-route";
 import {
 	classifyRiseopediaAdminError,
 	getBoolean,
@@ -31,15 +31,21 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export async function GET(): Promise<Response> {
+export async function GET(request: NextRequest): Promise<Response> {
 	const guardResponse = await requireAdminResponse();
 	if (guardResponse) {
 		return guardResponse;
 	}
 
+	const scopedId = parsePositiveInt(request.nextUrl.searchParams.get("sectionId"));
+
 	try {
 		const rows = await listRiseopediaAdminSections();
-		return NextResponse.json({ rows: rows.rules }, { status: 200 });
+		const sourceRows = rows.rules;
+		const filteredRows = scopedId
+			? sourceRows.filter((row) => String(row.section_id ?? "") === String(scopedId))
+			: sourceRows;
+		return NextResponse.json({ rows: filteredRows }, { status: 200 });
 	} catch (error: unknown) {
 		const classified = classifyRiseopediaAdminError(error);
 		return jsonError(classified.code, classified.message, classified.status);

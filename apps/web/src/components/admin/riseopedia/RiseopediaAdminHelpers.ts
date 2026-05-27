@@ -131,3 +131,78 @@ export function isNonNegativeIntegerText(value: unknown): boolean {
 
 	return /^\d+$/.test(value.trim());
 }
+
+export function ensureOption(
+	options: RiseopediaAdminOption[],
+	value: unknown,
+	label: unknown,
+): RiseopediaAdminOption[] {
+	const optionValue = toDisplayText(value).trim();
+	if (!optionValue) {
+		return options;
+	}
+
+	if (options.some((option) => option.value === optionValue)) {
+		return options;
+	}
+
+	const optionLabel = toDisplayText(label).trim();
+	return [
+		...options,
+		{
+			value: optionValue,
+			label: optionLabel.length > 0 ? optionLabel : optionValue,
+		},
+	].sort((left, right) => left.label.localeCompare(right.label));
+}
+
+export function buildEntityOptionsForType(
+	rows: RiseopediaAdminRows,
+	entityTypeCode: unknown,
+): RiseopediaAdminOption[] {
+	const selectedType = toDisplayText(entityTypeCode).trim();
+	if (!selectedType) {
+		return [];
+	}
+
+	return rows
+		.filter((row) => toDisplayText(readRowValue(row, "entity_type_code")) === selectedType)
+		.map((row) => {
+			const value = toDisplayText(readRowValue(row, "entity_key")).trim();
+			const name = toDisplayText(readRowValue(row, "entity_name")).trim();
+			const subtitle = toDisplayText(readRowValue(row, "entity_subtitle")).trim();
+			const labelParts = [name.length > 0 ? name : value, subtitle]
+				.filter((part) => part.length > 0);
+
+			return value.length > 0
+				? {
+						value,
+						label: labelParts.join(" · "),
+				  }
+				: null;
+		})
+		.filter((option): option is RiseopediaAdminOption => option !== null)
+		.sort((left, right) => left.label.localeCompare(right.label));
+}
+
+export function buildUniqueCodeOptions(
+	rows: RiseopediaAdminRows,
+	valueKey: string,
+	labelKey: string,
+): RiseopediaAdminOption[] {
+	const seen = new Set<string>();
+	const options: RiseopediaAdminOption[] = [];
+
+	for (const row of rows) {
+		const value = toDisplayText(readRowValue(row, valueKey)).trim();
+		if (!value || seen.has(value)) {
+			continue;
+		}
+
+		seen.add(value);
+		const label = toDisplayText(readRowValue(row, labelKey)).trim();
+		options.push({ value, label: label.length > 0 ? label : value });
+	}
+
+	return options.sort((left, right) => left.label.localeCompare(right.label));
+}

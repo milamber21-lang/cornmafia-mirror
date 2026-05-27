@@ -23,7 +23,7 @@ export const dynamic = "force-dynamic";
 export default async function RiseopediaProfilePropertiesAdminPage(): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Riseopedia Profile Properties" reason={guard.reason} />;
+		return <RiseopediaAdminGuard title="Profile Properties" reason={guard.reason} />;
 	}
 
 	const [meta, displayRows, propertyRows] = await Promise.all([
@@ -34,7 +34,7 @@ export default async function RiseopediaProfilePropertiesAdminPage(): Promise<JS
 
 	return (
 		<RiseopediaAdminPageChrome
-			title="Riseopedia Profile Properties"
+			title="Profile Properties"
 		>
 			<RiseopediaProfilePropertiesTable
 				initialRows={displayRows.properties}

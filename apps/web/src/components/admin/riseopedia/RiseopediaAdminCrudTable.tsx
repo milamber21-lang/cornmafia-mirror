@@ -15,6 +15,7 @@ import {
 	AdminTableFrame,
 	AdminTableSearchInput,
 	Button,
+	ButtonLink,
 	DropdownMenuSingle,
 	Pagination,
 	Table,
@@ -46,6 +47,7 @@ import type {
 	RiseopediaAdminFieldConfig,
 	RiseopediaAdminFilterConfig,
 	RiseopediaAdminRow,
+	RiseopediaAdminRowActionConfig,
 } from "./RiseopediaAdminTypes";
 
 type PanelMode = "create" | "edit";
@@ -57,6 +59,12 @@ type RiseopediaRowsResponse = {
 type FilterState = {
 	[key: string]: string;
 };
+
+export type RiseopediaAdminFieldsBuilder = (args: {
+	mode: PanelMode;
+	row: RiseopediaAdminRow | null;
+	rows: RiseopediaAdminRow[];
+}) => RiseopediaAdminFieldConfig[];
 
 export interface RiseopediaAdminCrudTableProps {
 	initialRows: RiseopediaAdminRow[];
@@ -76,6 +84,8 @@ export interface RiseopediaAdminCrudTableProps {
 	deleteOp?: string;
 	defaultSortKey?: string;
 	filters?: RiseopediaAdminFilterConfig[];
+	rowActions?: RiseopediaAdminRowActionConfig[];
+	fieldsBuilder?: RiseopediaAdminFieldsBuilder;
 }
 
 const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
@@ -156,6 +166,8 @@ export default function RiseopediaAdminCrudTable({
 	deleteOp = "delete",
 	defaultSortKey,
 	filters = EMPTY_FILTERS,
+	rowActions = [],
+	fieldsBuilder,
 }: RiseopediaAdminCrudTableProps): JSX.Element {
 	const [rows, setRows] = useState<RiseopediaAdminRow[]>(initialRows);
 	const [busyId, setBusyId] = useState<string | null>(null);
@@ -169,6 +181,18 @@ export default function RiseopediaAdminCrudTable({
 	const [pageSize, setPageSize] = useState<number>(20);
 	const [sortKey, setSortKey] = useState<string>(defaultSortKey ?? columns[0]?.rowKey ?? idKey);
 	const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+	const rowActionColumnCount = rowActions.length;
+
+	const buildFieldsFor = useCallback(
+		(mode: PanelMode, row: RiseopediaAdminRow | null): RiseopediaAdminFieldConfig[] =>
+			fieldsBuilder ? fieldsBuilder({ mode, row, rows }) : fields,
+		[fields, fieldsBuilder, rows],
+	);
+
+	const panelFields = useMemo(
+		() => buildFieldsFor(panelMode, selectedRow),
+		[buildFieldsFor, panelMode, selectedRow],
+	);
 
 	useEffect(() => {
 		setFilterState((currentState) => {
@@ -277,7 +301,8 @@ export default function RiseopediaAdminCrudTable({
 			}
 
 			const rowId = toRowKey(readRowValue(row, idKey));
-			const values = buildInitialValues(fields, row);
+			const effectiveFields = buildFieldsFor("edit", row);
+			const values = buildInitialValues(effectiveFields, row);
 			values.active = !toBoolean(readRowValue(row, "active_flag"));
 
 			setBusyId(rowId);
@@ -290,7 +315,7 @@ export default function RiseopediaAdminCrudTable({
 					body: JSON.stringify({
 						op: upsertOp,
 						id: readRowValue(row, idKey),
-						data: buildPayloadData(fields, values),
+						data: buildPayloadData(effectiveFields, values),
 					}),
 				});
 
@@ -311,7 +336,7 @@ export default function RiseopediaAdminCrudTable({
 				setBusyId(null);
 			}
 		},
-		[apiPath, busyId, fields, idKey, refreshFromServer, upsertOp],
+		[apiPath, buildFieldsFor, busyId, idKey, refreshFromServer, upsertOp],
 	);
 
 	const deleteRow = useCallback(
@@ -435,7 +460,12 @@ export default function RiseopediaAdminCrudTable({
 										/>
 									),
 								)}
-								<TH className="admin-table-cell--center">Delete</TH>
+								{rowActions.map((action) => (
+									<TH key={`action-${action.label}`} className="admin-table-cell--center">
+										{action.label}
+									</TH>
+								))}
+								<TH className="admin-table-cell--center">{deleteLabel}</TH>
 								<TH className="admin-table-cell--center">Action</TH>
 							</TR>
 						</THead>
@@ -471,6 +501,17 @@ export default function RiseopediaAdminCrudTable({
 												</TD>
 											);
 										})}
+										{rowActions.map((action) => (
+											<TD key={`${rowId}-${action.label}`} className="admin-table-cell--center">
+												<ButtonLink
+													href={action.href(row)}
+													variant={action.variant ?? "neutral"}
+													size="sm"
+												>
+													Manage
+												</ButtonLink>
+											</TD>
+										))}
 										<TD className="admin-table-cell--center">
 											<Button
 												variant="accent"
@@ -497,7 +538,7 @@ export default function RiseopediaAdminCrudTable({
 							{pageRows.length === 0 ? (
 								<TR>
 									<TD
-										colSpan={columns.length + 2}
+										colSpan={columns.length + 2 + rowActionColumnCount}
 										className="admin-table-empty-cell admin-table-empty-cell--spacious"
 									>
 										{emptyText}
@@ -530,7 +571,7 @@ export default function RiseopediaAdminCrudTable({
 				apiPath={apiPath}
 				idKey={idKey}
 				upsertOp={upsertOp}
-				fields={fields}
+				fields={panelFields}
 				onClose={closePanel}
 				onSaved={handleSaved}
 			/>

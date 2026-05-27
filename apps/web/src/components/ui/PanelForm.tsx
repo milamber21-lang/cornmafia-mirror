@@ -677,6 +677,11 @@ export default function PanelForm({
 
 	const normalizedRows = rows.map(normalizeRow);
 
+	function isFieldVisible(def: FieldDef | undefined): boolean {
+		if (!def) return true;
+		return def.visible ? def.visible(values) : true;
+	}
+
 	// ===== beforeunload guard for browser/tab close while dirty =====
 	useEffect(() => {
 		if (!dirtyGuard || !dirty) return;
@@ -727,28 +732,33 @@ export default function PanelForm({
 
 				<div className="panel-form-body">
 					<div className="panel-form-rows">
-						{normalizedRows.map((row, i) => (
-							<div key={i} className="panel-form-row">
-								{row.map((cell, j) => {
-									const def = fieldMap.get(cell.field);
-									const spanClass = SPAN_CLASS[cell.span] ?? SPAN_CLASS[12];
-									if (!def) return <div key={j} className={`panel-form-cell ${spanClass}`} />;
-									return (
-										<div key={j} className={`panel-form-cell ${spanClass}`}>
-											<RenderField
-												def={def}
-												values={values}
-												setValue={setValue}
-												fieldErrors={fieldErrors}
-												asyncOptions={asyncOptions}
-												queryByField={queryByField}
-												debouncedLoadOptions={debouncedLoadOptions}
-											/>
-										</div>
-									);
-								})}
-							</div>
-						))}
+						{normalizedRows.map((row, i) => {
+							const visibleCells = row.filter((cell) => isFieldVisible(fieldMap.get(cell.field)));
+							if (visibleCells.length === 0) return null;
+
+							return (
+								<div key={i} className="panel-form-row">
+									{visibleCells.map((cell, j) => {
+										const def = fieldMap.get(cell.field);
+										const spanClass = SPAN_CLASS[cell.span] ?? SPAN_CLASS[12];
+										if (!def) return <div key={j} className={`panel-form-cell ${spanClass}`} />;
+										return (
+											<div key={j} className={`panel-form-cell ${spanClass}`}>
+												<RenderField
+													def={def}
+													values={values}
+													setValue={setValue}
+													fieldErrors={fieldErrors}
+													asyncOptions={asyncOptions}
+													queryByField={queryByField}
+													debouncedLoadOptions={debouncedLoadOptions}
+												/>
+											</div>
+										);
+									})}
+								</div>
+							);
+						})}
 					</div>
 				</div>
 			</div>

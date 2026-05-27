@@ -162,27 +162,13 @@ const publishingLinks: AdminLink[] = [
 const riseopediaLinks: AdminLink[] = [
 	{
 		title: "Riseopedia Sections",
-		description: "Manage public Riseopedia sections and hub grouping.",
+		description: "Manage public Riseopedia sections and scoped section rules or overrides.",
 		href: "/admin/riseopedia/sections",
 		icon: Navigation,
 		minimumAccess: "admin",
 	},
 	{
-		title: "Riseopedia Rules",
-		description: "Configure automatic section rules for imported entities.",
-		href: "/admin/riseopedia/section-rules",
-		icon: ListTree,
-		minimumAccess: "admin",
-	},
-	{
-		title: "Riseopedia Manual Items",
-		description: "Pin or feature explicit entities inside Riseopedia sections.",
-		href: "/admin/riseopedia/section-items",
-		icon: Star,
-		minimumAccess: "admin",
-	},
-	{
-		title: "Riseopedia Visibility",
+		title: "Item Visibility Overrides",
 		description: "Hide, force-show, or limit imported entities by public visibility state.",
 		href: "/admin/riseopedia/visibility",
 		icon: Shield,
@@ -197,30 +183,9 @@ const riseopediaLinks: AdminLink[] = [
 	},
 	{
 		title: "Riseopedia Display Profiles",
-		description: "Manage display profiles and fixed-layout rendering contracts.",
+		description: "Manage display profiles and scoped bindings, properties, and blocks.",
 		href: "/admin/riseopedia/display-profiles",
 		icon: LayoutTemplate,
-		minimumAccess: "admin",
-	},
-	{
-		title: "Riseopedia Profile Bindings",
-		description: "Bind display profiles to entity types and imported classifications.",
-		href: "/admin/riseopedia/profile-bindings",
-		icon: Layers3,
-		minimumAccess: "admin",
-	},
-	{
-		title: "Riseopedia Profile Properties",
-		description: "Choose which properties render in overview, body, spec, and requirement slots.",
-		href: "/admin/riseopedia/profile-properties",
-		icon: Settings,
-		minimumAccess: "admin",
-	},
-	{
-		title: "Riseopedia Blocks",
-		description: "Control relationship, dependency, and changelog blocks for detail pages.",
-		href: "/admin/riseopedia/blocks",
-		icon: Folder,
 		minimumAccess: "admin",
 	},
 ];
@@ -243,7 +208,7 @@ const sections: AdminSection[] = [
 	},
 	{
 		title: "Riseopedia",
-		description: "Configure Riseopedia sections, visibility, display profiles, property placement, and blocks.",
+		description: "Configure Riseopedia sections, item visibility, properties, and display profiles.",
 		items: riseopediaLinks,
 	},
 ];

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/admin/riseopedia/RiseopediaSectionsTable.tsx                                  ////
 //// Language: TSX                                                                                               ////
-//// Riseopedia sections admin table and panel wrapper.                                                          ////
+//// Riseopedia sections admin table and panel wrapper with scoped section management links.                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 "use client";
@@ -9,7 +9,11 @@
 import type { JSX } from "react";
 
 import RiseopediaAdminCrudTable from "./RiseopediaAdminCrudTable";
-import { buildOptionsFromRows } from "./RiseopediaAdminHelpers";
+import {
+	buildOptionsFromRows,
+	readRowValue,
+	toRowKey,
+} from "./RiseopediaAdminHelpers";
 import type {
 	RiseopediaAdminMeta,
 	RiseopediaAdminRow,
@@ -18,6 +22,10 @@ import type {
 export interface RiseopediaSectionsTableProps {
 	initialRows: RiseopediaAdminRow[];
 	meta: RiseopediaAdminMeta;
+}
+
+function sectionIdHref(row: RiseopediaAdminRow, suffix: string): string {
+	return `/admin/riseopedia/sections/${toRowKey(readRowValue(row, "section_id"))}/${suffix}`;
 }
 
 export default function RiseopediaSectionsTable({
@@ -38,13 +46,24 @@ export default function RiseopediaSectionsTable({
 			emptyText="No Riseopedia sections match your search."
 			searchPlaceholder="Search sections"
 			defaultSortKey="sort_order"
+			rowActions={[
+				{
+					label: "Rules",
+					href: (row) => sectionIdHref(row, "rules"),
+					variant: "neutral",
+				},
+				{
+					label: "Overrides",
+					href: (row) => sectionIdHref(row, "manual-overrides"),
+					variant: "neutral",
+				},
+			]}
 			columns={[
 				{ rowKey: "section_name", label: "Name", strong: true },
 				{ rowKey: "section_code", label: "Code" },
 				{ rowKey: "section_slug", label: "Slug" },
 				{ rowKey: "section_mode_name", label: "Mode" },
 				{ rowKey: "public_item_count", label: "Items", kind: "count" },
-				{ rowKey: "active_rule_count", label: "Rules", kind: "count" },
 				{ rowKey: "public_visible_flag", label: "Public", kind: "boolean" },
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
