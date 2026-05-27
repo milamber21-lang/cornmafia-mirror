@@ -194,6 +194,10 @@ type PublicContentRedirectDbRow = {
 	doc: unknown;
 };
 
+type PublicContentHrefDbRow = {
+	href: string | null;
+};
+
 const RENDER_DESTINATIONS: PublicFieldRenderDestinationCode[] = [
 	"seo",
 	"hero",
@@ -738,6 +742,47 @@ function mapPublicContentRedirectResult(
 	};
 }
 
+
+
+export async function findPublicContentAppHrefByPath(args: {
+	actorDiscordId: string | null;
+	publicRoutePrefix: PublicRoutePrefix | null;
+	categorySlug: string;
+	subcategorySlug: string;
+	contentSlug: string;
+}): Promise<string | null> {
+	const result = await query<PublicContentHrefDbRow>(
+		`
+			SELECT web_api.web_content_public_find_app_href_by_path($1, $2, $3, $4, $5) AS href
+		`,
+		[
+			args.actorDiscordId,
+			args.publicRoutePrefix,
+			args.categorySlug,
+			args.subcategorySlug,
+			args.contentSlug,
+		],
+	);
+
+	const href = result.rows[0]?.href;
+	return typeof href === "string" && href.trim().length > 0 ? href : null;
+}
+
+export async function findPublicSubcategoryAppHref(args: {
+	actorDiscordId: string | null;
+	categorySlug: string;
+	subcategorySlug: string;
+}): Promise<string | null> {
+	const result = await query<PublicContentHrefDbRow>(
+		`
+			SELECT web_api.web_content_public_find_subcategory_app_href($1, $2, $3) AS href
+		`,
+		[args.actorDiscordId, args.categorySlug, args.subcategorySlug],
+	);
+
+	const href = result.rows[0]?.href;
+	return typeof href === "string" && href.trim().length > 0 ? href : null;
+}
 
 export async function findPublicCollectionByPath(args: {
 	actorDiscordId: string | null;

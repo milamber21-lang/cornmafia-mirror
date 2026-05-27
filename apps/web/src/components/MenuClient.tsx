@@ -26,7 +26,34 @@ type MenuPanelStyle = CSSProperties & {
 
 type MenuGridStyle = CSSProperties & {
 	"--menu-grid-template-columns"?: string;
+	"--menu-column-width"?: string;
 };
+
+const MENU_MAX_COLUMNS = 4;
+const MENU_MIN_COLUMN_WIDTH_PX = 210;
+const MENU_MAX_COLUMN_WIDTH_PX = 340;
+const MENU_COLUMN_GAP_PX = 10;
+const MENU_PANEL_HORIZONTAL_PADDING_PX = 22;
+const MENU_TEXT_CHARACTER_WIDTH_PX = 8;
+const MENU_ICON_AND_GAP_WIDTH_PX = 34;
+
+function clampMenuColumnWidth(width: number): number {
+	return Math.min(MENU_MAX_COLUMN_WIDTH_PX, Math.max(MENU_MIN_COLUMN_WIDTH_PX, width));
+}
+
+function estimateColumnWidth(category: MenuModel[number]): number {
+	let longestTextLength = 0;
+	for (const column of category.columns) {
+		longestTextLength = Math.max(longestTextLength, column.title.length);
+		for (const page of column.pages) {
+			longestTextLength = Math.max(longestTextLength, page.title.length);
+		}
+	}
+
+	return clampMenuColumnWidth(
+		longestTextLength * MENU_TEXT_CHARACTER_WIDTH_PX + MENU_ICON_AND_GAP_WIDTH_PX,
+	);
+}
 
 export default function MenuClient({ model }: Props) {
 	const containerRef = useRef<HTMLDivElement | null>(null);
@@ -64,11 +91,12 @@ export default function MenuClient({ model }: Props) {
 				return;
 			}
 
-			const columnCount = Math.min(4, Math.max(1, category.columns.length));
+			const columnCount = Math.min(MENU_MAX_COLUMNS, Math.max(1, category.columns.length));
+			const columnWidth = estimateColumnWidth(category);
 			const anchorRect = anchor.getBoundingClientRect();
 			const containerRect = container.getBoundingClientRect();
-			const contentWidth = columnCount * 210 + (columnCount - 1) * 10;
-			const nextWidth = contentWidth + 20 + 2;
+			const contentWidth = columnCount * columnWidth + (columnCount - 1) * MENU_COLUMN_GAP_PX;
+			const nextWidth = Math.min(containerRect.width, contentWidth + MENU_PANEL_HORIZONTAL_PADDING_PX);
 
 			let nextLeft = Math.round(anchorRect.left - containerRect.left);
 			const maxLeft = Math.max(0, containerRect.width - nextWidth);
@@ -125,7 +153,8 @@ export default function MenuClient({ model }: Props) {
 
 	const gridStyle: MenuGridStyle | undefined = current
 		? {
-				"--menu-grid-template-columns": `repeat(${Math.min(4, Math.max(1, current.columns.length))}, var(--menu-column-width))`,
+				"--menu-column-width": `${estimateColumnWidth(current)}px`,
+				"--menu-grid-template-columns": `repeat(${Math.min(MENU_MAX_COLUMNS, Math.max(1, current.columns.length))}, minmax(var(--menu-column-min-width), var(--menu-column-width)))`,
 			}
 		: undefined;
 

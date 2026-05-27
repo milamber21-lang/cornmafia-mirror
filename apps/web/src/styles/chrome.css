@@ -161,7 +161,8 @@
 	position: absolute;
 	top: calc(100% + 5px);
 	left: var(--menu-panel-left, 0);
-	width: var(--menu-panel-width, auto);
+	width: min(var(--menu-panel-width, auto), calc(100vw - 32px));
+	max-width: calc(100vw - 32px);
 	background: var(--theme-surface-glass-98);
 	border: 1px solid var(--theme-border);
 	border-radius: var(--radius-xl);
@@ -180,15 +181,17 @@
 }
 
 .menu-grid {
+	--menu-column-min-width: 210px;
 	--menu-column-width: 210px;
 	display: grid;
-	grid-template-columns: var(--menu-grid-template-columns, var(--menu-column-width));
+	grid-template-columns: var(--menu-grid-template-columns, minmax(var(--menu-column-min-width), var(--menu-column-width)));
 	gap: 10px;
+	max-width: 100%;
+	overflow-wrap: anywhere;
 }
 
 .menu-col {
-	width: var(--menu-column-width);
-	min-width: var(--menu-column-width);
+	min-width: 0;
 	max-width: var(--menu-column-width);
 }
 
@@ -201,7 +204,12 @@
 	font-weight: 700;
 	text-decoration: none;
 	margin-bottom: 8px;
-	white-space: nowrap;
+	min-width: 0;
+}
+
+.menu-col-title span {
+	min-width: 0;
+	overflow-wrap: anywhere;
 }
 
 .menu a:hover {
@@ -220,7 +228,12 @@
 	gap: 8px;
 	color: var(--theme-text);
 	padding: 4px 0;
-	white-space: nowrap;
+	min-width: 0;
+}
+
+.menu-link span {
+	min-width: 0;
+	overflow-wrap: anywhere;
 }
 
 .menu-section-label {

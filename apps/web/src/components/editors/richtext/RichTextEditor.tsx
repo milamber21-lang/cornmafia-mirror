@@ -182,6 +182,8 @@ export type RichTextEditorUiFeatures = {
 	fullscreen?: boolean;
 };
 
+export type RichTextEditorMediaContext = "admin" | "member";
+
 type PickedImageItem = {
 	id: string;
 	url?: string | null;
@@ -202,6 +204,7 @@ type Props = {
 	allowedToolCodes?: string[];
 	editorSessionKey?: string;
 	maxImageMB?: number;
+	mediaContext?: RichTextEditorMediaContext;
 	sourceLabel?: string;
 	sourceValue?: unknown;
 	toolbarLayout?: ToolbarItem[];
@@ -423,6 +426,7 @@ export default function RichTextEditor({
 	allowedToolCodes,
 	editorSessionKey,
 	maxImageMB = 10,
+	mediaContext = "admin",
 	toolbarLayout = DEFAULT_TOOLBAR_LAYOUT,
 	canvasLayoutMode = "full",
 }: Props) {
@@ -1150,6 +1154,7 @@ export default function RichTextEditor({
 				accept="image/*"
 				maxSizeMB={maxImageMB}
 				defaultShared={false}
+				mediaContext={mediaContext}
 			/>
 		</>
 	);

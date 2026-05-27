@@ -30,7 +30,6 @@ const cspDirectives = [
 	"child-src https://www.youtube-nocookie.com https://www.youtube.com",
 	"worker-src 'self' blob:",
 	"manifest-src 'self'",
-	"prefetch-src 'self'",
 	isProduction ? "upgrade-insecure-requests" : "",
 ].filter((directive) => directive.length > 0);
 

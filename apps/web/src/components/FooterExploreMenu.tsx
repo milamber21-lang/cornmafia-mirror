@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/FooterExploreMenu.tsx                                                          ////
 //// Language: TSX                                                                                                ////
-//// Click-open footer Explore popover for DB-driven footer navigation links.                                      ////
+//// Hover, focus, and click-open footer Explore popover for DB-driven footer navigation links.                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 "use client";
@@ -39,6 +39,8 @@ type FooterExploreMenuProps = {
 	model: PublicMenuModel;
 };
 
+const FOOTER_MENU_HIDE_DELAY_MS = 130;
+
 function buildGroups(model: PublicMenuModel): FooterExploreGroup[] {
 	return model.flatMap((category) =>
 		category.columns.map((column) => ({
@@ -67,14 +69,41 @@ function getTriggerLabel(model: PublicMenuModel): string {
 export default function FooterExploreMenu({ model }: FooterExploreMenuProps) {
 	const popoverId = useId();
 	const menuRef = useRef<HTMLDivElement | null>(null);
+	const hideTimerRef = useRef<number | null>(null);
 	const [open, setOpen] = useState(false);
 
 	const groups = useMemo(() => buildGroups(model), [model]);
 	const triggerLabel = useMemo(() => getTriggerLabel(model), [model]);
 	const hasMenu = groups.some((group) => group.links.length > 0 || group.seeAllHref.length > 0);
 
+	const clearHideTimer = useCallback((): void => {
+		if (hideTimerRef.current !== null) {
+			window.clearTimeout(hideTimerRef.current);
+			hideTimerRef.current = null;
+		}
+	}, []);
+
+	const openMenu = useCallback((): void => {
+		clearHideTimer();
+		setOpen(true);
+	}, [clearHideTimer]);
+
 	const closeMenu = useCallback((): void => {
+		clearHideTimer();
 		setOpen(false);
+	}, [clearHideTimer]);
+
+	const scheduleCloseMenu = useCallback((): void => {
+		clearHideTimer();
+		hideTimerRef.current = window.setTimeout(() => setOpen(false), FOOTER_MENU_HIDE_DELAY_MS);
+	}, [clearHideTimer]);
+
+	useEffect(() => {
+		return () => {
+			if (hideTimerRef.current !== null) {
+				window.clearTimeout(hideTimerRef.current);
+			}
+		};
 	}, []);
 
 	useEffect(() => {
@@ -113,7 +142,20 @@ export default function FooterExploreMenu({ model }: FooterExploreMenuProps) {
 	}
 
 	return (
-		<div ref={menuRef} className="footer-explore">
+		<div
+			ref={menuRef}
+			className="footer-explore"
+			onMouseEnter={openMenu}
+			onMouseLeave={scheduleCloseMenu}
+			onFocus={openMenu}
+			onBlur={(event) => {
+				const nextTarget = event.relatedTarget;
+				if (nextTarget instanceof Node && menuRef.current?.contains(nextTarget)) {
+					return;
+				}
+				scheduleCloseMenu();
+			}}
+		>
 			<button
 				type="button"
 				className={`footer-explore-button${open ? " is-open" : ""}`}

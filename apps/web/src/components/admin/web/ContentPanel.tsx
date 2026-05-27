@@ -910,6 +910,7 @@ export default function ContentPanel({
 								fields={templateFields}
 								fieldOptions={fieldOptions}
 								media={media}
+								series={series}
 								values={currentFieldValues}
 								categoryId={String(values.categoryId ?? "")}
 								subcategoryId={String(values.subcategoryId ?? "")}

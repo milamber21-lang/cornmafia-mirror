@@ -9,7 +9,9 @@
 
 import * as React from "react";
 
-import RichTextEditor from "@/components/editors/richtext/RichTextEditor";
+import RichTextEditor, {
+	type RichTextEditorMediaContext,
+} from "@/components/editors/richtext/RichTextEditor";
 import type {
 	RichTextEditorCanvasLayoutMode,
 } from "@/components/editors/richtext/RichTextEditorTypes";
@@ -29,6 +31,7 @@ import {
 } from "@/lib/editors/richtext/rich-text-json";
 import type {
 	ContentMediaOption,
+	ContentSeriesOption,
 	ContentTemplateField,
 	ContentTemplateFieldOption,
 } from "@/lib/data/content";
@@ -39,10 +42,12 @@ type ContentFieldInputsProps = {
 	fields: ContentTemplateField[];
 	fieldOptions: ContentTemplateFieldOption[];
 	media: ContentMediaOption[];
+	series?: ContentSeriesOption[];
 	values: Values;
 	categoryId: string;
 	subcategoryId: string;
 	editorSessionKey: string;
+	editorMediaContext?: RichTextEditorMediaContext;
 	onChange: (templateFieldId: string, value: unknown) => void;
 	readOnly?: boolean;
 };
@@ -99,6 +104,22 @@ function mediaOptions(rows: ContentMediaOption[]): SingleOption[] {
 		value: row.id,
 		label: row.label,
 	}));
+}
+
+function seriesOptions(rows: ContentSeriesOption[]): SingleOption[] {
+	return rows.map((row) => ({
+		value: row.id,
+		label: row.subcategoryId === null
+			? `${row.title} (category-level)`
+			: row.title,
+	}));
+}
+
+function isSeriesLatestField(field: ContentTemplateField): boolean {
+	return (
+		field.valueColumnName === "value_integer" &&
+		field.fieldListCode === "series_latest_series_id"
+	);
 }
 
 function classNames(...values: Array<string | undefined | false>): string {
@@ -242,10 +263,12 @@ export default function ContentFieldInputs({
 	fields,
 	fieldOptions,
 	media,
+	series = [],
 	values,
 	categoryId,
 	subcategoryId,
 	editorSessionKey,
+	editorMediaContext = "admin",
 	onChange,
 	readOnly = false,
 }: ContentFieldInputsProps): React.JSX.Element {
@@ -296,6 +319,21 @@ export default function ContentFieldInputs({
 								onChange={(event) => onChange(id, event.target.value)}
 								rows={5}
 								disabled={fieldReadOnly}
+							/>
+						</FieldShell>
+					);
+				}
+
+				if (isSeriesLatestField(field)) {
+					return (
+						<FieldShell key={id} field={field}>
+							<DropdownMenuSingle
+								className="admin-content-field-select"
+								options={seriesOptions(series)}
+								value={valueAsString(value)}
+								onChange={(nextValue) => onChange(id, nextValue)}
+								placeholder={series.length === 0 ? "No series available" : "Select series"}
+								disabled={fieldReadOnly || series.length === 0}
 							/>
 						</FieldShell>
 					);
@@ -418,6 +456,7 @@ export default function ContentFieldInputs({
 								readOnly={fieldReadOnly}
 								editorSessionKey={`${editorSessionKey}:${id}`}
 								allowedToolCodes={field.fieldToolCodes}
+								mediaContext={editorMediaContext}
 								canvasLayoutMode={getRichTextEditorCanvasLayoutMode(
 									field,
 									hasRenderableAsideFields,

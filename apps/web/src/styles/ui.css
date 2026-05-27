@@ -461,6 +461,28 @@
 	border-radius: var(--radius);
 	background: var(--theme-surface);
 	box-shadow: var(--shadow-1);
+	scrollbar-color: var(--theme-border-strong, var(--theme-border)) var(--theme-surface);
+	scrollbar-width: thin;
+}
+
+.ui-dropdown__menu::-webkit-scrollbar {
+	width: var(--space-2);
+	height: var(--space-2);
+}
+
+.ui-dropdown__menu::-webkit-scrollbar-track {
+	background: var(--theme-surface);
+	border-radius: var(--radius-pill);
+}
+
+.ui-dropdown__menu::-webkit-scrollbar-thumb {
+	border: 2px solid var(--theme-surface);
+	border-radius: var(--radius-pill);
+	background: var(--theme-border-strong, var(--theme-border));
+}
+
+.ui-dropdown__menu::-webkit-scrollbar-thumb:hover {
+	background: var(--theme-text-muted);
 }
 
 .ui-dropdown__option,
