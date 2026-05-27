@@ -10,6 +10,7 @@ import { NextResponse } from "next/server";
 import {
 	findGameAssetBySlug,
 	listGameAssetProperties,
+	listGameAssetVariants,
 	listRecipesCraftingGameAsset,
 	listRecipesUsingGameAsset,
 } from "@/lib/data/game-assets";
@@ -45,8 +46,9 @@ export async function GET(
 			return NextResponse.json({ message: "Not Found" }, { status: 404 });
 		}
 
-		const [properties, usedInRecipes, craftedByRecipes] = await Promise.all([
+		const [properties, variants, usedInRecipes, craftedByRecipes] = await Promise.all([
 			listGameAssetProperties(doc.id),
+			listGameAssetVariants(doc.id),
 			listRecipesUsingGameAsset(doc.id),
 			listRecipesCraftingGameAsset(doc.id),
 		]);
@@ -55,6 +57,7 @@ export async function GET(
 			{
 				doc,
 				properties,
+				variants,
 				usedInRecipes,
 				craftedByRecipes,
 			},

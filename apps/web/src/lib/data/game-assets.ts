@@ -86,6 +86,25 @@ export type GameAssetRecipeRef = {
 	primary: boolean | null;
 };
 
+export type GameAssetVariant = {
+	assetVariantId: string;
+	variantRoleCode: string;
+	variantLabel: string | null;
+	sortOrder: number;
+	parentAssetId: string;
+	parentCanonicalAssetKey: string;
+	parentName: string;
+	parentSlug: string;
+	variantAssetId: string;
+	variantCanonicalAssetKey: string;
+	variantName: string;
+	variantSlug: string;
+	variantRarityCode: string | null;
+	isCurrentAsset: boolean;
+	iconMedia: GameMediaRef | null;
+	detailMedia: GameMediaRef | null;
+};
+
 export type GameAssetListFilters = {
 	search: string | null;
 	assetClassCode: string | null;
@@ -177,6 +196,31 @@ type GameAssetRecipeRefRow = {
 	quantity_value: string | number | null;
 	quantity_text: string | null;
 	primary_flag?: boolean | null;
+};
+
+type GameAssetVariantRow = {
+	asset_variant_id: string | number;
+	variant_role_code: string;
+	variant_label: string | null;
+	sort_order: string | number;
+	parent_asset_id: string | number;
+	parent_canonical_asset_key: string;
+	parent_asset_name: string;
+	parent_asset_slug: string;
+	variant_asset_id: string | number;
+	variant_canonical_asset_key: string;
+	variant_asset_name: string;
+	variant_asset_slug: string;
+	variant_rarity_code: string | null;
+	is_current_asset: boolean;
+	icon_media_id: string | number | null;
+	icon_media_width_px: number | null;
+	icon_media_height_px: number | null;
+	icon_media_mime_type: string | null;
+	detail_media_id: string | number | null;
+	detail_media_width_px: number | null;
+	detail_media_height_px: number | null;
+	detail_media_mime_type: string | null;
 };
 
 const GAME_ASSET_SELECT_COLUMNS = `asset_id,
@@ -340,6 +384,37 @@ function mapAssetRecipeRefRow(row: GameAssetRecipeRefRow): GameAssetRecipeRef {
 	};
 }
 
+function mapAssetVariantRow(row: GameAssetVariantRow): GameAssetVariant {
+	return {
+		assetVariantId: String(row.asset_variant_id),
+		variantRoleCode: row.variant_role_code,
+		variantLabel: row.variant_label,
+		sortOrder: toNumber(row.sort_order),
+		parentAssetId: String(row.parent_asset_id),
+		parentCanonicalAssetKey: row.parent_canonical_asset_key,
+		parentName: row.parent_asset_name,
+		parentSlug: row.parent_asset_slug,
+		variantAssetId: String(row.variant_asset_id),
+		variantCanonicalAssetKey: row.variant_canonical_asset_key,
+		variantName: row.variant_asset_name,
+		variantSlug: row.variant_asset_slug,
+		variantRarityCode: row.variant_rarity_code,
+		isCurrentAsset: row.is_current_asset,
+		iconMedia: mapMediaRef({
+			mediaId: row.icon_media_id,
+			width: row.icon_media_width_px,
+			height: row.icon_media_height_px,
+			mimeType: row.icon_media_mime_type,
+		}),
+		detailMedia: mapMediaRef({
+			mediaId: row.detail_media_id,
+			width: row.detail_media_width_px,
+			height: row.detail_media_height_px,
+			mimeType: row.detail_media_mime_type,
+		}),
+	};
+}
+
 function normalizeSearch(value: string | null): string | null {
 	const normalized = value?.trim();
 	return normalized ? `%${normalized}%` : null;
@@ -431,6 +506,67 @@ export async function listGameAssetProperties(
 	);
 
 	return result.rows.map(mapPropertyRow);
+}
+
+export async function listGameAssetVariants(
+	assetId: string,
+): Promise<GameAssetVariant[]> {
+	const result = await query<GameAssetVariantRow>(
+		`SELECT DISTINCT ON (variants.variant_asset_id, variants.variant_role_code)
+				variants.asset_variant_id,
+				variants.variant_role_code,
+				variants.variant_label,
+				variants.sort_order,
+				variants.parent_asset_id,
+				variants.parent_canonical_asset_key,
+				variants.parent_asset_name,
+				variants.parent_asset_slug,
+				variants.variant_asset_id,
+				variants.variant_canonical_asset_key,
+				variants.variant_asset_name,
+				variants.variant_asset_slug,
+				variants.variant_rarity_code,
+				(variants.variant_asset_id = $1::bigint) AS is_current_asset,
+				assets.icon_media_id,
+				assets.icon_media_width_px,
+				assets.icon_media_height_px,
+				assets.icon_media_mime_type,
+				assets.detail_media_id,
+				assets.detail_media_width_px,
+				assets.detail_media_height_px,
+				assets.detail_media_mime_type
+		 FROM web_view.game_asset_variants variants
+		 JOIN web_view.game_assets assets
+		   ON assets.asset_id = variants.variant_asset_id
+		 WHERE variants.parent_asset_id IN (
+				SELECT $1::bigint AS parent_asset_id
+				UNION
+				SELECT related.parent_asset_id
+				FROM web_view.game_asset_variants related
+				WHERE related.variant_asset_id = $1::bigint
+			)
+		 ORDER BY variants.variant_asset_id,
+				  variants.variant_role_code,
+				  variants.sort_order,
+				  variants.variant_asset_name,
+				  variants.asset_variant_id`,
+		[assetId],
+	);
+
+	return result.rows
+		.map(mapAssetVariantRow)
+		.sort((left, right) => {
+			if (left.sortOrder !== right.sortOrder) {
+				return left.sortOrder - right.sortOrder;
+			}
+
+			const nameCompare = left.variantName.localeCompare(right.variantName);
+			if (nameCompare !== 0) {
+				return nameCompare;
+			}
+
+			return left.assetVariantId.localeCompare(right.assetVariantId);
+		});
 }
 
 export async function listRecipesUsingGameAsset(
