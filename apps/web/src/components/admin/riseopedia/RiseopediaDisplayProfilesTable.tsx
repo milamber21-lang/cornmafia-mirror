@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/admin/riseopedia/RiseopediaDisplayProfilesTable.tsx                          ////
 //// Language: TSX                                                                                               ////
-//// Riseopedia display profiles admin table and panel wrapper.                                                  ////
+//// Riseopedia display profiles admin table and panel wrapper with scoped child management links.               ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 "use client";
@@ -9,7 +9,11 @@
 import type { JSX } from "react";
 
 import RiseopediaAdminCrudTable from "./RiseopediaAdminCrudTable";
-import { buildOptionsFromRows } from "./RiseopediaAdminHelpers";
+import {
+	buildOptionsFromRows,
+	readRowValue,
+	toRowKey,
+} from "./RiseopediaAdminHelpers";
 import type {
 	RiseopediaAdminMeta,
 	RiseopediaAdminRow,
@@ -18,6 +22,10 @@ import type {
 export interface RiseopediaDisplayProfilesTableProps {
 	initialRows: RiseopediaAdminRow[];
 	meta: RiseopediaAdminMeta;
+}
+
+function profileIdHref(row: RiseopediaAdminRow, suffix: string): string {
+	return `/admin/riseopedia/display-profiles/${toRowKey(readRowValue(row, "display_profile_id"))}/${suffix}`;
 }
 
 export default function RiseopediaDisplayProfilesTable({
@@ -38,13 +46,27 @@ export default function RiseopediaDisplayProfilesTable({
 			emptyText="No display profiles match your search."
 			searchPlaceholder="Search display profiles"
 			defaultSortKey="display_profile_name"
+			rowActions={[
+				{
+					label: "Bindings",
+					href: (row) => profileIdHref(row, "bindings"),
+					variant: "neutral",
+				},
+				{
+					label: "Properties",
+					href: (row) => profileIdHref(row, "properties"),
+					variant: "neutral",
+				},
+				{
+					label: "Blocks",
+					href: (row) => profileIdHref(row, "blocks"),
+					variant: "neutral",
+				},
+			]}
 			columns={[
 				{ rowKey: "display_profile_name", label: "Profile", strong: true },
 				{ rowKey: "display_profile_code", label: "Code" },
 				{ rowKey: "entity_type_name", label: "Entity" },
-				{ rowKey: "binding_count", label: "Bindings", kind: "count" },
-				{ rowKey: "property_count", label: "Properties", kind: "count" },
-				{ rowKey: "relationship_block_count", label: "Blocks", kind: "count" },
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
 			fields={[

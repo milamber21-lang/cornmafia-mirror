@@ -37,12 +37,12 @@ const links: Array<{
 	},
 	{
 		key: "section-items",
-		label: "Manual Items",
+		label: "Section Manual Overrides",
 		href: "/admin/riseopedia/section-items",
 	},
 	{
 		key: "visibility",
-		label: "Visibility",
+		label: "Item Visibility Overrides",
 		href: "/admin/riseopedia/visibility",
 	},
 	{
@@ -65,7 +65,7 @@ const links: Array<{
 		label: "Profile Properties",
 		href: "/admin/riseopedia/profile-properties",
 	},
-	{ key: "blocks", label: "Blocks", href: "/admin/riseopedia/blocks" },
+	{ key: "blocks", label: "Profile Blocks", href: "/admin/riseopedia/blocks" },
 ];
 
 export default function RiseopediaAdminNav({

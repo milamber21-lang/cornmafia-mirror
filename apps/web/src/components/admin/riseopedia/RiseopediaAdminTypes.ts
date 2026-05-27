@@ -17,10 +17,15 @@ export type RiseopediaAdminMeta = {
 	sectionModes?: RiseopediaAdminRows;
 	ruleKinds?: RiseopediaAdminRows;
 	assetClasses?: RiseopediaAdminRows;
+	recipeBenches?: RiseopediaAdminRows;
 	propertyOrigins?: RiseopediaAdminRows;
+	propertyOriginOptions?: RiseopediaAdminRows;
+	propertySourceOptions?: RiseopediaAdminRows;
+	propertyDataTypes?: RiseopediaAdminRows;
 	displaySlots?: RiseopediaAdminRows;
 	profileSelectorKinds?: RiseopediaAdminRows;
 	relationshipBlockTypes?: RiseopediaAdminRows;
+	profilePropertyOptions?: RiseopediaAdminRows;
 };
 
 export type RiseopediaAdminOption = {
@@ -35,6 +40,18 @@ export type RiseopediaAdminFieldType =
 	| "select"
 	| "number";
 
+export type RiseopediaAdminFieldValues = { [key: string]: unknown };
+
+export type RiseopediaAdminFieldOptionBuilder = (values: RiseopediaAdminFieldValues) => RiseopediaAdminOption[];
+
+export type RiseopediaAdminFieldPredicate = (values: RiseopediaAdminFieldValues) => boolean;
+
+export type RiseopediaAdminFieldChangeHandler = (args: {
+	value: string;
+	values: RiseopediaAdminFieldValues;
+	setValue: (name: string, value: unknown) => void;
+}) => void;
+
 export type RiseopediaAdminFieldConfig = {
 	valueKey: string;
 	rowKey: string;
@@ -43,9 +60,14 @@ export type RiseopediaAdminFieldConfig = {
 	required?: boolean;
 	defaultValue?: unknown;
 	helpText?: string;
-	options?: RiseopediaAdminOption[];
+	options?: RiseopediaAdminOption[] | RiseopediaAdminFieldOptionBuilder;
 	textareaRows?: number;
 	readOnlyOnEdit?: boolean;
+	hidden?: boolean;
+	visible?: RiseopediaAdminFieldPredicate;
+	isDisabled?: RiseopediaAdminFieldPredicate;
+	span?: 6 | 12;
+	onChange?: RiseopediaAdminFieldChangeHandler;
 };
 
 export type RiseopediaAdminColumnKind = "text" | "boolean" | "count" | "status";
@@ -66,4 +88,10 @@ export type RiseopediaAdminFilterConfig = {
 	options: RiseopediaAdminOption[];
 	clearLabel: string;
 	placeholder?: string;
+};
+
+export type RiseopediaAdminRowActionConfig = {
+	label: string;
+	href: (row: RiseopediaAdminRow) => string;
+	variant?: "neutral" | "accent" | "ghost" | "green";
 };

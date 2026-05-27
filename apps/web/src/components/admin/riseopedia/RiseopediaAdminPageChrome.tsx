@@ -24,6 +24,8 @@ export interface RiseopediaAdminGuardProps {
 export interface RiseopediaAdminPageChromeProps {
 	title: string;
 	description?: string;
+	backHref?: string;
+	backLabel?: string;
 	children: ReactNode;
 }
 
@@ -56,6 +58,9 @@ export function RiseopediaAdminGuard({
 
 export default function RiseopediaAdminPageChrome({
 	title,
+	description,
+	backHref = "/admin",
+	backLabel = "Go back",
 	children,
 }: RiseopediaAdminPageChromeProps): JSX.Element {
 	return (
@@ -63,10 +68,11 @@ export default function RiseopediaAdminPageChrome({
 			<div className="admin-page-card-header">
 				<div>
 					<h1 className="admin-page-card-title">{title}</h1>
+					{description ? <p className="admin-page-card-description">{description}</p> : null}
 				</div>
 				<div className="admin-page-card-actions">
-					<ButtonLink href="/admin" variant="neutral">
-						Go back
+					<ButtonLink href={backHref} variant="neutral">
+						{backLabel}
 					</ButtonLink>
 				</div>
 			</div>

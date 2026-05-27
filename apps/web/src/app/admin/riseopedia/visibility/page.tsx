@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/app/admin/riseopedia/visibility/page.tsx                                                  ////
 //// Language: TSX                                                                                               ////
-//// Admin page for Riseopedia entity visibility overrides.                                                      ////
+//// Admin page for Riseopedia item visibility overrides.                                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -22,7 +22,7 @@ export const dynamic = "force-dynamic";
 export default async function RiseopediaVisibilityAdminPage(): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Riseopedia Visibility" reason={guard.reason} />;
+		return <RiseopediaAdminGuard title="Item Visibility Overrides" reason={guard.reason} />;
 	}
 
 	const [meta, rows] = await Promise.all([
@@ -32,9 +32,9 @@ export default async function RiseopediaVisibilityAdminPage(): Promise<JSX.Eleme
 
 	return (
 		<RiseopediaAdminPageChrome
-			title="Riseopedia Visibility"
+			title="Item Visibility Overrides"
 		>
-			<RiseopediaVisibilityTable initialRows={rows.overrides} meta={meta} />
+			<RiseopediaVisibilityTable initialRows={rows.overrides} entities={rows.entities} meta={meta} />
 		</RiseopediaAdminPageChrome>
 	);
 }

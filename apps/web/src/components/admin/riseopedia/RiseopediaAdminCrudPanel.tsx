@@ -49,6 +49,8 @@ function buildFieldDef(
 		label: field.label,
 		helpText: field.helpText,
 		readOnly: mode === "edit" && field.readOnlyOnEdit === true,
+		isDisabled: field.isDisabled,
+		visible: field.visible,
 		validate: (value: unknown): string | undefined => {
 			if (field.required === true && String(value ?? "").trim().length === 0) {
 				return `${field.label} is required.`;
@@ -87,6 +89,7 @@ function buildFieldDef(
 			type: "select-single",
 			allowClear: field.required !== true,
 			options: field.options ?? [],
+			onChange: field.onChange,
 		};
 	}
 
@@ -101,7 +104,11 @@ function buildRows(fields: RiseopediaAdminFieldConfig[]): RowDef[] {
 	let pending: RowDef = [];
 
 	for (const field of fields) {
-		if (field.type === "textarea") {
+		if (field.hidden === true) {
+			continue;
+		}
+
+		if (field.type === "textarea" || field.span === 12) {
 			if (pending.length > 0) {
 				rows.push(pending);
 				pending = [];
@@ -110,7 +117,7 @@ function buildRows(fields: RiseopediaAdminFieldConfig[]): RowDef[] {
 			continue;
 		}
 
-		pending.push({ field: field.valueKey, span: 6 });
+		pending.push({ field: field.valueKey, span: field.span ?? 6 });
 		if (pending.length === 2) {
 			rows.push(pending);
 			pending = [];
@@ -146,9 +153,14 @@ export default function RiseopediaAdminCrudPanel({
 		[fields, row],
 	);
 
+	const visibleFields = useMemo(
+		() => fields.filter((field) => field.hidden !== true),
+		[fields],
+	);
+
 	const panelFields = useMemo(
-		() => fields.map((field) => buildFieldDef(field, mode)),
-		[fields, mode],
+		() => visibleFields.map((field) => buildFieldDef(field, mode)),
+		[mode, visibleFields],
 	);
 
 	const panelRows = useMemo(() => buildRows(fields), [fields]);
