@@ -31,6 +31,13 @@ const MEDIA_CONTEXT_KEYS = new Set([
 	"displayimage",
 	"image",
 	"icon",
+	"itemicon",
+	"itemiconspatial",
+	"itemiconsquare",
+	"itemiconwheelmenu",
+	"itemiconsspatial",
+	"itemiconssquare",
+	"itemiconswheelmenu",
 	"largeimage",
 	"logo",
 	"picture",
@@ -864,9 +871,19 @@ function isMediaContextPath(path) {
 function mediaRoleFromPath(path) {
 	for (let index = path.length - 1; index >= 0; index -= 1) {
 		const normalized = path[index].toLowerCase().replace(/[^a-z0-9]/g, "");
-		if (MEDIA_CONTEXT_KEYS.has(normalized)) {
-			return normalized;
+		if (!MEDIA_CONTEXT_KEYS.has(normalized)) {
+			continue;
 		}
+
+		if (normalized.includes("icon")) {
+			return "icon";
+		}
+
+		if (normalized === "brandlogo") {
+			return "brandlogo";
+		}
+
+		return normalized;
 	}
 
 	return "media_reference";

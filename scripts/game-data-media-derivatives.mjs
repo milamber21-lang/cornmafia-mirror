@@ -22,7 +22,7 @@ const DEFAULT_VARIANTS = [
 	{ code: "icon_64", maxSizePx: 64 },
 	{ code: "icon_128", maxSizePx: 128 },
 	{ code: "icon_256", maxSizePx: 256 },
-	{ code: "detail_512", maxSizePx: 512 },
+	{ code: "detail_1024", maxSizePx: 1024 },
 ];
 const SAFE_RELATIVE_PATH_PATTERN = /(^\/|(^|\/)[.][.](\/|$))/;
 const SUPPORTED_INPUT_FORMATS = new Set(["png", "jpg", "jpeg", "webp"]);
@@ -47,7 +47,7 @@ Options:
   --patch <patch_code>          Required patch folder name/code, for example 0.4.0.
   --scan-batch-id <id>          Optional completed scan batch ID. Defaults to latest completed scan for the patch.
   --patches-root <path>         Patch root directory. Default: ${DEFAULT_PATCHES_ROOT_REL_PATH}
-  --variants <list>             Comma list of code:size pairs. Default: icon_64:64,icon_128:128,icon_256:256,detail_512:512
+  --variants <list>             Comma list of code:size pairs. Default: icon_64:64,icon_128:128,icon_256:256,detail_1024:1024
   --quality <1-100>             WebP quality. Default: 82.
   --processor <name>            auto, sharp, magick, convert, or cwebp. Default: auto.
   --include-unreferenced        Generate derivatives for all inventoried media, not only JSON-referenced media.
@@ -602,24 +602,24 @@ async function generateDerivative(processor, sourceAbsPath, outputAbsPath, varia
 				fit: "inside",
 				withoutEnlargement: true,
 			})
-			.webp({ quality })
+			.webp({ quality, alphaQuality: 100 })
 			.toFile(outputAbsPath);
 		return;
 	}
 
 	if (processor.name === "magick") {
-		runImageCommand("magick", [sourceAbsPath, "-auto-orient", "-resize", `${variant.maxSizePx}x${variant.maxSizePx}>`, "-quality", String(quality), outputAbsPath]);
+		runImageCommand("magick", [sourceAbsPath, "-auto-orient", "-alpha", "on", "-resize", `${variant.maxSizePx}x${variant.maxSizePx}>`, "-quality", String(quality), outputAbsPath]);
 		return;
 	}
 
 	if (processor.name === "convert") {
-		runImageCommand("convert", [sourceAbsPath, "-auto-orient", "-resize", `${variant.maxSizePx}x${variant.maxSizePx}>`, "-quality", String(quality), outputAbsPath]);
+		runImageCommand("convert", [sourceAbsPath, "-auto-orient", "-alpha", "on", "-resize", `${variant.maxSizePx}x${variant.maxSizePx}>`, "-quality", String(quality), outputAbsPath]);
 		return;
 	}
 
 	if (processor.name === "cwebp") {
 		const targetSize = calculateTargetSize(sourceWidth, sourceHeight, variant.maxSizePx);
-		runImageCommand("cwebp", ["-quiet", "-q", String(quality), "-resize", String(targetSize.width), String(targetSize.height), sourceAbsPath, "-o", outputAbsPath]);
+		runImageCommand("cwebp", ["-quiet", "-q", String(quality), "-alpha_q", "100", "-resize", String(targetSize.width), String(targetSize.height), sourceAbsPath, "-o", outputAbsPath]);
 		return;
 	}
 
