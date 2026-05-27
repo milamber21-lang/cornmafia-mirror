@@ -53,15 +53,6 @@ function firstId(resultRows: IdRow[], column: string): number | null {
 	return toPositiveInt(resultRows[0]?.[column]);
 }
 
-async function queryRowsOrEmpty(sql: string): Promise<RiseopediaAdminRows> {
-	try {
-		const result = await query<DbRow>(sql);
-		return result.rows;
-	} catch {
-		return [];
-	}
-}
-
 export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 	const [
 		entityTypes,
@@ -105,15 +96,15 @@ export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 		query<DbRow>(
 			`SELECT * FROM web_view.riseopedia_admin_property_origins ORDER BY sort_order, property_origin_name`,
 		),
-		{ rows: await queryRowsOrEmpty(
+		query<DbRow>(
 			`SELECT * FROM web_view.riseopedia_admin_property_origin_options ORDER BY entity_type_code, sort_order, property_origin_name`,
-		) },
-		{ rows: await queryRowsOrEmpty(
+		),
+		query<DbRow>(
 			`SELECT * FROM web_view.riseopedia_admin_property_source_options ORDER BY entity_type_code, property_origin_code, source_selector_kind_code, cataloged_flag, source_label`,
-		) },
-		{ rows: await queryRowsOrEmpty(
+		),
+		query<DbRow>(
 			`SELECT * FROM web_view.riseopedia_admin_property_data_types ORDER BY sort_order, data_type_name`,
-		) },
+		),
 		query<DbRow>(
 			`SELECT * FROM web_view.riseopedia_display_slots ORDER BY sort_order, display_slot_name`,
 		),
@@ -123,9 +114,9 @@ export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 		query<DbRow>(
 			`SELECT * FROM web_view.riseopedia_admin_relationship_block_types ORDER BY block_group_code, sort_order, relationship_block_type_name`,
 		),
-		{ rows: await queryRowsOrEmpty(
+		query<DbRow>(
 			`SELECT * FROM web_view.riseopedia_admin_profile_property_options ORDER BY display_profile_name, sort_order, property_name`,
-		) },
+		),
 	]);
 
 	return {

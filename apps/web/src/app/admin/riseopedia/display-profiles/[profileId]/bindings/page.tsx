@@ -91,6 +91,7 @@ export default async function RiseopediaProfileBindingsScopedPage({
 				displayProfiles={rows.profiles}
 				meta={meta}
 				displayProfile={displayProfile}
+				allBindings={rows.bindings}
 			/>
 		</RiseopediaAdminPageChrome>
 	);

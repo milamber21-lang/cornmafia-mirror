@@ -60,6 +60,36 @@ function inferSelectorKind(originCode: string): string {
 	return originCode === "asset_property" ? SOURCE_SELECTOR_PROPERTY : SOURCE_SELECTOR_COLUMN;
 }
 
+function inferOriginEntityType(row: RiseopediaAdminRow): string {
+	const code = toDisplayText(readRowValue(row, "property_origin_code")).trim().toLowerCase();
+	const name = toDisplayText(readRowValue(row, "property_origin_name")).trim().toLowerCase();
+
+	if (code === "asset_property") {
+		return "asset";
+	}
+
+	if (code === "asset" || code.startsWith("asset_") || name.startsWith("asset ")) {
+		return "asset";
+	}
+
+	if (code === "recipe" || code.startsWith("recipe_") || name.startsWith("recipe ")) {
+		return "recipe";
+	}
+
+	return "";
+}
+
+function originMatchesEntity(row: RiseopediaAdminRow, entityTypeCode: string): boolean {
+	const rowEntityTypeCode = toDisplayText(readRowValue(row, "entity_type_code")).trim();
+	const inferredEntityTypeCode = inferOriginEntityType(row);
+
+	if (inferredEntityTypeCode) {
+		return inferredEntityTypeCode === entityTypeCode;
+	}
+
+	return rowEntityTypeCode === entityTypeCode;
+}
+
 function getSelectedOriginOption(args: {
 	meta: RiseopediaAdminMeta;
 	values: { [key: string]: unknown };
@@ -171,7 +201,7 @@ function buildOriginOptions(args: {
 	const options: RiseopediaAdminOption[] = [];
 
 	for (const option of args.meta.propertyOriginOptions ?? []) {
-		if (toDisplayText(readRowValue(option, "entity_type_code")) !== entityTypeCode) {
+		if (!originMatchesEntity(option, entityTypeCode)) {
 			continue;
 		}
 
@@ -302,6 +332,7 @@ function applySourceOption(args: {
 	setValue: (name: string, value: unknown) => void;
 }): void {
 	const sourceValue = toDisplayText(readRowValue(args.row, "source_value"));
+	args.setValue("sourceValue", sourceValue);
 	args.setValue("sourceColumnName", args.selectorKindCode === SOURCE_SELECTOR_COLUMN ? sourceValue : "");
 	args.setValue("sourcePropertyCode", args.selectorKindCode === SOURCE_SELECTOR_PROPERTY ? sourceValue : "");
 	args.setValue("propertyCode", toDisplayText(readRowValue(args.row, "property_code")));

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/app/riseopedia/assets/[slug]/page.tsx                                                  ////
 //// Language: TSX                                                                                            ////
-//// Canonical public Riseopedia asset detail route using the shared fixed detail renderer.                    ////
+//// Canonical public Riseopedia asset detail route using profile-driven fields and header media.              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -25,14 +25,6 @@ type PageProps = {
 		slug: string;
 	}>;
 };
-
-function formatNumber(value: number | null): string | null {
-	if (value === null || !Number.isFinite(value)) {
-		return null;
-	}
-
-	return new Intl.NumberFormat("en-US").format(value);
-}
 
 function displayValue(row: RiseopediaDisplayProperty): string {
 	return row.unitCode ? `${row.displayValue} ${row.unitCode}` : row.displayValue;
@@ -59,57 +51,27 @@ export default async function RiseopediaAssetDetailPage({
 	}
 
 	const media = detail.doc.detailMedia ?? detail.doc.iconMedia;
-	const overviewRows: RiseopediaOverviewRow[] = [
-		{ key: "asset-class", label: "Class", value: detail.doc.assetClassName },
-		{ key: "category", label: "Category", value: detail.doc.categoryName },
-		{
-			key: "subcategory",
-			label: "Subcategory",
-			value: detail.doc.subcategoryName,
-		},
-		{ key: "brand", label: "Brand", value: detail.doc.primaryBrandName },
-		{ key: "rarity", label: "Rarity", value: detail.doc.rarityCode },
-		{
-			key: "stack-size",
-			label: "Stack size",
-			value: formatNumber(detail.doc.stackSize),
-		},
-		{
-			key: "slot-size",
-			label: "Slot size",
-			value:
-				detail.doc.slotWidth && detail.doc.slotHeight
-					? `${detail.doc.slotWidth} x ${detail.doc.slotHeight}`
-					: null,
-		},
-		{ key: "value", label: "Value", value: formatNumber(detail.doc.valueAmount) },
-		{ key: "patch", label: "Last patch", value: detail.doc.lastSeenPatchCode },
-		{ key: "status", label: "Status", value: detail.doc.assetStatusCode },
-		...displayOverviewRows(detail.display.overviewRows),
-	];
+	const overviewRows = displayOverviewRows(detail.display.overviewRows);
 
 	return (
 		<RiseopediaDetailLayout
-			eyebrow="Riseopedia / Asset"
+			breadcrumb={[
+				{ label: "Riseopedia", href: "/riseopedia" },
+				{ label: "Assets", href: "/riseopedia/assets" },
+				{ label: detail.doc.name },
+			]}
 			title={detail.doc.name}
-			summary={detail.doc.summary}
+			summary={null}
 			sections={detail.sections}
-			overview={
-				<>
-					<RiseopediaMediaFrame
-						media={media}
-						alt={detail.doc.name}
-						placeholderLabel="No asset media"
-					/>
-					<RiseopediaOverviewTable rows={overviewRows} />
-				</>
-			}
-			body={
-				<RiseopediaBodyContent
-					display={detail.display}
-					fallbackDescription={detail.doc.description}
+			media={
+				<RiseopediaMediaFrame
+					media={media}
+					alt={detail.doc.name}
+					placeholderLabel="No asset media"
 				/>
 			}
+			overview={<RiseopediaOverviewTable rows={overviewRows} />}
+			body={<RiseopediaBodyContent display={detail.display} />}
 			bottom={
 				<RiseopediaBottomBlocks
 					display={detail.display}

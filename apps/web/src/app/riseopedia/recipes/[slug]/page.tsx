@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/app/riseopedia/recipes/[slug]/page.tsx                                                 ////
 //// Language: TSX                                                                                            ////
-//// Canonical public Riseopedia recipe detail route using the shared fixed detail renderer and recipe tree.    ////
+//// Canonical public Riseopedia recipe detail route with profile-driven fields and recipe tree body block.    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,7 +18,6 @@ import RiseopediaOverviewTable, {
 import RiseopediaRecipeTree from "@/components/riseopedia/RiseopediaRecipeTree";
 import { findRiseopediaRecipeDetailBySlug } from "@/lib/data/riseopedia-detail";
 import type { RiseopediaDisplayProperty } from "@/lib/data/riseopedia-display";
-import type { RiseopediaMediaRef } from "@/lib/data/riseopedia-assets";
 import type { RiseopediaRecipeAssetRef } from "@/lib/data/riseopedia-recipes";
 
 export const dynamic = "force-dynamic";
@@ -28,28 +27,6 @@ type PageProps = {
 		slug: string;
 	}>;
 };
-
-function formatNumber(value: number | null): string | null {
-	if (value === null || !Number.isFinite(value)) {
-		return null;
-	}
-
-	return new Intl.NumberFormat("en-US").format(value);
-}
-
-function formatSeconds(value: number | null): string | null {
-	if (value === null || !Number.isFinite(value)) {
-		return null;
-	}
-
-	if (value < 60) {
-		return `${value}s`;
-	}
-
-	const minutes = Math.floor(value / 60);
-	const seconds = value % 60;
-	return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`;
-}
 
 function displayValue(row: RiseopediaDisplayProperty): string {
 	return row.unitCode ? `${row.displayValue} ${row.unitCode}` : row.displayValue;
@@ -71,24 +48,6 @@ function primaryOutput(
 	return rows.find((row) => row.primary === true) ?? rows[0] ?? null;
 }
 
-function recipeMedia(
-	rows: RiseopediaRecipeAssetRef[],
-): RiseopediaMediaRef | null {
-	return primaryOutput(rows)?.iconMedia ?? null;
-}
-
-function outputSummary(rows: RiseopediaRecipeAssetRef[]): string | null {
-	if (rows.length === 0) {
-		return null;
-	}
-
-	if (rows.length === 1) {
-		return `Crafts ${rows[0].assetName}.`;
-	}
-
-	return `Crafts ${rows.length} outputs.`;
-}
-
 export default async function RiseopediaRecipeDetailPage({
 	params,
 }: PageProps): Promise<JSX.Element> {
@@ -99,46 +58,27 @@ export default async function RiseopediaRecipeDetailPage({
 		notFound();
 	}
 
-	const overviewRows: RiseopediaOverviewRow[] = [
-		{ key: "bench", label: "Crafting station", value: detail.doc.benchName },
-		{
-			key: "tier",
-			label: "Crafting tier",
-			value:
-				detail.doc.craftingTier === null ? null : `Tier ${detail.doc.craftingTier}`,
-		},
-		{
-			key: "duration",
-			label: "Crafting time",
-			value: formatSeconds(detail.doc.durationSeconds),
-		},
-		{ key: "xp", label: "XP", value: formatNumber(detail.doc.xpValue) },
-		{
-			key: "required-perk",
-			label: "Required perk",
-			value: detail.doc.requiredPerkSourceKey,
-		},
-		{ key: "patch", label: "Last patch", value: detail.doc.lastSeenPatchCode },
-		{ key: "status", label: "Status", value: detail.doc.statusCode },
-		...displayOverviewRows(detail.display.overviewRows),
-	];
+	const output = primaryOutput(detail.outputs);
+	const overviewRows = displayOverviewRows(detail.display.overviewRows);
 
 	return (
 		<RiseopediaDetailLayout
-			eyebrow="Riseopedia / Recipe"
+			breadcrumb={[
+				{ label: "Riseopedia", href: "/riseopedia" },
+				{ label: "Recipes", href: "/riseopedia/recipes" },
+				{ label: detail.doc.name },
+			]}
 			title={detail.doc.name}
-			summary={outputSummary(detail.outputs)}
+			summary={null}
 			sections={detail.sections}
-			overview={
-				<>
-					<RiseopediaMediaFrame
-						media={recipeMedia(detail.outputs)}
-						alt={primaryOutput(detail.outputs)?.assetName ?? detail.doc.name}
-						placeholderLabel="No recipe media"
-					/>
-					<RiseopediaOverviewTable rows={overviewRows} />
-				</>
+			media={
+				<RiseopediaMediaFrame
+					media={output?.iconMedia ?? null}
+					alt={output?.assetName ?? detail.doc.name}
+					placeholderLabel="No recipe media"
+				/>
 			}
+			overview={<RiseopediaOverviewTable rows={overviewRows} />}
 			body={
 				<>
 					<RiseopediaRecipeTree

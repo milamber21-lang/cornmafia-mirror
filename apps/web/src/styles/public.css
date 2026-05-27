@@ -1209,23 +1209,97 @@ Future passes should move matching visual rules here according to docs/style_own
 
 .riseopedia-detail-page {
   display: grid;
-  gap: var(--space-6, 1.5rem);
+  gap: var(--space-5, 1.25rem);
 }
 
 .riseopedia-detail-header {
+  --riseopedia-header-media-size: 7.5rem;
+
   display: grid;
-  gap: var(--space-4, 1rem);
-  padding-bottom: var(--space-5, 1.25rem);
+  grid-template-areas:
+    "copy"
+    "media";
+  gap: var(--space-3, 0.75rem);
+  padding-bottom: var(--space-4, 1rem);
   border-bottom: 1px solid var(--theme-border);
 }
 
+@media (min-width: 760px) {
+  .riseopedia-detail-header {
+    --riseopedia-header-media-size: 8.75rem;
+
+    grid-template-areas: "copy media";
+    grid-template-columns: minmax(0, 1fr) var(--riseopedia-header-media-size);
+    align-items: start;
+  }
+}
+
 .riseopedia-detail-header__copy {
-  display: grid;
-  gap: var(--space-3, 0.75rem);
+  display: flex;
+  grid-area: copy;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
   max-width: 54rem;
 }
 
-.riseopedia-detail-header__eyebrow,
+@media (min-width: 760px) {
+  .riseopedia-detail-header--with-media .riseopedia-detail-header__copy {
+    min-height: var(--riseopedia-header-media-size);
+  }
+}
+
+.riseopedia-detail-header__media {
+  grid-area: media;
+  width: var(--riseopedia-header-media-size);
+  max-width: 100%;
+  justify-self: start;
+}
+
+.riseopedia-detail-header__media .riseopedia-media-frame {
+  width: var(--riseopedia-header-media-size);
+  max-width: 100%;
+  height: var(--riseopedia-header-media-size);
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: auto;
+}
+
+@media (min-width: 760px) {
+  .riseopedia-detail-header__media {
+    justify-self: end;
+  }
+}
+
+.riseopedia-detail-header__breadcrumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.riseopedia-detail-header__breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.riseopedia-detail-header__breadcrumb-item:not(:last-child)::after {
+  color: var(--theme-border-strong);
+  content: "/";
+}
+
+.riseopedia-detail-header__breadcrumb-link,
+.riseopedia-detail-header__breadcrumb-current,
 .riseopedia-recipe-tree__eyebrow,
 .riseopedia-bottom-block__eyebrow {
   margin: 0;
@@ -1234,32 +1308,53 @@ Future passes should move matching visual rules here according to docs/style_own
   font-weight: 700;
   line-height: 1rem;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
+}
+
+.riseopedia-detail-header__breadcrumb-link {
+  text-decoration: none;
+}
+
+.riseopedia-detail-header__breadcrumb-link:hover,
+.riseopedia-detail-header__breadcrumb-link:focus-visible {
+  color: var(--theme-text);
+  text-decoration: none;
+}
+
+.riseopedia-detail-header__breadcrumb-current {
+  color: var(--theme-text-muted);
 }
 
 .riseopedia-detail-header__title {
   margin: 0;
   color: var(--theme-text);
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-size: clamp(1.875rem, 4vw, 3rem);
   font-weight: 700;
-  line-height: 1.05;
+  line-height: 1;
 }
 
 .riseopedia-detail-header__summary {
   max-width: 48rem;
   margin: 0;
   color: var(--theme-text-muted);
-  font-size: 1rem;
-  line-height: 1.65;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .riseopedia-section-chip-list {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2, 0.5rem);
+  column-gap: var(--space-2, 0.5rem);
+  row-gap: var(--space-1, 0.25rem);
   padding: 0;
   margin: 0;
   list-style: none;
+}
+
+@media (min-width: 760px) {
+  .riseopedia-detail-header--with-media .riseopedia-section-chip-list {
+    margin-top: auto;
+  }
 }
 
 .riseopedia-section-chip,
@@ -1279,7 +1374,7 @@ Future passes should move matching visual rules here according to docs/style_own
 }
 
 .riseopedia-section-chip {
-  padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
+  padding: var(--space-1, 0.25rem) var(--space-2, 0.5rem);
 }
 
 .riseopedia-recipe-tree__badge {
@@ -1288,15 +1383,19 @@ Future passes should move matching visual rules here according to docs/style_own
 
 .riseopedia-detail-layout {
   display: grid;
-  grid-template-areas:
-    "overview"
-    "body";
+  grid-template-areas: "body";
   gap: var(--space-6, 1.5rem);
   align-items: start;
 }
 
+.riseopedia-detail-layout--with-overview {
+  grid-template-areas:
+    "overview"
+    "body";
+}
+
 @media (min-width: 1024px) {
-  .riseopedia-detail-layout {
+  .riseopedia-detail-layout--with-overview {
     grid-template-areas: "body overview";
     grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
     gap: var(--space-8, 2rem);
@@ -1304,7 +1403,7 @@ Future passes should move matching visual rules here according to docs/style_own
 }
 
 @media (min-width: 1280px) {
-  .riseopedia-detail-layout {
+  .riseopedia-detail-layout--with-overview {
     grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
   }
 }
