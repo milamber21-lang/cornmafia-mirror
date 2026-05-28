@@ -13,11 +13,15 @@ import {
 	listRecipesCraftingRiseopediaAssets,
 	listRecipesUsingRiseopediaAsset,
 	listRiseopediaAssetProperties,
+	listRiseopediaAssetRarities,
 	listRiseopediaAssetSections,
+	listRiseopediaAssetStateProperties,
 	listRiseopediaAssetVariants,
 	type RiseopediaAssetDoc,
 	type RiseopediaAssetProperty,
+	type RiseopediaAssetRarity,
 	type RiseopediaAssetRecipeRef,
+	type RiseopediaAssetStateProperty,
 	type RiseopediaAssetVariant,
 } from "@/lib/data/riseopedia-assets";
 import {
@@ -40,6 +44,8 @@ export type RiseopediaAssetDetail = {
 	doc: RiseopediaAssetDoc;
 	sections: RiseopediaEntitySectionRef[];
 	properties: RiseopediaAssetProperty[];
+	rarities: RiseopediaAssetRarity[];
+	stateProperties: RiseopediaAssetStateProperty[];
 	variants: RiseopediaAssetVariant[];
 	usedInRecipes: RiseopediaAssetRecipeRef[];
 	craftedByRecipes: RiseopediaAssetRecipeRef[];
@@ -123,6 +129,8 @@ export async function findRiseopediaAssetDetailBySlug(
 	const [
 		sections,
 		properties,
+		rarities,
+		stateProperties,
 		variants,
 		usedInRecipes,
 		craftedByRecipes,
@@ -130,6 +138,8 @@ export async function findRiseopediaAssetDetailBySlug(
 	] = await Promise.all([
 		listRiseopediaAssetSections(doc.id),
 		listRiseopediaAssetProperties(doc.id),
+		listRiseopediaAssetRarities(doc.id),
+		listRiseopediaAssetStateProperties(doc.id),
 		listRiseopediaAssetVariants(doc.id),
 		listRecipesUsingRiseopediaAsset(doc.id),
 		listRecipesCraftingRiseopediaAsset(doc.id),
@@ -143,6 +153,8 @@ export async function findRiseopediaAssetDetailBySlug(
 		doc,
 		sections,
 		properties,
+		rarities,
+		stateProperties,
 		variants,
 		usedInRecipes,
 		craftedByRecipes,

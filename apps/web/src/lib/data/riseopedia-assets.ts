@@ -78,6 +78,47 @@ export type RiseopediaAssetProperty = {
 	updatedAt: string | null;
 };
 
+export type RiseopediaAssetRarity = {
+	assetId: string;
+	canonicalAssetKey: string;
+	rarityCode: string;
+	rarityName: string;
+	raritySlug: string;
+	sortOrder: number;
+	sourceRowCount: number;
+	variantCount: number;
+	hasPrimarySource: boolean;
+};
+
+export type RiseopediaAssetStateProperty = {
+	assetId: string;
+	canonicalAssetKey: string;
+	rarityCode: string;
+	rarityName: string;
+	variantKey: string;
+	variantLabel: string | null;
+	displayProfileId: string;
+	displayProfileCode: string;
+	displayProfileName: string;
+	displayProfilePropertyId: string;
+	propertyCatalogId: string;
+	propertyCode: string;
+	displayLabel: string;
+	propertyName: string;
+	description: string | null;
+	propertyOriginCode: string;
+	dataTypeCode: string;
+	unitCode: string | null;
+	displaySlotCode: string;
+	displaySlotName: string;
+	groupCode: string;
+	sortOrder: number;
+	compact: boolean;
+	featured: boolean;
+	valueText: string | null;
+	displayValue: string;
+};
+
 export type RiseopediaAssetRecipeRef = {
 	assetId: string;
 	canonicalAssetKey: string;
@@ -97,6 +138,8 @@ export type RiseopediaAssetRecipeRef = {
 
 export type RiseopediaAssetVariant = {
 	assetVariantId: string;
+	variantKey: string;
+	variantStateSlug: string;
 	variantRoleCode: string;
 	variantLabel: string | null;
 	sortOrder: number;
@@ -212,8 +255,51 @@ type RiseopediaAssetRecipeRefRow = {
 	primary_flag?: boolean | null;
 };
 
+type RiseopediaAssetRarityRow = {
+	asset_id: string | number;
+	canonical_asset_key: string;
+	rarity_code: string;
+	rarity_name: string;
+	rarity_slug: string;
+	sort_order: string | number;
+	source_row_count: string | number;
+	variant_count: string | number;
+	has_primary_source_flag: boolean;
+};
+
+type RiseopediaAssetStatePropertyRow = {
+	asset_id: string | number;
+	canonical_asset_key: string;
+	rarity_code: string;
+	rarity_name: string;
+	variant_key: string | null;
+	variant_label: string | null;
+	display_profile_id: string | number;
+	display_profile_code: string;
+	display_profile_name: string;
+	display_profile_property_id: string | number;
+	property_catalog_id: string | number;
+	property_code: string;
+	display_label: string;
+	property_name: string;
+	description: string | null;
+	property_origin_code: string;
+	data_type_code: string;
+	unit_code: string | null;
+	display_slot_code: string;
+	display_slot_name: string;
+	group_code: string;
+	sort_order: string | number;
+	compact_flag: boolean;
+	featured_flag: boolean;
+	value_text: string | null;
+	display_value: string;
+};
+
 type RiseopediaAssetVariantRow = {
 	asset_variant_id: string | number;
+	variant_key: string;
+	variant_state_slug: string;
 	variant_role_code: string;
 	variant_label: string | null;
 	sort_order: string | number;
@@ -387,6 +473,53 @@ function mapPropertyRow(row: RiseopediaAssetPropertyRow): RiseopediaAssetPropert
 	};
 }
 
+function mapAssetRarityRow(row: RiseopediaAssetRarityRow): RiseopediaAssetRarity {
+	return {
+		assetId: String(row.asset_id),
+		canonicalAssetKey: row.canonical_asset_key,
+		rarityCode: row.rarity_code,
+		rarityName: row.rarity_name,
+		raritySlug: row.rarity_slug,
+		sortOrder: toNumber(row.sort_order),
+		sourceRowCount: toNumber(row.source_row_count),
+		variantCount: toNumber(row.variant_count),
+		hasPrimarySource: row.has_primary_source_flag,
+	};
+}
+
+function mapAssetStatePropertyRow(
+	row: RiseopediaAssetStatePropertyRow,
+): RiseopediaAssetStateProperty {
+	return {
+		assetId: String(row.asset_id),
+		canonicalAssetKey: row.canonical_asset_key,
+		rarityCode: row.rarity_code,
+		rarityName: row.rarity_name,
+		variantKey: row.variant_key ?? "base",
+		variantLabel: row.variant_label,
+		displayProfileId: String(row.display_profile_id),
+		displayProfileCode: row.display_profile_code,
+		displayProfileName: row.display_profile_name,
+		displayProfilePropertyId: String(row.display_profile_property_id),
+		propertyCatalogId: String(row.property_catalog_id),
+		propertyCode: row.property_code,
+		displayLabel: row.display_label,
+		propertyName: row.property_name,
+		description: row.description,
+		propertyOriginCode: row.property_origin_code,
+		dataTypeCode: row.data_type_code,
+		unitCode: row.unit_code,
+		displaySlotCode: row.display_slot_code,
+		displaySlotName: row.display_slot_name,
+		groupCode: row.group_code,
+		sortOrder: toNumber(row.sort_order),
+		compact: row.compact_flag,
+		featured: row.featured_flag,
+		valueText: row.value_text,
+		displayValue: row.display_value,
+	};
+}
+
 function mapAssetRecipeRefRow(row: RiseopediaAssetRecipeRefRow): RiseopediaAssetRecipeRef {
 	return {
 		assetId: String(row.asset_id),
@@ -409,6 +542,8 @@ function mapAssetRecipeRefRow(row: RiseopediaAssetRecipeRefRow): RiseopediaAsset
 function mapAssetVariantRow(row: RiseopediaAssetVariantRow): RiseopediaAssetVariant {
 	return {
 		assetVariantId: String(row.asset_variant_id),
+		variantKey: row.variant_key,
+		variantStateSlug: row.variant_state_slug,
 		variantRoleCode: row.variant_role_code,
 		variantLabel: row.variant_label,
 		sortOrder: toNumber(row.sort_order),
@@ -542,6 +677,29 @@ export async function listRiseopediaAssetSections(
 	return result.rows.map(mapEntitySectionRefRow);
 }
 
+export async function listRiseopediaAssetRarities(
+	assetId: string,
+): Promise<RiseopediaAssetRarity[]> {
+	const result = await query<RiseopediaAssetRarityRow>(
+		`SELECT asset_id,
+				canonical_asset_key,
+				rarity_code,
+				rarity_name,
+				rarity_slug,
+				sort_order,
+				source_row_count,
+				variant_count,
+				has_primary_source_flag
+		 FROM web_view.riseopedia_asset_detail_rarity_rows
+		 WHERE asset_id = $1::bigint
+		 ORDER BY sort_order,
+				  rarity_name`,
+		[assetId],
+	);
+
+	return result.rows.map(mapAssetRarityRow);
+}
+
 export async function listRiseopediaAssetProperties(
 	assetId: string,
 ): Promise<RiseopediaAssetProperty[]> {
@@ -574,11 +732,58 @@ export async function listRiseopediaAssetProperties(
 	return result.rows.map(mapPropertyRow);
 }
 
+export async function listRiseopediaAssetStateProperties(
+	assetId: string,
+): Promise<RiseopediaAssetStateProperty[]> {
+	const result = await query<RiseopediaAssetStatePropertyRow>(
+		`SELECT asset_id,
+				canonical_asset_key,
+				rarity_code,
+				rarity_name,
+				variant_key,
+				variant_label,
+				display_profile_id,
+				display_profile_code,
+				display_profile_name,
+				display_profile_property_id,
+				property_catalog_id,
+				property_code,
+				display_label,
+				property_name,
+				description,
+				property_origin_code,
+				data_type_code,
+				unit_code,
+				display_slot_code,
+				display_slot_name,
+				group_code,
+				sort_order,
+				compact_flag,
+				featured_flag,
+				value_text,
+				display_value
+		 FROM web_view.riseopedia_asset_detail_state_property_rows
+		 WHERE asset_id = $1::bigint
+		 ORDER BY rarity_sort_order,
+				  variant_key,
+				  display_slot_code,
+				  group_code,
+				  sort_order,
+				  display_label,
+				  property_code`,
+		[assetId],
+	);
+
+	return result.rows.map(mapAssetStatePropertyRow);
+}
+
 export async function listRiseopediaAssetVariants(
 	assetId: string,
 ): Promise<RiseopediaAssetVariant[]> {
 	const result = await query<RiseopediaAssetVariantRow>(
 		`SELECT variants.asset_variant_id,
+				variants.variant_key,
+				variants.variant_state_slug,
 				variants.variant_role_code,
 				variants.variant_label,
 				variants.sort_order,

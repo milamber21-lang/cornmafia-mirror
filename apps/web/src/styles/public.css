@@ -1213,7 +1213,8 @@ Future passes should move matching visual rules here according to docs/style_own
 }
 
 .riseopedia-detail-header {
-  --riseopedia-header-media-size: 7.5rem;
+  --riseopedia-header-media-width: min(100%, 18rem);
+  --riseopedia-header-media-height: min(11.25rem, 62.5vw);
 
   display: grid;
   grid-template-areas:
@@ -1226,11 +1227,19 @@ Future passes should move matching visual rules here according to docs/style_own
 
 @media (min-width: 760px) {
   .riseopedia-detail-header {
-    --riseopedia-header-media-size: 8.75rem;
+    --riseopedia-header-media-width: 18rem;
+    --riseopedia-header-media-height: 10.125rem;
 
     grid-template-areas: "copy media";
-    grid-template-columns: minmax(0, 1fr) var(--riseopedia-header-media-size);
+    grid-template-columns: minmax(0, 1fr) var(--riseopedia-header-media-width);
     align-items: start;
+  }
+}
+
+@media (min-width: 1200px) {
+  .riseopedia-detail-header {
+    --riseopedia-header-media-width: 20rem;
+    --riseopedia-header-media-height: 11.25rem;
   }
 }
 
@@ -1242,25 +1251,19 @@ Future passes should move matching visual rules here according to docs/style_own
   max-width: 54rem;
 }
 
-@media (min-width: 760px) {
-  .riseopedia-detail-header--with-media .riseopedia-detail-header__copy {
-    min-height: var(--riseopedia-header-media-size);
-  }
-}
-
 .riseopedia-detail-header__media {
   grid-area: media;
-  width: var(--riseopedia-header-media-size);
+  width: var(--riseopedia-header-media-width);
   max-width: 100%;
   justify-self: start;
 }
 
 .riseopedia-detail-header__media .riseopedia-media-frame {
-  width: var(--riseopedia-header-media-size);
+  width: var(--riseopedia-header-media-width);
   max-width: 100%;
-  height: var(--riseopedia-header-media-size);
+  height: var(--riseopedia-header-media-height);
   min-height: 0;
-  max-height: none;
+  max-height: var(--riseopedia-header-media-height);
   aspect-ratio: auto;
 }
 
@@ -1364,6 +1367,23 @@ Future passes should move matching visual rules here according to docs/style_own
 .riseopedia-detail-header__brand-value {
   color: var(--theme-text);
   font-weight: 700;
+}
+
+.riseopedia-detail-header__brand--empty {
+  visibility: hidden;
+}
+
+.riseopedia-detail-header__brand + .riseopedia-detail-header__summary,
+.riseopedia-detail-header__brand + .riseopedia-section-chip-list {
+  margin-top: calc(var(--space-1, 0.25rem) * -0.5);
+}
+
+.riseopedia-detail-header__summary + .riseopedia-section-chip-list {
+  margin-top: calc(var(--space-1, 0.25rem) * -0.25);
+}
+
+.riseopedia-section-chip-list + .riseopedia-detail-header__selectors {
+  margin-top: calc(var(--space-1, 0.25rem) * -0.25);
 }
 
 .riseopedia-section-chip-list {
@@ -2177,4 +2197,158 @@ Future passes should move matching visual rules here according to docs/style_own
 .riseopedia-card-media__image {
 	max-width: 100%;
 	max-height: 100%;
+}
+
+/* Riseopedia rarity state controls. Common stays neutral; uncommon and higher use rarity accents. */
+.riseopedia-detail-header,
+.riseopedia-media-frame,
+.riseopedia-overview-table,
+.riseopedia-state-toggle {
+  --riseopedia-rarity-color: var(--theme-border-strong);
+  --riseopedia-rarity-soft: var(--theme-surface-ink-soft);
+  --riseopedia-rarity-border: var(--theme-border);
+  --riseopedia-rarity-glow: transparent;
+}
+
+.riseopedia-detail-header[data-rarity="uncommon"],
+.riseopedia-media-frame[data-rarity="uncommon"],
+.riseopedia-overview-table[data-rarity="uncommon"],
+.riseopedia-state-toggle[data-rarity="uncommon"] {
+  --riseopedia-rarity-color: var(--theme-rarity-uncommon);
+  --riseopedia-rarity-soft: color-mix(in oklab, var(--riseopedia-rarity-color) 14%, transparent);
+  --riseopedia-rarity-border: color-mix(in oklab, var(--riseopedia-rarity-color) 62%, var(--theme-border));
+  --riseopedia-rarity-glow: color-mix(in oklab, var(--riseopedia-rarity-color) 28%, transparent);
+}
+
+.riseopedia-detail-header[data-rarity="rare"],
+.riseopedia-media-frame[data-rarity="rare"],
+.riseopedia-overview-table[data-rarity="rare"],
+.riseopedia-state-toggle[data-rarity="rare"] {
+  --riseopedia-rarity-color: var(--theme-rarity-rare);
+  --riseopedia-rarity-soft: color-mix(in oklab, var(--riseopedia-rarity-color) 14%, transparent);
+  --riseopedia-rarity-border: color-mix(in oklab, var(--riseopedia-rarity-color) 62%, var(--theme-border));
+  --riseopedia-rarity-glow: color-mix(in oklab, var(--riseopedia-rarity-color) 28%, transparent);
+}
+
+.riseopedia-detail-header[data-rarity="legendary"],
+.riseopedia-media-frame[data-rarity="legendary"],
+.riseopedia-overview-table[data-rarity="legendary"],
+.riseopedia-state-toggle[data-rarity="legendary"] {
+  --riseopedia-rarity-color: var(--theme-rarity-legendary);
+  --riseopedia-rarity-soft: color-mix(in oklab, var(--riseopedia-rarity-color) 14%, transparent);
+  --riseopedia-rarity-border: color-mix(in oklab, var(--riseopedia-rarity-color) 62%, var(--theme-border));
+  --riseopedia-rarity-glow: color-mix(in oklab, var(--riseopedia-rarity-color) 28%, transparent);
+}
+
+.riseopedia-detail-header[data-rarity="mythic"],
+.riseopedia-media-frame[data-rarity="mythic"],
+.riseopedia-overview-table[data-rarity="mythic"],
+.riseopedia-state-toggle[data-rarity="mythic"] {
+  --riseopedia-rarity-color: var(--theme-rarity-mythic);
+  --riseopedia-rarity-soft: color-mix(in oklab, var(--riseopedia-rarity-color) 14%, transparent);
+  --riseopedia-rarity-border: color-mix(in oklab, var(--riseopedia-rarity-color) 62%, var(--theme-border));
+  --riseopedia-rarity-glow: color-mix(in oklab, var(--riseopedia-rarity-color) 28%, transparent);
+}
+
+.riseopedia-detail-header[data-rarity="uncommon"],
+.riseopedia-detail-header[data-rarity="rare"],
+.riseopedia-detail-header[data-rarity="legendary"],
+.riseopedia-detail-header[data-rarity="mythic"] {
+  border-bottom-color: var(--riseopedia-rarity-border);
+}
+
+.riseopedia-detail-header__selectors {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+  padding-top: 0;
+}
+
+.riseopedia-detail-selector {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+}
+
+.riseopedia-detail-selector__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem);
+}
+
+.riseopedia-state-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--theme-surface-ink-soft);
+  color: var(--theme-text-muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  transition: border-color var(--transition-fast, 140ms ease), background var(--transition-fast, 140ms ease), color var(--transition-fast, 140ms ease), transform var(--transition-fast, 140ms ease), box-shadow var(--transition-fast, 140ms ease);
+}
+
+.riseopedia-state-toggle--rarity {
+  padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
+}
+
+.riseopedia-state-toggle--rarity[data-rarity="uncommon"],
+.riseopedia-state-toggle--rarity[data-rarity="rare"],
+.riseopedia-state-toggle--rarity[data-rarity="legendary"],
+.riseopedia-state-toggle--rarity[data-rarity="mythic"] {
+  border-color: var(--riseopedia-rarity-border);
+  color: color-mix(in oklab, var(--riseopedia-rarity-color) 84%, var(--theme-text));
+}
+
+.riseopedia-state-toggle:hover,
+.riseopedia-state-toggle:focus-visible {
+  border-color: var(--riseopedia-rarity-border);
+  background: var(--riseopedia-rarity-soft);
+  color: var(--theme-text);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.riseopedia-state-toggle.is-active {
+  border-color: var(--theme-border-strong);
+  background: var(--theme-surface-ink-soft);
+  color: var(--theme-text);
+  box-shadow: 0 0 0 1px var(--theme-border);
+}
+
+.riseopedia-state-toggle[data-rarity="uncommon"].is-active,
+.riseopedia-state-toggle[data-rarity="rare"].is-active,
+.riseopedia-state-toggle[data-rarity="legendary"].is-active,
+.riseopedia-state-toggle[data-rarity="mythic"].is-active {
+  border-color: var(--riseopedia-rarity-color);
+  background: var(--riseopedia-rarity-soft);
+  color: var(--theme-text);
+  box-shadow: 0 0 0 1px var(--riseopedia-rarity-border), 0 0 1.25rem var(--riseopedia-rarity-glow);
+}
+
+.riseopedia-media-frame[data-rarity="uncommon"],
+.riseopedia-media-frame[data-rarity="rare"],
+.riseopedia-media-frame[data-rarity="legendary"],
+.riseopedia-media-frame[data-rarity="mythic"] {
+  border-color: var(--riseopedia-rarity-border);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--riseopedia-rarity-color) 18%, transparent), 0 0 1.5rem color-mix(in oklab, var(--riseopedia-rarity-color) 18%, transparent);
+}
+
+.riseopedia-overview-table[data-rarity="uncommon"],
+.riseopedia-overview-table[data-rarity="rare"],
+.riseopedia-overview-table[data-rarity="legendary"],
+.riseopedia-overview-table[data-rarity="mythic"] {
+  border-color: var(--riseopedia-rarity-border);
+  box-shadow: inset 3px 0 0 var(--riseopedia-rarity-color);
+}
+
+.riseopedia-overview-table[data-rarity="uncommon"] .riseopedia-section-title,
+.riseopedia-overview-table[data-rarity="rare"] .riseopedia-section-title,
+.riseopedia-overview-table[data-rarity="legendary"] .riseopedia-section-title,
+.riseopedia-overview-table[data-rarity="mythic"] .riseopedia-section-title {
+  color: color-mix(in oklab, var(--riseopedia-rarity-color) 72%, var(--theme-text));
 }

@@ -109,6 +109,13 @@
 	--base-pink-50: #fce7f3;
 	--base-orange: #f59e0b;
 
+	/* Official Cornucopias game rarity palette. */
+	--rarity-common: #c4c7c8;
+	--rarity-uncommon: #49d016;
+	--rarity-rare: #10cbd8;
+	--rarity-legendary: #951fc2;
+	--rarity-mythic: #ea5c26;
+
 	/* General debug palette. */
 	--debug-red: #ff3b3b;
 	--debug-orange: #ff9f1c;
