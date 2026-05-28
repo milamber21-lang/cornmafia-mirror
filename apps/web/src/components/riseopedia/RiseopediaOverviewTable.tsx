@@ -16,7 +16,17 @@ export type RiseopediaOverviewRow = {
 export type RiseopediaOverviewTableProps = {
 	title?: string;
 	rows: RiseopediaOverviewRow[];
+	rarityCode?: string | null;
 };
+
+function safeRarityCode(value: string | null | undefined): string | undefined {
+	if (!value) {
+		return undefined;
+	}
+
+	const normalized = value.trim().toLowerCase();
+	return /^[a-z0-9_-]+$/.test(normalized) ? normalized : undefined;
+}
 
 function hasRenderableValue(value: ReactNode): boolean {
 	return (
@@ -44,6 +54,7 @@ function RiseopediaOverviewRows({
 export default function RiseopediaOverviewTable({
 	title = "Overview",
 	rows,
+	rarityCode,
 }: RiseopediaOverviewTableProps): JSX.Element | null {
 	const visibleRows = rows.filter((row) => hasRenderableValue(row.value));
 
@@ -54,6 +65,7 @@ export default function RiseopediaOverviewTable({
 	return (
 		<section
 			className="riseopedia-overview-table"
+			data-rarity={safeRarityCode(rarityCode)}
 			aria-labelledby="riseopedia-overview-heading"
 		>
 			<h2 className="riseopedia-section-title" id="riseopedia-overview-heading">

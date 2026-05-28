@@ -69,6 +69,19 @@
 	--theme-surface-ink-soft: color-mix(in oklab, var(--theme-ink) 20%, transparent);
 	--theme-surface-ink-muted: color-mix(in oklab, var(--theme-ink) 10%, transparent);
 
+	/* Official game rarity roles. */
+	--theme-rarity-common: var(--rarity-common);
+	--theme-rarity-uncommon: var(--rarity-uncommon);
+	--theme-rarity-rare: var(--rarity-rare);
+	--theme-rarity-legendary: var(--rarity-legendary);
+	--theme-rarity-mythic: var(--rarity-mythic);
+	--theme-rarity-any-gradient: linear-gradient(90deg,
+		var(--theme-rarity-common) 8%,
+		var(--theme-rarity-uncommon) 30%,
+		var(--theme-rarity-rare) 60%,
+		var(--theme-rarity-legendary) 85%,
+		var(--theme-rarity-mythic));
+
 	/* Feature color roles. */
 	--theme-map-bg: var(--base-ink-910);
 	--theme-map-marker-border: var(--brand-white);

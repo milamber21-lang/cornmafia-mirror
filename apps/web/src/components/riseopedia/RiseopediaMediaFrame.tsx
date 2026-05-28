@@ -15,17 +15,31 @@ export type RiseopediaMediaFrameProps = {
 	alt: string;
 	placeholderLabel: string;
 	loading?: "eager" | "lazy";
+	rarityCode?: string | null;
 };
+
+function safeRarityCode(value: string | null | undefined): string | undefined {
+	if (!value) {
+		return undefined;
+	}
+
+	const normalized = value.trim().toLowerCase();
+	return /^[a-z0-9_-]+$/.test(normalized) ? normalized : undefined;
+}
 
 export default function RiseopediaMediaFrame({
 	media,
 	alt,
 	placeholderLabel,
 	loading = "eager",
+	rarityCode,
 }: RiseopediaMediaFrameProps): JSX.Element {
 	if (!media) {
 		return (
-			<div className="riseopedia-media-frame riseopedia-media-frame--empty">
+			<div
+				className="riseopedia-media-frame riseopedia-media-frame--empty"
+				data-rarity={safeRarityCode(rarityCode)}
+			>
 				<span className="riseopedia-media-frame__placeholder">
 					{placeholderLabel}
 				</span>
@@ -34,7 +48,7 @@ export default function RiseopediaMediaFrame({
 	}
 
 	return (
-		<figure className="riseopedia-media-frame">
+		<figure className="riseopedia-media-frame" data-rarity={safeRarityCode(rarityCode)}>
 			<img
 				className="riseopedia-media-frame__image"
 				src={media.url}

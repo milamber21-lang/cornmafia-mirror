@@ -22,7 +22,9 @@ export type RiseopediaDetailLayoutProps = {
 	brandName?: string | null;
 	sections: RiseopediaEntitySectionRef[];
 	media?: ReactNode;
+	controls?: ReactNode;
 	overview?: ReactNode;
+	selectedRarityCode?: string | null;
 	body: ReactNode;
 	bottom: ReactNode;
 };
@@ -75,6 +77,15 @@ function RiseopediaBreadcrumb({
 	);
 }
 
+function safeRarityCode(value: string | null | undefined): string | undefined {
+	if (!value) {
+		return undefined;
+	}
+
+	const normalized = value.trim().toLowerCase();
+	return /^[a-z0-9_-]+$/.test(normalized) ? normalized : undefined;
+}
+
 function RiseopediaSectionChips({
 	sections,
 }: {
@@ -105,7 +116,9 @@ export default function RiseopediaDetailLayout({
 	brandName,
 	sections,
 	media,
+	controls,
 	overview,
+	selectedRarityCode,
 	body,
 	bottom,
 }: RiseopediaDetailLayoutProps): JSX.Element {
@@ -119,22 +132,28 @@ export default function RiseopediaDetailLayout({
 	return (
 		<section className="riseopedia-detail-shell">
 			<article className="card riseopedia-detail-page">
-				<header className={headerClassName}>
+				<header className={headerClassName} data-rarity={safeRarityCode(selectedRarityCode)}>
 					<div className="riseopedia-detail-header__copy">
 						<RiseopediaBreadcrumb items={breadcrumb} />
 						<h1 className="riseopedia-detail-header__title">{title}</h1>
+						<p
+							className={
+								brandName
+									? "riseopedia-detail-header__brand"
+									: "riseopedia-detail-header__brand riseopedia-detail-header__brand--empty"
+							}
+							aria-hidden={brandName ? undefined : true}
+						>
+							<span className="riseopedia-detail-header__brand-label">Brand</span>
+							<span className="riseopedia-detail-header__brand-value">
+								{brandName ?? "Reserved"}
+							</span>
+						</p>
 						{summary ? (
 							<p className="riseopedia-detail-header__summary">{summary}</p>
 						) : null}
-						{brandName ? (
-							<p className="riseopedia-detail-header__brand">
-								<span className="riseopedia-detail-header__brand-label">Brand</span>
-								<span className="riseopedia-detail-header__brand-value">
-									{brandName}
-								</span>
-							</p>
-						) : null}
 						<RiseopediaSectionChips sections={sections} />
+						{controls}
 					</div>
 
 					{media ? (
