@@ -62,6 +62,7 @@ export default async function RiseopediaAssetDetailPage({
 			]}
 			title={detail.doc.name}
 			summary={null}
+			brandName={detail.doc.primaryBrandName}
 			sections={detail.sections}
 			media={
 				<RiseopediaMediaFrame

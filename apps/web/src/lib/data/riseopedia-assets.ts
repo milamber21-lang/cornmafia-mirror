@@ -445,10 +445,38 @@ function normalizeSearch(value: string | null): string | null {
 export async function listRiseopediaAssets(
 	filters: RiseopediaAssetListFilters,
 ): Promise<RiseopediaAssetListResult> {
-	const offset = (filters.page - 1) * filters.pageSize;
+	const filterValues = [
+		normalizeSearch(filters.search),
+		filters.section,
+		filters.assetClassCode,
+		filters.categorySlug,
+		filters.subcategorySlug,
+		filters.brandCode,
+	];
+	const countResult = await query<{ total_count: string | number }>(
+		`SELECT COUNT(*)::bigint AS total_count
+		 FROM web_view.riseopedia_assets assets
+		 WHERE ($1::text IS NULL OR assets.asset_name ILIKE $1 OR assets.canonical_asset_key ILIKE $1)
+		   AND ($2::text IS NULL OR EXISTS (
+				SELECT 1
+				FROM web_view.riseopedia_asset_section_memberships membership
+				WHERE membership.asset_id = assets.asset_id
+				  AND (membership.section_code = $2 OR membership.section_slug = $2)
+			))
+		   AND ($3::text IS NULL OR assets.asset_class_code = $3)
+		   AND ($4::text IS NULL OR assets.asset_category_slug = $4)
+		   AND ($5::text IS NULL OR assets.asset_subcategory_slug = $5)
+		   AND ($6::text IS NULL OR assets.primary_brand_code = $6)`,
+		filterValues,
+	);
+	const totalDocs = countResult.rows[0]
+		? toNumber(countResult.rows[0].total_count)
+		: 0;
+	const totalPages = totalDocs > 0 ? Math.ceil(totalDocs / filters.pageSize) : 0;
+	const page = totalPages > 0 ? Math.min(filters.page, totalPages) : filters.page;
+	const offset = (page - 1) * filters.pageSize;
 	const result = await query<RiseopediaAssetRow>(
-		`SELECT ${RISEOPEDIA_ASSET_SELECT_COLUMNS},
-				COUNT(*) OVER() AS total_count
+		`SELECT ${RISEOPEDIA_ASSET_SELECT_COLUMNS}
 		 FROM web_view.riseopedia_assets assets
 		 WHERE ($1::text IS NULL OR assets.asset_name ILIKE $1 OR assets.canonical_asset_key ILIKE $1)
 		   AND ($2::text IS NULL OR EXISTS (
@@ -465,28 +493,15 @@ export async function listRiseopediaAssets(
 				  assets.asset_id
 		 LIMIT $7
 		 OFFSET $8`,
-		[
-			normalizeSearch(filters.search),
-			filters.section,
-			filters.assetClassCode,
-			filters.categorySlug,
-			filters.subcategorySlug,
-			filters.brandCode,
-			filters.pageSize,
-			offset,
-		],
+		[...filterValues, filters.pageSize, offset],
 	);
-
-	const totalDocs = result.rows[0]?.total_count
-		? toNumber(result.rows[0].total_count)
-		: 0;
 
 	return {
 		rows: result.rows.map(mapAssetRow),
-		page: filters.page,
+		page,
 		pageSize: filters.pageSize,
 		totalDocs,
-		totalPages: totalDocs > 0 ? Math.ceil(totalDocs / filters.pageSize) : 0,
+		totalPages,
 	};
 }
 

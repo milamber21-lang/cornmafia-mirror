@@ -19,6 +19,7 @@ export type RiseopediaDetailLayoutProps = {
 	breadcrumb: RiseopediaBreadcrumbItem[];
 	title: string;
 	summary: string | null;
+	brandName?: string | null;
 	sections: RiseopediaEntitySectionRef[];
 	media?: ReactNode;
 	overview?: ReactNode;
@@ -101,6 +102,7 @@ export default function RiseopediaDetailLayout({
 	breadcrumb,
 	title,
 	summary,
+	brandName,
 	sections,
 	media,
 	overview,
@@ -123,6 +125,14 @@ export default function RiseopediaDetailLayout({
 						<h1 className="riseopedia-detail-header__title">{title}</h1>
 						{summary ? (
 							<p className="riseopedia-detail-header__summary">{summary}</p>
+						) : null}
+						{brandName ? (
+							<p className="riseopedia-detail-header__brand">
+								<span className="riseopedia-detail-header__brand-label">Brand</span>
+								<span className="riseopedia-detail-header__brand-value">
+									{brandName}
+								</span>
+							</p>
 						) : null}
 						<RiseopediaSectionChips sections={sections} />
 					</div>

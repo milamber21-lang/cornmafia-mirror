@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/riseopedia/RiseopediaBodyContent.tsx                                        ////
 //// Language: TSX                                                                                            ////
-//// Renders display-profile-selected public Riseopedia body and spec rows inside the fixed detail layout.      ////
+//// Renders display-profile-selected public Riseopedia prose, body, and spec rows inside the detail layout.   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -16,8 +16,55 @@ export type RiseopediaBodyContentProps = {
 	display: RiseopediaDisplayLayout;
 };
 
+const PROSE_PROPERTY_CODES = new Set(["summary", "description"]);
+
 function renderPropertyValue(row: RiseopediaDisplayProperty): string {
 	return row.unitCode ? `${row.displayValue} ${row.unitCode}` : row.displayValue;
+}
+
+function bodyRowsWithoutProse(
+	rows: RiseopediaDisplayProperty[],
+): RiseopediaDisplayProperty[] {
+	return rows.filter((row) => !PROSE_PROPERTY_CODES.has(row.propertyCode));
+}
+
+function proseRows(
+	display: RiseopediaDisplayLayout,
+	propertyCode: "summary" | "description",
+): RiseopediaDisplayProperty[] {
+	return [
+		...display.bodyLead,
+		...display.bodyMain,
+		...display.bodyNotes,
+	].filter((row) => row.propertyCode === propertyCode);
+}
+
+function RiseopediaProseSection({
+	title,
+	rows,
+}: {
+	title: string;
+	rows: RiseopediaDisplayProperty[];
+}): JSX.Element | null {
+	if (rows.length === 0) {
+		return null;
+	}
+
+	return (
+		<section className="riseopedia-prose-section">
+			<h2 className="riseopedia-section-title">{title}</h2>
+			<div className="riseopedia-prose-section__body">
+				{rows.map((row) => (
+					<p
+						className="riseopedia-prose-section__text"
+						key={row.displayProfilePropertyId}
+					>
+						{renderPropertyValue(row)}
+					</p>
+				))}
+			</div>
+		</section>
+	);
 }
 
 function RiseopediaPropertyStack({
@@ -90,10 +137,17 @@ function RiseopediaSpecTable({
 export default function RiseopediaBodyContent({
 	display,
 }: RiseopediaBodyContentProps): JSX.Element | null {
+	const summaryRows = proseRows(display, "summary");
+	const descriptionRows = proseRows(display, "description");
+	const bodyLeadRows = bodyRowsWithoutProse(display.bodyLead);
+	const bodyMainRows = bodyRowsWithoutProse(display.bodyMain);
+	const bodyNotesRows = bodyRowsWithoutProse(display.bodyNotes);
 	const hasDisplayBody =
-		display.bodyLead.length > 0 ||
-		display.bodyMain.length > 0 ||
-		display.bodyNotes.length > 0 ||
+		summaryRows.length > 0 ||
+		descriptionRows.length > 0 ||
+		bodyLeadRows.length > 0 ||
+		bodyMainRows.length > 0 ||
+		bodyNotesRows.length > 0 ||
 		display.specRows.length > 0 ||
 		display.requirementRows.length > 0;
 
@@ -103,11 +157,13 @@ export default function RiseopediaBodyContent({
 
 	return (
 		<div className="riseopedia-body-content">
-			<RiseopediaPropertyStack title="Highlights" rows={display.bodyLead} />
-			<RiseopediaPropertyStack title="Details" rows={display.bodyMain} />
+			<RiseopediaProseSection title="Summary" rows={summaryRows} />
+			<RiseopediaProseSection title="Description" rows={descriptionRows} />
+			<RiseopediaPropertyStack title="Highlights" rows={bodyLeadRows} />
+			<RiseopediaPropertyStack title="Details" rows={bodyMainRows} />
 			<RiseopediaSpecTable title="Specs" rows={display.specRows} />
 			<RiseopediaSpecTable title="Requirements" rows={display.requirementRows} />
-			<RiseopediaPropertyStack title="Notes" rows={display.bodyNotes} />
+			<RiseopediaPropertyStack title="Notes" rows={bodyNotesRows} />
 		</div>
 	);
 }

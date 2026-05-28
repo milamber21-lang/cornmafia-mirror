@@ -8,6 +8,7 @@
 import "server-only";
 
 import { query } from "@/lib/data/pg";
+import { buildRiseopediaMediaFileUrl } from "@/lib/helpers/riseopedia-media-files";
 
 export type RiseopediaAssetClassDoc = {
 	id: string;
@@ -19,6 +20,21 @@ export type RiseopediaAssetClassDoc = {
 	updatedAt: string | null;
 };
 
+export type RiseopediaAssetClassMediaRef = {
+	mediaId: string;
+	url: string;
+	width: number | null;
+	height: number | null;
+	mimeType: string | null;
+};
+
+export type RiseopediaAssetClassMediaSample = {
+	assetClassCode: string;
+	assetName: string;
+	assetSlug: string;
+	media: RiseopediaAssetClassMediaRef;
+};
+
 type RiseopediaAssetClassRow = {
 	asset_class_id: string | number;
 	asset_class_code: string;
@@ -27,6 +43,16 @@ type RiseopediaAssetClassRow = {
 	sort_order: string | number;
 	asset_count: string | number;
 	updated_dt: Date | string | null;
+};
+
+type RiseopediaAssetClassMediaSampleRow = {
+	asset_class_code: string;
+	asset_name: string;
+	asset_slug: string;
+	media_id: string | number;
+	media_width_px: number | null;
+	media_height_px: number | null;
+	media_mime_type: string | null;
 };
 
 function toNumber(value: string | number): number {
@@ -53,6 +79,25 @@ function mapAssetClassRow(row: RiseopediaAssetClassRow): RiseopediaAssetClassDoc
 	};
 }
 
+function mapAssetClassMediaSampleRow(
+	row: RiseopediaAssetClassMediaSampleRow,
+): RiseopediaAssetClassMediaSample {
+	const mediaId = String(row.media_id);
+
+	return {
+		assetClassCode: row.asset_class_code,
+		assetName: row.asset_name,
+		assetSlug: row.asset_slug,
+		media: {
+			mediaId,
+			url: buildRiseopediaMediaFileUrl(mediaId),
+			width: row.media_width_px,
+			height: row.media_height_px,
+			mimeType: row.media_mime_type,
+		},
+	};
+}
+
 export async function listRiseopediaAssetClasses(): Promise<
 	RiseopediaAssetClassDoc[]
 > {
@@ -71,4 +116,28 @@ export async function listRiseopediaAssetClasses(): Promise<
 	);
 
 	return result.rows.map(mapAssetClassRow);
+}
+
+
+export async function listRiseopediaAssetClassMediaSamples(): Promise<
+	RiseopediaAssetClassMediaSample[]
+> {
+	const result = await query<RiseopediaAssetClassMediaSampleRow>(
+		`SELECT DISTINCT ON (asset_class_code)
+				asset_class_code,
+				asset_name,
+				asset_slug,
+				COALESCE(icon_media_id, detail_media_id) AS media_id,
+				COALESCE(icon_media_width_px, detail_media_width_px) AS media_width_px,
+				COALESCE(icon_media_height_px, detail_media_height_px) AS media_height_px,
+				COALESCE(icon_media_mime_type, detail_media_mime_type) AS media_mime_type
+		 FROM web_view.riseopedia_assets
+		 WHERE COALESCE(icon_media_id, detail_media_id) IS NOT NULL
+		 ORDER BY asset_class_code,
+				  md5(canonical_asset_key),
+				  asset_name,
+				  asset_id`,
+	);
+
+	return result.rows.map(mapAssetClassMediaSampleRow);
 }

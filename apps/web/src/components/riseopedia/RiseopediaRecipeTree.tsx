@@ -1,13 +1,14 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/riseopedia/RiseopediaRecipeTree.tsx                                        ////
 //// Language: TSX                                                                                            ////
-//// Recipe-specific body renderer for public Riseopedia inputs, outputs, placeholders, and craftable links.   ////
+//// Compact recipe tree renderer for public Riseopedia inputs, outputs, quantities, and recipe links.      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /* eslint-disable @next/next/no-img-element */
 import type { JSX } from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import RiseopediaEmptyState from "@/components/riseopedia/RiseopediaEmptyState";
 import type { RiseopediaRecipeComponentCraftingRecipes } from "@/lib/data/riseopedia-detail";
@@ -19,6 +20,8 @@ export type RiseopediaRecipeTreeProps = {
 	outputs: RiseopediaRecipeAssetRef[];
 	componentCraftingRecipes: RiseopediaRecipeComponentCraftingRecipes[];
 };
+
+type RiseopediaRecipeTreeGroupKind = "inputs" | "outputs";
 
 function formatQuantity(row: RiseopediaRecipeAssetRef): string | null {
 	if (row.quantityText) {
@@ -92,7 +95,7 @@ function RiseopediaRecipeAssetName({
 	);
 }
 
-function RiseopediaCraftingLinks({
+function RiseopediaCraftingRecipeActions({
 	recipes,
 }: {
 	recipes: RiseopediaAssetRecipeRef[];
@@ -102,23 +105,19 @@ function RiseopediaCraftingLinks({
 	}
 
 	return (
-		<div className="riseopedia-recipe-tree__crafting-links">
-			<span className="riseopedia-recipe-tree__crafting-label">Craftable by</span>
-			<ul className="riseopedia-recipe-tree__crafting-list">
-				{recipes.map((recipe) => (
-					<li
-						className="riseopedia-recipe-tree__crafting-item"
-						key={recipe.recipeId}
-					>
-						<Link
-							className="riseopedia-recipe-tree__recipe-link"
-							href={`/riseopedia/recipes/${recipe.recipeSlug}`}
-						>
-							{recipe.recipeName}
-						</Link>
-					</li>
-				))}
-			</ul>
+		<div className="riseopedia-recipe-tree__recipe-actions">
+			{recipes.map((recipe) => (
+				<Link
+					className="ui-btn ui-button ui-button--xs ui-button--ghost riseopedia-recipe-tree__recipe-action"
+					href={`/riseopedia/recipes/${recipe.recipeSlug}`}
+					key={recipe.recipeId}
+				>
+					<span>{recipe.recipeName}</span>
+					<span className="ui-button__icon ui-button__icon--right">
+						<ArrowRight aria-hidden />
+					</span>
+				</Link>
+			))}
 		</div>
 	);
 }
@@ -140,7 +139,9 @@ function RiseopediaRecipeTreeRow({
 				</span>
 
 				<span className="riseopedia-recipe-tree__asset-copy">
-					<RiseopediaRecipeAssetName row={row} />
+					<span className="riseopedia-recipe-tree__asset-title-line">
+						<RiseopediaRecipeAssetName row={row} />
+					</span>
 					<span className="riseopedia-recipe-tree__asset-meta">
 						{row.assetClassName}
 						{row.isPlaceholder ? " / unresolved placeholder" : null}
@@ -148,34 +149,38 @@ function RiseopediaRecipeTreeRow({
 				</span>
 			</div>
 
-			{quantity ? (
-				<span className="riseopedia-recipe-tree__quantity">{quantity}</span>
-			) : null}
+			<RiseopediaCraftingRecipeActions recipes={craftingRecipes} />
 
 			{row.isPlaceholder ? (
 				<span className="riseopedia-recipe-tree__badge">Placeholder</span>
 			) : null}
 
-			<RiseopediaCraftingLinks recipes={craftingRecipes} />
+			{quantity ? (
+				<span className="riseopedia-recipe-tree__quantity">{quantity}</span>
+			) : null}
 		</li>
 	);
 }
 
 function RiseopediaRecipeTreeGroup({
 	title,
+	kind,
 	rows,
 	craftingByAssetId,
 	emptyTitle,
 	emptyMessage,
 }: {
 	title: string;
+	kind: RiseopediaRecipeTreeGroupKind;
 	rows: RiseopediaRecipeAssetRef[];
 	craftingByAssetId: Map<string, RiseopediaAssetRecipeRef[]>;
 	emptyTitle: string;
 	emptyMessage: string;
 }): JSX.Element {
 	return (
-		<section className="riseopedia-recipe-tree__group">
+		<section
+			className={`riseopedia-recipe-tree__group riseopedia-recipe-tree__group--${kind}`}
+		>
 			<h3 className="riseopedia-recipe-tree__group-title">{title}</h3>
 			{rows.length > 0 ? (
 				<ul className="riseopedia-recipe-tree__list">
@@ -207,18 +212,18 @@ export default function RiseopediaRecipeTree({
 			aria-labelledby="riseopedia-recipe-tree-heading"
 		>
 			<div className="riseopedia-recipe-tree__header">
-				<p className="riseopedia-recipe-tree__eyebrow">Recipe tree</p>
 				<h2
 					className="riseopedia-section-title"
 					id="riseopedia-recipe-tree-heading"
 				>
-					Inputs and outputs
+					Recipe Tree
 				</h2>
 			</div>
 
 			<div className="riseopedia-recipe-tree__grid">
 				<RiseopediaRecipeTreeGroup
 					title="Inputs"
+					kind="inputs"
 					rows={components}
 					craftingByAssetId={craftingByAssetId}
 					emptyTitle="No inputs listed."
@@ -227,6 +232,7 @@ export default function RiseopediaRecipeTree({
 
 				<RiseopediaRecipeTreeGroup
 					title="Outputs"
+					kind="outputs"
 					rows={outputs}
 					craftingByAssetId={new Map<string, RiseopediaAssetRecipeRef[]>()}
 					emptyTitle="No outputs listed."
