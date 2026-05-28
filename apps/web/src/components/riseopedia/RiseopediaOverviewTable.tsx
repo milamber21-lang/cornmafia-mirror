@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/riseopedia/RiseopediaOverviewTable.tsx                                      ////
 //// Language: TSX                                                                                            ////
-//// Compact label/value overview table for public Riseopedia detail pages with overflow protection.           ////
+//// Compact label/value overview table for public Riseopedia detail pages.                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -16,27 +16,12 @@ export type RiseopediaOverviewRow = {
 export type RiseopediaOverviewTableProps = {
 	title?: string;
 	rows: RiseopediaOverviewRow[];
-	maxInitialRows?: number;
 };
-
-const DEFAULT_MAX_INITIAL_ROWS = 8;
 
 function hasRenderableValue(value: ReactNode): boolean {
 	return (
 		value !== null && value !== undefined && value !== "" && value !== false
 	);
-}
-
-function visibleRowLimit(maxInitialRows: number | undefined): number {
-	if (maxInitialRows === undefined) {
-		return DEFAULT_MAX_INITIAL_ROWS;
-	}
-
-	if (!Number.isFinite(maxInitialRows) || maxInitialRows < 1) {
-		return DEFAULT_MAX_INITIAL_ROWS;
-	}
-
-	return Math.floor(maxInitialRows);
 }
 
 function RiseopediaOverviewRows({
@@ -59,17 +44,12 @@ function RiseopediaOverviewRows({
 export default function RiseopediaOverviewTable({
 	title = "Overview",
 	rows,
-	maxInitialRows,
 }: RiseopediaOverviewTableProps): JSX.Element | null {
 	const visibleRows = rows.filter((row) => hasRenderableValue(row.value));
 
 	if (visibleRows.length === 0) {
 		return null;
 	}
-
-	const rowLimit = visibleRowLimit(maxInitialRows);
-	const primaryRows = visibleRows.slice(0, rowLimit);
-	const overflowRows = visibleRows.slice(rowLimit);
 
 	return (
 		<section
@@ -80,16 +60,7 @@ export default function RiseopediaOverviewTable({
 				{title}
 			</h2>
 
-			<RiseopediaOverviewRows rows={primaryRows} />
-
-			{overflowRows.length > 0 ? (
-				<details className="riseopedia-overview-table__more">
-					<summary className="riseopedia-overview-table__more-trigger">
-						More facts ({overflowRows.length})
-					</summary>
-					<RiseopediaOverviewRows rows={overflowRows} />
-				</details>
-			) : null}
+			<RiseopediaOverviewRows rows={visibleRows} />
 		</section>
 	);
 }

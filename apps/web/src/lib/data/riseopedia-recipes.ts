@@ -33,6 +33,11 @@ export type RiseopediaRecipeDoc = {
 	durationSeconds: number | null;
 	xpValue: number | null;
 	lastSeenPatchCode: string | null;
+	outputAssetId: string | null;
+	outputCanonicalAssetKey: string | null;
+	outputAssetName: string | null;
+	outputAssetSlug: string | null;
+	outputIconMedia: RiseopediaMediaRef | null;
 	updatedAt: string | null;
 };
 
@@ -86,6 +91,14 @@ type RiseopediaRecipeRow = {
 	duration_seconds: string | number | null;
 	xp_value: string | number | null;
 	last_seen_patch_code: string | null;
+	output_asset_id: string | number | null;
+	output_canonical_asset_key: string | null;
+	output_asset_name: string | null;
+	output_asset_slug: string | null;
+	output_icon_media_id: string | number | null;
+	output_icon_media_width_px: number | null;
+	output_icon_media_height_px: number | null;
+	output_icon_media_mime_type: string | null;
 	updated_dt: Date | string | null;
 	total_count?: string | number;
 };
@@ -175,6 +188,16 @@ function mapRecipeRow(row: RiseopediaRecipeRow): RiseopediaRecipeDoc {
 		durationSeconds: toNullableNumber(row.duration_seconds),
 		xpValue: toNullableNumber(row.xp_value),
 		lastSeenPatchCode: row.last_seen_patch_code,
+		outputAssetId: row.output_asset_id === null ? null : String(row.output_asset_id),
+		outputCanonicalAssetKey: row.output_canonical_asset_key,
+		outputAssetName: row.output_asset_name,
+		outputAssetSlug: row.output_asset_slug,
+		outputIconMedia: mapMediaRef({
+			mediaId: row.output_icon_media_id,
+			width: row.output_icon_media_width_px,
+			height: row.output_icon_media_height_px,
+			mimeType: row.output_icon_media_mime_type,
+		}),
 		updatedAt: toIsoString(row.updated_dt),
 	};
 }
@@ -206,27 +229,72 @@ function mapRecipeAssetRefRow(row: RiseopediaRecipeAssetRefRow): RiseopediaRecip
 export async function listRiseopediaRecipes(
 	filters: RiseopediaRecipeListFilters,
 ): Promise<RiseopediaRecipeListResult> {
-	const offset = (filters.page - 1) * filters.pageSize;
-	const result = await query<RiseopediaRecipeRow>(
-		`SELECT recipe_id,
-				recipe_key,
-				recipe_name,
-				recipe_slug,
-				recipe_status_code,
-				effective_visibility_code,
-				listable_flag,
-				detail_allowed_flag,
-				searchable_flag,
-				bench_code,
-				bench_name,
-				crafting_tier,
-				required_perk_source_key,
-				duration_seconds,
-				xp_value,
-				last_seen_patch_code,
-				updated_dt,
-				COUNT(*) OVER() AS total_count
+	const filterValues = [
+		normalizeSearch(filters.search),
+		filters.section,
+		filters.benchCode,
+	];
+	const countResult = await query<{ total_count: string | number }>(
+		`SELECT COUNT(*)::bigint AS total_count
 		 FROM web_view.riseopedia_recipes recipes
+		 WHERE ($1::text IS NULL OR recipes.recipe_name ILIKE $1 OR recipes.recipe_key ILIKE $1)
+		   AND ($2::text IS NULL OR EXISTS (
+				SELECT 1
+				FROM web_view.riseopedia_recipe_section_memberships membership
+				WHERE membership.recipe_id = recipes.recipe_id
+				  AND (membership.section_code = $2 OR membership.section_slug = $2)
+			))
+		   AND ($3::text IS NULL OR recipes.bench_code = $3)`,
+		filterValues,
+	);
+	const totalDocs = countResult.rows[0]
+		? toNumber(countResult.rows[0].total_count)
+		: 0;
+	const totalPages = totalDocs > 0 ? Math.ceil(totalDocs / filters.pageSize) : 0;
+	const page = totalPages > 0 ? Math.min(filters.page, totalPages) : filters.page;
+	const offset = (page - 1) * filters.pageSize;
+	const result = await query<RiseopediaRecipeRow>(
+		`SELECT recipes.recipe_id,
+				recipes.recipe_key,
+				recipes.recipe_name,
+				recipes.recipe_slug,
+				recipes.recipe_status_code,
+				recipes.effective_visibility_code,
+				recipes.listable_flag,
+				recipes.detail_allowed_flag,
+				recipes.searchable_flag,
+				recipes.bench_code,
+				recipes.bench_name,
+				recipes.crafting_tier,
+				recipes.required_perk_source_key,
+				recipes.duration_seconds,
+				recipes.xp_value,
+				recipes.last_seen_patch_code,
+				output_asset.output_asset_id,
+				output_asset.output_canonical_asset_key,
+				output_asset.output_asset_name,
+				output_asset.output_asset_slug,
+				output_asset.output_icon_media_id,
+				output_asset.output_icon_media_width_px,
+				output_asset.output_icon_media_height_px,
+				output_asset.output_icon_media_mime_type,
+				recipes.updated_dt
+		 FROM web_view.riseopedia_recipes recipes
+		 LEFT JOIN LATERAL (SELECT output_row.asset_id AS output_asset_id,
+								   output_row.canonical_asset_key AS output_canonical_asset_key,
+								   output_row.asset_name AS output_asset_name,
+								   output_row.asset_slug AS output_asset_slug,
+								   output_row.icon_media_id AS output_icon_media_id,
+								   output_row.icon_media_width_px AS output_icon_media_width_px,
+								   output_row.icon_media_height_px AS output_icon_media_height_px,
+								   output_row.icon_media_mime_type AS output_icon_media_mime_type
+						 FROM web_view.riseopedia_asset_crafted_by_recipes output_row
+						 WHERE output_row.recipe_id = recipes.recipe_id
+						 ORDER BY output_row.primary_flag DESC NULLS LAST,
+								  output_row.sort_order,
+								  output_row.asset_name,
+								  output_row.asset_id
+						 LIMIT 1) output_asset ON true
 		 WHERE ($1::text IS NULL OR recipes.recipe_name ILIKE $1 OR recipes.recipe_key ILIKE $1)
 		   AND ($2::text IS NULL OR EXISTS (
 				SELECT 1
@@ -239,25 +307,15 @@ export async function listRiseopediaRecipes(
 				  recipes.recipe_id
 		 LIMIT $4
 		 OFFSET $5`,
-		[
-			normalizeSearch(filters.search),
-			filters.section,
-			filters.benchCode,
-			filters.pageSize,
-			offset,
-		],
+		[...filterValues, filters.pageSize, offset],
 	);
-
-	const totalDocs = result.rows[0]?.total_count
-		? toNumber(result.rows[0].total_count)
-		: 0;
 
 	return {
 		rows: result.rows.map(mapRecipeRow),
-		page: filters.page,
+		page,
 		pageSize: filters.pageSize,
 		totalDocs,
-		totalPages: totalDocs > 0 ? Math.ceil(totalDocs / filters.pageSize) : 0,
+		totalPages,
 	};
 }
 
@@ -265,25 +323,48 @@ export async function findRiseopediaRecipeBySlug(
 	slug: string,
 ): Promise<RiseopediaRecipeDoc | null> {
 	const result = await query<RiseopediaRecipeRow>(
-		`SELECT recipe_id,
-				recipe_key,
-				recipe_name,
-				recipe_slug,
-				recipe_status_code,
-				effective_visibility_code,
-				listable_flag,
-				detail_allowed_flag,
-				searchable_flag,
-				bench_code,
-				bench_name,
-				crafting_tier,
-				required_perk_source_key,
-				duration_seconds,
-				xp_value,
-				last_seen_patch_code,
-				updated_dt
-		 FROM web_view.riseopedia_recipes
-		 WHERE recipe_slug = $1
+		`SELECT recipes.recipe_id,
+				recipes.recipe_key,
+				recipes.recipe_name,
+				recipes.recipe_slug,
+				recipes.recipe_status_code,
+				recipes.effective_visibility_code,
+				recipes.listable_flag,
+				recipes.detail_allowed_flag,
+				recipes.searchable_flag,
+				recipes.bench_code,
+				recipes.bench_name,
+				recipes.crafting_tier,
+				recipes.required_perk_source_key,
+				recipes.duration_seconds,
+				recipes.xp_value,
+				recipes.last_seen_patch_code,
+				output_asset.output_asset_id,
+				output_asset.output_canonical_asset_key,
+				output_asset.output_asset_name,
+				output_asset.output_asset_slug,
+				output_asset.output_icon_media_id,
+				output_asset.output_icon_media_width_px,
+				output_asset.output_icon_media_height_px,
+				output_asset.output_icon_media_mime_type,
+				recipes.updated_dt
+		 FROM web_view.riseopedia_recipes recipes
+		 LEFT JOIN LATERAL (SELECT output_row.asset_id AS output_asset_id,
+								   output_row.canonical_asset_key AS output_canonical_asset_key,
+								   output_row.asset_name AS output_asset_name,
+								   output_row.asset_slug AS output_asset_slug,
+								   output_row.icon_media_id AS output_icon_media_id,
+								   output_row.icon_media_width_px AS output_icon_media_width_px,
+								   output_row.icon_media_height_px AS output_icon_media_height_px,
+								   output_row.icon_media_mime_type AS output_icon_media_mime_type
+						 FROM web_view.riseopedia_asset_crafted_by_recipes output_row
+						 WHERE output_row.recipe_id = recipes.recipe_id
+						 ORDER BY output_row.primary_flag DESC NULLS LAST,
+								  output_row.sort_order,
+								  output_row.asset_name,
+								  output_row.asset_id
+						 LIMIT 1) output_asset ON true
+		 WHERE recipes.recipe_slug = $1
 		 LIMIT 1`,
 		[slug],
 	);

@@ -1341,6 +1341,31 @@ Future passes should move matching visual rules here according to docs/style_own
   line-height: 1.5;
 }
 
+.riseopedia-detail-header__brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  margin: 0;
+  color: var(--theme-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+
+.riseopedia-detail-header__brand-label {
+  color: var(--theme-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.riseopedia-detail-header__brand-value {
+  color: var(--theme-text);
+  font-weight: 700;
+}
+
 .riseopedia-section-chip-list {
   display: flex;
   flex-wrap: wrap;
@@ -1426,6 +1451,8 @@ Future passes should move matching visual rules here according to docs/style_own
 .riseopedia-detail-bottom,
 .riseopedia-body-content,
 .riseopedia-property-stack,
+.riseopedia-prose-section,
+.riseopedia-prose-section__body,
 .riseopedia-recipe-tree,
 .riseopedia-recipe-tree__grid,
 .riseopedia-bottom-blocks {
@@ -1583,6 +1610,27 @@ Future passes should move matching visual rules here according to docs/style_own
   padding-top: var(--space-2, 0.5rem);
 }
 
+.riseopedia-prose-section {
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-prose-section__body {
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-prose-section__text {
+  max-width: 64rem;
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.riseopedia-prose-section + .riseopedia-body-section,
+.riseopedia-prose-section + .riseopedia-prose-section {
+  padding-top: var(--space-1, 0.25rem);
+}
+
 .riseopedia-property-card {
   display: grid;
   gap: var(--space-2, 0.5rem);
@@ -1602,6 +1650,10 @@ Future passes should move matching visual rules here according to docs/style_own
   font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.25rem;
+}
+
+.riseopedia-recipe-tree__group-title {
+  text-align: center;
 }
 
 .riseopedia-property-card__value,
@@ -1628,8 +1680,20 @@ Future passes should move matching visual rules here according to docs/style_own
 
 @media (min-width: 1180px) {
   .riseopedia-recipe-tree__grid {
+    position: relative;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start;
+    align-items: stretch;
+    gap: var(--space-8, 2rem);
+  }
+
+  .riseopedia-recipe-tree__grid::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: var(--theme-border);
+    content: "";
   }
 }
 
@@ -1639,8 +1703,11 @@ Future passes should move matching visual rules here according to docs/style_own
   min-width: 0;
 }
 
+.riseopedia-recipe-tree__group--outputs {
+  align-self: center;
+}
+
 .riseopedia-recipe-tree__list,
-.riseopedia-recipe-tree__crafting-list,
 .riseopedia-bottom-list {
   display: grid;
   gap: var(--space-3, 0.75rem);
@@ -1651,15 +1718,37 @@ Future passes should move matching visual rules here according to docs/style_own
 
 .riseopedia-recipe-tree__row {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3, 0.75rem);
+  align-items: center;
   padding: var(--space-3, 0.75rem);
   border: 1px solid var(--theme-border);
   border-radius: var(--radius-lg, 0.75rem);
   background: var(--theme-bg-alpha-62);
 }
 
+@media (min-width: 760px) {
+  .riseopedia-recipe-tree__row {
+    grid-template-columns: minmax(0, 1fr) auto auto minmax(3rem, auto);
+  }
+
+  .riseopedia-recipe-tree__recipe-actions {
+    grid-column: 2;
+  }
+
+  .riseopedia-recipe-tree__badge {
+    grid-column: 3;
+  }
+
+  .riseopedia-recipe-tree__quantity {
+    grid-column: 4;
+    justify-self: end;
+  }
+}
+
 .riseopedia-recipe-tree__asset {
-  display: flex;
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3, 0.75rem);
   min-width: 0;
@@ -1670,8 +1759,8 @@ Future passes should move matching visual rules here according to docs/style_own
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 3rem;
+  height: 3rem;
   overflow: hidden;
   border: 1px solid var(--theme-border);
   border-radius: var(--radius-md, 0.5rem);
@@ -1700,9 +1789,17 @@ Future passes should move matching visual rules here according to docs/style_own
   min-width: 0;
 }
 
+.riseopedia-recipe-tree__asset-title-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2, 0.5rem);
+  row-gap: var(--space-1, 0.25rem);
+  min-width: 0;
+}
+
 .riseopedia-recipe-tree__asset-link,
 .riseopedia-recipe-tree__asset-name,
-.riseopedia-recipe-tree__recipe-link,
 .riseopedia-bottom-list__title {
   color: var(--theme-text);
   font-weight: 700;
@@ -1712,8 +1809,6 @@ Future passes should move matching visual rules here according to docs/style_own
 
 .riseopedia-recipe-tree__asset-link:hover,
 .riseopedia-recipe-tree__asset-link:focus-visible,
-.riseopedia-recipe-tree__recipe-link:hover,
-.riseopedia-recipe-tree__recipe-link:focus-visible,
 .riseopedia-bottom-list__title:hover,
 .riseopedia-bottom-list__title:focus-visible {
   color: var(--theme-accent);
@@ -1721,7 +1816,6 @@ Future passes should move matching visual rules here according to docs/style_own
 }
 
 .riseopedia-recipe-tree__asset-meta,
-.riseopedia-recipe-tree__crafting-label,
 .riseopedia-bottom-list__meta {
   color: var(--theme-text-muted);
   font-size: 0.75rem;
@@ -1729,27 +1823,39 @@ Future passes should move matching visual rules here according to docs/style_own
 }
 
 .riseopedia-recipe-tree__quantity {
-  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
+  min-width: 3rem;
   color: var(--theme-accent);
   font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.25rem;
+  text-align: right;
 }
 
-.riseopedia-recipe-tree__crafting-links {
-  display: grid;
-  gap: var(--space-2, 0.5rem);
-  padding-top: var(--space-2, 0.5rem);
-  border-top: 1px solid var(--theme-border);
-}
-
-.riseopedia-recipe-tree__crafting-list {
+.riseopedia-recipe-tree__recipe-actions {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1, 0.25rem);
+  min-width: 0;
 }
 
-.riseopedia-recipe-tree__crafting-item {
-  display: inline-flex;
-  min-width: 0;
+@media (min-width: 760px) {
+  .riseopedia-recipe-tree__recipe-actions {
+    justify-content: flex-end;
+    min-width: 8rem;
+  }
+}
+
+.riseopedia-recipe-tree__recipe-action {
+  max-width: min(100%, 15rem);
+}
+
+.riseopedia-recipe-tree__recipe-action .ui-button__icon svg {
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .riseopedia-bottom-blocks {
@@ -1771,6 +1877,16 @@ Future passes should move matching visual rules here according to docs/style_own
   background: var(--theme-bg-alpha-62);
 }
 
+.riseopedia-bottom-list--recipes .riseopedia-bottom-list__item {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.riseopedia-bottom-recipe-card {
+  min-height: 0;
+}
+
 .riseopedia-bottom-list__meta {
   margin: 0;
 }
@@ -1789,3 +1905,276 @@ Future passes should move matching visual rules here according to docs/style_own
   line-height: 1.35;
 }
 
+
+/* ===== Riseopedia public overview surfaces ===== */
+.riseopedia-page {
+  width: 100%;
+}
+
+.riseopedia-hub-hero {
+  display: grid;
+  gap: var(--space-4, 1rem);
+}
+
+.riseopedia-hub-actions {
+  margin-top: var(--space-5, 1.25rem);
+}
+
+.riseopedia-browser-hero {
+  align-items: center;
+}
+
+.riseopedia-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  margin-bottom: var(--space-1, 0.25rem);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.riseopedia-breadcrumb a {
+  color: var(--theme-accent);
+  text-decoration: none;
+}
+
+.riseopedia-breadcrumb a::after {
+  display: inline-block;
+  margin-left: var(--space-2, 0.5rem);
+  color: var(--theme-border-strong);
+  content: "/";
+}
+
+.riseopedia-breadcrumb a:hover,
+.riseopedia-breadcrumb a:focus-visible {
+  color: var(--theme-text);
+  text-decoration: none;
+}
+
+.riseopedia-breadcrumb span {
+  color: var(--theme-text-muted);
+}
+
+.riseopedia-filter-bar {
+  align-items: center;
+}
+
+.riseopedia-filter-bar__control {
+  min-width: 0;
+}
+
+.riseopedia-filter-bar__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2, 0.5rem);
+}
+
+@media (min-width: 1024px) {
+  .riseopedia-filter-bar--assets {
+    grid-template-columns: 190px 190px minmax(0, 1fr) auto;
+  }
+
+  .riseopedia-filter-bar--recipes {
+    grid-template-columns: 190px minmax(0, 1fr) auto;
+  }
+}
+
+.riseopedia-result-grid {
+  align-items: stretch;
+}
+
+.riseopedia-result-card {
+  min-height: 7rem;
+}
+
+.riseopedia-result-card__icon {
+  width: 3.25rem;
+  height: 3.25rem;
+}
+
+.riseopedia-result-card__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.riseopedia-result-card__fallback-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--theme-accent);
+}
+
+.riseopedia-control-card {
+  min-width: 0;
+}
+
+.riseopedia-card-media {
+  overflow: hidden;
+}
+
+.riseopedia-card-media__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.riseopedia-card-media__caption {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.riseopedia-section-grid,
+.riseopedia-class-grid {
+  align-items: stretch;
+}
+
+.riseopedia-section-card {
+  align-items: flex-start;
+}
+
+.riseopedia-section-card__body {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+}
+
+.riseopedia-section-card__title,
+.riseopedia-section-card__description {
+  min-width: 0;
+}
+
+.riseopedia-section-card__description {
+  margin: 0;
+}
+
+.riseopedia-section-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem);
+  margin-top: var(--space-2, 0.5rem);
+}
+
+.riseopedia-class-grid {
+  align-items: stretch;
+}
+
+@media (min-width: 1280px) {
+  .riseopedia-class-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.riseopedia-preview-grid {
+  display: grid;
+  gap: var(--space-4, 1rem);
+}
+
+@media (min-width: 1024px) {
+  .riseopedia-preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.riseopedia-section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-preview-panel {
+  display: grid;
+  gap: var(--space-4, 1rem);
+}
+
+.riseopedia-preview-list {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-preview-row {
+  min-height: 4.5rem;
+}
+
+.riseopedia-preview-row__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.riseopedia-pagination {
+  padding-top: var(--space-2, 0.5rem);
+}
+
+@media (max-width: 720px) {
+  .riseopedia-pagination {
+    grid-template-columns: 1fr;
+  }
+
+  .riseopedia-pagination .ui-pagination__page-size,
+  .riseopedia-pagination .ui-pagination__controls,
+  .riseopedia-pagination .ui-pagination__summary {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+.public-collection-hero__description {
+  max-width: 42rem;
+  margin: var(--space-2, 0.5rem) 0 0;
+  color: var(--theme-text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.riseopedia-section-items-panel {
+  display: grid;
+  gap: var(--space-4, 1rem);
+}
+
+/* ===== Riseopedia overview v7 dynamic controls and rectangular media normalization ===== */
+.riseopedia-search-bar {
+	align-items: center;
+}
+
+.riseopedia-search-bar__actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+@media (min-width: 1024px) {
+	.riseopedia-search-bar {
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+}
+
+.riseopedia-filter-bar__actions {
+	justify-content: flex-start;
+}
+
+@media (min-width: 1024px) {
+	.riseopedia-filter-bar--assets {
+		grid-template-columns: 190px 190px minmax(0, 1fr) auto;
+	}
+
+	.riseopedia-filter-bar--recipes {
+		grid-template-columns: 190px minmax(0, 1fr) auto;
+	}
+}
+
+.surface-icon-well.riseopedia-card-media {
+	border-radius: var(--radius-lg, 0.75rem);
+	background: var(--theme-surface-ink-soft);
+}
+
+.riseopedia-card-media .admin-control-icon,
+.riseopedia-card-media__image {
+	max-width: 100%;
+	max-height: 100%;
+}

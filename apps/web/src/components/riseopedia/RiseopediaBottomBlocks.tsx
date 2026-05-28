@@ -7,6 +7,7 @@
 
 import type { JSX, ReactNode } from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import type {
 	RiseopediaAssetRecipeRef,
@@ -112,18 +113,25 @@ function RecipeRefList({
 	recipes: RiseopediaAssetRecipeRef[];
 }): JSX.Element {
 	return (
-		<ul className="riseopedia-bottom-list">
+		<ul className="riseopedia-bottom-list riseopedia-bottom-list--recipes">
 			{recipes.map((recipe) => (
 				<li className="riseopedia-bottom-list__item" key={recipe.recipeId}>
 					<Link
-						className="riseopedia-bottom-list__title"
+						className="public-collection-card riseopedia-bottom-recipe-card"
 						href={`/riseopedia/recipes/${recipe.recipeSlug}`}
 					>
-						{recipe.recipeName}
+						<span className="public-collection-card__body">
+							<span className="public-collection-card__title">
+								{recipe.recipeName}
+							</span>
+							{recipeMeta(recipe) ? (
+								<span className="public-collection-card__meta">
+									{recipeMeta(recipe)}
+								</span>
+							) : null}
+						</span>
+						<ArrowRight className="public-collection-card__arrow" aria-hidden />
 					</Link>
-					{recipeMeta(recipe) ? (
-						<p className="riseopedia-bottom-list__meta">{recipeMeta(recipe)}</p>
-					) : null}
 				</li>
 			))}
 		</ul>
