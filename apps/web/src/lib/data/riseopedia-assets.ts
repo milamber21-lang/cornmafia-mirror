@@ -455,11 +455,11 @@ export async function listRiseopediaAssets(
 	];
 	const countResult = await query<{ total_count: string | number }>(
 		`SELECT COUNT(*)::bigint AS total_count
-		 FROM web_view.riseopedia_assets assets
+		 FROM web_view.riseopedia_asset_browse_rows assets
 		 WHERE ($1::text IS NULL OR assets.asset_name ILIKE $1 OR assets.canonical_asset_key ILIKE $1)
 		   AND ($2::text IS NULL OR EXISTS (
 				SELECT 1
-				FROM web_view.riseopedia_asset_section_memberships membership
+				FROM web_view.riseopedia_asset_browse_section_memberships membership
 				WHERE membership.asset_id = assets.asset_id
 				  AND (membership.section_code = $2 OR membership.section_slug = $2)
 			))
@@ -477,11 +477,11 @@ export async function listRiseopediaAssets(
 	const offset = (page - 1) * filters.pageSize;
 	const result = await query<RiseopediaAssetRow>(
 		`SELECT ${RISEOPEDIA_ASSET_SELECT_COLUMNS}
-		 FROM web_view.riseopedia_assets assets
+		 FROM web_view.riseopedia_asset_browse_rows assets
 		 WHERE ($1::text IS NULL OR assets.asset_name ILIKE $1 OR assets.canonical_asset_key ILIKE $1)
 		   AND ($2::text IS NULL OR EXISTS (
 				SELECT 1
-				FROM web_view.riseopedia_asset_section_memberships membership
+				FROM web_view.riseopedia_asset_browse_section_memberships membership
 				WHERE membership.asset_id = assets.asset_id
 				  AND (membership.section_code = $2 OR membership.section_slug = $2)
 			))
@@ -510,7 +510,7 @@ export async function findRiseopediaAssetBySlug(
 ): Promise<RiseopediaAssetDoc | null> {
 	const result = await query<RiseopediaAssetRow>(
 		`SELECT ${RISEOPEDIA_ASSET_SELECT_COLUMNS}
-		 FROM web_view.riseopedia_assets
+		 FROM web_view.riseopedia_asset_browse_rows
 		 WHERE asset_slug = $1
 		 LIMIT 1`,
 		[slug],
@@ -530,7 +530,7 @@ export async function listRiseopediaAssetSections(
 				section_name,
 				section_sort_order,
 				rule_sort_order
-		 FROM web_view.riseopedia_asset_section_memberships
+		 FROM web_view.riseopedia_asset_browse_section_memberships
 		 WHERE asset_id = $1::bigint
 		 ORDER BY section_sort_order,
 				  rule_sort_order,
@@ -563,7 +563,7 @@ export async function listRiseopediaAssetProperties(
 				unit_code,
 				source_field_path,
 				updated_dt
-		 FROM web_view.riseopedia_asset_properties
+		 FROM web_view.riseopedia_asset_detail_property_rows
 		 WHERE asset_id = $1::bigint
 		 ORDER BY render_group_code,
 				  property_name,
@@ -578,8 +578,7 @@ export async function listRiseopediaAssetVariants(
 	assetId: string,
 ): Promise<RiseopediaAssetVariant[]> {
 	const result = await query<RiseopediaAssetVariantRow>(
-		`SELECT DISTINCT ON (variants.variant_asset_id, variants.variant_role_code)
-				variants.asset_variant_id,
+		`SELECT variants.asset_variant_id,
 				variants.variant_role_code,
 				variants.variant_label,
 				variants.sort_order,
@@ -593,22 +592,20 @@ export async function listRiseopediaAssetVariants(
 				variants.variant_asset_slug,
 				variants.variant_rarity_code,
 				(variants.variant_asset_id = $1::bigint) AS is_current_asset,
-				assets.icon_media_id,
-				assets.icon_media_width_px,
-				assets.icon_media_height_px,
-				assets.icon_media_mime_type,
-				assets.detail_media_id,
-				assets.detail_media_width_px,
-				assets.detail_media_height_px,
-				assets.detail_media_mime_type
-		 FROM web_view.riseopedia_asset_variants variants
-		 JOIN web_view.riseopedia_assets assets
-		   ON assets.asset_id = variants.variant_asset_id
+				variants.icon_media_id,
+				variants.icon_media_width_px,
+				variants.icon_media_height_px,
+				variants.icon_media_mime_type,
+				variants.detail_media_id,
+				variants.detail_media_width_px,
+				variants.detail_media_height_px,
+				variants.detail_media_mime_type
+		 FROM web_view.riseopedia_asset_detail_variant_rows variants
 		 WHERE variants.parent_asset_id IN (
 				SELECT $1::bigint AS parent_asset_id
 				UNION
 				SELECT related.parent_asset_id
-				FROM web_view.riseopedia_asset_variants related
+				FROM web_view.riseopedia_asset_detail_variant_rows related
 				WHERE related.variant_asset_id = $1::bigint
 			)
 		 ORDER BY variants.variant_asset_id,
@@ -653,7 +650,7 @@ export async function listRecipesUsingRiseopediaAsset(
 				quantity_value,
 				quantity_text,
 				NULL::boolean AS primary_flag
-		 FROM web_view.riseopedia_asset_used_in_recipes
+		 FROM web_view.riseopedia_asset_used_in_recipe_rows
 		 WHERE asset_id = $1::bigint
 		 ORDER BY recipe_name,
 				  recipe_id`,
@@ -681,7 +678,7 @@ export async function listRecipesCraftingRiseopediaAsset(
 				quantity_value,
 				quantity_text,
 				primary_flag
-		 FROM web_view.riseopedia_asset_crafted_by_recipes
+		 FROM web_view.riseopedia_asset_crafted_by_recipe_rows
 		 WHERE asset_id = $1::bigint
 		 ORDER BY primary_flag DESC,
 				  recipe_name,
@@ -690,4 +687,55 @@ export async function listRecipesCraftingRiseopediaAsset(
 	);
 
 	return result.rows.map(mapAssetRecipeRefRow);
+}
+
+
+export async function listRecipesCraftingRiseopediaAssets(
+	assetIds: string[],
+): Promise<Map<string, RiseopediaAssetRecipeRef[]>> {
+	const uniqueAssetIds = Array.from(
+		new Set(assetIds.filter((assetId) => /^\d+$/.test(assetId))),
+	);
+	const rowsByAssetId = new Map<string, RiseopediaAssetRecipeRef[]>();
+
+	for (const assetId of uniqueAssetIds) {
+		rowsByAssetId.set(assetId, []);
+	}
+
+	if (uniqueAssetIds.length === 0) {
+		return rowsByAssetId;
+	}
+
+	const result = await query<RiseopediaAssetRecipeRefRow>(
+		`SELECT asset_id,
+				canonical_asset_key,
+				recipe_id,
+				recipe_key,
+				recipe_name,
+				recipe_slug,
+				bench_code,
+				bench_name,
+				crafting_tier,
+				duration_seconds,
+				xp_value,
+				quantity_value,
+				quantity_text,
+				primary_flag
+		 FROM web_view.riseopedia_asset_crafted_by_recipe_rows
+		 WHERE asset_id = ANY($1::bigint[])
+		 ORDER BY asset_id,
+				  primary_flag DESC,
+				  recipe_name,
+				  recipe_id`,
+		[uniqueAssetIds],
+	);
+
+	for (const row of result.rows) {
+		const assetId = String(row.asset_id);
+		const rows = rowsByAssetId.get(assetId) ?? [];
+		rows.push(mapAssetRecipeRefRow(row));
+		rowsByAssetId.set(assetId, rows);
+	}
+
+	return rowsByAssetId;
 }

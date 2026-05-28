@@ -311,7 +311,7 @@ export async function listRiseopediaSections(): Promise<RiseopediaSectionDoc[]> 
 				sort_order,
 				item_count,
 				updated_dt
-		 FROM web_view.riseopedia_sections
+		 FROM web_view.riseopedia_section_directory_rows
 		 ORDER BY sort_order,
 				  section_name,
 				  section_id`,
@@ -336,7 +336,7 @@ export async function findRiseopediaSectionBySlug(
 				sort_order,
 				item_count,
 				updated_dt
-		 FROM web_view.riseopedia_sections
+		 FROM web_view.riseopedia_section_directory_rows
 		 WHERE section_slug = $1
 		   AND (public_visible_flag = true OR show_when_empty_flag = true)
 		 LIMIT 1`,
@@ -350,62 +350,20 @@ export async function listRiseopediaSectionMediaSamples(): Promise<
 	RiseopediaSectionMediaSample[]
 > {
 	const result = await query<RiseopediaSectionMediaSampleRow>(
-		`WITH item_media AS (
-				SELECT items.section_code,
-					   items.section_slug,
-					   items.entity_type_code,
-					   items.entity_key,
-					   items.entity_name,
-					   items.entity_slug,
-					   items.icon_media_id,
-					   items.icon_media_width_px,
-					   items.icon_media_height_px,
-					   items.icon_media_mime_type,
-					   items.pinned_flag,
-					   items.featured_flag,
-					   items.item_sort_order,
-					   0 AS output_sort_order
-				FROM web_view.riseopedia_section_items items
-				WHERE items.icon_media_id IS NOT NULL
-				UNION ALL
-				SELECT items.section_code,
-					   items.section_slug,
-					   items.entity_type_code,
-					   items.entity_key,
-					   items.entity_name,
-					   items.entity_slug,
-					   crafted.icon_media_id,
-					   crafted.icon_media_width_px,
-					   crafted.icon_media_height_px,
-					   crafted.icon_media_mime_type,
-					   items.pinned_flag,
-					   items.featured_flag,
-					   items.item_sort_order,
-					   crafted.sort_order AS output_sort_order
-				FROM web_view.riseopedia_section_items items
-				JOIN web_view.riseopedia_asset_crafted_by_recipes crafted
-				  ON crafted.recipe_key = items.entity_key
-				WHERE items.entity_type_code = 'recipe'
-				  AND crafted.icon_media_id IS NOT NULL
-			)
-		 SELECT DISTINCT ON (section_code)
-				section_code,
+		`SELECT section_code,
 				section_slug,
-				entity_type_code,
-				entity_name,
-				entity_slug,
-				icon_media_id,
-				icon_media_width_px,
-				icon_media_height_px,
-				icon_media_mime_type
-		 FROM item_media
-		 ORDER BY section_code,
-				  featured_flag DESC,
-				  pinned_flag DESC,
-				  md5(entity_type_code || ':' || entity_key),
-				  item_sort_order,
-				  output_sort_order,
-				  entity_name`,
+				sample_entity_type_code AS entity_type_code,
+				sample_entity_name AS entity_name,
+				sample_entity_slug AS entity_slug,
+				sample_media_id AS icon_media_id,
+				sample_media_width_px AS icon_media_width_px,
+				sample_media_height_px AS icon_media_height_px,
+				sample_media_mime_type AS icon_media_mime_type
+		 FROM web_view.riseopedia_section_directory_rows
+		 WHERE sample_media_id IS NOT NULL
+		 ORDER BY sort_order,
+				  section_name,
+				  section_id`,
 	);
 
 	return result.rows.map(mapSectionMediaSampleRow);
@@ -417,7 +375,7 @@ async function countRiseopediaSectionItems(args: {
 }): Promise<number> {
 	const result = await query<CountRow>(
 		`SELECT COUNT(*) AS total_count
-		 FROM web_view.riseopedia_section_items items
+		 FROM web_view.riseopedia_section_item_browse_rows items
 		 WHERE items.section_slug = $1
 		   AND ($2::text IS NULL
 		        OR items.entity_name ILIKE ('%' || $2 || '%')
@@ -468,31 +426,16 @@ export async function listRiseopediaSectionItems(
 				items.asset_class_name,
 				items.bench_code,
 				items.bench_name,
-				COALESCE(items.icon_media_id, recipe_media.icon_media_id) AS media_id,
-				COALESCE(items.icon_media_width_px, recipe_media.icon_media_width_px) AS media_width_px,
-				COALESCE(items.icon_media_height_px, recipe_media.icon_media_height_px) AS media_height_px,
-				COALESCE(items.icon_media_mime_type, recipe_media.icon_media_mime_type) AS media_mime_type,
+				items.media_id,
+				items.media_width_px,
+				items.media_height_px,
+				items.media_mime_type,
 				items.item_sort_order,
 				items.pinned_flag,
 				items.featured_flag,
 				items.source_code,
 				items.effective_visibility_code
-		 FROM web_view.riseopedia_section_items items
-		 LEFT JOIN LATERAL (
-			SELECT crafted.icon_media_id,
-				   crafted.icon_media_width_px,
-				   crafted.icon_media_height_px,
-				   crafted.icon_media_mime_type
-			FROM web_view.riseopedia_asset_crafted_by_recipes crafted
-			WHERE items.entity_type_code = 'recipe'
-			  AND crafted.recipe_key = items.entity_key
-			  AND crafted.icon_media_id IS NOT NULL
-			ORDER BY crafted.primary_flag DESC NULLS LAST,
-					 crafted.sort_order,
-					 crafted.asset_name,
-					 crafted.asset_id
-			LIMIT 1
-		 ) recipe_media ON true
+		 FROM web_view.riseopedia_section_item_browse_rows items
 		 WHERE items.section_slug = $1
 		   AND ($2::text IS NULL
 		        OR items.entity_name ILIKE ('%' || $2 || '%')
@@ -509,7 +452,6 @@ export async function listRiseopediaSectionItems(
 		 OFFSET $4`,
 		[filters.section, search, pageSize, offset],
 	);
-
 	return {
 		rows: result.rows.map(mapSectionItemRow),
 		page,

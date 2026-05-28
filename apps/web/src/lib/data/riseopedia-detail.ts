@@ -10,6 +10,7 @@ import "server-only";
 import {
 	findRiseopediaAssetBySlug,
 	listRecipesCraftingRiseopediaAsset,
+	listRecipesCraftingRiseopediaAssets,
 	listRecipesUsingRiseopediaAsset,
 	listRiseopediaAssetProperties,
 	listRiseopediaAssetSections,
@@ -90,20 +91,18 @@ async function listRecipeComponentCraftingRecipes(args: {
 	components: RiseopediaRecipeAssetRef[];
 }): Promise<RiseopediaRecipeComponentCraftingRecipes[]> {
 	const resolvedComponents = uniqueResolvedComponents(args.components);
-	const rows = await Promise.all(
-		resolvedComponents.map(async (component) => {
-			const recipes = await listRecipesCraftingRiseopediaAsset(component.assetId);
-			return {
-				assetId: component.assetId,
-				canonicalAssetKey: component.canonicalAssetKey,
-				assetName: component.assetName,
-				assetSlug: component.assetSlug,
-				recipes: recipes.filter(
-					(recipe) => recipe.recipeId !== args.currentRecipeId,
-				),
-			};
-		}),
+	const recipesByAssetId = await listRecipesCraftingRiseopediaAssets(
+		resolvedComponents.map((component) => component.assetId),
 	);
+	const rows = resolvedComponents.map((component) => ({
+		assetId: component.assetId,
+		canonicalAssetKey: component.canonicalAssetKey,
+		assetName: component.assetName,
+		assetSlug: component.assetSlug,
+		recipes: (recipesByAssetId.get(component.assetId) ?? []).filter(
+			(recipe) => recipe.recipeId !== args.currentRecipeId,
+		),
+	}));
 
 	return rows.filter((row) => row.recipes.length > 0);
 }

@@ -18,7 +18,6 @@ import RiseopediaOverviewTable, {
 import RiseopediaRecipeTree from "@/components/riseopedia/RiseopediaRecipeTree";
 import { findRiseopediaRecipeDetailBySlug } from "@/lib/data/riseopedia-detail";
 import type { RiseopediaDisplayProperty } from "@/lib/data/riseopedia-display";
-import type { RiseopediaRecipeAssetRef } from "@/lib/data/riseopedia-recipes";
 
 export const dynamic = "force-dynamic";
 
@@ -42,12 +41,6 @@ function displayOverviewRows(
 	}));
 }
 
-function primaryOutput(
-	rows: RiseopediaRecipeAssetRef[],
-): RiseopediaRecipeAssetRef | null {
-	return rows.find((row) => row.primary === true) ?? rows[0] ?? null;
-}
-
 export default async function RiseopediaRecipeDetailPage({
 	params,
 }: PageProps): Promise<JSX.Element> {
@@ -58,7 +51,6 @@ export default async function RiseopediaRecipeDetailPage({
 		notFound();
 	}
 
-	const output = primaryOutput(detail.outputs);
 	const overviewRows = displayOverviewRows(detail.display.overviewRows);
 
 	return (
@@ -73,8 +65,8 @@ export default async function RiseopediaRecipeDetailPage({
 			sections={detail.sections}
 			media={
 				<RiseopediaMediaFrame
-					media={output?.iconMedia ?? null}
-					alt={output?.assetName ?? detail.doc.name}
+					media={detail.doc.primaryMedia}
+					alt={detail.doc.primaryMediaOutputAssetName ?? detail.doc.name}
 					placeholderLabel="No recipe media"
 				/>
 			}
