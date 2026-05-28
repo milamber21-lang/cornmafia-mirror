@@ -220,7 +220,7 @@ export async function getRiseopediaDisplayLayout(args: {
 					featured_flag,
 					value_text,
 					display_value
-			 FROM web_view.riseopedia_entity_display_properties
+			 FROM web_view.riseopedia_detail_display_properties
 			 WHERE entity_type_code = $1
 			   AND entity_key = $2
 			 ORDER BY display_slot_code,
@@ -243,7 +243,7 @@ export async function getRiseopediaDisplayLayout(args: {
 					block_group_code,
 					sort_order,
 					visible_flag
-			 FROM web_view.riseopedia_entity_display_blocks
+			 FROM web_view.riseopedia_detail_display_blocks
 			 WHERE entity_type_code = $1
 			   AND entity_key = $2
 			 ORDER BY block_group_code,

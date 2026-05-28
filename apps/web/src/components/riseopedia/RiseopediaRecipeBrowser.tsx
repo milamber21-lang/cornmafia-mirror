@@ -72,9 +72,9 @@ function recipeMetaParts(recipe: RiseopediaRecipeDoc): string[] {
 
 function RiseopediaRecipeCard({ recipe }: { recipe: RiseopediaRecipeDoc }): JSX.Element {
 	const metaParts = recipeMetaParts(recipe);
-	const media = recipe.outputIconMedia;
-	const summary = recipe.outputAssetName
-		? `Crafts ${recipe.outputAssetName}`
+	const media = recipe.primaryMedia;
+	const summary = recipe.primaryMediaOutputAssetName
+		? `Crafts ${recipe.primaryMediaOutputAssetName}`
 		: recipe.requiredPerkSourceKey
 			? `Requires ${recipe.requiredPerkSourceKey}`
 			: "Open the recipe detail page for components, outputs, and profile-driven metadata.";

@@ -101,9 +101,9 @@ function findRecipeFeatureMedia(
   recipes: RiseopediaRecipeDoc[],
 ): RiseopediaHubMedia | null {
   const recipeWithMedia = recipes.find(
-    (recipe) => recipe.outputIconMedia !== null,
+    (recipe) => recipe.primaryMedia !== null,
   );
-  return recipeWithMedia?.outputIconMedia ?? null;
+  return recipeWithMedia?.primaryMedia ?? null;
 }
 
 function HubIcon({ icon: Icon }: { icon: LucideIcon }): JSX.Element {
@@ -264,9 +264,9 @@ function RiseopediaRecipePreviewRow({
 }: {
   recipe: RiseopediaRecipeDoc;
 }): JSX.Element {
-  const media = recipe.outputIconMedia;
-  const meta = recipe.outputAssetName
-    ? `Crafts ${recipe.outputAssetName}`
+  const media = recipe.primaryMedia;
+  const meta = recipe.primaryMediaOutputAssetName
+    ? `Crafts ${recipe.primaryMediaOutputAssetName}`
     : (recipe.benchName ?? "Recipe");
 
   return (

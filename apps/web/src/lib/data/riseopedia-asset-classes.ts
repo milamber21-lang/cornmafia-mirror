@@ -109,7 +109,7 @@ export async function listRiseopediaAssetClasses(): Promise<
 				sort_order,
 				asset_count,
 				updated_dt
-		 FROM web_view.riseopedia_asset_classes
+		 FROM web_view.riseopedia_asset_class_directory_rows
 		 ORDER BY sort_order,
 				  asset_class_name,
 				  asset_class_id`,
@@ -123,20 +123,18 @@ export async function listRiseopediaAssetClassMediaSamples(): Promise<
 	RiseopediaAssetClassMediaSample[]
 > {
 	const result = await query<RiseopediaAssetClassMediaSampleRow>(
-		`SELECT DISTINCT ON (asset_class_code)
-				asset_class_code,
-				asset_name,
-				asset_slug,
-				COALESCE(icon_media_id, detail_media_id) AS media_id,
-				COALESCE(icon_media_width_px, detail_media_width_px) AS media_width_px,
-				COALESCE(icon_media_height_px, detail_media_height_px) AS media_height_px,
-				COALESCE(icon_media_mime_type, detail_media_mime_type) AS media_mime_type
-		 FROM web_view.riseopedia_assets
-		 WHERE COALESCE(icon_media_id, detail_media_id) IS NOT NULL
-		 ORDER BY asset_class_code,
-				  md5(canonical_asset_key),
-				  asset_name,
-				  asset_id`,
+		`SELECT asset_class_code,
+				sample_asset_name AS asset_name,
+				sample_asset_slug AS asset_slug,
+				sample_media_id AS media_id,
+				sample_media_width_px AS media_width_px,
+				sample_media_height_px AS media_height_px,
+				sample_media_mime_type AS media_mime_type
+		 FROM web_view.riseopedia_asset_class_directory_rows
+		 WHERE sample_media_id IS NOT NULL
+		 ORDER BY sort_order,
+				  asset_class_name,
+				  asset_class_id`,
 	);
 
 	return result.rows.map(mapAssetClassMediaSampleRow);
