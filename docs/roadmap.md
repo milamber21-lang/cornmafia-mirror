@@ -5,7 +5,7 @@
 
 This file defines the current post-foundation roadmap for Corn Mafia.
 
-It is a sequencing document. Architecture and non-negotiable rules live in `docs/project_definition.md`. TypeScript, app-surface, route, helper, SQL, and generation rules live in `docs/codebase_rules.md`. Styling, token, brand, and inline-style exception rules live in `docs/style_system.md`.
+Architecture and non-negotiable rules live in `docs/project_definition.md`. TypeScript, app-surface, route, helper, SQL, and generation rules live in `docs/codebase_rules.md`. Styling, token, brand, and inline-style exception rules live in `docs/style_system.md`. Game-data sync details live in `docs/game_data_handling.md` and `docs/game_sync_pipeline.md`.
 
 ---
 
@@ -28,8 +28,9 @@ The current baseline is:
 - DB-backed public navigation and content routing
 - DB-backed member profile, media, series, and authoring surfaces
 - DB-backed YouTube channel allowlist support
-- placeholder public landing and collection surfaces waiting for final product design
-- editor system active and available for admin and member authoring flows
+- clean `game_data -> web_priv` Riseopedia/game-data sync pipeline
+- re-entrant `web_priv.game_sync_patch(p_patch_code text)` wrapper
+- placeholder/temporary Riseopedia compatibility views pending final read-model rebuild
 
 The foundation is deliverable as V1. Future work should improve UX, product depth, observability, automation, and feature breadth without restarting the architecture.
 
@@ -50,32 +51,47 @@ The following foundation phases are considered done for roadmap purposes:
 - help/operator script baseline
 - style ownership migration baseline
 - inline style exception registry baseline
+- clean game-data canonical sync through `web_priv.game_sync_patch`
+- release decision sync for game entities
+- weapon/ammo relationship rule coverage
+- crafting bench true folding in canonical game data
 
 Do not describe these as active foundation work unless a new audit finds a concrete regression.
 
 ---
 
-## 3. Current V1 delivery focus
+## 3. Current Priority 0 - Riseopedia read-model rebuild
 
-Goal: make the current platform easy to ship, operate, explain, and continue from.
+Goal: make Riseopedia app-facing pages read from durable, release-aware `web_view` contracts over the new clean `web_priv.game_*` truth.
 
-Work items:
+Scope:
 
-- keep `docs/README.md` short and V1 accurate
-- keep durable docs under `docs/`
-- keep bootstrap docs aligned with current env taxonomy
-- keep security posture scripts passing on the real repository
-- keep root archive/snapshot generation secret-safe
-- keep deployment assumptions explicit
-- keep member authoring documented as V1 active
-- keep YouTube channel allowlist documented as active admin family
-- keep placeholder public surfaces clearly separated from final product design
+- audit actual app usage of `web_view.riseopedia_*`
+- rebuild missing/stale views
+- replace temporary compatibility views with durable read models
+- fix `riseopedia_hub_counts`
+- fix media-safe recipe previews and asset media fields
+- rebuild asset browse/detail/read surfaces
+- preserve true crafting bench folding
+- verify default rarity/variant behavior does not invent `common`
+- verify recipe relationship rows and graph-derived views
+- align route/data helper expectations with final SQL contracts
 
 Acceptance:
 
-- docs match the current repo and SQL
-- generated docs no longer describe foundation work as future work
-- future ChatGPT sessions can understand the current baseline without old prompt memory
+- no app logs for missing `web_view.riseopedia_*` relations
+- no app media safety errors from invalid media IDs
+- hub counts are non-zero and release-aware
+- browsable crafting bench assets count is 12
+- higher-rarity-only assets do not display fake common/default variants
+- recipe used-in/crafted-by surfaces are populated and release-aware
+
+Rules:
+
+- start with read-only audit
+- inspect app files before changing view columns
+- app reads must remain through `web_view` or approved read functions
+- do not grant `cm_client` broad access to `game_data`
 
 ---
 
@@ -89,6 +105,7 @@ Scope:
 - category page design
 - subcategory page design
 - public collection hubs
+- Riseopedia page UX once read models are stable
 - footer and exploration flows
 - member dashboard polish
 - member content creation UX polish
@@ -151,10 +168,9 @@ Candidate tests:
 - media upload/render
 - SVG sanitization
 - rich text render
-- category/subcategory behavior
-- YouTube channel allowlist and URL validation
+- Riseopedia hub/browse/detail pages
+- game sync wrapper SQL smoke test
 - API error paths
-- SQL function edge cases
 
 Rules:
 
@@ -218,73 +234,28 @@ Possible work:
 
 - deployment runbook
 - backup and restore runbook
-- DB bootstrap verification improvements
-- media storage verification improvements
-- health and readiness checks
-- structured app logging strategy
-- production error reporting strategy
-- rate limit tuning
-- dependency audit tracking
-- Docker/runtime hardening reviews
-
-Rules:
-
-- scripts should be small and understandable
-- destructive scripts require clear names and confirmations
-- do not hide destructive behavior behind generic helpers
-- document assumptions instead of relying on unavailable local state
+- game patch import/rebuild checklist automation
+- SQL smoke scripts for app-required views
+- app log triage checklist
+- security check automation
+- release decision dashboard
 
 ---
 
+## 10. Current next move
 
----
+Next session should start with Riseopedia read-model audit, not destructive SQL.
 
-## 10. Game data and Riseopedia foundation track
-
-Goal: make imported game data reliable, auditable, and ready for Riseopedia without chasing one-off source issues in the app layer.
-
-Current completed / mostly completed work:
-
-- building item and building material imports are functioning
-- building set property exists for imported building-item files
-- asset grouping and naming have been cleaned enough to proceed
-- duplicate asset-name problems have been reduced to specific display/source-quality cases
-- entity relationship storage has been rebuilt around `game_entity_relationships_r`
-- `uses_ammunition` relationships resolve through the new entity relationship path
-
-Next sequence:
+Minimum first deliverable:
 
 ```text
-7B7A Documentation and schema standardization
-7B7B Move QA/audit views to web_analytics
-7B7C Move game_transform_* rules to game_data
-7B7D Property model standardization
-7B8  Categories/subcategories cleanup
-7B9  Recipe display dedupe and bench wiring QA
-7C   Building item material/cost relationships
-7D   Riseopedia app wiring
-7E   Deprecated object cleanup
+view/app contract matrix:
+- app file / function
+- queried web_view object
+- expected columns
+- current object exists yes/no
+- current row count
+- media safety status
+- bench folding status
+- rarity/default variant status
 ```
-
-Rules:
-
-- document architecture decisions before structural SQL migrations
-- move transform rules to `game_data`, not app code
-- move QA/read-only diagnostics to `web_analytics`
-- use guarded `web_api` wrappers for sensitive/admin analytics access
-- do not expose `web_analytics` as public app read contracts
-- keep canonical truth in `web_priv.game_*`
-- preserve raw source evidence in `game_data`
-- do not treat raw source payloads as normal public asset properties
-- keep Riseopedia UI wiring after data identity, properties, categories, and relationships are stable
-
-## 11. Working rule for roadmap updates
-
-When updating this roadmap:
-
-- work from current real files and current SQL
-- do not describe completed foundation phases as active work
-- keep future work separate from current implementation facts
-- avoid generic product-roadmap language that does not help implementation
-- keep the roadmap useful as a prompt handoff document
-- ask before removing already implemented behavior from scope
