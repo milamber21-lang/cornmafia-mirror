@@ -93,10 +93,18 @@ Current app architecture:
 
 ## 4. Required database architecture
 
-Use these database layers exactly:
+Use these database layers deliberately:
 
 ```text
+game_data
+	raw game imports
+	game patch/source-file metadata
+	game_transform_* rule/config tables
+	source-to-canonical transformation rules
+	import evidence used by promotion/rebuild logic
+
 web_priv
+	canonical current truth
 	private tables
 	private helpers
 	trigger helpers
@@ -104,12 +112,14 @@ web_priv
 	sync helpers
 	access helpers
 	business internals
+	private promotion/rebuild/revalidation functions
 
 web_api
 	app-callable business functions
 	app-callable write functions
 	approved action functions
 	approved app resolver functions where intentionally exposed
+	guarded admin wrappers for sensitive analytics access
 
 web_view
 	app read surfaces
@@ -117,13 +127,24 @@ web_view
 	admin read contracts
 	member read contracts
 	public read contracts
+
+web_analytics
+	QA views
+	audit views
+	validation summaries
+	data-quality diagnostics
+	admin/operational analytics surfaces
 ```
 
 Application contract:
 
-- reads should come from `web_view` or a clearly approved read function
-- writes should go through `web_api`
+- public/member/admin app reads should come from `web_view` or a clearly approved read function
+- writes and app-callable actions should go through `web_api`
+- sensitive admin analytics should be exposed through guarded `web_api` functions, not as public `web_view` surfaces
+- `web_analytics` is a separate admin/QA read surface, not a replacement for `web_view`
 - private implementation details stay under `web_priv`
+- raw imports and transform rules stay under `game_data`
+- app code must not directly CRUD private truth tables
 - direct table ownership must not move into route handlers
 - app runtime must not require owner privileges
 - `public` must not be reintroduced as the main project schema
@@ -137,8 +158,6 @@ cm_client = runtime app role
 
 Do not design solutions that require `cm_client` to behave like `cm`.
 
----
-
 ## 5. DB object naming taxonomy
 
 Current approved DB object prefixes:
@@ -146,6 +165,7 @@ Current approved DB object prefixes:
 - `actor_`
 - `auth_`
 - `discord_`
+- `game_`
 - `web_`
 
 Meaning:
@@ -153,15 +173,42 @@ Meaning:
 - `actor_` = current actor access evaluation and permission helpers
 - `auth_` = authentication and account-linking concerns
 - `discord_` = Discord-sourced identity and role sync concerns
+- `game_` = canonical game/Riseopedia domain data, relationships, imports, and transformation outputs
 - `web_` = current web platform families
 
 Schema prefix rules:
 
 ```text
-web_priv may use actor_, auth_, discord_, web_
-web_api  may use auth_, discord_, web_
-web_view may use auth_, discord_, web_
+game_data may use game_transform_*, import_*, patch/source metadata helpers, and raw-import helper names
+web_priv  may use actor_, auth_, discord_, game_, web_
+web_api   may use auth_, discord_, game_, web_
+web_view  may use auth_, discord_, game_, web_
+web_analytics may use game_*, riseopedia_*, and QA/audit naming
 ```
+
+Game domain taxonomy:
+
+```text
+game_asset_*    = assets and asset-specific dimensions
+game_entity_*   = cross-entity identity, release state, and relationships
+game_media_*    = game media and media mappings
+game_recipe_*   = recipes, components, outputs, benches, catalysts, and generic requirement groups
+game_quest_*    = quests and quest-specific relationships
+game_vendor_*   = vendors and shop data
+game_npc_*      = NPCs and drops
+game_location_* = locations, map/resource locations, and location relationships
+game_transform_* = source transformation, classification, identity, naming, ref-resolution, and relationship rules
+```
+
+Approved current game-domain decisions:
+
+- crafting benches are assets with `asset_class_code = 'crafting_bench'`
+- bench-specific details should live as asset properties, asset media, relationships, or an asset profile table only if truly needed
+- brands belong under the `game_asset_brand*` family, not as long-term generic properties
+- rarities belong under the `game_asset_rarity*` family and source-mapping/variant identity, not as unrelated generic properties
+- release state, entity types, and cross-domain relationships belong under `game_entity_*`
+- relationship results use `game_entity_relationships_r`, because relationships are not asset-only
+- recipe generic resources are represented by `game_recipe_requirement_groups*`, not by asset grouping
 
 Future first-class feature families may receive their own prefix only when they become real standalone domains.
 
@@ -169,11 +216,8 @@ Potential future examples:
 
 - `map_*`
 - `event_*`
-- `game_*`
 
 Do not create new naming families only for cosmetic symmetry.
-
----
 
 ## 6. Security and access model
 
@@ -479,7 +523,7 @@ Bootstrap should preserve:
 
 - `cm` as owner/migration role
 - `cm_client` as runtime app role
-- `web_priv`, `web_api`, and `web_view` layering
+- `game_data`, `web_priv`, `web_api`, `web_view`, and `web_analytics` layering
 - imported IDs where bootstrap data needs stable references
 - sequence resets above imported rows
 - security boundary verification
