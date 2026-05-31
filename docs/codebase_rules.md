@@ -201,19 +201,24 @@ The project direction is DB-first.
 Use these database layers:
 
 ```text
-web_priv = private truth, private helpers, validation helpers, sync helpers, access helpers, business internals
-web_api  = app-callable business functions, write functions, and approved action functions
-web_view = app read surfaces, lookup surfaces, admin/member/public read contracts
+game_data     = raw game imports, patch/source metadata, and game_transform_* source transformation rules
+web_priv      = canonical private truth, private helpers, validation helpers, sync helpers, access helpers, and private business internals
+web_api       = app-callable business functions, write functions, approved action functions, and guarded admin wrappers
+web_view      = app read surfaces, lookup surfaces, admin/member/public read contracts
+web_analytics = QA, audit, validation, data-quality, and admin/operational analytics views
 ```
 
 Application contract:
 
 - app reads from `web_view` or approved DB read functions
+- sensitive admin analytics are exposed through guarded `web_api` functions when app access is needed
+- `web_analytics` is not a public read contract and must not replace `web_view`
 - app writes through `web_api`
 - app must not directly perform CRUD on `web_priv`
+- app must not directly perform CRUD on `game_data` import or transform tables
 - app code must not make the runtime user behave like the owner
 - `public` must not be reintroduced as the main project schema
-- do not split `web_priv` into extra schema families unless explicitly requested
+- new schema families require explicit architectural agreement and documentation updates
 
 Runtime and ownership:
 
@@ -221,8 +226,6 @@ Runtime and ownership:
 cm_client = runtime app user
 cm        = owner / migration user
 ```
-
----
 
 ## 9. App contexts
 
@@ -740,6 +743,32 @@ Relationship tables use `_r`; relationship history uses `_r_h`.
 
 Lookup/source-resolution tables use `_l`.
 
+Project-specific schema and naming rules:
+
+```text
+game_data.game_transform_*_c = source transformation/configuration rules
+web_priv.game_*              = canonical current-state game truth
+web_priv.game_*_h            = patch/history snapshots where needed
+web_priv.game_*_r            = relationships and bridge tables
+web_analytics.*              = QA/read-only analytics views and summaries
+```
+
+Game-domain object families:
+
+```text
+game_asset_*    = assets and asset-specific dimensions
+game_entity_*   = cross-entity identity, release state, and relationships
+game_media_*    = game media and media mappings
+game_recipe_*   = recipes and recipe-specific dimensions
+game_quest_*    = quests and quest-specific dimensions
+game_transform_* = import/source transformation and resolution rules
+```
+
+Transform/config tables belong in `game_data` unless there is a specific reason they must be canonical current truth.
+Canonical app truth belongs in `web_priv`.
+QA and audit diagnostics belong in `web_analytics`.
+
+
 ---
 
 ## 22. SQL column conventions
@@ -835,6 +864,7 @@ Current approved prefixes:
 - `actor_`
 - `auth_`
 - `discord_`
+- `game_`
 - `web_`
 
 Verb meanings:
@@ -1077,3 +1107,59 @@ Reason:
 
 - the first three categories often hide behavior bugs
 - unused declarations are usually lower risk but should still be cleaned before calling a pass finished
+
+---
+
+## 31. Game data and property handling rules
+
+Game data uses a source-to-canonical model.
+
+Authoritative placement:
+
+```text
+game_data
+	raw source imports
+	patch/source file metadata
+	game_transform_* rules
+	import evidence used by rebuild logic
+
+web_priv
+	canonical current game truth
+	private rebuild/promotion/revalidation functions
+
+web_analytics
+	QA/audit/read-only diagnostics
+```
+
+Transform rules:
+
+- put source classification, identity, naming, variant, relationship, and recipe-ref-resolution rules under `game_data.game_transform_*`
+- do not put transform rules in app routes
+- do not encode one-off source mistakes in UI code
+- promotion/rebuild functions may live in `web_priv` and read transform rules from `game_data`
+
+Asset property rules:
+
+- `game_asset_property_values` should store transformed, queryable property values
+- raw source payloads are evidence, not normal asset properties
+- source file roles and source identity values belong to source mappings or analytics evidence, not normal public properties
+- media paths belong to `game_media_*` and `game_asset_media_*`, not normal properties
+- brands belong under `game_asset_brand*` long-term
+- rarity belongs under `game_asset_rarity*`, source mapping identity, and variant identity, not as an unrelated generic property
+- structured source objects should be exploded into atomic/child rows only when useful for filtering, analytics, or display
+- arrays should be exploded only when their item meaning is known or analytics needs the indexed evidence
+- grouped assets need property rows that preserve source mapping, rarity, and variant context when source rows differ
+
+Recipe generic resource rules:
+
+- generic recipe requirements are canonical recipe concepts, not asset groups
+- keep canonical generic groups under `web_priv.game_recipe_requirement_groups*`
+- keep generic group alias/ref-resolution rules under `game_data.game_transform_recipe_*`
+
+Revalidation and rebuild rules:
+
+- app-callable revalidation should be exposed as guarded functions, not unguarded procedures
+- private rebuild/revalidation logic should live under `web_priv`
+- expose only guarded `web_api` wrappers when app/admin runtime needs to trigger it
+- manual operator procedures are acceptable only when they are explicitly operational and documented
+

@@ -61,7 +61,7 @@ Goal: make the current platform easy to ship, operate, explain, and continue fro
 
 Work items:
 
-- keep `README.md` short and V1 accurate
+- keep `docs/README.md` short and V1 accurate
 - keep durable docs under `docs/`
 - keep bootstrap docs aligned with current env taxonomy
 - keep security posture scripts passing on the real repository
@@ -236,7 +236,49 @@ Rules:
 
 ---
 
-## 10. Working rule for roadmap updates
+
+---
+
+## 10. Game data and Riseopedia foundation track
+
+Goal: make imported game data reliable, auditable, and ready for Riseopedia without chasing one-off source issues in the app layer.
+
+Current completed / mostly completed work:
+
+- building item and building material imports are functioning
+- building set property exists for imported building-item files
+- asset grouping and naming have been cleaned enough to proceed
+- duplicate asset-name problems have been reduced to specific display/source-quality cases
+- entity relationship storage has been rebuilt around `game_entity_relationships_r`
+- `uses_ammunition` relationships resolve through the new entity relationship path
+
+Next sequence:
+
+```text
+7B7A Documentation and schema standardization
+7B7B Move QA/audit views to web_analytics
+7B7C Move game_transform_* rules to game_data
+7B7D Property model standardization
+7B8  Categories/subcategories cleanup
+7B9  Recipe display dedupe and bench wiring QA
+7C   Building item material/cost relationships
+7D   Riseopedia app wiring
+7E   Deprecated object cleanup
+```
+
+Rules:
+
+- document architecture decisions before structural SQL migrations
+- move transform rules to `game_data`, not app code
+- move QA/read-only diagnostics to `web_analytics`
+- use guarded `web_api` wrappers for sensitive/admin analytics access
+- do not expose `web_analytics` as public app read contracts
+- keep canonical truth in `web_priv.game_*`
+- preserve raw source evidence in `game_data`
+- do not treat raw source payloads as normal public asset properties
+- keep Riseopedia UI wiring after data identity, properties, categories, and relationships are stable
+
+## 11. Working rule for roadmap updates
 
 When updating this roadmap:
 
