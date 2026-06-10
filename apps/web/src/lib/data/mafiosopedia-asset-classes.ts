@@ -1,0 +1,141 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// FILE: apps/web/src/lib/data/mafiosopedia-asset-classes.ts                                                  ////
+//// Language: TS                                                                                             ////
+//// DB-first Mafiosopedia asset class helpers for hub cards and filters.                                        ////
+//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+import "server-only";
+
+import { query } from "@/lib/data/pg";
+import { buildMafiosopediaMediaFileUrl } from "@/lib/helpers/mafiosopedia-media-files";
+
+export type MafiosopediaAssetClassDoc = {
+	id: string;
+	code: string;
+	name: string;
+	description: string | null;
+	sortOrder: number;
+	assetCount: number;
+	updatedAt: string | null;
+};
+
+export type MafiosopediaAssetClassMediaRef = {
+	mediaId: string;
+	url: string;
+	width: number | null;
+	height: number | null;
+	mimeType: string | null;
+};
+
+export type MafiosopediaAssetClassMediaSample = {
+	assetClassCode: string;
+	assetName: string;
+	assetSlug: string;
+	media: MafiosopediaAssetClassMediaRef;
+};
+
+type MafiosopediaAssetClassRow = {
+	asset_class_id: string | number;
+	asset_class_code: string;
+	asset_class_name: string;
+	description: string | null;
+	sort_order: string | number;
+	asset_count: string | number;
+	updated_dt: Date | string | null;
+};
+
+type MafiosopediaAssetClassMediaSampleRow = {
+	asset_class_code: string;
+	asset_name: string;
+	asset_slug: string;
+	media_id: string | number;
+	media_width_px: number | null;
+	media_height_px: number | null;
+	media_mime_type: string | null;
+};
+
+function toNumber(value: string | number): number {
+	return typeof value === "number" ? value : Number(value);
+}
+
+function toIsoString(value: Date | string | null): string | null {
+	if (value === null) {
+		return null;
+	}
+
+	return value instanceof Date ? value.toISOString() : value;
+}
+
+function mapAssetClassRow(row: MafiosopediaAssetClassRow): MafiosopediaAssetClassDoc {
+	return {
+		id: String(row.asset_class_id),
+		code: row.asset_class_code,
+		name: row.asset_class_name,
+		description: row.description,
+		sortOrder: toNumber(row.sort_order),
+		assetCount: toNumber(row.asset_count),
+		updatedAt: toIsoString(row.updated_dt),
+	};
+}
+
+function mapAssetClassMediaSampleRow(
+	row: MafiosopediaAssetClassMediaSampleRow,
+): MafiosopediaAssetClassMediaSample {
+	const mediaId = String(row.media_id);
+
+	return {
+		assetClassCode: row.asset_class_code,
+		assetName: row.asset_name,
+		assetSlug: row.asset_slug,
+		media: {
+			mediaId,
+			url: buildMafiosopediaMediaFileUrl(mediaId),
+			width: row.media_width_px,
+			height: row.media_height_px,
+			mimeType: row.media_mime_type,
+		},
+	};
+}
+
+export async function listMafiosopediaAssetClasses(): Promise<
+	MafiosopediaAssetClassDoc[]
+> {
+	const result = await query<MafiosopediaAssetClassRow>(
+		`SELECT asset_class_id,
+				asset_class_code,
+				asset_class_name,
+				description,
+				sort_order,
+				asset_count,
+				updated_dt
+		 FROM web_view.mafiosopedia_asset_class_directory_rows
+		 ORDER BY sort_order,
+				  asset_class_name,
+				  asset_class_id`,
+	);
+
+	return result.rows.map(mapAssetClassRow);
+}
+
+
+export async function listMafiosopediaAssetClassMediaSamples(): Promise<
+	MafiosopediaAssetClassMediaSample[]
+> {
+	const result = await query<MafiosopediaAssetClassMediaSampleRow>(
+		`SELECT asset_class_code,
+				sample_asset_name AS asset_name,
+				sample_asset_slug AS asset_slug,
+				sample_media_id AS media_id,
+				sample_media_width_px AS media_width_px,
+				sample_media_height_px AS media_height_px,
+				sample_media_mime_type AS media_mime_type
+		 FROM web_view.mafiosopedia_asset_class_directory_rows
+		 WHERE sample_media_id IS NOT NULL
+		 ORDER BY sort_order,
+				  asset_class_name,
+				  asset_class_id`,
+	);
+
+	return result.rows.map(mapAssetClassMediaSampleRow);
+}

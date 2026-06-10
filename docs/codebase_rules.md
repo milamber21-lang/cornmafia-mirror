@@ -344,6 +344,7 @@ Admin lists use two main normalization tracks.
 
 Use for compact dictionaries, code-table-style admin families, and low-volume reference families:
 
+- Riseopedia patch/publication/display-profile rule families when the route returns compact dictionary-style rows
 - theme colors
 - icons
 - categories
@@ -389,6 +390,7 @@ Use for operational, larger, or governed families:
 - media
 - series
 - navigation panels
+- Riseopedia operational/admin families when route pagination/filtering is needed
 
 Target shape:
 
@@ -563,6 +565,7 @@ Public navigation should:
 
 - request a slot
 - use DB-resolved panel structure
+- resolve a fresh server-side actor before passing actor identity to navigation DB functions
 - render readable saved branches according to current DB result
 - avoid duplicating business access rules in client components
 
@@ -639,6 +642,8 @@ Required patterns:
 - API mutations use same-origin proof unless explicitly exempted
 - token-protected endpoints must not accept secrets in URL parameters
 - route handlers validate input before calling DB functions
+- Discord sign-in performs required guild/member/role sync in the `signIn` callback and returns `false` when that sync cannot complete
+- server-rendered actor-sensitive public surfaces refresh due role caches before granting gated navigation/content/media access
 - file uploads validate declared MIME and binary signatures where applicable
 - media paths must remain safe relative storage paths
 - SVG serving must use sanitizer-controlled paths
@@ -1121,11 +1126,16 @@ game_data
 	raw source imports
 	patch/source file metadata
 	game_transform_* rules
+	manual source-to-canonical transformation rules
 	import evidence used by rebuild logic
 
 web_priv
 	canonical current game truth
 	private rebuild/promotion/revalidation functions
+	canonical current-state tables and history snapshots
+
+web_view
+	app-facing read contracts and compatibility read models
 
 web_analytics
 	QA/audit/read-only diagnostics
@@ -1133,28 +1143,57 @@ web_analytics
 
 Transform rules:
 
-- put source classification, identity, naming, variant, relationship, and recipe-ref-resolution rules under `game_data.game_transform_*`
+- put source classification, identity, naming, variant, relationship, recipe-ref-resolution, and generic-group alias rules under `game_data.game_transform_*`
 - do not put transform rules in app routes
 - do not encode one-off source mistakes in UI code
 - promotion/rebuild functions may live in `web_priv` and read transform rules from `game_data`
+- source mappings and aliases are evidence/resolution helpers, not canonical public identity
 
-Asset property rules:
+Current canonical game model:
 
-- `game_asset_property_values` should store transformed, queryable property values
-- raw source payloads are evidence, not normal asset properties
+- `web_priv.game_entities` is cross-domain identity
+- `web_priv.game_assets` and `web_priv.game_recipes` are domain tables linked to entities
+- `web_priv.game_entity_variants_r` stores concrete canonical variants
+- `web_priv.game_entity_variant_values_r` stores variant dimensions such as rarity, tier, color, body, denomination, and edition
+- `web_priv.game_entity_variant_source_mappings_r` stores import/source evidence for concrete variants
+- `web_priv.game_entity_variant_aliases` stores generated resolver aliases for messy source strings
+- `web_priv.game_entity_brands_c` and `web_priv.game_entity_brand_links_r` store entity-only brand assignments
+- `web_priv.game_entity_property_values` stores transformed, queryable, variant-linked property values
+- `web_priv.game_entity_media_r` stores entity/variant media assignments with source mapping evidence
+
+Retired asset-level concepts:
+
+- do not recreate `game_asset_aliases`
+- do not recreate `game_asset_source_mappings_r`
+- do not recreate `game_asset_brands_c` or `game_asset_brand_links_r`
+- do not recreate `game_asset_rarities_c`
+- do not recreate `game_variant_groups_c` or `game_variant_values_c`
+
+Property rules:
+
+- raw source payloads are evidence, not normal public properties
 - source file roles and source identity values belong to source mappings or analytics evidence, not normal public properties
-- media paths belong to `game_media_*` and `game_asset_media_*`, not normal properties
-- brands belong under `game_asset_brand*` long-term
-- rarity belongs under `game_asset_rarity*`, source mapping identity, and variant identity, not as an unrelated generic property
+- media paths belong to `game_media_*` / `game_entity_media_*`, not normal properties
+- brands belong under `game_entity_brand*`, not as generic properties
+- rarity belongs under entity variant values, not as a generic property and not as an asset-level code table
 - structured source objects should be exploded into atomic/child rows only when useful for filtering, analytics, or display
-- arrays should be exploded only when their item meaning is known or analytics needs the indexed evidence
-- grouped assets need property rows that preserve source mapping, rarity, and variant context when source rows differ
+- arrays should be exploded only when their item meaning is known or analytics needs indexed evidence
+- grouped/source-derived assets need property rows tied to `entity_variant_id` and `entity_variant_source_mapping_id` when source rows differ
 
-Recipe generic resource rules:
+Recipe generic and catalyst rules:
 
 - generic recipe requirements are canonical recipe concepts, not asset groups
-- keep canonical generic groups under `web_priv.game_recipe_requirement_groups*`
-- keep generic group alias/ref-resolution rules under `game_data.game_transform_recipe_*`
+- keep canonical generic groups under `web_priv.game_recipe_generic_group_types_c`, `web_priv.game_recipe_generic_groups_c`, and `web_priv.game_recipe_generic_connections_r`
+- keep generic group alias/ref-resolution rules under `game_data.game_transform_recipe_generic_group_aliases_c`
+- catalysts live under `web_priv.game_recipe_catalysts_r`
+- do not reintroduce `game_recipe_generic_requirement_*` or `game_recipe_catalyst_requirements_*` names
+
+History rules:
+
+- current-state tables store current truth only
+- `_h` tables preserve patch snapshots where needed
+- `game_sync_patch_history` and the variant history helper must preserve variant/source links for properties and variants
+- current variant history tables are `game_entity_variants_r_h`, `game_entity_variant_values_r_h`, and `game_entity_variant_source_mappings_r_h`
 
 Revalidation and rebuild rules:
 
@@ -1162,4 +1201,3 @@ Revalidation and rebuild rules:
 - private rebuild/revalidation logic should live under `web_priv`
 - expose only guarded `web_api` wrappers when app/admin runtime needs to trigger it
 - manual operator procedures are acceptable only when they are explicitly operational and documented
-

@@ -12,9 +12,8 @@ When a repository snapshot is provided, inspect these docs first:
 ```text
 docs/project_definition.md
 docs/codebase_rules.md
-docs/game_data_handling.md
-docs/game_patch_runbook.md
-docs/game_data_quality.md
+docs/riseopedia.md
+docs/auth_access_model.md
 docs/style_system.md
 docs/roadmap.md
 docs/README.md
@@ -38,7 +37,7 @@ Member authoring is V1 active.
 
 YouTube channel allowlist/admin management is an active web-domain admin family.
 
-Riseopedia/game-data work is DB-first and uses the current game-data schema standard.
+Riseopedia/Mafiosopedia game-data work is DB-first and uses the current transform model, game-data schema, sync pipeline, and read-model standard. `docs/riseopedia.md` is the durable unified Riseopedia-family overview when a task touches `/info` wiki routes, admin Riseopedia surfaces, display profiles, release rules, media, or read models.
 
 ## Architecture rules
 
@@ -49,6 +48,8 @@ Riseopedia/game-data work is DB-first and uses the current game-data schema stan
 - Runtime app role is `cm_client`.
 - Owner/migration role is `cm`.
 - Admin, member, and public workflows remain separate when behavior differs.
+- Discord login must fail closed if login-time guild/member/role sync cannot complete.
+- Actor-sensitive public menus/content should use a fresh server-side actor helper before granting gated access.
 - Do not move business-rule ownership into route handlers.
 - Do not restart the architecture from scratch.
 
@@ -78,12 +79,12 @@ Game-domain decisions:
 
 - `game_*` is an approved first-class domain prefix.
 - Crafting benches are assets.
-- Brands belong under `game_asset_brand*`.
-- Rarities belong under `game_asset_rarity*` and source-mapping/variant identity.
+- Brands belong under `game_entity_brand*`; brand assignment is entity-only.
+- Rarities belong under entity variant values: `game_entity_variant_groups_c`, `game_entity_variant_value_codes_c`, and `game_entity_variant_values_r`.
 - Release states, entity types, and cross-entity relationships belong under `game_entity_*`.
 - Relationship results use `game_entity_relationships_r`.
-- Recipe generic resources use `game_recipe_requirement_groups*`, not asset grouping.
-- Source payloads are evidence, not normal public asset properties.
+- Recipe generic resources use `game_recipe_generic_group_types_c`, `game_recipe_generic_groups_c`, and `game_recipe_generic_connections_r`, not asset grouping.
+- Source payloads, entity variant source mappings, and aliases are evidence/resolution data, not normal public asset properties or canonical links.
 - Media paths belong under `game_media*` / `game_asset_media*`, not normal asset properties.
 
 ## Code generation rules
@@ -152,9 +153,8 @@ Correct archive shape:
 docs/README.md
 docs/project_definition.md
 docs/codebase_rules.md
-docs/game_data_handling.md
-docs/game_patch_runbook.md
-docs/game_data_quality.md
+docs/riseopedia.md
+docs/auth_access_model.md
 docs/style_system.md
 docs/roadmap.md
 apps/...
@@ -174,3 +174,36 @@ cornmafia-update/docs/...
 For best future behavior, keep the real docs committed in the repository and also upload the current consolidated docs as ChatGPT project files when the project UI supports persistent project files.
 
 The repo docs remain authoritative when a snapshot is provided. Uploaded project files are only a convenience for conversations where no current snapshot is attached.
+
+
+## Current game-data cleanup state
+
+Do not recreate retired game tables/functions unless explicitly requested for rollback:
+
+```text
+web_priv.game_asset_aliases
+web_priv.game_asset_source_mappings_r
+web_priv.game_asset_brands_c
+web_priv.game_asset_brand_links_r
+web_priv.game_asset_rarities_c
+web_priv.game_variant_groups_c
+web_priv.game_variant_values_c
+web_priv.game_recipe_generic_requirement_* tables
+web_priv.game_recipe_catalyst_requirements_* tables
+web_priv.game_sync_patch_asset_brand_links(text)
+web_priv.game_sync_recipe_requirement_group_connections(text)
+```
+
+Current replacements:
+
+```text
+web_priv.game_entity_variant_aliases
+web_priv.game_entity_variant_source_mappings_r
+web_priv.game_entity_brands_c
+web_priv.game_entity_brand_links_r
+web_priv.game_entity_variant_groups_c
+web_priv.game_entity_variant_value_codes_c
+web_priv.game_recipe_generic_* tables
+web_priv.game_recipe_catalysts_r
+web_priv.game_sync_recipe_generic_connections(text)
+```

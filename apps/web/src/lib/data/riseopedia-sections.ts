@@ -7,6 +7,12 @@
 
 import "server-only";
 
+import {
+	mapRiseopediaCardProperties,
+	normalizeRiseopediaCardMode,
+	type RiseopediaCardProperty,
+	type RiseopediaOverviewCardMode,
+} from "@/lib/data/riseopedia-card-properties";
 import { query } from "@/lib/data/pg";
 import { buildRiseopediaMediaFileUrl } from "@/lib/helpers/riseopedia-media-files";
 
@@ -67,6 +73,8 @@ export type RiseopediaSectionItemDoc = {
 	benchCode: string | null;
 	benchName: string | null;
 	media: RiseopediaSectionMediaRef | null;
+	cardMode: RiseopediaOverviewCardMode;
+	cardProperties: RiseopediaCardProperty[];
 	itemSortOrder: number;
 	pinned: boolean;
 	featured: boolean;
@@ -144,6 +152,8 @@ type RiseopediaSectionItemRow = {
 	media_width_px: number | null;
 	media_height_px: number | null;
 	media_mime_type: string | null;
+	resolved_card_mode_code: string | null;
+	card_properties: unknown;
 	item_sort_order: string | number;
 	pinned_flag: boolean;
 	featured_flag: boolean;
@@ -289,6 +299,8 @@ function mapSectionItemRow(row: RiseopediaSectionItemRow): RiseopediaSectionItem
 			height: row.media_height_px,
 			mimeType: row.media_mime_type,
 		}),
+		cardMode: normalizeRiseopediaCardMode(row.resolved_card_mode_code),
+		cardProperties: mapRiseopediaCardProperties(row.card_properties),
 		itemSortOrder: toNumber(row.item_sort_order),
 		pinned: row.pinned_flag,
 		featured: row.featured_flag,
@@ -430,6 +442,26 @@ export async function listRiseopediaSectionItems(
 				items.media_width_px,
 				items.media_height_px,
 				items.media_mime_type,
+				COALESCE((SELECT resolved.card_mode_code
+						  FROM web_view.riseopedia_entity_overview_card_resolved_rules resolved
+						  WHERE resolved.entity_id = items.entity_id::bigint
+							AND resolved.placement_code = 'section'
+						  LIMIT 1), 'compact') AS resolved_card_mode_code,
+				COALESCE((SELECT jsonb_agg(jsonb_build_object(
+							'placementCode', element.placement_code,
+							'cardModeCode', element.card_mode_code,
+							'displaySlotCode', element.display_slot_code,
+							'displaySlotName', element.display_slot_name,
+							'sourceTypeCode', element.source_type_code,
+							'sourceCode', element.source_code,
+							'displayLabel', element.display_label,
+							'displayValue', element.display_value,
+							'valueTypeCode', element.value_type_code,
+							'sortOrder', element.sort_order
+						  ) ORDER BY element.sort_order, element.overview_card_rule_element_id)
+						  FROM web_view.riseopedia_entity_overview_card_elements element
+						  WHERE element.entity_id = items.entity_id::bigint
+							AND element.placement_code = 'section'), '[]'::jsonb) AS card_properties,
 				items.item_sort_order,
 				items.pinned_flag,
 				items.featured_flag,
@@ -444,6 +476,8 @@ export async function listRiseopediaSectionItems(
 		        OR items.bench_name ILIKE ('%' || $2 || '%'))
 		 ORDER BY items.pinned_flag DESC,
 				  items.featured_flag DESC,
+				  items.asset_class_name NULLS LAST,
+				  items.entity_subtitle NULLS LAST,
 				  items.item_sort_order,
 				  items.entity_name,
 				  items.entity_type_code,

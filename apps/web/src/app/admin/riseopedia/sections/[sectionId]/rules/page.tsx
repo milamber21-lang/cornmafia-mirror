@@ -78,7 +78,7 @@ export default async function RiseopediaSectionRulesScopedPage({
 		);
 	}
 
-	const scopedRules = rows.rules.filter((row) => String(row.section_id ?? "") === String(sectionId));
+	const scopedRules = rows.classificationRules.filter((row: { [key: string]: unknown }) => String(row.section_id ?? "") === String(sectionId));
 
 	return (
 		<RiseopediaAdminPageChrome

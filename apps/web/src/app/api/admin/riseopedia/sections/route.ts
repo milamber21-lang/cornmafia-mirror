@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/app/api/admin/riseopedia/sections/route.ts                                                ////
 //// Language: TS                                                                                                ////
-//// Admin API route for Riseopedia section rows.                                                               ////
+//// Admin API route for rebuilt Riseopedia section rows.                                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -71,9 +71,8 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const sectionCode = getRequiredCode(data, "sectionCode");
 			const sectionSlug = getRequiredString(data, "sectionSlug");
 			const sectionName = getRequiredString(data, "sectionName");
-			const sectionModeCode = getRequiredCode(data, "sectionModeCode");
-			if (!sectionCode || !sectionSlug || !sectionName || !sectionModeCode) {
-				return jsonError("VALIDATION_REQUIRED", "Section code, slug, name, and mode are required.", 400);
+			if (!sectionCode || !sectionSlug || !sectionName) {
+				return jsonError("VALIDATION_REQUIRED", "Section code, slug, and name are required.", 400);
 			}
 
 			const id = await upsertRiseopediaSectionAdmin({
@@ -83,9 +82,6 @@ export async function POST(request: NextRequest): Promise<Response> {
 				sectionSlug,
 				sectionName,
 				description: getNullableString(data, "description"),
-				sectionModeCode,
-				publicVisible: getBoolean(data, "publicVisible", true),
-				showWhenEmpty: getBoolean(data, "showWhenEmpty", false),
 				sortOrder: getNonNegativeInt(data, "sortOrder", 1000),
 				active: getBoolean(data, "active", true),
 			});

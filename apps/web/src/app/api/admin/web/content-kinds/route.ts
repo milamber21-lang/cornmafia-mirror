@@ -66,11 +66,12 @@ const PUBLIC_ROUTE_PREFIXES: readonly ContentKindPublicRoutePrefix[] = [
 	"event",
 	"custom",
 	"external",
+	"info",
 	"video",
 ];
 
 const PUBLIC_ROUTE_PREFIX_MESSAGE =
-	"Route prefix must be blank, app, custom, event, external, map, tool, or video.";
+	"Route prefix must be blank, app, custom, event, external, info, map, tool, or video.";
 
 const RENDERER_CODES: readonly ContentKindRendererCode[] = [
 	"page",

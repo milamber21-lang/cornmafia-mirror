@@ -3,9 +3,9 @@
 
 ## Purpose
 
-This file defines the current post-foundation roadmap for Corn Mafia.
+This file defines the current post-cleanup roadmap for Corn Mafia.
 
-Architecture and non-negotiable rules live in `docs/project_definition.md`. TypeScript, app-surface, route, helper, SQL, and generation rules live in `docs/codebase_rules.md`. Styling, token, brand, and inline-style exception rules live in `docs/style_system.md`. Game-data sync details live in `docs/game_data_handling.md` and `docs/game_sync_pipeline.md`.
+Architecture and non-negotiable rules live in `docs/project_definition.md`. TypeScript, app-surface, route, helper, SQL, and generation rules live in `docs/codebase_rules.md`. Styling rules live in `docs/style_system.md`. Riseopedia/Mafiosopedia product, transform model, source-data handling, sync pipeline, patch runbook, and read-model truth lives in `docs/riseopedia.md`.
 
 ---
 
@@ -13,7 +13,7 @@ Architecture and non-negotiable rules live in `docs/project_definition.md`. Type
 
 Corn Mafia is in V1 delivery and feature-expansion mode.
 
-The current baseline is:
+Current baseline:
 
 - DB-first web app
 - Next.js 16
@@ -28,63 +28,75 @@ The current baseline is:
 - DB-backed public navigation and content routing
 - DB-backed member profile, media, series, and authoring surfaces
 - DB-backed YouTube channel allowlist support
-- clean `game_data -> web_priv` Riseopedia/game-data sync pipeline
-- re-entrant `web_priv.game_sync_patch(p_patch_code text)` wrapper
-- placeholder/temporary Riseopedia compatibility views pending final read-model rebuild
+- clean entity-first game-data canonical sync through `web_priv.game_sync_patch`
+- variant/source/alias/brand/rarity cleanup complete in canonical `web_priv`
+- property mapping/catalog/value pipeline complete enough for app read models
+- crafting bench taxonomy/source/property linkage fixed
+- recipe classification materialized from resolved outputs and bench tier/family logic
+- vehicle subcategory prefix issue fixed
+- variant family history added and wired through the sync wrapper
 
 The foundation is deliverable as V1. Future work should improve UX, product depth, observability, automation, and feature breadth without restarting the architecture.
 
 ---
 
-## 2. Completed foundation milestones
+## 2. Completed cleanup milestones
 
-The following foundation phases are considered done for roadmap purposes:
+The following are complete at the canonical DB layer:
 
-- navigation panels and navigation designer foundation
-- editor foundation
-- admin panel surface foundation
-- public surface foundation
-- full project audit pass
-- full security audit pass
-- testing phase baseline
-- DB bootstrap baseline
-- help/operator script baseline
-- style ownership migration baseline
-- inline style exception registry baseline
-- clean game-data canonical sync through `web_priv.game_sync_patch`
-- release decision sync for game entities
-- weapon/ammo relationship rule coverage
-- crafting bench true folding in canonical game data
+```text
+asset aliases               -> entity variant aliases
+asset source maps           -> entity variant source mappings
+asset brands                -> entity brands
+asset rarities              -> entity variant rarity values
+recipe generic reqs         -> recipe generic groups/connections
+recipe catalysts            -> recipe catalysts
+game_variant_*              -> game_entity_variant_*
+variant history             -> added and wired
+property history            -> preserves variant/source links
+crafting_bench entity type  -> removed; benches remain assets
+recipe class                -> output-derived helper logic
+recipe category/subcategory -> bench family and tier/no_tier_required
+vehicle subcategory         -> raw brand/source value, no class prefix
+property expectations       -> retired in favor of mapping rules + catalog
+crafting bench properties   -> source-linked across dt_craft_benches variants
+```
 
-Do not describe these as active foundation work unless a new audit finds a concrete regression.
+Do not describe these as active cleanup work unless a new audit finds a concrete regression.
 
 ---
 
-## 3. Current Priority 0 - Riseopedia read-model rebuild
+## 3. Current Priority 0 - Riseopedia/web read-model rebuild
 
-Goal: make Riseopedia app-facing pages read from durable, release-aware `web_view` contracts over the new clean `web_priv.game_*` truth.
+Goal: make Riseopedia and Mafiosopedia app-facing pages read from durable, release-aware `web_view` contracts over the clean `web_priv.game_*` truth.
 
 Scope:
 
-- audit actual app usage of `web_view.riseopedia_*`
+- audit actual app usage of `web_view.riseopedia_*`, `web_view.mafiosopedia_*`, and related game read views
+- build an app/view contract matrix
 - rebuild missing/stale views
 - replace temporary compatibility views with durable read models
-- fix `riseopedia_hub_counts`
+- fix `riseopedia_hub_counts` and `mafiosopedia_hub_counts`
 - fix media-safe recipe previews and asset media fields
 - rebuild asset browse/detail/read surfaces
 - preserve true crafting bench folding
 - verify default rarity/variant behavior does not invent `common`
 - verify recipe relationship rows and graph-derived views
+- expose property catalog/value read models for detail pages
 - align route/data helper expectations with final SQL contracts
+- remove `web_view` compatibility columns only after app usage is updated
 
 Acceptance:
 
-- no app logs for missing `web_view.riseopedia_*` relations
+- no app logs for missing `web_view.riseopedia_*` or `web_view.mafiosopedia_*` relations
 - no app media safety errors from invalid media IDs
 - hub counts are non-zero and release-aware
-- browsable crafting bench assets count is 12
+- crafting bench assets remain folded correctly
 - higher-rarity-only assets do not display fake common/default variants
 - recipe used-in/crafted-by surfaces are populated and release-aware
+- property detail surfaces are driven by `game_entity_properties_c` and `game_entity_property_values` views
+- no direct app reads from `web_priv` or `game_data`
+- first server-rendered menu/content responses use freshly synced or freshly verified role cache before gated access is granted
 
 Rules:
 
@@ -97,7 +109,7 @@ Rules:
 
 ## 4. Priority 1 - Product surface polish
 
-Goal: make the public and member-facing V1 feel intentional for real users.
+Goal: make the public and member-facing V1 feel intentional for real users after read models are stable.
 
 Scope:
 
@@ -112,14 +124,6 @@ Scope:
 - member media and series UX polish
 - empty states and unavailable states
 - terms and privacy final copy
-
-Rules:
-
-- do not move business rules into components
-- keep public content routing DB-backed
-- keep member authoring member-context only
-- keep admin and member workflows separate where behavior differs
-- use `docs/style_system.md` for visual ownership
 
 ---
 
@@ -138,13 +142,6 @@ Scope:
 - renderer safety
 - inline style exceptions in editor/runtime geometry
 - member authoring editor experience
-
-Rules:
-
-- preserve sanitizer boundaries
-- preserve media path safety
-- keep stored formatting constrained
-- keep editor runtime geometry documented in `docs/style_system.md`
 
 ---
 
@@ -169,30 +166,16 @@ Candidate tests:
 - SVG sanitization
 - rich text render
 - Riseopedia hub/browse/detail pages
+- Mafiosopedia/info hub/browse/detail pages
+- first-render menu/content access after Discord login and after role-refresh-due states
 - game sync wrapper SQL smoke test
 - API error paths
-
-Rules:
-
-- prioritize behavior-sensitive flows before cosmetic tests
-- keep tests deterministic
-- keep DB/bootstrap assumptions explicit
 
 ---
 
 ## 7. Priority 4 - Maps and interactive features
 
 Goal: evolve the transitional map viewer into a first-class feature family only when the domain is ready.
-
-Possible scope:
-
-- map route model
-- map layer model
-- marker/entity model
-- tile management
-- public map content routing
-- admin map management
-- member map interactions if needed
 
 Rules:
 
@@ -203,48 +186,9 @@ Rules:
 
 ---
 
-## 8. Priority 5 - Events, tools, apps, and custom feature families
+## 8. Current next move
 
-Goal: expand content kinds into richer feature families without breaking the content routing model.
-
-Candidate families:
-
-- events
-- tools
-- apps
-- custom content modules
-- game systems
-- interactive guides
-- reward or value-aware workflows
-
-Rules:
-
-- start through existing content kind, template, renderer, and route prefix model where possible
-- create a new DB prefix only when the domain becomes a standalone system
-- treat reward/value-aware workflows as security-sensitive and product-sensitive
-- keep member/admin workflows separate when actions differ
-
----
-
-## 9. Priority 6 - Operations and observability
-
-Goal: make production operation safer and easier.
-
-Possible work:
-
-- deployment runbook
-- backup and restore runbook
-- game patch import/rebuild checklist automation
-- SQL smoke scripts for app-required views
-- app log triage checklist
-- security check automation
-- release decision dashboard
-
----
-
-## 10. Current next move
-
-Next session should start with Riseopedia read-model audit, not destructive SQL.
+Next session should start from `docs/riseopedia.md` and continue **Riseopedia/Mafiosopedia read-model contract audit, verification, and UX polish**, not destructive game-data SQL.
 
 Minimum first deliverable:
 
@@ -258,4 +202,7 @@ view/app contract matrix:
 - media safety status
 - bench folding status
 - rarity/default variant status
+- recipe relationship status
+- property read-model status
+- proposed final contract action
 ```

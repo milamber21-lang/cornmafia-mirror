@@ -10,7 +10,7 @@ import "server-only";
 import { query } from "@/lib/data/pg";
 import { buildAppMediaFileUrl } from "@/lib/helpers/media-url";
 
-export type PublicRoutePrefix = "map" | "tool" | "app" | "event" | "custom" | "video";
+export type PublicRoutePrefix = "map" | "tool" | "app" | "event" | "custom" | "info" | "video";
 export type PublicRendererCode =
 	| "page"
 	| "map"
@@ -267,6 +267,7 @@ function normalizeRoutePrefix(value: unknown): PublicRoutePrefix | null {
 		value === "app" ||
 		value === "event" ||
 		value === "custom" ||
+		value === "info" ||
 		value === "video"
 		? value
 		: null;

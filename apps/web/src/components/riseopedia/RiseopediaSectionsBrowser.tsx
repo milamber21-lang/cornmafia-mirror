@@ -6,9 +6,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 import type { JSX } from "react";
-import Link from "next/link";
-import { Database } from "lucide-react";
 
+import RiseopediaPageHeader from "@/components/riseopedia/RiseopediaPageHeader";
 import RiseopediaSearchBox from "@/components/riseopedia/RiseopediaSearchBox";
 import RiseopediaSectionCard from "@/components/riseopedia/RiseopediaSectionCard";
 import { StatusPill } from "@/components/ui";
@@ -16,11 +15,14 @@ import type {
 	RiseopediaSectionDoc,
 	RiseopediaSectionMediaSample,
 } from "@/lib/data/riseopedia-sections";
+import { RISEOPEDIA_INFO_BASE_PATH } from "@/lib/helpers/riseopedia-entity-links";
 
 export type RiseopediaSectionsBrowserProps = {
 	sections: RiseopediaSectionDoc[];
 	sectionMediaSamples: RiseopediaSectionMediaSample[];
 	search: string | null;
+	basePath?: string;
+	homePath?: string;
 };
 
 function formatNumber(value: number): string {
@@ -59,6 +61,8 @@ export default function RiseopediaSectionsBrowser({
 	sections,
 	sectionMediaSamples,
 	search,
+	basePath = `${RISEOPEDIA_INFO_BASE_PATH}/sections`,
+	homePath = `${RISEOPEDIA_INFO_BASE_PATH}/browse`,
 }: RiseopediaSectionsBrowserProps): JSX.Element {
 	const sectionSampleLookup = buildSectionSampleLookup(sectionMediaSamples);
 	const searchValue = normalizedSearch(search);
@@ -71,45 +75,37 @@ export default function RiseopediaSectionsBrowser({
 	return (
 		<section className="public-collection-shell">
 			<div className="card public-collection-page riseopedia-page">
-				<section className="public-collection-hero riseopedia-browser-hero">
-					<div className="public-collection-hero__main">
-						<div className="public-collection-hero__icon">
-							<Database className="public-collection-hero__icon-glyph" aria-hidden />
-						</div>
-						<div>
-							<nav className="riseopedia-breadcrumb" aria-label="Riseopedia breadcrumb">
-								<Link href="/riseopedia">Riseopedia</Link>
-								<span>Sections</span>
-							</nav>
-							<div className="public-collection-hero__eyebrow">Mixed collections</div>
-							<h1 className="public-collection-hero__title">Sections</h1>
-							<p className="public-collection-hero__description">
-								Browse public Riseopedia sections with representative item images,
-								then open a section to explore matching assets and recipes.
-							</p>
-						</div>
-					</div>
-
-					<div className="public-collection-hero__actions">
+				<RiseopediaPageHeader
+					title="Sections"
+					description="Browse public Riseopedia sections with representative item images, then open a section to explore matching entries."
+					eyebrow="Mixed collections"
+					breadcrumbs={[
+						{ label: "Riseopedia", href: homePath },
+						{ label: "Sections" },
+					]}
+					actions={
 						<StatusPill tone="default" size="md">
 							{formatNumber(filteredSections.length)} matching sections
 						</StatusPill>
-					</div>
-				</section>
+					}
+				/>
 
-				<section className="public-collection-panel">
+				<section className="public-collection-panel riseopedia-overview-search-panel">
 					<RiseopediaSearchBox
-						basePath="/riseopedia/sections"
+						basePath={basePath}
 						search={search}
 						placeholder="Search sections..."
 					/>
+				</section>
 
+				<section className="riseopedia-classification-section public-collection-panel">
 					{filteredSections.length > 0 ? (
 						<div className="admin-control-section__grid riseopedia-section-grid">
 							{filteredSections.map((section) => (
 								<RiseopediaSectionCard
 									mediaSample={sectionSampleLookup.get(section.code) ?? null}
 									section={section}
+									basePath={basePath}
 									key={section.id}
 								/>
 							))}

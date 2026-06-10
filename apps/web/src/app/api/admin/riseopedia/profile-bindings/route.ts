@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/app/api/admin/riseopedia/profile-bindings/route.ts                                       ////
 //// Language: TS                                                                                                ////
-//// Admin API route for Riseopedia display profile bindings.                                                    ////
+//// Admin API route for Riseopedia display profile classification bindings.                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,13 +18,13 @@ import {
 	getBoolean,
 	getData,
 	getNonNegativeInt,
+	getNullablePositiveInt,
 	getNullableString,
 	getOp,
 	getOptionalId,
 	getPositiveInt,
 	getRequiredCode,
 	getRequiredId,
-	getRequiredString,
 	readObjectBody,
 	requireRiseopediaAdminActor,
 } from "@/lib/server/riseopedia-admin-api";
@@ -41,10 +41,9 @@ export async function GET(request: NextRequest): Promise<Response> {
 
 	try {
 		const rows = await listRiseopediaAdminDisplayProfiles();
-		const sourceRows = rows.bindings;
 		const filteredRows = scopedId
-			? sourceRows.filter((row) => String(row.display_profile_id ?? "") === String(scopedId))
-			: sourceRows;
+			? rows.bindings.filter((row) => String(row.display_profile_id ?? "") === String(scopedId))
+			: rows.bindings;
 		return NextResponse.json({ rows: filteredRows }, { status: 200 });
 	} catch (error: unknown) {
 		const classified = classifyRiseopediaAdminError(error);
@@ -68,6 +67,8 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError("VALIDATION_REQUIRED", "Missing op.", 400);
 	}
 
+	const scopedId = parsePositiveInt(request.nextUrl.searchParams.get("displayProfileId"));
+
 	try {
 		if (op === "upsert") {
 			const data = getData(payloadOrResponse);
@@ -77,10 +78,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 			const displayProfileId = getPositiveInt(data, "displayProfileId");
 			const entityTypeCode = getRequiredCode(data, "entityTypeCode");
-			const profileSelectorKindCode = getRequiredCode(data, "profileSelectorKindCode");
-			const selectorValue = getRequiredString(data, "selectorValue");
-			if (!displayProfileId || !entityTypeCode || !profileSelectorKindCode || !selectorValue) {
-				return jsonError("VALIDATION_REQUIRED", "Display profile, entity type, selector kind, and selector value are required.", 400);
+			if (!displayProfileId || !entityTypeCode) {
+				return jsonError("VALIDATION_REQUIRED", "Display profile and entity type are required.", 400);
+			}
+			if (scopedId && displayProfileId !== scopedId) {
+				return jsonError("VALIDATION_REQUIRED", "This binding can only be saved under the selected display profile.", 400);
 			}
 
 			const id = await upsertRiseopediaDisplayProfileBindingAdmin({
@@ -88,8 +90,9 @@ export async function POST(request: NextRequest): Promise<Response> {
 				displayProfileBindingId: getOptionalId(payloadOrResponse),
 				displayProfileId,
 				entityTypeCode,
-				profileSelectorKindCode,
-				selectorValue,
+				entityClassId: getNullablePositiveInt(data, "entityClassId"),
+				entityCategoryId: getNullablePositiveInt(data, "entityCategoryId"),
+				entitySubcategoryId: getNullablePositiveInt(data, "entitySubcategoryId"),
 				priorityOrder: getNonNegativeInt(data, "priorityOrder", 1000),
 				active: getBoolean(data, "active", true),
 				adminNote: getNullableString(data, "adminNote"),
@@ -102,6 +105,14 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const displayProfileBindingId = getRequiredId(payloadOrResponse);
 			if (!displayProfileBindingId) {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
+			}
+
+			if (scopedId) {
+				const rows = await listRiseopediaAdminDisplayProfiles();
+				const target = rows.bindings.find((row) => Number(row.display_profile_binding_id) === displayProfileBindingId);
+				if (!target || Number(target.display_profile_id) !== scopedId) {
+					return jsonError("VALIDATION_REQUIRED", "This binding does not belong to the selected display profile.", 400);
+				}
 			}
 
 			await deleteRiseopediaDisplayProfileBindingAdmin({ actorDiscordId: actorOrResponse, displayProfileBindingId });

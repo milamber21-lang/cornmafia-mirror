@@ -1,16 +1,16 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/app/api/admin/riseopedia/section-rules/route.ts                                          ////
 //// Language: TS                                                                                                ////
-//// Admin API route for Riseopedia automatic section rules.                                                     ////
+//// Admin API route for rebuilt Riseopedia section classification rules.                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 import { NextRequest, NextResponse } from "next/server";
 
 import {
-	deleteRiseopediaSectionRuleAdmin,
+	deleteRiseopediaSectionClassificationRuleAdmin,
 	listRiseopediaAdminSections,
-	upsertRiseopediaSectionRuleAdmin,
+	upsertRiseopediaSectionClassificationRuleAdmin,
 } from "@/lib/data/riseopedia-admin";
 import { jsonError, parsePositiveInt, requireAdminResponse } from "@/lib/server/admin-route";
 import {
@@ -18,13 +18,13 @@ import {
 	getBoolean,
 	getData,
 	getNonNegativeInt,
+	getNullablePositiveInt,
 	getNullableString,
 	getOp,
 	getOptionalId,
 	getPositiveInt,
 	getRequiredCode,
 	getRequiredId,
-	getRequiredString,
 	readObjectBody,
 	requireRiseopediaAdminActor,
 } from "@/lib/server/riseopedia-admin-api";
@@ -41,10 +41,9 @@ export async function GET(request: NextRequest): Promise<Response> {
 
 	try {
 		const rows = await listRiseopediaAdminSections();
-		const sourceRows = rows.rules;
 		const filteredRows = scopedId
-			? sourceRows.filter((row) => String(row.section_id ?? "") === String(scopedId))
-			: sourceRows;
+			? rows.classificationRules.filter((row) => String(row.section_id ?? "") === String(scopedId))
+			: rows.classificationRules;
 		return NextResponse.json({ rows: filteredRows }, { status: 200 });
 	} catch (error: unknown) {
 		const classified = classifyRiseopediaAdminError(error);
@@ -77,19 +76,18 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 			const sectionId = getPositiveInt(data, "sectionId");
 			const entityTypeCode = getRequiredCode(data, "entityTypeCode");
-			const ruleKindCode = getRequiredCode(data, "ruleKindCode");
-			const ruleValue = getRequiredString(data, "ruleValue");
-			if (!sectionId || !entityTypeCode || !ruleKindCode || !ruleValue) {
-				return jsonError("VALIDATION_REQUIRED", "Section, entity type, rule kind, and rule value are required.", 400);
+			if (!sectionId || !entityTypeCode) {
+				return jsonError("VALIDATION_REQUIRED", "Section and entity type are required.", 400);
 			}
 
-			const id = await upsertRiseopediaSectionRuleAdmin({
+			const id = await upsertRiseopediaSectionClassificationRuleAdmin({
 				actorDiscordId: actorOrResponse,
-				sectionEntityRuleId: getOptionalId(payloadOrResponse),
+				sectionClassificationRuleId: getOptionalId(payloadOrResponse),
 				sectionId,
 				entityTypeCode,
-				ruleKindCode,
-				ruleValue,
+				entityClassId: getNullablePositiveInt(data, "entityClassId"),
+				entityCategoryId: getNullablePositiveInt(data, "entityCategoryId"),
+				entitySubcategoryId: getNullablePositiveInt(data, "entitySubcategoryId"),
 				sortOrder: getNonNegativeInt(data, "sortOrder", 1000),
 				active: getBoolean(data, "active", true),
 				adminNote: getNullableString(data, "adminNote"),
@@ -99,12 +97,12 @@ export async function POST(request: NextRequest): Promise<Response> {
 		}
 
 		if (op === "delete") {
-			const sectionEntityRuleId = getRequiredId(payloadOrResponse);
-			if (!sectionEntityRuleId) {
+			const sectionClassificationRuleId = getRequiredId(payloadOrResponse);
+			if (!sectionClassificationRuleId) {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
 			}
 
-			await deleteRiseopediaSectionRuleAdmin({ actorDiscordId: actorOrResponse, sectionEntityRuleId });
+			await deleteRiseopediaSectionClassificationRuleAdmin({ actorDiscordId: actorOrResponse, sectionClassificationRuleId });
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 

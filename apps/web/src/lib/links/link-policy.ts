@@ -49,7 +49,7 @@ type HrefParts = {
 	suffix: string;
 };
 
-const PUBLIC_ROUTE_PREFIXES = new Set(["map", "tool", "app", "event", "custom", "video"]);
+const PUBLIC_ROUTE_PREFIXES = new Set(["map", "tool", "app", "event", "custom", "info", "video"]);
 const BLOCKED_INTERNAL_FIRST_SEGMENTS = new Set([
 	"admin",
 	"api",

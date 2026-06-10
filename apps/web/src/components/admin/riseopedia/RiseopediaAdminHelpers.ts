@@ -85,7 +85,7 @@ export function buildInitialValues(
 	const values: { [key: string]: unknown } = {};
 
 	for (const field of fields) {
-		const rowValue = row ? readRowValue(row, field.rowKey) : undefined;
+		const rowValue = row ? field.readValue?.(row) ?? readRowValue(row, field.rowKey) : undefined;
 		if (field.type === "checkbox") {
 			values[field.valueKey] = rowValue === undefined ? Boolean(field.defaultValue) : toBoolean(rowValue);
 			continue;

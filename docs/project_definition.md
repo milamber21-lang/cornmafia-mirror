@@ -45,6 +45,32 @@ The project has passed the foundation phase. The current baseline includes:
 
 Future work should improve, extend, and harden this V1 baseline. Do not restart the architecture.
 
+
+---
+
+## 1A. Current game-data baseline
+
+The canonical game-data foundation is ready for Riseopedia/web app read-model work.
+
+Current decisions that future work must preserve:
+
+```text
+entities are asset or recipe
+crafting benches are assets, not a separate entity type
+rarity is represented as entity variant values
+brands are entity-level
+aliases are resolver evidence only
+source mappings are variant evidence only
+recipe class is resolved from outputs
+recipe category/subcategory come from bench family and tier/no_tier_required
+vehicle subcategories use raw brand/source values without category prefixes
+properties are defined by game_data mapping rules and materialized through web_priv values
+web_priv.game_entity_properties_c is a preserved metadata catalog
+web_priv.game_entity_property_expectations_r is retired
+```
+
+The next major work is not another destructive canonical game-data cleanup. The next major work is rebuilding/auditing `web_view.riseopedia_*`, `web_view.mafiosopedia_*`, and related game read contracts so `apps/web` can safely consume the cleaned canonical truth. Durable Riseopedia-family product, channel, app, admin, and read-model rules live in `docs/riseopedia.md`.
+
 ---
 
 ## 2. Platform intent
@@ -202,13 +228,25 @@ game_transform_* = source transformation, classification, identity, naming, ref-
 
 Approved current game-domain decisions:
 
-- crafting benches are assets with `asset_class_code = 'crafting_bench'`
-- bench-specific details should live as asset properties, asset media, relationships, or an asset profile table only if truly needed
-- brands belong under the `game_asset_brand*` family, not as long-term generic properties
-- rarities belong under the `game_asset_rarity*` family and source-mapping/variant identity, not as unrelated generic properties
-- release state, entity types, and cross-domain relationships belong under `game_entity_*`
+- canonical game truth is entity-first; `game_entities` owns cross-domain identity and `game_assets` / `game_recipes` are domain rows linked to that identity
+- concrete asset variants live under `game_entity_variants_r`
+- variant dimensions and values live under `game_entity_variant_groups_c`, `game_entity_variant_value_codes_c`, and `game_entity_variant_values_r`
+- source/import evidence for concrete variants lives under `game_entity_variant_source_mappings_r`
+- property metadata lives under `game_entity_properties_c`; materialized values live under `game_entity_property_values`
+- crafting bench source rows from `dt_craft_benches` must map to canonical bench family/tier variants before property sync
+- source mappings are evidence, not canonical identity
+- recipe entity classification is output-derived and relationship-aware; do not force it into simple source-field rules
+- resolver aliases live under `game_entity_variant_aliases`; aliases resolve messy source refs to `entity_variant_id` and must not become durable relationship targets
+- brands are entity-level canonical data under `game_entity_brands_c` and `game_entity_brand_links_r`
+- rarities are entity variant values, not an asset-level reference table; `game_asset_rarities_c` has been retired
+- crafting benches are assets with `asset_class_code = 'crafting_bench'`; `entity_type_code = 'crafting_bench'` has been retired
+- bench-specific details live as asset properties, media, relationships, and recipe/bench relationships unless a future profile table is justified
+- release state, entity types, and cross-entity relationships belong under `game_entity_*`
 - relationship results use `game_entity_relationships_r`, because relationships are not asset-only
-- recipe generic resources are represented by `game_recipe_requirement_groups*`, not by asset grouping
+- recipe generic resources are canonical recipe concepts under `game_recipe_generic_group_types_c`, `game_recipe_generic_groups_c`, and `game_recipe_generic_connections_r`
+- recipe catalysts live under `game_recipe_catalysts_r`
+- variant, variant value, and variant source mapping history is maintained under `_h` tables and wired through `game_sync_patch`
+- `domain_entity_id` remains a compatibility bridge and must not be removed until the Riseopedia read models are stable
 
 Future first-class feature families may receive their own prefix only when they become real standalone domains.
 
@@ -241,6 +279,9 @@ Access model:
 - role cache and access summary are DB-backed
 - access can include public, authenticated, rank-based, editor, and admin behavior
 - governed content and navigation visibility should use DB-backed access evaluation
+- Discord login must fail closed when login-time guild/member/role sync cannot complete
+- server-rendered actor-sensitive public surfaces must refresh due role caches before granting gated menu/content access
+- if role verification is due and cannot complete, public surfaces render as public/anonymous instead of trusting stale elevated access
 - admin capability does not make every normal surface behave as admin
 
 Context model:
@@ -279,6 +320,7 @@ Current active admin domains:
 
 ```text
 discord
+riseopedia
 web
 ```
 
@@ -286,10 +328,13 @@ Examples:
 
 ```text
 apps/web/src/app/api/admin/discord/*
+apps/web/src/app/api/admin/riseopedia/*
 apps/web/src/app/api/admin/web/*
 apps/web/src/app/admin/discord/*
+apps/web/src/app/admin/riseopedia/*
 apps/web/src/app/admin/web/*
 apps/web/src/components/admin/discord/*
+apps/web/src/components/admin/riseopedia/*
 apps/web/src/components/admin/web/*
 ```
 
@@ -305,6 +350,27 @@ Do not create empty domain folders for theoretical future features.
 - Discord users
 
 Discord-owned truth remains system-owned. Admin-local editing should stay narrow and explicit.
+
+### Riseopedia domain
+
+- sections
+- section classification rules
+- patch publication channels
+- patch publications
+- patch scope overrides
+- release evidence
+- release decisions
+- release overrides
+- display profiles
+- display profile bindings
+- display profile properties/elements
+- display profile variant selectors
+- overview card rule sets
+- overview card rule elements
+- relationship display rules
+- property catalog inspection/options
+
+Riseopedia admin is game-domain administration over guarded `web_api.riseopedia_*` actions and `web_view.riseopedia_admin_*` read contracts. It must preserve the app/database boundary and must not directly CRUD `web_priv` or `game_data` from app code.
 
 ### Web domain
 
@@ -348,6 +414,7 @@ Current active public surfaces:
   - `/custom/<category>/<subcategory>/<content>`
   - `/video/<category>/<subcategory>/<content>`
 - public series route: `/series/<slug>`
+- Riseopedia/Mafiosopedia info routes under `/info/<category>`
 - transitional map viewer route: `/maps/<map>`
 - placeholder homepage
 - placeholder category page
@@ -392,6 +459,7 @@ Navigation access model:
 - category, subcategory, and content access choose what is visible inside that menu
 - saved stale rows should remain visible in admin until removed or replaced
 - public rendering should apply real access checks and preserve saved readable branches according to current DB behavior
+- public rendering should resolve a fresh server-side actor before passing actor identity into DB navigation/content read functions
 
 Content route model:
 

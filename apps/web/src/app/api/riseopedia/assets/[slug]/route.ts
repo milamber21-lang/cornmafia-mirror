@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/app/api/riseopedia/assets/[slug]/route.ts                                              ////
 //// Language: TS                                                                                             ////
-//// Public Riseopedia asset detail API backed by the shared public detail aggregation helper.                 ////
+//// Public Riseopedia asset detail API backed by entity-first public detail read models.                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 import { NextResponse } from "next/server";
 
-import { findRiseopediaAssetDetailBySlug } from "@/lib/data/riseopedia-detail";
+import { findRiseopediaEntityDetailBySlug } from "@/lib/data/riseopedia-entity-detail";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +23,10 @@ export async function GET(
 ): Promise<Response> {
 	try {
 		const resolvedParams = await params;
-		const detail = await findRiseopediaAssetDetailBySlug(resolvedParams.slug);
+		const detail = await findRiseopediaEntityDetailBySlug({
+			slug: resolvedParams.slug,
+			entityTypeCode: "asset",
+		});
 
 		if (!detail) {
 			return NextResponse.json({ message: "Not Found" }, { status: 404 });

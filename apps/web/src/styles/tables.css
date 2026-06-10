@@ -1,10 +1,10 @@
 /* FILE: apps/web/src/styles/tables.css
-   Table shell, admin table, column, loading, and empty-row classes reserved for upcoming style passes.
+   Shared table shell, admin table, column, loading, and empty-row classes.
 */
 
 /*
 Pass 1 intentionally creates this layer without moving TS/TSX-owned styles yet.
-Future passes should move matching visual rules here according to docs/style_ownership_rules.md.
+Future passes should move matching visual rules here according to docs/style_system.md.
 */
 /* ===== Table column widths ===== */
 .table-col {
@@ -197,6 +197,14 @@ Future passes should move matching visual rules here according to docs/style_own
 	justify-content: flex-end;
 }
 
+.admin-table-toolbar--secondary {
+	grid-template-columns: auto minmax(260px, 1fr) auto;
+}
+
+.admin-table-toolbar--secondary .admin-table-toolbar-search {
+	justify-content: center;
+}
+
 .admin-data-table {
 	min-width: 100%;
 	font-size: var(--font-size-sm);
@@ -243,28 +251,9 @@ Future passes should move matching visual rules here according to docs/style_own
 	min-width: 160px;
 }
 
-.admin-table-toolbar-filter--riseopedia {
-	flex-wrap: wrap;
-	min-width: 0;
-}
-
 .admin-table-toolbar-filter--empty {
 	min-width: 0;
 	pointer-events: none;
-}
-
-.admin-table-filter-control--flexible {
-	width: fit-content;
-	min-width: 180px;
-	max-width: min(100%, 420px);
-}
-
-.admin-table-filter-control--flexible .ui-dropdown__button {
-	width: 100%;
-}
-
-.admin-table-filter-control--flexible .ui-dropdown__menu {
-	min-width: 100%;
 }
 
 .admin-table-cell--mono {
@@ -371,13 +360,6 @@ Future passes should move matching visual rules here according to docs/style_own
 		grid-template-columns: 1fr;
 	}
 
-	.admin-table-toolbar-filter--riseopedia,
-	.admin-table-filter-control--flexible,
-	.admin-table-filter-control--flexible .ui-dropdown__button {
-		width: 100%;
-		max-width: none;
-	}
-
 	.admin-table-toolbar-search,
 	.admin-table-toolbar-action {
 		justify-content: stretch;
@@ -386,4 +368,18 @@ Future passes should move matching visual rules here according to docs/style_own
 	.admin-table-toolbar-action .ui-button {
 		width: 100%;
 	}
+}
+
+.admin-table-wrap {
+	overflow-wrap: anywhere;
+	word-break: normal;
+}
+
+.admin-table-break-word {
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+.admin-table-nowrap {
+	white-space: nowrap;
 }

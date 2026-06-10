@@ -161,31 +161,38 @@ const publishingLinks: AdminLink[] = [
 
 const riseopediaLinks: AdminLink[] = [
 	{
-		title: "Riseopedia Sections",
-		description: "Manage public Riseopedia sections and scoped section rules or overrides.",
-		href: "/admin/riseopedia/sections",
-		icon: Navigation,
-		minimumAccess: "admin",
-	},
-	{
-		title: "Item Visibility Overrides",
-		description: "Hide, force-show, or limit imported entities by public visibility state.",
-		href: "/admin/riseopedia/visibility",
+		title: "Riseopedia Access Control",
+		description: "Manage game patch publications, publication scope overrides, and release evidence.",
+		href: "/admin/riseopedia/patch-publications",
 		icon: Shield,
 		minimumAccess: "admin",
 	},
 	{
-		title: "Riseopedia Properties",
-		description: "Manage the property catalog used by fixed Riseopedia detail layouts.",
-		href: "/admin/riseopedia/properties",
-		icon: FileText,
+		title: "Riseopedia Sections",
+		description: "Manage section records and classification rules.",
+		href: "/admin/riseopedia/sections",
+		icon: ListTree,
 		minimumAccess: "admin",
 	},
 	{
 		title: "Riseopedia Display Profiles",
-		description: "Manage display profiles and scoped bindings, properties, and blocks.",
+		description: "Manage detail display profiles and their child configuration tables.",
 		href: "/admin/riseopedia/display-profiles",
 		icon: LayoutTemplate,
+		minimumAccess: "admin",
+	},
+	{
+		title: "Riseopedia Card Rules",
+		description: "Manage overview card rule sets and card elements.",
+		href: "/admin/riseopedia/overview-card-rules",
+		icon: Layers3,
+		minimumAccess: "admin",
+	},
+	{
+		title: "Riseopedia Relationship Display",
+		description: "Manage Obtained from, Used for, and hidden relationship display rules.",
+		href: "/admin/riseopedia/relationship-display-rules",
+		icon: Link2,
 		minimumAccess: "admin",
 	},
 ];
@@ -208,7 +215,7 @@ const sections: AdminSection[] = [
 	},
 	{
 		title: "Riseopedia",
-		description: "Configure Riseopedia sections, item visibility, properties, and display profiles.",
+		description: "Configure Riseopedia access control, sections, display profiles, and card rules.",
 		items: riseopediaLinks,
 	},
 ];
