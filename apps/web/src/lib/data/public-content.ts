@@ -559,7 +559,6 @@ function mapPublicContentResult(value: unknown): PublicContentResult | null {
 	};
 }
 
-
 function normalizeIconSource(value: unknown): "lucide" | "media" | null {
 	return value === "lucide" || value === "media" ? value : null;
 }
@@ -742,8 +741,6 @@ function mapPublicContentRedirectResult(
 		redirectTypeCode,
 	};
 }
-
-
 
 export async function findPublicContentAppHrefByPath(args: {
 	actorDiscordId: string | null;

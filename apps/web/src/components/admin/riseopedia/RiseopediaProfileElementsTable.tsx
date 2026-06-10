@@ -44,19 +44,8 @@ import {
 	buildRiseopediaProfileElementFields,
 } from "./RiseopediaAdminPanelFieldBuilders";
 import {
-	ADMIN_NOTE_FIELD,
-	BOOLEAN_ACTIVE_FIELD,
-	COMPACT_FIELD,
-	VISIBLE_FIELD,
 	activeFilter,
-	buildBuiltinFieldOptions,
-	buildOptionsFromRows,
-	buildPropertyOptions,
-	buildScopedProfileOptions,
-	displaySourceTypeField,
-	filterProfilePropertyRows,
 	idText,
-	isBuiltinSourceType,
 } from "./RiseopediaAdminConfigHelpers";
 
 import {

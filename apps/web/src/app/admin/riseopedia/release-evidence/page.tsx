@@ -12,10 +12,7 @@ import RiseopediaAdminPageChrome, {
 } from "@/components/admin/riseopedia/RiseopediaAdminPageChrome";
 import RiseopediaReleaseEvidenceTable from "@/components/admin/riseopedia/RiseopediaReleaseEvidenceTable";
 import { requireAdmin } from "@/lib/auth/authz";
-import {
-	listRiseopediaAdminMeta,
-	listRiseopediaReleaseAdmin,
-} from "@/lib/data/riseopedia-admin";
+import { listRiseopediaReleaseAdmin } from "@/lib/data/riseopedia-admin";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +39,7 @@ export default async function ReleaseEvidenceAdminPage({ searchParams }: Release
 
 	const resolvedSearchParams = searchParams ? await searchParams : {};
 	const entityId = typeof resolvedSearchParams.entityId === "string" ? resolvedSearchParams.entityId : "";
-	const [meta, rows] = await Promise.all([listRiseopediaAdminMeta(), listRiseopediaReleaseAdmin()]);
+	const rows = await listRiseopediaReleaseAdmin();
 	const evidenceRows = entityId
 		? rows.evidence.filter((row) => String(row.entity_id ?? "") === entityId)
 		: rows.evidence;

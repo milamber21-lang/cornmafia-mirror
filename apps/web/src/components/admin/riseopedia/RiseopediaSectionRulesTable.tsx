@@ -44,11 +44,7 @@ import {
 	buildRiseopediaSectionRuleFields,
 } from "./RiseopediaAdminPanelFieldBuilders";
 import {
-	ADMIN_NOTE_FIELD,
-	BOOLEAN_ACTIVE_FIELD,
 	activeFilter,
-	buildSectionOptions,
-	classificationFields,
 	entityTypeFilter,
 	idText,
 } from "./RiseopediaAdminConfigHelpers";
@@ -101,7 +97,7 @@ export default function RiseopediaSectionRulesTable({ initialRows, sections, met
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
 			fields={buildRiseopediaSectionRuleFields({ sections, section, meta })}
-			renderPanel={({ open, mode, row, rows, onClose, onSaved }) => (
+			renderPanel={({ open, mode, row, onClose, onSaved }) => (
 				<RiseopediaSectionRulesPanel
 					open={open}
 					mode={mode}

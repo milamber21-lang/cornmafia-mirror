@@ -36,7 +36,6 @@ import { readResponseMessage as tableReadResponseMessage } from "@/lib/helpers/h
 
 import type {
 	RiseopediaAdminMeta,
-	RiseopediaAdminRow,
 	RiseopediaAdminRows,
 } from "./RiseopediaAdminTypes";
 import RiseopediaDisplayProfilesPanel from "./RiseopediaDisplayProfilesPanel";
@@ -44,11 +43,7 @@ import {
 	buildRiseopediaDisplayProfileFields,
 } from "./RiseopediaAdminPanelFieldBuilders";
 import {
-	ADMIN_NOTE_FIELD,
-	BOOLEAN_ACTIVE_FIELD,
 	activeFilter,
-	buildOptionsFromRows,
-	buildRenderingChannelOptions,
 	entityTypeFilter,
 	idText,
 } from "./RiseopediaAdminConfigHelpers";
@@ -102,7 +97,7 @@ export default function RiseopediaDisplayProfilesTable({ initialRows, meta }: Di
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
 			fields={buildRiseopediaDisplayProfileFields(meta)}
-			renderPanel={({ open, mode, row, rows, onClose, onSaved }) => (
+			renderPanel={({ open, mode, row, onClose, onSaved }) => (
 				<RiseopediaDisplayProfilesPanel
 					open={open}
 					mode={mode}

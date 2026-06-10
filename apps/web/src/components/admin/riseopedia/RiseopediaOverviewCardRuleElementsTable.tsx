@@ -44,18 +44,8 @@ import {
 	buildRiseopediaOverviewCardRuleElementFields,
 } from "./RiseopediaAdminPanelFieldBuilders";
 import {
-	ADMIN_NOTE_FIELD,
-	BOOLEAN_ACTIVE_FIELD,
 	activeFilter,
-	buildBuiltinFieldOptions,
-	buildOverviewCardSlotOptions,
-	buildPropertyOptions,
-	buildRuleSetOptions,
-	displaySourceTypeField,
-	filterOverviewCardPropertyRows,
 	idText,
-	isBuiltinSourceType,
-	isPropertySourceType,
 } from "./RiseopediaAdminConfigHelpers";
 
 import {

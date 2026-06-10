@@ -44,12 +44,8 @@ import {
 	buildRiseopediaProfileVariantSelectorFields,
 } from "./RiseopediaAdminPanelFieldBuilders";
 import {
-	ADMIN_NOTE_FIELD,
-	BOOLEAN_ACTIVE_FIELD,
 	activeFilter,
-	buildScopedProfileOptions,
 	idText,
-	optionRows,
 } from "./RiseopediaAdminConfigHelpers";
 
 import {

@@ -15,7 +15,6 @@ import {
 	buildOptionsFromRows,
 	buildOverviewCardSlotOptions,
 	buildPatchOptions,
-	buildProfileOptions,
 	buildPropertyOptions,
 	buildRuleSetOptions,
 	buildScopedProfileOptions,
@@ -30,7 +29,6 @@ import {
 	isPropertySourceType,
 	optionRows,
 	overviewCardRuleSetFields,
-	propertyRowMatchesClassScope,
 } from "./RiseopediaAdminConfigHelpers";
 import {
 	readRowValue,

@@ -43,11 +43,7 @@ import {
 	buildRiseopediaReleaseOverrideFields,
 } from "./RiseopediaAdminPanelFieldBuilders";
 import {
-	BOOLEAN_ACTIVE_FIELD,
 	activeFilter,
-	buildEntityOptions,
-	buildOptionsFromRows,
-	buildPatchOptions,
 	entityTypeFilter,
 } from "./RiseopediaAdminConfigHelpers";
 
@@ -96,7 +92,7 @@ export default function RiseopediaReleaseOverridesTable({ initialRows, meta }: R
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
 			fields={buildRiseopediaReleaseOverrideFields(meta)}
-			renderPanel={({ open, mode, row, rows, onClose, onSaved }) => (
+			renderPanel={({ open, mode, row, onClose, onSaved }) => (
 				<RiseopediaReleaseOverridesPanel
 					open={open}
 					mode={mode}

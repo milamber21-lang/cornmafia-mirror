@@ -7,18 +7,9 @@
 
 export const MAFIOSOPEDIA_INFO_BASE_PATH = "/info/mafiosopedia";
 
-const MAFIOSOPEDIA_INFO_ROUTE_FAMILIES = [
-	"browse",
-	"sections",
-	"classes",
-	"categories",
-	"subcategories",
-	"entity",
-] as const;
-
 const MAFIOSOPEDIA_ENTITY_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,127}$/;
 
-export type MafiosopediaInfoRouteFamily = (typeof MAFIOSOPEDIA_INFO_ROUTE_FAMILIES)[number];
+export type MafiosopediaInfoRouteFamily = "browse" | "sections" | "classes" | "categories" | "subcategories" | "entity";
 
 function normalizePathSegment(value: string | null): string | null {
 	const trimmed = value?.trim();

@@ -44,12 +44,7 @@ import {
 	buildRiseopediaPatchScopeOverrideFields,
 } from "./RiseopediaAdminPanelFieldBuilders";
 import {
-	ADMIN_NOTE_FIELD,
-	BOOLEAN_ACTIVE_FIELD,
-	buildPatchOptions,
-	classificationFields,
 	classificationFilters,
-	idText,
 	patchFilter,
 } from "./RiseopediaAdminConfigHelpers";
 
@@ -100,7 +95,7 @@ export default function RiseopediaPatchScopeOverridesTable({ initialRows, meta }
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
 			fields={buildRiseopediaPatchScopeOverrideFields(meta)}
-			renderPanel={({ open, mode, row, rows, onClose, onSaved }) => (
+			renderPanel={({ open, mode, row, onClose, onSaved }) => (
 				<RiseopediaPatchScopeOverridesPanel
 					open={open}
 					mode={mode}

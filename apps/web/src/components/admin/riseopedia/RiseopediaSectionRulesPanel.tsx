@@ -118,7 +118,7 @@ export default function RiseopediaSectionRulesPanel({
 				setSubmitting(false);
 			}
 		},
-		[fields, mode, row, scopedSectionId],
+		[fields, mode, row, scopedSectionId, section],
 	);
 
 	if (!open) {
