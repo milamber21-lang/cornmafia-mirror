@@ -82,6 +82,12 @@ type DiscordUserViewRow = {
 	updated_dt: Date | string;
 };
 
+type AuthUserIdentityRow = {
+	auth_user_id: string | number;
+	discord_id: string | null;
+	is_disabled: boolean;
+};
+
 type DiscordRoleSyncPayload = {
 	role_id: string;
 	role_name: string;
@@ -206,10 +212,7 @@ async function fetchDiscordSyncData(
 
 	if (discordAccessToken) {
 		try {
-			guildMember = await getCurrentUserGuildMember(
-				guildId,
-				discordAccessToken,
-			);
+			guildMember = await getCurrentUserGuildMember(guildId, discordAccessToken);
 			memberFetchOk = true;
 		} catch (error: unknown) {
 			if (isDiscordNotFoundError(error)) {
@@ -291,6 +294,137 @@ async function getDiscordUserViewByDiscordId(
 	);
 
 	return result.rows[0] ?? null;
+}
+
+function normalizeSessionIdentifier(
+	value: string | null | undefined,
+): string | null {
+	if (typeof value !== "string") {
+		return null;
+	}
+
+	const trimmedValue = value.trim();
+	return trimmedValue.length > 0 ? trimmedValue : null;
+}
+
+function isIntegerText(value: string): boolean {
+	return /^\d+$/.test(value);
+}
+
+function isLikelyDiscordSnowflake(value: string): boolean {
+	return /^\d{17,20}$/.test(value);
+}
+
+async function findAuthUserIdentityByAuthUserId(
+	authUserId: string,
+): Promise<AuthUserIdentityRow | null> {
+	if (!isIntegerText(authUserId)) {
+		return null;
+	}
+
+	const result = await query<AuthUserIdentityRow>(
+		`
+			SELECT
+				auth_user_id,
+				discord_id,
+				is_disabled
+			FROM web_view.auth_users
+			WHERE auth_user_id = $1::bigint
+			LIMIT 1
+		`,
+		[authUserId],
+	);
+
+	const row = result.rows[0] ?? null;
+	return row && !row.is_disabled ? row : null;
+}
+
+async function findAuthUserIdentityByDiscordId(
+	discordUserId: string,
+): Promise<AuthUserIdentityRow | null> {
+	const result = await query<AuthUserIdentityRow>(
+		`
+			SELECT
+				auth_user_id,
+				discord_id,
+				is_disabled
+			FROM web_view.auth_users
+			WHERE discord_id = $1
+			LIMIT 1
+		`,
+		[discordUserId],
+	);
+
+	const row = result.rows[0] ?? null;
+	return row && !row.is_disabled ? row : null;
+}
+
+type CanonicalSessionIdentity = {
+	authUserId: string | null;
+	discordUserId: string | null;
+};
+
+async function resolveCanonicalSessionIdentity(params: {
+	authUserId: string | null;
+	discordUserId: string | null;
+}): Promise<CanonicalSessionIdentity> {
+	const authUserId = normalizeSessionIdentifier(params.authUserId);
+	const discordUserId = normalizeSessionIdentifier(params.discordUserId);
+
+	if (discordUserId) {
+		const row = await findAuthUserIdentityByDiscordId(discordUserId);
+
+		if (row?.discord_id) {
+			return {
+				authUserId: String(row.auth_user_id),
+				discordUserId: row.discord_id,
+			};
+		}
+	}
+
+	if (authUserId) {
+		const row = await findAuthUserIdentityByAuthUserId(authUserId);
+
+		if (row?.discord_id) {
+			return {
+				authUserId: String(row.auth_user_id),
+				discordUserId: row.discord_id,
+			};
+		}
+
+		if (isLikelyDiscordSnowflake(authUserId)) {
+			const discordRow = await findAuthUserIdentityByDiscordId(authUserId);
+
+			if (discordRow?.discord_id) {
+				return {
+					authUserId: String(discordRow.auth_user_id),
+					discordUserId: discordRow.discord_id,
+				};
+			}
+		}
+	}
+
+	return {
+		authUserId,
+		discordUserId,
+	};
+}
+
+function shouldRefreshJwtIdentity(token: JwtWithDiscordId): boolean {
+	const authUserId = normalizeSessionIdentifier(
+		typeof token.sub === "string" ? token.sub : null,
+	);
+	const discordUserId = normalizeSessionIdentifier(token.discordId ?? null);
+
+	if (!authUserId && !discordUserId) {
+		return false;
+	}
+
+	if (!authUserId || !discordUserId) {
+		return true;
+	}
+
+	return authUserId === discordUserId || isLikelyDiscordSnowflake(authUserId);
 }
 
 async function runDiscordSync(
@@ -425,7 +559,7 @@ export async function syncDiscordUserOnLogin(params: {
 	usernameFallback?: string | null;
 	globalNameFallback?: string | null;
 	imageFallback?: string | null;
-}): Promise<boolean> {
+}): Promise<DiscordSyncResultRow | null> {
 	const guildId = getOptionalEnv("DISCORD_GUILD_ID");
 	const syncData = await fetchDiscordSyncData(
 		guildId,
@@ -435,9 +569,9 @@ export async function syncDiscordUserOnLogin(params: {
 
 	if (!syncData.memberFetchOk || !syncData.rolesFetchOk) {
 		console.warn(
-			`[auth] Skipping Discord login sync for ${params.discordUserId} because guild verification is unavailable.`,
+			`[auth] Blocking Discord login sync for ${params.discordUserId} because guild verification is unavailable.`,
 		);
-		return false;
+		return null;
 	}
 
 	const request = buildSyncRequest({
@@ -450,8 +584,7 @@ export async function syncDiscordUserOnLogin(params: {
 		avatarUrlFallback: params.imageFallback,
 	});
 
-	const result = await runDiscordSync("login", request);
-	return result !== null;
+	return runDiscordSync("login", request);
 }
 
 export async function verifyDiscordRolesIfDue(params: {
@@ -508,17 +641,18 @@ async function syncDiscordUserForSignIn(params: {
 
 		if (!synced) {
 			console.warn(
-				`[auth] Allowing Discord sign-in for ${params.discordUserId} without a fresh guild role sync.`,
+				`[auth] Blocking Discord sign-in for ${params.discordUserId} because guild verification is unavailable.`,
 			);
+			return false;
 		}
 
 		return true;
 	} catch (error: unknown) {
 		console.error(
-			`[auth] Allowing Discord sign-in for ${params.discordUserId} even though guild sync failed:`,
+			`[auth] Blocking Discord sign-in for ${params.discordUserId} because guild sync failed:`,
 			error,
 		);
-		return true;
+		return false;
 	}
 }
 
@@ -590,13 +724,16 @@ export function buildAuthOptions(): NextAuthOptions {
 				user: NextAuthUser;
 				account?: NextAuthAccount | null;
 			}) {
-				if (
-					account?.provider !== "discord" ||
-					!account.providerAccountId ||
-					!user.id
-				) {
+				if (account?.provider !== "discord" || !account.providerAccountId) {
 					console.warn(
 						"[auth] Blocking sign-in because the Discord account context is incomplete.",
+					);
+					return false;
+				}
+
+				if (!user.id) {
+					console.warn(
+						"[auth] Blocking Discord sign-in because the internal auth user context is missing.",
 					);
 					return false;
 				}
@@ -605,9 +742,7 @@ export function buildAuthOptions(): NextAuthOptions {
 					authUserId: user.id,
 					discordUserId: account.providerAccountId,
 					discordAccessToken:
-						typeof account.access_token === "string"
-							? account.access_token
-							: null,
+						typeof account.access_token === "string" ? account.access_token : null,
 					usernameFallback: user.name ?? null,
 					globalNameFallback: user.name ?? null,
 					imageFallback: user.image ?? null,
@@ -624,12 +759,50 @@ export function buildAuthOptions(): NextAuthOptions {
 			}) {
 				const mutableToken = token as JwtWithDiscordId;
 
+				if (account?.provider === "discord" && account.providerAccountId) {
+					if (!user?.id) {
+						throw new Error(
+							"Discord token creation blocked because the internal auth user context is missing.",
+						);
+					}
+
+					mutableToken.sub = user.id;
+					mutableToken.discordId = account.providerAccountId;
+
+					const canonicalIdentity = await resolveCanonicalSessionIdentity({
+						authUserId: user.id,
+						discordUserId: account.providerAccountId,
+					});
+
+					if (canonicalIdentity.authUserId) {
+						mutableToken.sub = canonicalIdentity.authUserId;
+					}
+
+					if (canonicalIdentity.discordUserId) {
+						mutableToken.discordId = canonicalIdentity.discordUserId;
+					}
+
+					return mutableToken;
+				}
+
 				if (user?.id) {
 					mutableToken.sub = user.id;
 				}
 
-				if (account?.provider === "discord" && account.providerAccountId) {
-					mutableToken.discordId = account.providerAccountId;
+				if (shouldRefreshJwtIdentity(mutableToken)) {
+					const canonicalIdentity = await resolveCanonicalSessionIdentity({
+						authUserId:
+							typeof mutableToken.sub === "string" ? mutableToken.sub : null,
+						discordUserId: mutableToken.discordId ?? null,
+					});
+
+					if (canonicalIdentity.authUserId) {
+						mutableToken.sub = canonicalIdentity.authUserId;
+					}
+
+					if (canonicalIdentity.discordUserId) {
+						mutableToken.discordId = canonicalIdentity.discordUserId;
+					}
 				}
 
 				return mutableToken;
@@ -637,12 +810,20 @@ export function buildAuthOptions(): NextAuthOptions {
 			async session({ session, token }: { session: Session; token: JWT }) {
 				const mutableToken = token as JwtWithDiscordId;
 				const mutableSessionUser = (session.user ?? {}) as SessionUserShape;
-				const authUserId =
+				let authUserId =
 					typeof mutableToken.sub === "string" ? mutableToken.sub : null;
-				const discordUserId =
-					typeof mutableToken.discordId === "string"
-						? mutableToken.discordId
-						: null;
+				let discordUserId =
+					typeof mutableToken.discordId === "string" ? mutableToken.discordId : null;
+
+				if (!authUserId || !discordUserId || authUserId === discordUserId) {
+					const canonicalIdentity = await resolveCanonicalSessionIdentity({
+						authUserId,
+						discordUserId,
+					});
+
+					authUserId = canonicalIdentity.authUserId ?? authUserId;
+					discordUserId = canonicalIdentity.discordUserId ?? discordUserId;
+				}
 
 				mutableSessionUser.id = authUserId ?? undefined;
 				mutableSessionUser.discordId = getSessionDiscordId({

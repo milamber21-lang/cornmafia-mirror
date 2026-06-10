@@ -58,7 +58,7 @@ export function RiseopediaAdminGuard({
 
 export default function RiseopediaAdminPageChrome({
 	title,
-	description,
+	description: _description,
 	backHref = "/admin",
 	backLabel = "Go back",
 	children,
@@ -68,7 +68,6 @@ export default function RiseopediaAdminPageChrome({
 			<div className="admin-page-card-header">
 				<div>
 					<h1 className="admin-page-card-title">{title}</h1>
-					{description ? <p className="admin-page-card-description">{description}</p> : null}
 				</div>
 				<div className="admin-page-card-actions">
 					<ButtonLink href={backHref} variant="neutral">

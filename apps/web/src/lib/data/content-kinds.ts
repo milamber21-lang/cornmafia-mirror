@@ -16,6 +16,7 @@ export type ContentKindPublicRoutePrefix =
 	| "event"
 	| "custom"
 	| "external"
+	| "info"
 	| "video";
 
 export type ContentKindRendererCode =

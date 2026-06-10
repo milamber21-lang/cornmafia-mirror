@@ -27,6 +27,7 @@ const PUBLIC_ROUTE_PREFIX_OPTIONS = sortAdminPickerOptions([
 	{ value: "custom", label: "custom (/custom/category/subcategory/content)" },
 	{ value: "event", label: "event (/event/category/subcategory/content)" },
 	{ value: "external", label: "external (navigation target only)" },
+	{ value: "info", label: "info (/info/category/subcategory/content)" },
 	{ value: "map", label: "map (/map/category/subcategory/content)" },
 	{ value: "tool", label: "tool (/tool/category/subcategory/content)" },
 	{ value: "video", label: "video (/video/category/subcategory/content)" },

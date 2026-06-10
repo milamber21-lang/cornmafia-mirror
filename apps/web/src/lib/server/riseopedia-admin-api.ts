@@ -124,3 +124,22 @@ export function getNonNegativeInt(data: ObjectBody, key: string, fallback: numbe
 export function getPositiveInt(data: ObjectBody, key: string): number | null {
 	return parsePositiveInt(data[key]);
 }
+
+export function getNullablePositiveInt(data: ObjectBody, key: string): number | null {
+	const value = data[key];
+	if (value === null || value === undefined || value === "") {
+		return null;
+	}
+
+	return parsePositiveInt(value);
+}
+
+export function getNullableTimestampText(data: ObjectBody, key: string): string | null {
+	const value = normalizeNullableString(data[key]);
+	if (!value) {
+		return null;
+	}
+
+	const parsed = Date.parse(value);
+	return Number.isNaN(parsed) ? value : value;
+}

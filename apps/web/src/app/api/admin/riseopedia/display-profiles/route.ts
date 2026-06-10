@@ -68,16 +68,18 @@ export async function POST(request: NextRequest): Promise<Response> {
 				return jsonError("VALIDATION_REQUIRED", "Missing data.", 400);
 			}
 
+			const channelCode = getRequiredCode(data, "channelCode") ?? "riseopedia";
 			const displayProfileCode = getRequiredCode(data, "displayProfileCode");
 			const displayProfileName = getRequiredString(data, "displayProfileName");
 			const entityTypeCode = getRequiredCode(data, "entityTypeCode");
-			if (!displayProfileCode || !displayProfileName || !entityTypeCode) {
-				return jsonError("VALIDATION_REQUIRED", "Display profile code, name, and entity type are required.", 400);
+			if (!channelCode || !displayProfileCode || !displayProfileName || !entityTypeCode) {
+				return jsonError("VALIDATION_REQUIRED", "Channel, display profile code, name, and entity type are required.", 400);
 			}
 
 			const id = await upsertRiseopediaDisplayProfileAdmin({
 				actorDiscordId: actorOrResponse,
 				displayProfileId: getOptionalId(payloadOrResponse),
+				channelCode,
 				displayProfileCode,
 				displayProfileName,
 				entityTypeCode,

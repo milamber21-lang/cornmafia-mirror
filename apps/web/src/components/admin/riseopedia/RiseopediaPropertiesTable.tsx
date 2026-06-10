@@ -1,505 +1,545 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//// FILE: apps/web/src/components/admin/riseopedia/RiseopediaPropertiesTable.tsx                               ////
+//// FILE: apps/web/src/components/admin/riseopedia/RiseopediaPropertiesTable.tsx                          ////
 //// Language: TSX                                                                                               ////
-//// Riseopedia property catalog admin table and panel wrapper with DB-backed source selectors.                  ////
+//// Read-only Riseopedia canonical property admin diagnostics table.                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 "use client";
 
-import type { JSX } from "react";
+import type { Dispatch, JSX, ReactNode, SetStateAction } from "react";
+import { useCallback, useMemo, useState } from "react";
 
-import RiseopediaAdminCrudTable from "./RiseopediaAdminCrudTable";
+import AdminSortableTH from "@/components/admin/common/AdminSortableTH";
 import {
-	buildOptionsFromRows,
-	ensureOption,
-	readRowValue,
-	toBoolean,
-	toDisplayText,
+	AlertBanner as TableAlertBanner,
+	AdminTableFrame as TableAdminTableFrame,
+	AdminTableSearchInput as TableAdminTableSearchInput,
+	Button as TableButton,
+	ButtonLink as TableButtonLink,
+	DropdownMenuSingle as TableDropdownMenuSingle,
+	Pagination as TablePagination,
+	Table as TableElement,
+	TBody as TableTBody,
+	TD as TableTD,
+	TH as TableTH,
+	THead as TableTHead,
+	TR as TableTR,
+} from "@/components/ui";
+import {
+	applyAdminSortDirection as tableApplyAdminSortDirection,
+	compareAdminText as tableCompareAdminText,
+	getNextSortDirection as tableGetNextSortDirection,
+	type SortDirection as TableSortDirection,
+} from "@/lib/helpers/admin-table-sorting";
+
+import { entityTypeFilter } from "./RiseopediaAdminConfigHelpers";
+import type { RiseopediaAdminMeta, RiseopediaAdminRows } from "./RiseopediaAdminTypes";
+
+import {
+	readRowValue as tableReadRowValue,
+	toBoolean as tableToBoolean,
+	toDisplayText as tableToDisplayText,
 } from "./RiseopediaAdminHelpers";
 import type {
-	RiseopediaAdminMeta,
-	RiseopediaAdminOption,
-	RiseopediaAdminRow,
+	RiseopediaAdminButtonVariant as TableButtonVariant,
+	RiseopediaAdminColumnConfig as TableColumnConfig,
+	RiseopediaAdminFilterConfig as TableFilterConfig,
+	RiseopediaAdminFilterState as TableFilterState,
+	RiseopediaAdminOption as TableOption,
+	RiseopediaAdminReadOnlyActionContext as TableReadOnlyActionContext,
+	RiseopediaAdminReadOnlyRowActionConfig as TableReadOnlyRowActionConfig,
+	RiseopediaAdminRow as TableRow,
 } from "./RiseopediaAdminTypes";
 
 export interface RiseopediaPropertiesTableProps {
-	initialRows: RiseopediaAdminRow[];
+	initialRows: RiseopediaAdminRows;
 	meta: RiseopediaAdminMeta;
 }
 
-const SOURCE_SELECTOR_COLUMN = "source_column";
-const SOURCE_SELECTOR_PROPERTY = "source_property";
-
-const fallbackDataTypeOptions: RiseopediaAdminOption[] = [
-	{ value: "text", label: "Text" },
-	{ value: "integer", label: "Integer" },
-	{ value: "number", label: "Number" },
-	{ value: "boolean", label: "Boolean" },
-	{ value: "enum", label: "Enum" },
-	{ value: "color", label: "Color" },
-	{ value: "vector2", label: "Vector 2" },
-	{ value: "vector3", label: "Vector 3" },
-	{ value: "asset_ref", label: "Asset Reference" },
-	{ value: "localized_text", label: "Localized Text" },
-	{ value: "json", label: "JSON" },
-];
-
-function getValue(values: { [key: string]: unknown }, key: string): string {
-	return toDisplayText(values[key]).trim();
-}
-
-function getEntityTypeCode(values: { [key: string]: unknown }): string {
-	return getValue(values, "entityTypeCode");
-}
-
-function getOriginCode(values: { [key: string]: unknown }): string {
-	return getValue(values, "propertyOriginCode");
-}
-
-function inferSelectorKind(originCode: string): string {
-	return originCode === "asset_property" ? SOURCE_SELECTOR_PROPERTY : SOURCE_SELECTOR_COLUMN;
-}
-
-function inferOriginEntityType(row: RiseopediaAdminRow): string {
-	const code = toDisplayText(readRowValue(row, "property_origin_code")).trim().toLowerCase();
-	const name = toDisplayText(readRowValue(row, "property_origin_name")).trim().toLowerCase();
-
-	if (code === "asset_property") {
-		return "asset";
-	}
-
-	if (code === "asset" || code.startsWith("asset_") || name.startsWith("asset ")) {
-		return "asset";
-	}
-
-	if (code === "recipe" || code.startsWith("recipe_") || name.startsWith("recipe ")) {
-		return "recipe";
-	}
-
-	return "";
-}
-
-function originMatchesEntity(row: RiseopediaAdminRow, entityTypeCode: string): boolean {
-	const rowEntityTypeCode = toDisplayText(readRowValue(row, "entity_type_code")).trim();
-	const inferredEntityTypeCode = inferOriginEntityType(row);
-
-	if (inferredEntityTypeCode) {
-		return inferredEntityTypeCode === entityTypeCode;
-	}
-
-	return rowEntityTypeCode === entityTypeCode;
-}
-
-function getSelectedOriginOption(args: {
-	meta: RiseopediaAdminMeta;
-	values: { [key: string]: unknown };
-}): RiseopediaAdminRow | null {
-	const entityTypeCode = getEntityTypeCode(args.values);
-	const originCode = getOriginCode(args.values);
-	if (!originCode) {
-		return null;
-	}
-
-	const scopedOption = (args.meta.propertyOriginOptions ?? []).find(
-		(option) =>
-			toDisplayText(readRowValue(option, "entity_type_code")) === entityTypeCode &&
-			toDisplayText(readRowValue(option, "property_origin_code")) === originCode,
-	);
-	if (scopedOption) {
-		return scopedOption;
-	}
-
-	const fallbackOrigin = (args.meta.propertyOrigins ?? []).find(
-		(option) => toDisplayText(readRowValue(option, "property_origin_code")) === originCode,
-	);
-	if (!fallbackOrigin) {
-		return null;
-	}
-
-	return {
-		...fallbackOrigin,
-		entity_type_code: entityTypeCode,
-		source_selector_kind_code: inferSelectorKind(originCode),
-	};
-}
-
-function getSelectorKind(args: {
-	meta: RiseopediaAdminMeta;
-	values: { [key: string]: unknown };
-}): string {
-	const selectedOrigin = getSelectedOriginOption(args);
-	return toDisplayText(readRowValue(selectedOrigin ?? {}, "source_selector_kind_code")).trim();
-}
-
-function isSourceBacked(meta: RiseopediaAdminMeta, values: { [key: string]: unknown }): boolean {
-	const selectorKind = getSelectorKind({ meta, values });
-	return selectorKind === SOURCE_SELECTOR_COLUMN || selectorKind === SOURCE_SELECTOR_PROPERTY;
-}
-
-function buildDataTypeOptions(meta: RiseopediaAdminMeta): RiseopediaAdminOption[] {
-	const dbOptions = buildOptionsFromRows(
-		meta.propertyDataTypes ?? [],
-		"data_type_code",
-		"data_type_name",
-	);
-	return dbOptions.length > 0 ? dbOptions : fallbackDataTypeOptions;
-}
-
-function getCurrentPropertyCatalogId(row: RiseopediaAdminRow | null): string {
-	return row ? toDisplayText(readRowValue(row, "property_catalog_id")).trim() : "";
-}
-
-function isCurrentSourceOption(args: {
-	row: RiseopediaAdminRow | null;
-	option: RiseopediaAdminRow;
-}): boolean {
-	const currentId = getCurrentPropertyCatalogId(args.row);
-	const optionId = toDisplayText(readRowValue(args.option, "property_catalog_id")).trim();
-	return currentId.length > 0 && optionId.length > 0 && currentId === optionId;
-}
-
-function isCatalogedByAnotherProperty(args: {
-	row: RiseopediaAdminRow | null;
-	option: RiseopediaAdminRow;
-}): boolean {
-	return toBoolean(readRowValue(args.option, "cataloged_flag")) && !isCurrentSourceOption(args);
-}
-
-function hasAvailableSourceOption(args: {
-	meta: RiseopediaAdminMeta;
-	values: { [key: string]: unknown };
-	row: RiseopediaAdminRow | null;
-	originCode: string;
-	sourceSelectorKindCode: string;
-}): boolean {
-	const entityTypeCode = getEntityTypeCode(args.values);
-	if (!entityTypeCode || !args.originCode || !args.sourceSelectorKindCode) {
-		return false;
-	}
-
-	return (args.meta.propertySourceOptions ?? []).some(
-		(option) =>
-			toDisplayText(readRowValue(option, "entity_type_code")) === entityTypeCode &&
-			toDisplayText(readRowValue(option, "property_origin_code")) === args.originCode &&
-			toDisplayText(readRowValue(option, "source_selector_kind_code")) === args.sourceSelectorKindCode &&
-			!isCatalogedByAnotherProperty({ row: args.row, option }),
-	);
-}
-
-function buildOriginOptions(args: {
-	meta: RiseopediaAdminMeta;
-	values: { [key: string]: unknown };
-	row: RiseopediaAdminRow | null;
-}): RiseopediaAdminOption[] {
-	const entityTypeCode = getEntityTypeCode(args.values);
-	const currentValue = args.row ? readRowValue(args.row, "property_origin_code") : null;
-	if (!entityTypeCode) {
-		return ensureOption([], currentValue, currentValue);
-	}
-
-	const seen = new Set<string>();
-	const options: RiseopediaAdminOption[] = [];
-
-	for (const option of args.meta.propertyOriginOptions ?? []) {
-		if (!originMatchesEntity(option, entityTypeCode)) {
-			continue;
-		}
-
-		const originCode = toDisplayText(readRowValue(option, "property_origin_code")).trim();
-		const selectorKindCode = toDisplayText(readRowValue(option, "source_selector_kind_code")).trim();
-		if (!originCode || seen.has(originCode)) {
-			continue;
-		}
-
-		if (!hasAvailableSourceOption({
-			meta: args.meta,
-			values: args.values,
-			row: args.row,
-			originCode,
-			sourceSelectorKindCode: selectorKindCode,
-		})) {
-			continue;
-		}
-
-		seen.add(originCode);
-		options.push({
-			value: originCode,
-			label: toDisplayText(readRowValue(option, "property_origin_name")) || originCode,
-		});
-	}
-
-	return ensureOption(
-		options.sort((left, right) => left.label.localeCompare(right.label)),
-		currentValue,
-		currentValue,
-	);
-}
-
-function formatSourceOptionLabel(row: RiseopediaAdminRow): string {
-	const sourceLabel = toDisplayText(readRowValue(row, "source_label")).trim();
-	const sourceValue = toDisplayText(readRowValue(row, "source_value")).trim();
-	const groupName = toDisplayText(readRowValue(row, "entity_group_name")).trim();
-	const sampleValue = toDisplayText(readRowValue(row, "sample_value")).trim();
-	const base = sourceLabel || sourceValue;
-	const metaParts = [groupName, sampleValue ? `sample: ${sampleValue}` : ""].filter((part) => part.length > 0);
-	return metaParts.length > 0 ? `${base} · ${metaParts.join(" · ")}` : base;
-}
-
-function getCurrentSourceValue(row: RiseopediaAdminRow | null): unknown {
-	if (!row) {
-		return null;
-	}
-
-	const sourceDisplayValue = readRowValue(row, "source_display_value");
-	if (toDisplayText(sourceDisplayValue).trim()) {
-		return sourceDisplayValue;
-	}
-
-	const sourcePropertyCode = readRowValue(row, "source_property_code");
-	if (toDisplayText(sourcePropertyCode).trim()) {
-		return sourcePropertyCode;
-	}
-
-	return readRowValue(row, "source_column_name");
-}
-
-function buildSourceOptions(args: {
-	meta: RiseopediaAdminMeta;
-	values: { [key: string]: unknown };
-	row: RiseopediaAdminRow | null;
-}): RiseopediaAdminOption[] {
-	const entityTypeCode = getEntityTypeCode(args.values);
-	const originCode = getOriginCode(args.values);
-	const selectorKindCode = getSelectorKind({ meta: args.meta, values: args.values });
-	const currentValue = getCurrentSourceValue(args.row);
-	const seen = new Set<string>();
-	const options: RiseopediaAdminOption[] = [];
-
-	for (const row of args.meta.propertySourceOptions ?? []) {
-		if (toDisplayText(readRowValue(row, "entity_type_code")) !== entityTypeCode) {
-			continue;
-		}
-
-		if (toDisplayText(readRowValue(row, "property_origin_code")) !== originCode) {
-			continue;
-		}
-
-		if (toDisplayText(readRowValue(row, "source_selector_kind_code")) !== selectorKindCode) {
-			continue;
-		}
-
-		if (isCatalogedByAnotherProperty({ row: args.row, option: row })) {
-			continue;
-		}
-
-		const value = toDisplayText(readRowValue(row, "source_value")).trim();
-		if (!value || seen.has(value)) {
-			continue;
-		}
-
-		seen.add(value);
-		options.push({ value, label: formatSourceOptionLabel(row) });
-	}
-
-	return ensureOption(
-		options.sort((left, right) => left.label.localeCompare(right.label)),
-		currentValue,
-		currentValue,
-	);
-}
-
-function findSourceOption(args: {
-	meta: RiseopediaAdminMeta;
-	values: { [key: string]: unknown };
-	value: string;
-}): RiseopediaAdminRow | null {
-	const entityTypeCode = getEntityTypeCode(args.values);
-	const originCode = getOriginCode(args.values);
-	const selectorKindCode = getSelectorKind({ meta: args.meta, values: args.values });
-
-	return (args.meta.propertySourceOptions ?? []).find(
-		(row) =>
-			toDisplayText(readRowValue(row, "entity_type_code")) === entityTypeCode &&
-			toDisplayText(readRowValue(row, "property_origin_code")) === originCode &&
-			toDisplayText(readRowValue(row, "source_selector_kind_code")) === selectorKindCode &&
-			toDisplayText(readRowValue(row, "source_value")) === args.value,
-	) ?? null;
-}
-
-function applySourceOption(args: {
-	row: RiseopediaAdminRow;
-	selectorKindCode: string;
-	setValue: (name: string, value: unknown) => void;
-}): void {
-	const sourceValue = toDisplayText(readRowValue(args.row, "source_value"));
-	args.setValue("sourceValue", sourceValue);
-	args.setValue("sourceColumnName", args.selectorKindCode === SOURCE_SELECTOR_COLUMN ? sourceValue : "");
-	args.setValue("sourcePropertyCode", args.selectorKindCode === SOURCE_SELECTOR_PROPERTY ? sourceValue : "");
-	args.setValue("propertyCode", toDisplayText(readRowValue(args.row, "property_code")));
-	args.setValue("propertyName", toDisplayText(readRowValue(args.row, "property_name")));
-	args.setValue("dataTypeCode", toDisplayText(readRowValue(args.row, "data_type_code")));
-	args.setValue("unitCode", toDisplayText(readRowValue(args.row, "unit_code")));
-	args.setValue("defaultDisplaySlotCode", toDisplayText(readRowValue(args.row, "default_display_slot_code")) || "hidden");
-	args.setValue("defaultGroupCode", toDisplayText(readRowValue(args.row, "default_group_code")) || "general");
-}
-
-function clearSourceValues(setValue: (name: string, value: unknown) => void): void {
-	setValue("sourceValue", "");
-	setValue("sourceColumnName", "");
-	setValue("sourcePropertyCode", "");
-}
-
-function clearSourceDerivedValues(setValue: (name: string, value: unknown) => void): void {
-	clearSourceValues(setValue);
-	setValue("propertyCode", "");
-	setValue("propertyName", "");
-	setValue("dataTypeCode", "");
-	setValue("unitCode", "");
-	setValue("defaultDisplaySlotCode", "hidden");
-	setValue("defaultGroupCode", "general");
-}
-
-export default function RiseopediaPropertiesTable({
-	initialRows,
-	meta,
-}: RiseopediaPropertiesTableProps): JSX.Element {
+export default function RiseopediaPropertiesTable({ initialRows, meta }: RiseopediaPropertiesTableProps): JSX.Element {
 	return (
-		<RiseopediaAdminCrudTable
+		<PropertiesTableBody
 			initialRows={initialRows}
-			apiPath="/api/admin/riseopedia/properties"
-			idKey="property_catalog_id"
-			createLabel="Create Property"
-			titleCreate="Create Property Catalog Row"
-			titleEdit="Edit Property Catalog Row"
-			deleteLabel="Delete"
-			deleteConfirmTitle="Delete property catalog row?"
-			deleteConfirmMessage={(row) => `Delete property "${String(row.property_name ?? row.property_code ?? row.property_catalog_id)}"? This also removes its profile placements.`}
-			emptyText="No Riseopedia properties match your search."
-			searchPlaceholder="Search properties"
-			defaultSortKey="property_name"
-			filters={[
-				{
-					key: "entity",
-					rowKey: "entity_type_code",
-					label: "Filter entity",
-					clearLabel: "All entities",
-					placeholder: "All entities",
-					options: buildOptionsFromRows(meta.entityTypes ?? [], "entity_type_code", "entity_type_name"),
-				},
-			]}
+			searchPlaceholder="Search canonical properties"
+			emptyText="No properties found."
+			filters={[entityTypeFilter(meta)]}
 			columns={[
-				{ rowKey: "property_name", label: "Property", strong: true },
+				{ rowKey: "property_label", label: "Property", strong: true },
 				{ rowKey: "property_code", label: "Code" },
-				{ rowKey: "entity_type_code", label: "Entity" },
-				{ rowKey: "property_origin_name", label: "Origin" },
-				{ rowKey: "source_display_value", label: "Source" },
-				{ rowKey: "default_display_slot_name", label: "Default slot" },
-				{ rowKey: "active_flag", label: "Status", kind: "status" },
+				{ rowKey: "entity_type_code", label: "Type" },
+				{ rowKey: "entity_class_name", label: "Class" },
+				{ rowKey: "value_type_code", label: "Value type" },
+				{ rowKey: "display_default_flag", label: "Default", kind: "boolean" },
+				{ rowKey: "active_flag", label: "Active", kind: "boolean" },
 			]}
-			fieldsBuilder={({ row }) => [
-				{
-					valueKey: "entityTypeCode",
-					rowKey: "entity_type_code",
-					label: "Entity type",
-					type: "select",
-					required: true,
-					options: buildOptionsFromRows(meta.entityTypes ?? [], "entity_type_code", "entity_type_name"),
-					onChange: ({ setValue }) => {
-						setValue("propertyOriginCode", "");
-						clearSourceDerivedValues(setValue);
-					},
-				},
-				{
-					valueKey: "propertyOriginCode",
-					rowKey: "property_origin_code",
-					label: "Origin",
-					type: "select",
-					required: true,
-					options: (values) => buildOriginOptions({ meta, values, row }),
-					onChange: ({ setValue }) => {
-						clearSourceDerivedValues(setValue);
-					},
-				},
-				{
-					valueKey: "sourceValue",
-					rowKey: "source_display_value",
-					label: "Source",
-					type: "select",
-					required: true,
-					span: 12,
-					helpText: "DB-backed source field for this property. Already cataloged sources are hidden from create mode.",
-					visible: (values) => isSourceBacked(meta, values),
-					options: (values) => buildSourceOptions({ meta, values, row }),
-					onChange: ({ value, values, setValue }) => {
-						clearSourceValues(setValue);
-						const selectorKindCode = getSelectorKind({ meta, values });
-						const sourceOption = findSourceOption({ meta, values, value });
-						if (sourceOption) {
-							applySourceOption({ row: sourceOption, selectorKindCode, setValue });
-						}
-					},
-				},
-				{
-					valueKey: "sourceColumnName",
-					rowKey: "source_column_name",
-					label: "Source column",
-					type: "text",
-					hidden: true,
-				},
-				{
-					valueKey: "sourcePropertyCode",
-					rowKey: "source_property_code",
-					label: "Source property",
-					type: "text",
-					hidden: true,
-				},
-				{
-					valueKey: "propertyCode",
-					rowKey: "property_code",
-					label: "Property code",
-					type: "text",
-					required: true,
-					isDisabled: (values) => isSourceBacked(meta, values),
-				},
-				{
-					valueKey: "propertyName",
-					rowKey: "property_name",
-					label: "Property name",
-					type: "text",
-					required: true,
-					isDisabled: (values) => isSourceBacked(meta, values),
-				},
-				{
-					valueKey: "dataTypeCode",
-					rowKey: "data_type_code",
-					label: "Data type",
-					type: "select",
-					required: true,
-					options: buildDataTypeOptions(meta),
-					isDisabled: (values) => isSourceBacked(meta, values),
-				},
-				{
-					valueKey: "unitCode",
-					rowKey: "unit_code",
-					label: "Unit",
-					type: "text",
-					isDisabled: (values) => isSourceBacked(meta, values),
-				},
-				{
-					valueKey: "defaultDisplaySlotCode",
-					rowKey: "default_display_slot_code",
-					label: "Default display slot",
-					type: "select",
-					required: true,
-					options: buildOptionsFromRows(meta.displaySlots ?? [], "display_slot_code", "display_slot_name"),
-				},
-				{ valueKey: "defaultGroupCode", rowKey: "default_group_code", label: "Default group", type: "text", required: true, defaultValue: "general" },
-				{ valueKey: "description", rowKey: "description", label: "Description", type: "textarea", textareaRows: 4 },
-				{ valueKey: "defaultVisible", rowKey: "default_visible_flag", label: "Default visible", type: "checkbox", defaultValue: false },
-				{ valueKey: "sortOrder", rowKey: "sort_order", label: "Sort order", type: "number", defaultValue: 1000, required: true },
-				{ valueKey: "active", rowKey: "active_flag", label: "Active", type: "checkbox", defaultValue: true },
-			]}
-			fields={[]}
 		/>
 	);
 }
+
+export { RiseopediaPropertiesTable };
+
+interface PropertiesTableBodyProps {
+	initialRows: TableRow[];
+	columns: TableColumnConfig[];
+	searchPlaceholder: string;
+	emptyText: string;
+	defaultSortKey?: string;
+	filters?: TableFilterConfig[];
+	rowActions?: TableReadOnlyRowActionConfig[];
+	toolbarLeft?: ReactNode;
+	toolbarRight?: ReactNode;
+	secondaryLeft?: ReactNode;
+	secondaryCenter?: ReactNode;
+	secondaryRight?: ReactNode;
+	filtersPlacement?: "primaryLeft" | "secondaryLeft" | "secondaryCenter";
+	initialSearch?: string;
+	initialFilterState?: TableFilterState;
+}
+
+const RISEOPEDIA_OWNED_READ_ONLY_PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
+const RISEOPEDIA_OWNED_READ_ONLY_EMPTY_FILTERS: TableFilterConfig[] = [];
+const RISEOPEDIA_OWNED_READ_ONLY_EMPTY_ROW_ACTIONS: TableReadOnlyRowActionConfig[] = [];
+
+function formatRiseopediaOwnedReadOnlyCell(row: TableRow, column: TableColumnConfig): string {
+	const value = tableReadRowValue(row, column.rowKey);
+	if (column.kind === "boolean") {
+		return tableToBoolean(value) ? "Yes" : "No";
+	}
+
+	if (column.kind === "status") {
+		return tableToBoolean(value) ? "Enabled" : "Disabled";
+	}
+
+	return tableToDisplayText(value);
+}
+
+function getRiseopediaOwnedReadOnlyColumnWidthClassName(column: TableColumnConfig): string {
+	if (column.width === "narrow") {
+		return "table-col table-col--w-8";
+	}
+
+	if (column.width === "compact") {
+		return "table-col table-col--w-10";
+	}
+
+	if (column.width === "normal") {
+		return "table-col table-col--w-12";
+	}
+
+	if (column.width === "wide") {
+		return "table-col table-col--w-18";
+	}
+
+	if (column.width === "fluid") {
+		return "table-col";
+	}
+
+	const key = column.rowKey.toLowerCase();
+	const label = column.label.toLowerCase();
+	if (column.kind === "boolean" || column.kind === "count" || column.kind === "status") {
+		return "table-col table-col--w-10";
+	}
+
+	if (column.strong === true || key.includes("name") || label.includes("name") || label.includes("entity")) {
+		return "table-col table-col--w-18";
+	}
+
+	if (key.includes("code") || key.includes("slug") || key.includes("type")) {
+		return "table-col table-col--w-12";
+	}
+
+	return "table-col";
+}
+
+function renderRiseopediaOwnedReadOnlyColGroup(args: {
+	columns: TableColumnConfig[];
+	rowActions: TableReadOnlyRowActionConfig[];
+}): JSX.Element {
+	return (
+		<colgroup>
+			{args.columns.map((column) => (
+				<col key={`data-${column.rowKey}`} className={getRiseopediaOwnedReadOnlyColumnWidthClassName(column)} />
+			))}
+			{args.rowActions.map((action) => (
+				<col key={`row-action-${action.columnLabel ?? (typeof action.label === "string" ? action.label : "row")}`} className="table-col table-col--w-10" />
+			))}
+		</colgroup>
+	);
+}
+
+function getRiseopediaOwnedReadOnlyRowSearchText(row: TableRow, columns: TableColumnConfig[]): string {
+	return columns
+		.filter((column) => column.searchable !== false)
+		.map((column) => formatRiseopediaOwnedReadOnlyCell(row, column))
+		.join(" ")
+		.toLowerCase();
+}
+
+function buildRiseopediaOwnedReadOnlyInitialFilterState(filters: TableFilterConfig[]): TableFilterState {
+	const state: TableFilterState = {};
+	for (const filter of filters) {
+		state[filter.key] = "";
+	}
+	return state;
+}
+
+function riseopediaOwnedReadOnlyFilterValueMatches(rowValue: unknown, selectedValue: string): boolean {
+	if (!selectedValue) {
+		return true;
+	}
+
+	if (typeof rowValue === "boolean") {
+		const normalizedSelectedValue = selectedValue.trim().toLowerCase();
+		if (rowValue) {
+			return ["true", "yes", "enabled", "active", "1"].includes(normalizedSelectedValue);
+		}
+
+		return ["false", "no", "disabled", "inactive", "0"].includes(normalizedSelectedValue);
+	}
+
+	return tableToDisplayText(rowValue) === selectedValue;
+}
+
+function riseopediaOwnedReadOnlyMatchesFilters(
+	row: TableRow,
+	filters: TableFilterConfig[],
+	filterState: TableFilterState,
+): boolean {
+	for (const filter of filters) {
+		const selectedValue = filterState[filter.key] ?? "";
+		if (!riseopediaOwnedReadOnlyFilterValueMatches(tableReadRowValue(row, filter.rowKey), selectedValue)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+function getRiseopediaOwnedReadOnlyFilterOptions(
+	filter: TableFilterConfig,
+	filterState: TableFilterState,
+): TableOption[] {
+	return filter.optionsBuilder ? filter.optionsBuilder(filterState) : filter.options ?? [];
+}
+
+function renderRiseopediaOwnedReadOnlyFilterControlItems(args: {
+	filters: TableFilterConfig[];
+	filterState: TableFilterState;
+	setFilterState: Dispatch<SetStateAction<TableFilterState>>;
+	setPage: Dispatch<SetStateAction<number>>;
+}): ReactNode {
+	if (args.filters.length === 0) {
+		return null;
+	}
+
+	return args.filters.map((filter) => (
+		<TableDropdownMenuSingle
+			key={filter.key}
+			className="admin-table-filter-control admin-table-filter-control--compact admin-table-filter-control--flexible"
+			options={getRiseopediaOwnedReadOnlyFilterOptions(filter, args.filterState)}
+			value={args.filterState[filter.key] ?? ""}
+			placeholder={filter.placeholder ?? filter.clearLabel}
+			ariaLabel={filter.label}
+			allowClear
+			clearLabel={filter.clearLabel}
+			onChange={(nextValue) => {
+				args.setFilterState((currentState) => {
+					const nextState = {
+						...currentState,
+						[filter.key]: nextValue,
+					};
+
+					for (const key of filter.clearKeysOnChange ?? []) {
+						nextState[key] = "";
+					}
+
+					return nextState;
+				});
+				args.setPage(1);
+			}}
+		/>
+	));
+}
+
+function renderRiseopediaOwnedReadOnlyToolbarCluster(content: ReactNode): JSX.Element | null {
+	if (!content) {
+		return null;
+	}
+
+	return <div className="admin-table-toolbar-filter admin-table-toolbar-filter--riseopedia">{content}</div>;
+}
+
+function combineRiseopediaOwnedReadOnlyToolbarContent(primary: ReactNode, secondary: ReactNode): ReactNode {
+	if (primary && secondary) {
+		return renderRiseopediaOwnedReadOnlyToolbarCluster(
+			<>
+				{primary}
+				{secondary}
+			</>,
+		);
+	}
+
+	return primary ?? renderRiseopediaOwnedReadOnlyToolbarCluster(secondary);
+}
+
+function getRiseopediaOwnedReadOnlyStableRowKey(row: TableRow, index: number): string {
+	const preferredKeys = [
+		"release_decision_id",
+		"release_evidence_id",
+		"entity_release_override_id",
+		"entity_id",
+		"patch_id",
+	] as const;
+
+	const parts = preferredKeys
+		.map((key) => tableToDisplayText(tableReadRowValue(row, key)).trim())
+		.filter((value) => value.length > 0);
+
+	return parts.length > 0 ? parts.join("-") : String(index);
+}
+
+function getRiseopediaOwnedReadOnlyActionVariant(
+	action: TableReadOnlyRowActionConfig,
+	row: TableRow,
+): TableButtonVariant {
+	return typeof action.variant === "function" ? action.variant(row) : action.variant ?? "neutral";
+}
+
+function PropertiesTableBody({
+	initialRows,
+	columns,
+	searchPlaceholder,
+	emptyText,
+	defaultSortKey,
+	filters = RISEOPEDIA_OWNED_READ_ONLY_EMPTY_FILTERS,
+	rowActions = RISEOPEDIA_OWNED_READ_ONLY_EMPTY_ROW_ACTIONS,
+	toolbarLeft,
+	toolbarRight,
+	secondaryLeft,
+	secondaryCenter,
+	secondaryRight,
+	filtersPlacement = "secondaryLeft",
+	initialSearch = "",
+	initialFilterState,
+}: PropertiesTableBodyProps): JSX.Element {
+	const [search, setSearch] = useState(initialSearch);
+	const [filterState, setFilterState] = useState<TableFilterState>(() => ({
+		...buildRiseopediaOwnedReadOnlyInitialFilterState(filters),
+		...(initialFilterState ?? {}),
+	}));
+	const [page, setPage] = useState<number>(1);
+	const [pageSize, setPageSize] = useState<number>(20);
+	const [sortKey, setSortKey] = useState<string>(defaultSortKey ?? columns[0]?.rowKey ?? "row");
+	const [sortDirection, setSortDirection] = useState<TableSortDirection>("asc");
+	const [busyRowKey, setBusyRowKey] = useState<string | null>(null);
+	const [error, setError] = useState("");
+	const filterControlItems = renderRiseopediaOwnedReadOnlyFilterControlItems({ filters, filterState, setFilterState, setPage });
+	const primaryLeft = filtersPlacement === "primaryLeft"
+		? combineRiseopediaOwnedReadOnlyToolbarContent(toolbarLeft, filterControlItems)
+		: toolbarLeft;
+	const primaryRight = toolbarRight ?? null;
+	const secondaryLeftContent = filtersPlacement === "secondaryLeft"
+		? renderRiseopediaOwnedReadOnlyToolbarCluster(filterControlItems)
+		: secondaryLeft;
+	const secondaryCenterContent = filtersPlacement === "secondaryCenter"
+		? renderRiseopediaOwnedReadOnlyToolbarCluster(filterControlItems)
+		: secondaryCenter;
+	const hasSecondaryToolbar = Boolean(secondaryLeftContent || secondaryCenterContent || secondaryRight);
+	const secondaryToolbarClassName = filtersPlacement === "secondaryLeft"
+		? "admin-table-toolbar admin-table-toolbar--secondary admin-table-toolbar--secondary-left"
+		: "admin-table-toolbar admin-table-toolbar--secondary";
+	const actionContext = useMemo<TableReadOnlyActionContext>(() => ({
+		search,
+		filterState,
+	}), [filterState, search]);
+
+	const filteredRows = useMemo(() => {
+		const normalizedSearch = search.trim().toLowerCase();
+		const nextRows = initialRows.filter((row) => {
+			if (!riseopediaOwnedReadOnlyMatchesFilters(row, filters, filterState)) {
+				return false;
+			}
+
+			return normalizedSearch
+				? getRiseopediaOwnedReadOnlyRowSearchText(row, columns).includes(normalizedSearch)
+				: true;
+		});
+
+		return nextRows.slice().sort((left, right) => {
+			const comparison = tableCompareAdminText(
+				formatRiseopediaOwnedReadOnlyCell(left, { rowKey: sortKey, label: sortKey }),
+				formatRiseopediaOwnedReadOnlyCell(right, { rowKey: sortKey, label: sortKey }),
+			);
+
+			return tableApplyAdminSortDirection(comparison, sortDirection);
+		});
+	}, [columns, filterState, filters, initialRows, search, sortDirection, sortKey]);
+
+	const pageRows = useMemo(() => {
+		const startIndex = (page - 1) * pageSize;
+		return filteredRows.slice(startIndex, startIndex + pageSize);
+	}, [filteredRows, page, pageSize]);
+
+	const runRowAction = useCallback(
+		async (row: TableRow, action: TableReadOnlyRowActionConfig, rowKey: string): Promise<void> => {
+			if (busyRowKey) {
+				return;
+			}
+
+			setBusyRowKey(rowKey);
+			setError("");
+
+			if (!action.onClick) {
+				setBusyRowKey(null);
+				return;
+			}
+
+			try {
+				await action.onClick(row);
+			} catch (actionError: unknown) {
+				setError(
+					actionError instanceof Error
+						? actionError.message
+						: "Failed to run Riseopedia row action.",
+				);
+			} finally {
+				setBusyRowKey(null);
+			}
+		},
+		[busyRowKey],
+	);
+
+	return (
+		<div className="admin-table-stack">
+			<div className="admin-table-toolbar">
+				<div className="admin-table-toolbar-nav">
+					{primaryLeft ?? <div className="admin-table-toolbar-spacer admin-table-toolbar-spacer--action" aria-hidden="true" />}
+				</div>
+
+				<div className="admin-table-toolbar-search">
+					<TableAdminTableSearchInput
+						placeholder={searchPlaceholder}
+						value={search}
+						onChange={(event) => {
+							setSearch(event.target.value);
+							setPage(1);
+						}}
+					/>
+				</div>
+
+				<div className="admin-table-toolbar-action">
+					{primaryRight ?? <div className="admin-table-toolbar-spacer admin-table-toolbar-spacer--action" aria-hidden="true" />}
+				</div>
+			</div>
+
+			{hasSecondaryToolbar ? (
+				<div className={secondaryToolbarClassName}>
+					<div className="admin-table-toolbar-nav">{secondaryLeftContent}</div>
+					<div className="admin-table-toolbar-search">{secondaryCenterContent}</div>
+					<div className="admin-table-toolbar-action">{secondaryRight}</div>
+				</div>
+			) : null}
+
+			{error ? <TableAlertBanner tone="error">{error}</TableAlertBanner> : null}
+
+			<TableAdminTableFrame>
+				<TableElement className="admin-data-table">
+					{renderRiseopediaOwnedReadOnlyColGroup({ columns, rowActions })}
+					<TableTHead>
+						<TableTR>
+							{columns.map((column) =>
+								column.sortable === false || column.kind === "status" ? (
+									<TableTH key={column.rowKey} className="admin-table-cell--center">
+										{column.label}
+									</TableTH>
+								) : (
+									<AdminSortableTH
+										key={column.rowKey}
+										className="admin-table-cell--center"
+										label={column.label}
+										sortKey={column.rowKey}
+										activeSortKey={sortKey}
+										sortDirection={sortDirection}
+										onSortChange={(nextSortKey) => {
+											setSortDirection((currentDirection) =>
+												tableGetNextSortDirection(sortKey === nextSortKey, currentDirection),
+											);
+											setSortKey(nextSortKey);
+											setPage(1);
+										}}
+									/>
+								),
+							)}
+							{rowActions.map((action) => (
+								<TableTH key={`action-${action.columnLabel ?? (typeof action.label === "string" ? action.label : "row")}`} className="admin-table-cell--center">
+									{action.columnLabel ?? "Action"}
+								</TableTH>
+							))}
+						</TableTR>
+					</TableTHead>
+					<TableTBody>
+						{pageRows.length > 0 ? (
+							pageRows.map((row, index) => {
+								const rowKey = getRiseopediaOwnedReadOnlyStableRowKey(row, index);
+								const disabled = busyRowKey === rowKey;
+
+								return (
+									<TableTR key={rowKey}>
+										{columns.map((column) => (
+											<TableTD key={column.rowKey} className="admin-table-cell--center">
+												{formatRiseopediaOwnedReadOnlyCell(row, column)}
+											</TableTD>
+										))}
+										{rowActions.map((action) => {
+											const label = typeof action.label === "function" ? action.label(row) : action.label;
+											const visible = action.isVisible ? action.isVisible(row) : true;
+											return (
+												<TableTD key={`${rowKey}-${action.columnLabel ?? label}`} className="admin-table-cell--center">
+													{visible ? (
+														action.href ? (
+															<TableButtonLink href={action.href(row, actionContext)} variant={getRiseopediaOwnedReadOnlyActionVariant(action, row)}>
+																{label}
+															</TableButtonLink>
+														) : (
+															<TableButton
+																variant={getRiseopediaOwnedReadOnlyActionVariant(action, row)}
+																disabled={disabled}
+																onClick={() => void runRowAction(row, action, rowKey)}
+																aria-label={action.ariaLabel ? action.ariaLabel(row) : label}
+															>
+																{label}
+															</TableButton>
+														)
+													) : null}
+												</TableTD>
+											);
+										})}
+									</TableTR>
+								);
+							})
+						) : (
+							<TableTR>
+								<TableTD colSpan={columns.length + rowActions.length} className="admin-table-empty-cell">
+									{emptyText}
+								</TableTD>
+							</TableTR>
+						)}
+					</TableTBody>
+				</TableElement>
+			</TableAdminTableFrame>
+
+			<TablePagination
+				page={page}
+				pageSize={pageSize}
+				total={filteredRows.length}
+				pageSizeOptions={[...RISEOPEDIA_OWNED_READ_ONLY_PAGE_SIZE_OPTIONS]}
+				onPageChange={setPage}
+				onPageSizeChange={(nextPageSize) => {
+					setPageSize(nextPageSize);
+					setPage(1);
+				}}
+			/>
+		</div>
+	);
+}
+

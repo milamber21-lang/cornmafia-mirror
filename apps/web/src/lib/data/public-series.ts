@@ -123,6 +123,7 @@ function normalizeRoutePrefix(value: unknown): PublicRoutePrefix | null {
 		value === "app" ||
 		value === "event" ||
 		value === "custom" ||
+		value === "info" ||
 		value === "video"
 		? value
 		: null;

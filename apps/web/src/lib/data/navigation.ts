@@ -870,14 +870,12 @@ export async function listNavigationContentPickerAdmin(args: {
 		query<NavigationPickerOptionDbRow>(
 			`
 				SELECT content_kind_code AS value,
-					   MAX(content_kind_label) AS label
-				FROM web_view.web_navigation_content_lookup
-				${optionWhere}
-				GROUP BY content_kind_code
-				ORDER BY MAX(content_kind_label) ASC,
+					   label AS label
+				FROM web_view.web_content_kind_lookup
+				WHERE is_enabled = true
+				ORDER BY label ASC,
 						 content_kind_code ASC
 			`,
-			[args.categoryId, args.subcategoryId, excludedContentIds],
 		),
 		query<NavigationPickerOptionDbRow>(
 			`

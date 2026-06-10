@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//// FILE: apps/web/src/app/admin/riseopedia/sections/page.tsx                                                    ////
+//// FILE: apps/web/src/app/admin/riseopedia/sections/page.tsx                                                            ////
 //// Language: TSX                                                                                               ////
-//// Admin page for Riseopedia public sections.                                                                  ////
+//// Admin page for rebuilt Riseopedia sections.                                                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -10,31 +10,30 @@ import type { JSX } from "react";
 import RiseopediaAdminPageChrome, {
 	RiseopediaAdminGuard,
 } from "@/components/admin/riseopedia/RiseopediaAdminPageChrome";
-import RiseopediaSectionsTable from "@/components/admin/riseopedia/RiseopediaSectionsTable";
+import RiseopediaAdminNav from "@/components/admin/riseopedia/RiseopediaAdminNav";
 import { requireAdmin } from "@/lib/auth/authz";
+import RiseopediaSectionsTable from "@/components/admin/riseopedia/RiseopediaSectionsTable";
 import {
-	listRiseopediaAdminMeta,
 	listRiseopediaAdminSections,
 } from "@/lib/data/riseopedia-admin";
 
 export const dynamic = "force-dynamic";
 
-export default async function RiseopediaSectionsAdminPage(): Promise<JSX.Element> {
+export default async function SectionsAdminPage(): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
 		return <RiseopediaAdminGuard title="Sections" reason={guard.reason} />;
 	}
 
-	const [meta, rows] = await Promise.all([
-		listRiseopediaAdminMeta(),
-		listRiseopediaAdminSections(),
-	]);
+	const rows = await listRiseopediaAdminSections();
 
 	return (
 		<RiseopediaAdminPageChrome
 			title="Sections"
+			description="Configure editorial Riseopedia sections. Membership is defined by classification rules."
 		>
-			<RiseopediaSectionsTable initialRows={rows.sections} meta={meta} />
+			<RiseopediaAdminNav active="sections" />
+			<RiseopediaSectionsTable initialRows={rows.sections} />
 		</RiseopediaAdminPageChrome>
 	);
 }

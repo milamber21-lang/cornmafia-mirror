@@ -70,8 +70,9 @@ Database URL resolution order:
 This script writes only to game_data.import_media_derivatives_f and game_data import batch/message tables. It does
 not promote data into web_priv.game_* canonical tables.
 
-By default it is rerunnable: unchanged source media reuse existing derivative files from earlier batches and are
-counted as skipped instead of being regenerated or inserted again. Use --force to regenerate.
+By default it is rerunnable: unchanged source media reuse existing derivative files from earlier batches.
+Reusable derivatives are still registered for the current import_media_file_id so later game sync can create
+web_priv.game_media_files for the latest scan batch. Use --force to regenerate physical files.
 `);
 }
 
@@ -873,6 +874,7 @@ async function main() {
 	let generatedCount = 0;
 	let skippedCount = 0;
 	let reusedCount = 0;
+	let reusedRegisteredCount = 0;
 	let warningCount = 0;
 	let errorCount = 0;
 	let messageCount = 0;
@@ -973,11 +975,26 @@ async function main() {
 						sourceHashSha256: mediaRow.source_hash_sha256 || null,
 					});
 					if (reusableDerivative) {
-						const reusableAbsPath = resolve(patchRootPath, normalizeRelPath(reusableDerivative.derived_rel_path));
+						const reusableDerivativeRelPath = normalizeRelPath(reusableDerivative.derived_rel_path);
+						const reusableAbsPath = resolve(patchRootPath, reusableDerivativeRelPath);
 						assertInsideRoot(reusableAbsPath, patchRootPath, "reusable derivative path");
 						if (existsSync(reusableAbsPath)) {
+							const registrationRelPath = existsSync(outputAbsPath) ? derivedRelPath : reusableDerivativeRelPath;
+							await upsertDerivative(client, {
+								importBatchId,
+								patchId,
+								importMediaFileId: mediaRow.import_media_file_id,
+								variantCode: variant.code,
+								derivedRelPath: registrationRelPath,
+								derivedWidthPx: Number(reusableDerivative.derived_width_px),
+								derivedHeightPx: Number(reusableDerivative.derived_height_px),
+								derivedSizeBytes: reusableDerivative.derived_size_bytes === null ? null : Number(reusableDerivative.derived_size_bytes),
+								derivedHashSha256: reusableDerivative.derived_hash_sha256,
+								generationStatusCode: "generated",
+								errorMessage: null,
+							});
 							reusedCount += 1;
-							skippedCount += 1;
+							reusedRegisteredCount += 1;
 							continue;
 						}
 					}
@@ -1050,6 +1067,7 @@ async function main() {
 			mediaFileCount: sourceMediaRows.length,
 			processedMediaCount,
 			generatedCount,
+			reusedRegisteredCount,
 			skippedCount,
 			reusedCount,
 			warningCount,
@@ -1074,7 +1092,7 @@ async function main() {
 				importBatchId,
 				finalBatchStatus,
 				processedMediaCount,
-				generatedCount,
+				generatedCount + reusedRegisteredCount,
 				messageCount,
 				errorCount,
 				warningCount,

@@ -11,7 +11,7 @@ import type { FormEvent, JSX } from "react";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 
-import { ButtonLink, Input } from "@/components/ui";
+import { Input } from "@/components/ui";
 
 export type RiseopediaSearchParam = {
 	name: string;
@@ -22,7 +22,6 @@ export type RiseopediaSearchBoxProps = {
 	basePath: string;
 	search: string | null;
 	placeholder: string;
-	resetLabel?: string;
 	params?: RiseopediaSearchParam[];
 	pageSize?: number;
 };
@@ -62,7 +61,6 @@ export default function RiseopediaSearchBox({
 	basePath,
 	search,
 	placeholder,
-	resetLabel = "Reset",
 	params = EMPTY_PARAMS,
 	pageSize,
 }: RiseopediaSearchBoxProps): JSX.Element {
@@ -110,7 +108,7 @@ export default function RiseopediaSearchBox({
 	}
 
 	return (
-		<form className="public-collection-controls riseopedia-search-bar" onSubmit={submitSearch}>
+		<form className="riseopedia-search-bar" onSubmit={submitSearch}>
 			<label className="public-collection-sr-label" htmlFor="riseopedia-search-box">
 				Search
 			</label>
@@ -121,12 +119,6 @@ export default function RiseopediaSearchBox({
 				onChange={(event) => setSearchValue(event.currentTarget.value)}
 				placeholder={placeholder}
 			/>
-
-			<div className="riseopedia-search-bar__actions">
-				<ButtonLink href={basePath} variant="neutral">
-					{resetLabel}
-				</ButtonLink>
-			</div>
 		</form>
 	);
 }
