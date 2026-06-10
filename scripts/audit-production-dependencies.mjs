@@ -8,10 +8,12 @@
 import { spawnSync } from "node:child_process";
 
 const WEB_DIRECTORY = "apps/web";
+
 const ALLOWED_MODERATE_ADVISORIES = new Map([
 	["postcss", new Set(["GHSA-qx2v-qp2m-jg93"])],
 	["next", new Set(["GHSA-qx2v-qp2m-jg93"])],
-	["next-auth", new Set(["GHSA-qx2v-qp2m-jg93"])],
+	["next-auth", new Set(["GHSA-qx2v-qp2m-jg93", "GHSA-w5hq-g745-h8pq"])],
+	["uuid", new Set(["GHSA-w5hq-g745-h8pq"])],
 ]);
 
 function isRecord(value) {
@@ -57,6 +59,7 @@ function collectAdvisoryIds(name, vulnerabilities, visited = new Set()) {
 	}
 
 	visited.add(name);
+
 	const vulnerability = vulnerabilities.get(name);
 	if (!vulnerability) {
 		return new Set();
@@ -64,6 +67,7 @@ function collectAdvisoryIds(name, vulnerabilities, visited = new Set()) {
 
 	const ids = new Set();
 	const via = vulnerability.via;
+
 	if (!Array.isArray(via)) {
 		return ids;
 	}
@@ -96,6 +100,7 @@ function collectAdvisoryIds(name, vulnerabilities, visited = new Set()) {
 
 function isAllowedModerate(name, advisoryIds) {
 	const allowedIds = ALLOWED_MODERATE_ADVISORIES.get(name);
+
 	if (!allowedIds || advisoryIds.size === 0) {
 		return false;
 	}
