@@ -35,7 +35,6 @@ import {
 import { readResponseMessage as tableReadResponseMessage } from "@/lib/helpers/http-response";
 
 import {
-	BOOLEAN_ACTIVE_FIELD,
 	activeFilter,
 } from "./RiseopediaAdminConfigHelpers";
 import type { RiseopediaAdminRows } from "./RiseopediaAdminTypes";
@@ -87,7 +86,7 @@ export default function RiseopediaPatchChannelsTable({ initialRows }: Riseopedia
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
 			fields={buildRiseopediaPatchChannelFields()}
-			renderPanel={({ open, mode, row, rows, onClose, onSaved }) => (
+			renderPanel={({ open, mode, row, onClose, onSaved }) => (
 				<RiseopediaPatchChannelsPanel
 					open={open}
 					mode={mode}

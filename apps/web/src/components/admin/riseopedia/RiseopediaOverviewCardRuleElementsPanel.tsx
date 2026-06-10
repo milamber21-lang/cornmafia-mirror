@@ -120,7 +120,7 @@ export default function RiseopediaOverviewCardRuleElementsPanel({
 				setSubmitting(false);
 			}
 		},
-		[fields, mode, row, scopedRuleSetId],
+		[fields, mode, row, ruleSet, scopedRuleSetId],
 	);
 
 	if (!open) {

@@ -44,9 +44,6 @@ import {
 	buildRiseopediaPatchPublicationFields,
 } from "./RiseopediaAdminPanelFieldBuilders";
 import {
-	ADMIN_NOTE_FIELD,
-	buildOptionsFromRows,
-	buildPatchOptions,
 } from "./RiseopediaAdminConfigHelpers";
 
 import {
@@ -95,7 +92,7 @@ export default function RiseopediaPatchPublicationsTable({ initialRows, channels
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
 			fields={buildRiseopediaPatchPublicationFields({ channels, meta })}
-			renderPanel={({ open, mode, row, rows, onClose, onSaved }) => (
+			renderPanel={({ open, mode, row, onClose, onSaved }) => (
 				<RiseopediaPatchPublicationsPanel
 					open={open}
 					mode={mode}

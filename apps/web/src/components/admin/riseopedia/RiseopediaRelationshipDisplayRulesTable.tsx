@@ -36,8 +36,6 @@ import { readResponseMessage as tableReadResponseMessage } from "@/lib/helpers/h
 
 import {
 	buildOptionsFromRows,
-	readRowValue,
-	toDisplayText,
 } from "./RiseopediaAdminHelpers";
 import RiseopediaRelationshipDisplayRulesPanel from "./RiseopediaRelationshipDisplayRulesPanel";
 import {
@@ -46,7 +44,6 @@ import {
 import type {
 	RiseopediaAdminFilterConfig,
 	RiseopediaAdminMeta,
-	RiseopediaAdminOption,
 	RiseopediaAdminRows,
 } from "./RiseopediaAdminTypes";
 
@@ -122,23 +119,6 @@ function perspectiveFilter(meta: RiseopediaAdminMeta): RiseopediaAdminFilterConf
 	};
 }
 
-function relationshipOptions(meta: RiseopediaAdminMeta): RiseopediaAdminOption[] {
-	return optionRows(meta.relationshipTypes)
-		.map((row) => {
-			const code = toDisplayText(readRowValue(row, "relationship_code")).trim();
-			const name = toDisplayText(readRowValue(row, "relationship_name")).trim();
-			const family = toDisplayText(readRowValue(row, "relationship_family_code")).trim();
-			const suffix = family ? ` · ${family}` : "";
-			return code
-				? {
-						value: code,
-						label: `${name || code} (${code})${suffix}`,
-				  }
-				: null;
-		})
-		.filter((option): option is RiseopediaAdminOption => option !== null)
-		.sort((left, right) => left.label.localeCompare(right.label));
-}
 
 export default function RiseopediaRelationshipDisplayRulesTable({
 	initialRows,
@@ -152,7 +132,7 @@ export default function RiseopediaRelationshipDisplayRulesTable({
 			searchPlaceholder="Search relationship display rules"
 			createLabel="Create rule"
 			deleteConfirmTitle="Delete relationship display rule"
-			deleteConfirmMessage={(row) => `Delete display rule ${toDisplayText(row.relationship_code)} / ${toDisplayText(row.perspective_code)}?`}
+			deleteConfirmMessage={(row) => `Delete display rule ${tableToDisplayText(row.relationship_code)} / ${tableToDisplayText(row.perspective_code)}?`}
 			emptyText="No relationship display rules found."
 			defaultSortKey="relationship_name"
 			filters={[perspectiveFilter(meta), blockFilter(meta), activeFilter()]}

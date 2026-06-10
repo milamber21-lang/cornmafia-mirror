@@ -10,18 +10,9 @@ export type OpediaWikiCode = "riseopedia" | "mafiosopedia";
 export const RISEOPEDIA_INFO_BASE_PATH = "/info/riseopedia";
 export const MAFIOSOPEDIA_INFO_BASE_PATH = "/info/mafiosopedia";
 
-const RISEOPEDIA_INFO_ROUTE_FAMILIES = [
-	"browse",
-	"sections",
-	"classes",
-	"categories",
-	"subcategories",
-	"entity",
-] as const;
-
 const RISEOPEDIA_ENTITY_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,127}$/;
 
-export type RiseopediaInfoRouteFamily = (typeof RISEOPEDIA_INFO_ROUTE_FAMILIES)[number];
+export type RiseopediaInfoRouteFamily = "browse" | "sections" | "classes" | "categories" | "subcategories" | "entity";
 
 function normalizePathSegment(value: string | null): string | null {
 	const trimmed = value?.trim();

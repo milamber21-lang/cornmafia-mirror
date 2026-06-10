@@ -201,20 +201,6 @@ function filterValues(filters: MafiosopediaEntityListFilters): [
 	];
 }
 
-function scopeValues(filters: MafiosopediaEntityFilterOptionFilters): [
-	string | null,
-	string | null,
-	string | null,
-	string | null,
-] {
-	return [
-		filters.section,
-		filters.entityClassCode,
-		filters.categorySlug,
-		filters.subcategorySlug,
-	];
-}
-
 function mapMediaRef(args: {
 	mediaId: string | number | null;
 	width: number | null;

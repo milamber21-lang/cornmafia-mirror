@@ -44,11 +44,7 @@ import {
 	buildRiseopediaProfileBindingFields,
 } from "./RiseopediaAdminPanelFieldBuilders";
 import {
-	ADMIN_NOTE_FIELD,
-	BOOLEAN_ACTIVE_FIELD,
 	activeFilter,
-	buildScopedProfileOptions,
-	classificationFields,
 	entityTypeFilter,
 	idText,
 } from "./RiseopediaAdminConfigHelpers";
@@ -104,7 +100,7 @@ export default function RiseopediaProfileBindingsTable({ initialRows, displayPro
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
 			fields={buildRiseopediaProfileBindingFields({ displayProfiles, displayProfile, meta })}
-			renderPanel={({ open, mode, row, rows, onClose, onSaved }) => (
+			renderPanel={({ open, mode, row, onClose, onSaved }) => (
 				<RiseopediaProfileBindingsPanel
 					open={open}
 					mode={mode}

@@ -122,7 +122,7 @@ export default function RiseopediaProfileElementsPanel({
 				setSubmitting(false);
 			}
 		},
-		[fields, mode, row, scopedProfileId],
+		[displayProfile, fields, mode, row, scopedProfileId],
 	);
 
 	if (!open) {

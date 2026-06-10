@@ -201,20 +201,6 @@ function filterValues(filters: RiseopediaEntityListFilters): [
 	];
 }
 
-function scopeValues(filters: RiseopediaEntityFilterOptionFilters): [
-	string | null,
-	string | null,
-	string | null,
-	string | null,
-] {
-	return [
-		filters.section,
-		filters.entityClassCode,
-		filters.categorySlug,
-		filters.subcategorySlug,
-	];
-}
-
 function mapMediaRef(args: {
 	mediaId: string | number | null;
 	width: number | null;

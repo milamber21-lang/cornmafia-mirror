@@ -36,7 +36,6 @@ import { readResponseMessage as tableReadResponseMessage } from "@/lib/helpers/h
 
 import type {
 	RiseopediaAdminMeta,
-	RiseopediaAdminRow,
 	RiseopediaAdminRows,
 } from "./RiseopediaAdminTypes";
 import RiseopediaOverviewCardRuleSetsPanel from "./RiseopediaOverviewCardRuleSetsPanel";
@@ -46,7 +45,6 @@ import {
 import {
 	activeFilter,
 	idText,
-	overviewCardRuleSetFields,
 	overviewCardSectionFilter,
 } from "./RiseopediaAdminConfigHelpers";
 
@@ -98,7 +96,7 @@ export default function RiseopediaOverviewCardRuleSetsTable({ initialRows, meta 
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
 			fields={buildRiseopediaOverviewCardRuleSetFields(meta)}
-			renderPanel={({ open, mode, row, rows, onClose, onSaved }) => (
+			renderPanel={({ open, mode, row, onClose, onSaved }) => (
 				<RiseopediaOverviewCardRuleSetsPanel
 					open={open}
 					mode={mode}

@@ -35,7 +35,6 @@ import {
 import { readResponseMessage as tableReadResponseMessage } from "@/lib/helpers/http-response";
 
 import {
-	BOOLEAN_ACTIVE_FIELD,
 	activeFilter,
 	idText,
 } from "./RiseopediaAdminConfigHelpers";
@@ -90,7 +89,7 @@ export default function RiseopediaSectionsTable({ initialRows }: SectionTablePro
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
 			fields={buildRiseopediaSectionFields()}
-			renderPanel={({ open, mode, row, rows, onClose, onSaved }) => (
+			renderPanel={({ open, mode, row, onClose, onSaved }) => (
 				<RiseopediaSectionsPanel
 					open={open}
 					mode={mode}
