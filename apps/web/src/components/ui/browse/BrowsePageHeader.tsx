@@ -72,15 +72,10 @@ export function BrowsePageBreadcrumbs({
 						{item.href ? (
 							<Link href={item.href}>{item.label}</Link>
 						) : (
-							<span aria-current={isCurrent ? "page" : undefined}>
-								{item.label}
-							</span>
+							<span aria-current={isCurrent ? "page" : undefined}>{item.label}</span>
 						)}
 						{!isCurrent ? (
-							<span
-								className="browse-page-header__breadcrumb-separator"
-								aria-hidden
-							>
+							<span className="browse-page-header__breadcrumb-separator" aria-hidden>
 								/
 							</span>
 						) : null}

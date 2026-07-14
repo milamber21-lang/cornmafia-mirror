@@ -185,7 +185,9 @@ describe("createDraftContentRenderModel", () => {
 			id: "3001",
 			url: "/api/me/media/3001",
 		});
-		expect(model.fields.every((renderField) => renderField.contentLink === null)).toBe(true);
+		expect(
+			model.fields.every((renderField) => renderField.contentLink === null),
+		).toBe(true);
 	});
 
 	it("uses a stable untitled fallback and omits incomplete series metadata", () => {

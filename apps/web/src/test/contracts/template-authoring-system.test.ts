@@ -241,10 +241,7 @@ describe.skipIf(!RUN_SQL_DUMP_CONTRACTS)(
 
 		it("configures the four public member templates while retaining YouTube admin templates", async () => {
 			const analysis = await getSqlDumpAnalysis();
-			const templates = requireRows(
-				analysis,
-				`${privateSchema}.web_templates`,
-			);
+			const templates = requireRows(analysis, `${privateSchema}.web_templates`);
 
 			for (const templateCode of [
 				"story_chronicle",
@@ -267,10 +264,7 @@ describe.skipIf(!RUN_SQL_DUMP_CONTRACTS)(
 
 		it("keeps Hero media as the only authored Page Hero field", async () => {
 			const analysis = await getSqlDumpAnalysis();
-			const templates = requireRows(
-				analysis,
-				`${privateSchema}.web_templates`,
-			);
+			const templates = requireRows(analysis, `${privateSchema}.web_templates`);
 			const fieldLists = requireRows(
 				analysis,
 				`${privateSchema}.web_template_field_list`,
@@ -280,11 +274,7 @@ describe.skipIf(!RUN_SQL_DUMP_CONTRACTS)(
 				`${privateSchema}.web_template_fields`,
 			);
 			const pageTemplate = requireRow(templates, "template_code", "page");
-			const heroMedia = requireRow(
-				fieldLists,
-				"field_list_code",
-				"hero_media_id",
-			);
+			const heroMedia = requireRow(fieldLists, "field_list_code", "hero_media_id");
 			const assignment = templateFields.find(
 				(row) =>
 					row.template_id === pageTemplate.template_id &&

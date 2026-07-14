@@ -38,10 +38,7 @@ describe("BrowsePageHeader", () => {
 			"/guild",
 		);
 		expect(screen.getByText("4 entries")).toBeInTheDocument();
-		expect(screen.getByText("About Us")).toHaveAttribute(
-			"aria-current",
-			"page",
-		);
+		expect(screen.getByText("About Us")).toHaveAttribute("aria-current", "page");
 		expect(
 			container.querySelector(".browse-page-header__breadcrumb-separator"),
 		).not.toBeNull();
