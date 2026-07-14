@@ -1,4 +1,5 @@
 <!-- FILE: docs/LICENSE.md -->
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->
 
 # Corn Mafia Proprietary Source License
 
@@ -99,3 +100,5 @@ revisions unless a later revision states otherwise.
 
 These terms do not purport to retroactively revoke rights, if any, that were
 validly granted for an earlier revision under different terms.
+
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->

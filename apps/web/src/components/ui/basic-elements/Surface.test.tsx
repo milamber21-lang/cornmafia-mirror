@@ -32,7 +32,6 @@ describe("PageHero", () => {
 		expect(container.querySelector(".surface-page-hero--with-media")).toBeNull();
 	});
 
-
 	it("keeps breadcrumbs inside the copy column above the title", () => {
 		const { container } = render(
 			<PageHero title="Guide" breadcrumbs={<nav>Guides / Tutorial</nav>} />,

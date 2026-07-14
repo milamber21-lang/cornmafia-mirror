@@ -279,9 +279,7 @@ export function PageHero({
 
 						<div className="surface-page-hero__copy">
 							{breadcrumbs ? (
-								<div className="surface-page-hero__breadcrumbs">
-									{breadcrumbs}
-								</div>
+								<div className="surface-page-hero__breadcrumbs">{breadcrumbs}</div>
 							) : null}
 							{eyebrow ? (
 								<div className="surface-page-hero__eyebrow">{eyebrow}</div>

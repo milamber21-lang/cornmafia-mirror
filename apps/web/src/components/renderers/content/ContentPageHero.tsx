@@ -54,8 +54,7 @@ function resolveContentBreadcrumbs(
 	if (categoryTitle) {
 		breadcrumbs.push({
 			label: categoryTitle,
-			href:
-				linkPublicTaxonomy && categorySlug ? `/${categorySlug}` : undefined,
+			href: linkPublicTaxonomy && categorySlug ? `/${categorySlug}` : undefined,
 		});
 	}
 
@@ -84,8 +83,7 @@ export default function ContentPageHero({
 
 	const mediaFields = getDisplayableFields(heroFields.filter(isHeroMediaField));
 	const bodyFields = heroFields.filter(
-		(field) =>
-			!isHeroMediaField(field) && !isRetiredHeroOverlineField(field),
+		(field) => !isHeroMediaField(field) && !isRetiredHeroOverlineField(field),
 	);
 	const hasBodyFields = hasRenderableFields(bodyFields, model);
 	const summary = resolveSummary(model.doc.summary);

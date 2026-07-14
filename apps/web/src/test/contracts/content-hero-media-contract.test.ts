@@ -38,9 +38,7 @@ describe("content Hero editorial media contract", () => {
 		expect(publicCss).toContain("grid-column: 2 / 3;");
 		expect(publicCss).toContain("grid-row: 1 / 2;");
 		expect(publicCss).toContain("inset: 0;");
-		expect(publicCss).toContain(
-			"--public-content-hero-media-overlap: calc(",
-		);
+		expect(publicCss).toContain("--public-content-hero-media-overlap: calc(");
 		expect(publicCss).toContain(
 			"margin-block: calc(-1 * var(--public-content-hero-media-overlap));",
 		);

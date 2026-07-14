@@ -174,8 +174,7 @@
     position: relative;
   }
 
-  .public-content-hero.surface-page-hero--with-media
-    .surface-page-hero__media {
+  .public-content-hero.surface-page-hero--with-media .surface-page-hero__media {
     position: absolute;
     inset: 0;
     grid-column: 2 / 3;
