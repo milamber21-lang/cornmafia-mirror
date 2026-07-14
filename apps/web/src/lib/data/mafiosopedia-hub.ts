@@ -1,13 +1,24 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/lib/data/mafiosopedia-hub.ts                                                            ////
-//// Language: TS                                                                                             ////
-//// Materialized hub data loader for public Mafiosopedia classification overview cards.                          ////
+//// Language: TS                                                                                               ////
+//// Loads Mafiosopedia hub cards from staged materialized views, with dynamic fallback for non-default releases. ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
+import {
+	listMafiosopediaCategoryDirectoryCards,
+	listMafiosopediaClassDirectoryCards,
+	listMafiosopediaSectionDirectoryCards,
+} from "@/lib/data/mafiosopedia-classification";
 import { query } from "@/lib/data/pg";
+import {
+	hasNonDefaultMafiosopediaReleaseFilters,
+	mafiosopediaReleaseFilterFlags,
+	type MafiosopediaReleaseFilterCode,
+} from "@/lib/data/mafiosopedia-release";
 import { buildMafiosopediaInfoPath } from "@/lib/helpers/mafiosopedia-entity-links";
 import { buildMafiosopediaMediaFileUrl } from "@/lib/helpers/mafiosopedia-media-files";
 
@@ -100,6 +111,19 @@ function toIsoString(value: Date | string | null): string | null {
 	return value instanceof Date ? value.toISOString() : value;
 }
 
+function mapCountsRow(
+	row: MafiosopediaHubCountsRow | undefined,
+): MafiosopediaHubCounts {
+	return {
+		entityCount: row ? toNumber(row.entity_count) : 0,
+		assetCount: row ? toNumber(row.asset_count) : 0,
+		recipeCount: row ? toNumber(row.recipe_count) : 0,
+		sectionCount: row ? toNumber(row.section_count) : 0,
+		classCount: row ? toNumber(row.class_count) : 0,
+		categoryCount: row ? toNumber(row.category_count) : 0,
+	};
+}
+
 function mapMediaRef(args: {
 	mediaId: string | number | null;
 	width: number | null;
@@ -131,17 +155,25 @@ function directoryHref(row: MafiosopediaHubDirectoryRow): string | null {
 	}
 
 	if (row.node_type_code === "category") {
-		return buildMafiosopediaInfoPath({ family: "categories", slug: row.node_slug });
+		return buildMafiosopediaInfoPath({
+			family: "categories",
+			slug: row.node_slug,
+		});
 	}
 
 	if (row.node_type_code === "subcategory") {
-		return buildMafiosopediaInfoPath({ family: "subcategories", slug: row.node_slug });
+		return buildMafiosopediaInfoPath({
+			family: "subcategories",
+			slug: row.node_slug,
+		});
 	}
 
 	return null;
 }
 
-function mapHubDirectoryRow(row: MafiosopediaHubDirectoryRow): MafiosopediaHubDirectoryCardDoc {
+function mapHubDirectoryRow(
+	row: MafiosopediaHubDirectoryRow,
+): MafiosopediaHubDirectoryCardDoc {
 	return {
 		id: String(row.node_id),
 		nodeTypeCode: row.node_type_code,
@@ -168,46 +200,28 @@ function mapHubDirectoryRow(row: MafiosopediaHubDirectoryRow): MafiosopediaHubDi
 	};
 }
 
-function emptyCounts(): MafiosopediaHubCounts {
-	return {
-		entityCount: 0,
-		assetCount: 0,
-		recipeCount: 0,
-		sectionCount: 0,
-		classCount: 0,
-		categoryCount: 0,
-	};
+function releaseFilterWhere(firstParameterIndex: number): string {
+	return `(($${firstParameterIndex}::boolean AND release_status.public_match_flag)
+			 OR ($${firstParameterIndex + 1}::boolean AND release_status.patch_rule_match_flag)
+			 OR ($${firstParameterIndex + 2}::boolean AND release_status.evidence_rule_match_flag)
+			 OR ($${firstParameterIndex + 3}::boolean AND release_status.manual_rule_match_flag))`;
 }
 
-function mapCountsRow(row: MafiosopediaHubCountsRow | undefined): MafiosopediaHubCounts {
-	if (!row) {
-		return emptyCounts();
-	}
-
-	return {
-		entityCount: toNumber(row.entity_count),
-		assetCount: toNumber(row.asset_count),
-		recipeCount: toNumber(row.recipe_count),
-		sectionCount: toNumber(row.section_count),
-		classCount: toNumber(row.class_count),
-		categoryCount: toNumber(row.category_count),
-	};
-}
-
-export async function getMafiosopediaHubData(): Promise<MafiosopediaHubData> {
-	const [countResult, sectionResult, classResult, categoryResult] = await Promise.all([
-		query<MafiosopediaHubCountsRow>(
-			`SELECT entity_count,
+async function getMaterializedMafiosopediaHubData(): Promise<MafiosopediaHubData> {
+	const [countResult, sectionResult, classResult, categoryResult] =
+		await Promise.all([
+			query<MafiosopediaHubCountsRow>(
+				`SELECT entity_count,
 					asset_count,
 					recipe_count,
 					section_count,
 					class_count,
 					category_count
-			 FROM web_view.mafiosopedia_hub_counts
-			 LIMIT 1`,
-		),
-		query<MafiosopediaHubDirectoryRow>(
-			`SELECT node_type_code,
+				 FROM web_view.mafiosopedia_hub_counts
+				 LIMIT 1`,
+			),
+			query<MafiosopediaHubDirectoryRow>(
+				`SELECT node_type_code,
 					node_id,
 					node_code,
 					node_slug,
@@ -227,13 +241,14 @@ export async function getMafiosopediaHubData(): Promise<MafiosopediaHubData> {
 					sample_media_width_px,
 					sample_media_height_px,
 					sample_media_mime_type
-			 FROM web_view.mafiosopedia_hub_sections
-			 ORDER BY sort_order,
-				  node_name,
-				  node_id`,
-		),
-		query<MafiosopediaHubDirectoryRow>(
-			`SELECT node_type_code,
+				 FROM web_view.mafiosopedia_hub_sections
+				 WHERE item_count > 0
+				 ORDER BY sort_order,
+					  node_name,
+					  node_id`,
+			),
+			query<MafiosopediaHubDirectoryRow>(
+				`SELECT node_type_code,
 					node_id,
 					node_code,
 					node_slug,
@@ -253,13 +268,14 @@ export async function getMafiosopediaHubData(): Promise<MafiosopediaHubData> {
 					sample_media_width_px,
 					sample_media_height_px,
 					sample_media_mime_type
-			 FROM web_view.mafiosopedia_hub_classes
-			 ORDER BY sort_order,
-				  node_name,
-				  node_id`,
-		),
-		query<MafiosopediaHubDirectoryRow>(
-			`SELECT node_type_code,
+				 FROM web_view.mafiosopedia_hub_classes
+				 WHERE item_count > 0
+				 ORDER BY sort_order,
+					  node_name,
+					  node_id`,
+			),
+			query<MafiosopediaHubDirectoryRow>(
+				`SELECT node_type_code,
 					node_id,
 					node_code,
 					node_slug,
@@ -279,12 +295,13 @@ export async function getMafiosopediaHubData(): Promise<MafiosopediaHubData> {
 					sample_media_width_px,
 					sample_media_height_px,
 					sample_media_mime_type
-			 FROM web_view.mafiosopedia_hub_categories
-			 ORDER BY sort_order,
-				  node_name,
-				  node_id`,
-		),
-	]);
+				 FROM web_view.mafiosopedia_hub_categories
+				 WHERE item_count > 0
+				 ORDER BY sort_order,
+					  node_name,
+					  node_id`,
+			),
+		]);
 
 	return {
 		counts: mapCountsRow(countResult.rows[0]),
@@ -293,3 +310,56 @@ export async function getMafiosopediaHubData(): Promise<MafiosopediaHubData> {
 		categories: categoryResult.rows.map(mapHubDirectoryRow),
 	};
 }
+
+async function getDynamicMafiosopediaHubData(
+	releaseFilters: readonly MafiosopediaReleaseFilterCode[],
+): Promise<MafiosopediaHubData> {
+	const releaseFlags = mafiosopediaReleaseFilterFlags(releaseFilters);
+	const [countResult, sections, classes, categories] = await Promise.all([
+		query<MafiosopediaHubCountsRow>(
+			`SELECT COUNT(*)::bigint AS entity_count,
+					COUNT(*) FILTER (WHERE detail.entity_type_code = 'asset')::bigint AS asset_count,
+					COUNT(*) FILTER (WHERE detail.entity_type_code = 'recipe')::bigint AS recipe_count,
+					COUNT(DISTINCT detail.section_id)::bigint AS section_count,
+					COUNT(DISTINCT detail.entity_class_id)::bigint AS class_count,
+					COUNT(DISTINCT detail.entity_category_id)::bigint AS category_count
+			 FROM web_view.mafiosopedia_entity_detail detail
+			 JOIN web_view.mafiosopedia_entity_release_status release_status
+			   ON release_status.entity_id = detail.entity_id
+			 WHERE ${releaseFilterWhere(1)}`,
+			[
+				releaseFlags.public,
+				releaseFlags.patch,
+				releaseFlags.evidence,
+				releaseFlags.manual,
+			],
+		),
+		listMafiosopediaSectionDirectoryCards([...releaseFilters]),
+		listMafiosopediaClassDirectoryCards({
+			section: null,
+			releaseFilters: [...releaseFilters],
+		}),
+		listMafiosopediaCategoryDirectoryCards({
+			section: null,
+			entityClassCode: null,
+			releaseFilters: [...releaseFilters],
+		}),
+	]);
+
+	return {
+		counts: mapCountsRow(countResult.rows[0]),
+		sections,
+		classes,
+		categories,
+	};
+}
+
+export async function getMafiosopediaHubData(
+	releaseFilters: readonly MafiosopediaReleaseFilterCode[],
+): Promise<MafiosopediaHubData> {
+	return hasNonDefaultMafiosopediaReleaseFilters(releaseFilters)
+		? getDynamicMafiosopediaHubData(releaseFilters)
+		: getMaterializedMafiosopediaHubData();
+}
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -1,18 +1,29 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/me/MeTable.tsx                                                                 ////
 //// Language: TSX                                                                                                ////
-//// Client member workspace surface with profile actions, overview cards, and role summary.                      ////
+//// Shared member workspace with compact profile header, authoring cards, account overview, and role summary.   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
-import { ArrowRight, BookOpen, Clapperboard, Layers3, Pencil, ShieldCheck } from "lucide-react";
+import { Pencil, ShieldCheck } from "lucide-react";
 
 import RolesPanel from "@/components/login/RolesPanel";
 import MePanel from "@/components/me/MePanel";
-import { Button, ButtonLink } from "@/components/ui/basic-elements/Button";
+import {
+	BrowsePageHeader,
+	BrowseResultCard,
+	BrowseResultsPanel,
+	Button,
+	IconVisual,
+	SectionHeader,
+	StatusPill,
+	SurfacePanel,
+	SurfaceState,
+} from "@/components/ui";
 
 /* ============================== Types & guards ============================== */
 type EntityLike =
@@ -64,13 +75,13 @@ type WorkspaceAction = {
 	title: string;
 	description: string;
 	href: string;
-	icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+	lucideName: string;
 };
 
-type OverviewItem = {
+type ProfileDetailRowProps = {
 	label: string;
-	value: string;
-	tone?: "normal" | "good" | "muted";
+	children: React.ReactNode;
+	monospace?: boolean;
 };
 
 const WORKSPACE_ACTIONS: WorkspaceAction[] = [
@@ -78,19 +89,19 @@ const WORKSPACE_ACTIONS: WorkspaceAction[] = [
 		title: "My content",
 		description: "Review and manage your authored pages across collections.",
 		href: "/me/content",
-		icon: BookOpen,
+		lucideName: "BookOpen",
 	},
 	{
 		title: "My media",
 		description: "Manage uploads prepared for your public and member content.",
 		href: "/me/media",
-		icon: Clapperboard,
+		lucideName: "Clapperboard",
 	},
 	{
 		title: "My series",
 		description: "Organize serial content and future multi-part releases.",
 		href: "/me/series",
-		icon: Layers3,
+		lucideName: "Layers3",
 	},
 ];
 
@@ -106,23 +117,23 @@ function isProfileRecord(value: unknown): value is DiscordUserRecord {
 		(typeof value.userUid === "string" || value.userUid === null) &&
 		(typeof value.username === "string" || value.username === null) &&
 		(typeof value.globalName === "string" || value.globalName === null) &&
-		(typeof value.isMember === "boolean")
+		typeof value.isMember === "boolean"
 	);
 }
 
 /* ============================== Format helpers ============================= */
 function formatDate(value: string | null): string {
 	if (!value) {
-		return "-";
+		return "Not available";
 	}
 
 	const date = new Date(value);
 	return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 }
 
-function formatShortDate(value: string | null): string {
+function formatShortDate(value: string | null): string | null {
 	if (!value) {
-		return "-";
+		return null;
 	}
 
 	const date = new Date(value);
@@ -137,11 +148,11 @@ function formatShortDate(value: string | null): string {
 
 function formatEntity(value: EntityLike): string {
 	if (!value) {
-		return "-";
+		return "Not linked";
 	}
 
 	if (typeof value === "string") {
-		return value || "-";
+		return value || "Not linked";
 	}
 
 	const id =
@@ -154,7 +165,7 @@ function formatEntity(value: EntityLike): string {
 		isObject(value.type) && typeof value.type.type === "string"
 			? value.type.type
 			: "";
-	const pieces = [name || id || "-"];
+	const pieces = [name || id || "Not linked"];
 
 	if (type) {
 		pieces.push(type);
@@ -169,11 +180,11 @@ function formatEntity(value: EntityLike): string {
 
 function formatTheme(value: ThemeLike): string {
 	if (!value) {
-		return "-";
+		return "Not set";
 	}
 
 	if (typeof value === "string") {
-		return value || "-";
+		return value || "Not set";
 	}
 
 	const themeName =
@@ -183,136 +194,61 @@ function formatTheme(value: ThemeLike): string {
 		(typeof value.label === "string" && value.label) ||
 		"";
 
-	return themeName || "-";
+	return themeName || "Not set";
 }
 
-function getDisplayName(record: DiscordUserRecord | null, sessionName: string): string {
+function getDisplayName(
+	record: DiscordUserRecord | null,
+	sessionName: string,
+): string {
 	return record?.globalName || record?.username || sessionName;
 }
 
-function buildOverviewItems(record: DiscordUserRecord): OverviewItem[] {
-	return [
-		{
-			label: "Membership",
-			value: record.isMember ? "Mafia Guild Member" : "Signed in",
-			tone: record.isMember ? "good" : "muted",
-		},
-		{
-			label: "Game username",
-			value: record.gameUsername ?? "Not set",
-		},
-		{
-			label: "Alias",
-			value: record.alias ?? "Not set",
-		},
-		{
-			label: "Theme",
-			value: formatTheme(record.theme),
-		},
-		{
-			label: "Joined",
-			value: formatShortDate(record.joinedAt),
-		},
-		{
-			label: "Last login",
-			value: formatDate(record.lastLoginAt),
-		},
-	];
-}
-
-function getToneClass(tone: OverviewItem["tone"]): string {
-	if (tone === "good") {
-		return "member-stat-card__value--good";
-	}
-
-	if (tone === "muted") {
-		return "member-stat-card__value--muted";
-	}
-
-	return "member-stat-card__value--default";
-}
-
 /* ============================== Subcomponents ============================== */
-function ProfileAvatar({ image, name }: { image: string | null; name: string }) {
-	if (image) {
-		return (
-			<Image
-				src={image}
-				alt={name}
-				width={88}
-				height={88}
-				unoptimized
-				className="member-profile-avatar member-profile-avatar--image"
-			/>
-		);
-	}
-
+function WorkspaceActionCard({ action }: { action: WorkspaceAction }) {
 	return (
-		<div className="member-profile-avatar member-profile-avatar--fallback">
-			{name.slice(0, 1).toUpperCase()}
-		</div>
-	);
-}
-
-function ActionCard({ action }: { action: WorkspaceAction }) {
-	const Icon = action.icon;
-
-	return (
-		<ButtonLink
+		<BrowseResultCard
 			href={action.href}
-			variant="neutral"
-			className="member-action-card"
-		>
-			<span className="member-action-card__icon">
-				<Icon className="member-action-card__glyph" aria-hidden />
-			</span>
-			<span className="member-action-card__body">
-				<span className="member-action-card__title">
-					{action.title}
-				</span>
-				<span className="member-action-card__text">
-					{action.description}
-				</span>
-			</span>
-			<ArrowRight className="member-action-card__arrow" aria-hidden />
-		</ButtonLink>
-	);
-}
-
-function OverviewCard({ item }: { item: OverviewItem }) {
-	return (
-		<div className="member-stat-card">
-			<div className="member-stat-card__label">
-				{item.label}
-			</div>
-			<div className={`member-stat-card__value member-stat-card__value--profile ${getToneClass(item.tone)}`}>
-				{item.value}
-			</div>
-		</div>
-	);
-}
-
-function LoadingState() {
-	return (
-		<div className="member-skeleton-grid">
-			{["one", "two", "three", "four", "five", "six"].map((key) => (
-				<div
-					key={key}
-					className="member-skeleton-card"
+			visual={
+				<IconVisual
+					iconKey={null}
+					iconColor={null}
+					fallback={{ lucideName: action.lucideName }}
+					mediaRouteScope="app"
+					size="card"
+					title={action.title}
 				/>
-			))}
+			}
+			title={action.title}
+			summary={action.description}
+			className="member-workspace-card"
+		/>
+	);
+}
+
+function ProfileDetailRow({
+	label,
+	children,
+	monospace = false,
+}: ProfileDetailRowProps) {
+	return (
+		<div className="member-profile-detail-row">
+			<dt className="member-profile-detail-row__term">{label}</dt>
+			<dd
+				className={
+					monospace
+						? "member-profile-detail-row__value member-profile-detail-row__value--mono"
+						: "member-profile-detail-row__value"
+				}
+			>
+				{children}
+			</dd>
 		</div>
 	);
 }
 
 /* ============================== Component ============================== */
-export default function MeTable({
-	name,
-	image,
-}: {
-	name: string;
-	image: string | null;
-}) {
+export default function MeTable({ name }: { name: string }) {
 	const [open, setOpen] = React.useState(false);
 	const [loading, setLoading] = React.useState(true);
 	const [error, setError] = React.useState<string | undefined>();
@@ -353,109 +289,143 @@ export default function MeTable({
 	}, [load]);
 
 	const displayName = getDisplayName(record, name);
-	const overviewItems = record ? buildOverviewItems(record) : [];
+	const notes = record?.notes?.trim() || null;
 
 	return (
-		<div className="member-dashboard-main">
-			<header className="member-hero">
-				<ProfileAvatar image={image} name={displayName} />
-				<div className="member-profile-hero__body">
-					<div className="member-profile-badge">
-						<ShieldCheck className="member-profile-badge__icon" aria-hidden />
-						Member workspace
+		<div className="member-dashboard-main member-profile-workspace">
+			<BrowsePageHeader
+				className="member-profile-header"
+				breadcrumbs={[{ label: "Member" }, { label: "Profile" }]}
+				title={displayName}
+				actions={
+					record ? (
+						<StatusPill tone={record.isMember ? "success" : "muted"}>
+							<ShieldCheck
+								className="member-profile-header__status-icon"
+								aria-hidden
+							/>
+							{record.isMember ? "Mafia Guild Member" : "Signed in"}
+						</StatusPill>
+					) : loading ? (
+						<StatusPill tone="muted">Loading profile</StatusPill>
+					) : null
+				}
+				description={
+					<div className="member-profile-header__secondary-actions">
+						<Button
+							size="sm"
+							variant="secondary"
+							leftIcon={
+								<Pencil className="member-profile-header__edit-icon" aria-hidden />
+							}
+							onClick={() => setOpen(true)}
+							disabled={loading || !record}
+						>
+							Edit profile
+						</Button>
 					</div>
-					<h1 className="member-hero__title member-profile-title">
-						{displayName}
-					</h1>
-					<p className="member-hero__text">
-						{record?.username ? `Discord: ${record.username}` : "Discord profile"}
-					</p>
-				</div>
-			</header>
+				}
+			/>
 
-			<div className="member-stat-grid member-stat-grid--four">
-				{WORKSPACE_ACTIONS.map((action) => (
-					<ActionCard key={action.href} action={action} />
-				))}
-				<Button
-					variant="neutral"
-					className="member-action-card"
-					onClick={() => setOpen(true)}
-				>
-					<span className="member-action-card__icon member-action-card__icon--danger">
-						<Pencil className="member-action-card__glyph" aria-hidden />
-					</span>
-					<span className="member-action-card__body">
-						<span className="member-action-card__title">Edit profile</span>
-						<span className="member-action-card__text">
-							Update your member profile fields and display preferences.
-						</span>
-					</span>
-					<ArrowRight className="member-action-card__arrow" aria-hidden />
-				</Button>
-			</div>
-
-			<section className="member-profile-section">
-				<div className="member-profile-section__header">
-					<div>
-						<h2 className="member-profile-section__title">Overview</h2>
-						<p className="member-hero__text">
-							Current profile details available from the member profile contract.
-						</p>
-					</div>
+			<BrowseResultsPanel
+				className="member-profile-workspace-panel"
+				aria-label="Member workspace"
+			>
+				<div className="member-workspace-grid">
+					{WORKSPACE_ACTIONS.map((action) => (
+						<WorkspaceActionCard key={action.href} action={action} />
+					))}
 				</div>
+			</BrowseResultsPanel>
+
+			<SurfacePanel
+				material="structure"
+				density="spacious"
+				className="member-profile-overview"
+			>
+				<SectionHeader
+					eyebrow="Account"
+					title="Profile overview"
+					description="Your member-facing preferences and the account facts resolved by the platform."
+				/>
 
 				{loading ? (
-					<LoadingState />
+					<SurfaceState
+						kind="loading"
+						title="Loading profile"
+						description="Resolving your current member profile and account details."
+					/>
 				) : error ? (
-					<div className="member-error-banner">
-						{error}
-					</div>
+					<SurfaceState
+						kind="error"
+						title="Profile unavailable"
+						description={error}
+						actions={
+							<Button variant="secondary" onClick={() => void load()}>
+								Try again
+							</Button>
+						}
+					/>
 				) : !record ? (
-					<div className="member-profile-note">
-						No profile was found for this account.
-					</div>
+					<SurfaceState
+						kind="empty"
+						title="No profile found"
+						description="No member profile is currently available for this account."
+					/>
 				) : (
-					<div className="member-profile-overview-stack">
-						<div className="member-skeleton-grid">
-							{overviewItems.map((item) => (
-								<OverviewCard key={item.label} item={item} />
-							))}
+					<div className="member-profile-overview__layout">
+						<div className="member-profile-overview__group">
+							<h3 className="member-profile-overview__group-title">Preferences</h3>
+							<dl className="member-profile-detail-list">
+								<ProfileDetailRow label="Membership">
+									<StatusPill tone={record.isMember ? "success" : "muted"}>
+										{record.isMember ? "Mafia Guild Member" : "Signed in"}
+									</StatusPill>
+								</ProfileDetailRow>
+								<ProfileDetailRow label="Game username">
+									{record.gameUsername ?? "Not set"}
+								</ProfileDetailRow>
+								<ProfileDetailRow label="Alias">
+									{record.alias ?? "Not set"}
+								</ProfileDetailRow>
+								<ProfileDetailRow label="Theme">
+									{formatTheme(record.theme)}
+								</ProfileDetailRow>
+								<ProfileDetailRow label="Joined">
+									{formatShortDate(record.joinedAt) ?? "Not available"}
+								</ProfileDetailRow>
+								<ProfileDetailRow label="Last login">
+									{formatDate(record.lastLoginAt)}
+								</ProfileDetailRow>
+							</dl>
 						</div>
 
-						<div className="member-profile-card-grid">
-							<div className="member-profile-card">
-								<div className="member-stat-card__label">
-									Discord identity
-								</div>
-								<dl className="member-profile-definition-list">
-									<div className="member-profile-definition-row">
-										<dt className="member-profile-definition-term">Discord ID</dt>
-										<dd className="member-profile-definition-value member-profile-definition-value--mono">{record.discordId}</dd>
-									</div>
-									<div className="member-profile-definition-row">
-										<dt className="member-profile-definition-term">Entity</dt>
-										<dd className="member-profile-definition-value">{formatEntity(record.entity)}</dd>
-									</div>
-									<div className="member-profile-definition-row">
-										<dt className="member-profile-definition-term">Profile updated</dt>
-										<dd className="member-profile-definition-value">{formatDate(record.updatedAt)}</dd>
-									</div>
-								</dl>
-							</div>
+						<div className="member-profile-overview__group">
+							<h3 className="member-profile-overview__group-title">Account details</h3>
+							<dl className="member-profile-detail-list">
+								<ProfileDetailRow label="Discord ID" monospace>
+									{record.discordId}
+								</ProfileDetailRow>
+								<ProfileDetailRow label="Linked entity">
+									{formatEntity(record.entity)}
+								</ProfileDetailRow>
+								<ProfileDetailRow label="Profile updated">
+									{formatDate(record.updatedAt)}
+								</ProfileDetailRow>
+							</dl>
 
-							<div className="member-profile-card">
-								<div className="member-stat-card__label">
-									Profile notes
+							{notes ? (
+								<div className="member-profile-overview__notes">
+									<div className="member-profile-overview__notes-label">
+										Profile notes
+									</div>
+									<p>{notes}</p>
 								</div>
-								<p className="member-profile-card__text">
-									{record.notes ?? "No profile notes saved yet."}
-								</p>
-							</div>
+							) : null}
 						</div>
 					</div>
 				)}
-			</section>
+			</SurfacePanel>
 
 			<RolesPanel />
 
@@ -477,3 +447,5 @@ export default function MeTable({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

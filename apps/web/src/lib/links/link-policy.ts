@@ -4,6 +4,7 @@
 //// Shared app-side link policy helpers for rich text, template, footer, and render surfaces.                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 export type LinkPolicyKind = "internal" | "external";
 
@@ -49,7 +50,15 @@ type HrefParts = {
 	suffix: string;
 };
 
-const PUBLIC_ROUTE_PREFIXES = new Set(["map", "tool", "app", "event", "custom", "info", "video"]);
+const PUBLIC_ROUTE_PREFIXES = new Set([
+	"map",
+	"tool",
+	"app",
+	"event",
+	"custom",
+	"info",
+	"video",
+]);
 const BLOCKED_INTERNAL_FIRST_SEGMENTS = new Set([
 	"admin",
 	"api",
@@ -61,7 +70,8 @@ const BLOCKED_INTERNAL_FIRST_SEGMENTS = new Set([
 	"uploads",
 ]);
 
-const HOST_PATTERN = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/;
+const HOST_PATTERN =
+	/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/;
 const UNSAFE_PATH_ENCODING_PATTERN = /%2e|%2f|%5c|%00/i;
 const SCHEME_PATTERN = /^[a-z][a-z0-9+.-]*:/i;
 
@@ -206,7 +216,10 @@ function hasUnsafeDecodedSegment(value: string): boolean {
 	);
 }
 
-function normalizeInternalPath(value: string, mode: InternalPathMode): string | null {
+function normalizeInternalPath(
+	value: string,
+	mode: InternalPathMode,
+): string | null {
 	if (
 		!value.startsWith("/") ||
 		value.startsWith("//") ||
@@ -326,7 +339,10 @@ function normalizeExternalLink(
 			);
 		}
 
-		if (!options.allowTypedHttpsProtocol || options.requireProtocolOmittedForExternal) {
+		if (
+			!options.allowTypedHttpsProtocol ||
+			options.requireProtocolOmittedForExternal
+		) {
 			return failure(
 				"disallowed_protocol",
 				"Enter external links without protocol, for example example.com/path.",
@@ -431,15 +447,21 @@ export function stripHttpsProtocol(value: string): string {
 		: trimmedValue;
 }
 
-export function normalizeRichTextLinkAuthorInput(value: unknown): LinkPolicyResult {
+export function normalizeRichTextLinkAuthorInput(
+	value: unknown,
+): LinkPolicyResult {
 	return normalizeLinkInput(value, RICH_TEXT_AUTHOR_OPTIONS);
 }
 
-export function normalizeGeneralLinkAuthorInput(value: unknown): LinkPolicyResult {
+export function normalizeGeneralLinkAuthorInput(
+	value: unknown,
+): LinkPolicyResult {
 	return normalizeLinkInput(value, GENERAL_AUTHOR_OPTIONS);
 }
 
-export function normalizeStoredRichTextLinkHref(value: unknown): LinkPolicyResult {
+export function normalizeStoredRichTextLinkHref(
+	value: unknown,
+): LinkPolicyResult {
 	return normalizeLinkInput(value, RENDER_OPTIONS);
 }
 
@@ -447,3 +469,5 @@ export function isExternalLinkHref(value: unknown): boolean {
 	const result = normalizeGeneralLinkAuthorInput(value);
 	return result.ok && result.kind === "external";
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

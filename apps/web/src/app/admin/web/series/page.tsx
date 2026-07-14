@@ -4,6 +4,8 @@
 //// Admin series page with page-preloaded policy and taxonomy metadata                                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { JSX } from "react";
 import Link from "next/link";
 
@@ -24,7 +26,9 @@ export default async function SeriesAdminPage(): Promise<JSX.Element> {
 			return (
 				<div className="admin-guard-shell">
 					<h1 className="admin-guard-title">Series</h1>
-					<p className="admin-guard-message">You need to sign in to access the admin area.</p>
+					<p className="admin-guard-message">
+						You need to sign in to access the admin area.
+					</p>
 					<Link href="/login" className="admin-guard-link">
 						Go to login
 					</Link>
@@ -36,7 +40,7 @@ export default async function SeriesAdminPage(): Promise<JSX.Element> {
 			<div className="admin-guard-shell">
 				<h1 className="admin-guard-title">Series</h1>
 				<p className="admin-guard-message">Admin or editor access is required.</p>
-				<ButtonLink href="/admin" variant="neutral">
+				<ButtonLink href="/admin" variant="secondary">
 					Go back
 				</ButtonLink>
 			</div>
@@ -111,12 +115,12 @@ export default async function SeriesAdminPage(): Promise<JSX.Element> {
 				lucideName: icon.lucideName,
 				iconMedia: icon.iconMedia
 					? {
-						id: icon.iconMedia.id,
-						url: icon.iconMedia.url,
-						filename: icon.iconMedia.filename,
-						mimeType: icon.iconMedia.mimeType,
-						storageRelPath: icon.iconMedia.storageRelPath,
-					}
+							id: icon.iconMedia.id,
+							url: icon.iconMedia.url,
+							filename: icon.iconMedia.filename,
+							mimeType: icon.iconMedia.mimeType,
+							storageRelPath: icon.iconMedia.storageRelPath,
+						}
 					: null,
 			})),
 			colors: colors.map((color) => ({
@@ -131,9 +135,7 @@ export default async function SeriesAdminPage(): Promise<JSX.Element> {
 		meta = {
 			...meta,
 			error:
-				error instanceof Error
-					? error.message
-					: "Failed to load series metadata.",
+				error instanceof Error ? error.message : "Failed to load series metadata.",
 		};
 	}
 
@@ -143,7 +145,7 @@ export default async function SeriesAdminPage(): Promise<JSX.Element> {
 				<h1 className="admin-page-card-title">Series</h1>
 
 				<div className="admin-page-card-actions">
-					<ButtonLink href="/admin" variant="neutral">
+					<ButtonLink href="/admin" variant="secondary">
 						Go back
 					</ButtonLink>
 				</div>
@@ -153,3 +155,5 @@ export default async function SeriesAdminPage(): Promise<JSX.Element> {
 		</section>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

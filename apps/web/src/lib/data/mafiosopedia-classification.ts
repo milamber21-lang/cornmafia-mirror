@@ -1,14 +1,21 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/lib/data/mafiosopedia-classification.ts                                                 ////
-//// Language: TS                                                                                             ////
-//// DB-first Mafiosopedia classification directory helpers for /info overview pages.                            ////
+//// Language: TS                                                                                               ////
+//// Release-aware Mafiosopedia classification directory helpers for public /info overview pages.                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
 import { query } from "@/lib/data/pg";
 import type { MafiosopediaHubDirectoryCardDoc } from "@/lib/data/mafiosopedia-hub";
+import {
+	hasNonDefaultMafiosopediaReleaseFilters,
+	mafiosopediaReleaseFilterFlags,
+	mafiosopediaReleaseSearchParam,
+	type MafiosopediaReleaseFilterCode,
+} from "@/lib/data/mafiosopedia-release";
 import { buildMafiosopediaInfoPath } from "@/lib/helpers/mafiosopedia-entity-links";
 import { buildMafiosopediaMediaFileUrl } from "@/lib/helpers/mafiosopedia-media-files";
 
@@ -22,6 +29,7 @@ export type MafiosopediaClassificationDirectoryFilters = {
 	section: string | null;
 	entityClassCode: string | null;
 	categorySlug: string | null;
+	releaseFilters: MafiosopediaReleaseFilterCode[];
 };
 
 type MafiosopediaClassificationDirectoryRow = {
@@ -65,6 +73,28 @@ function toIsoString(value: Date | string | null): string | null {
 	return value instanceof Date ? value.toISOString() : value;
 }
 
+function releaseFilterWhere(firstParameterIndex: number): string {
+	return `(($${firstParameterIndex}::boolean AND release_status.public_match_flag)
+			 OR ($${firstParameterIndex + 1}::boolean AND release_status.patch_rule_match_flag)
+			 OR ($${firstParameterIndex + 2}::boolean AND release_status.evidence_rule_match_flag)
+			 OR ($${firstParameterIndex + 3}::boolean AND release_status.manual_rule_match_flag))`;
+}
+
+function releaseFilterValues(
+	filters: readonly MafiosopediaReleaseFilterCode[],
+): [boolean, boolean, boolean, boolean] {
+	const flags = mafiosopediaReleaseFilterFlags(filters);
+	return [flags.public, flags.patch, flags.evidence, flags.manual];
+}
+
+function releaseQuery(
+	filters: readonly MafiosopediaReleaseFilterCode[],
+): string {
+	return `?release=${encodeURIComponent(
+		mafiosopediaReleaseSearchParam(filters),
+	)}`;
+}
+
 function mapMediaRef(args: {
 	mediaId: string | number | null;
 	width: number | null;
@@ -76,7 +106,6 @@ function mapMediaRef(args: {
 	}
 
 	const mediaId = String(args.mediaId);
-
 	return {
 		mediaId,
 		url: buildMafiosopediaMediaFileUrl(mediaId),
@@ -86,23 +115,29 @@ function mapMediaRef(args: {
 	};
 }
 
-function directoryHref(row: MafiosopediaClassificationDirectoryRow): string {
-	if (row.node_type_code === "section") {
-		return buildMafiosopediaInfoPath({ family: "sections", slug: row.node_slug });
-	}
+function directoryHref(
+	row: MafiosopediaClassificationDirectoryRow,
+	releaseFilters: readonly MafiosopediaReleaseFilterCode[],
+): string {
+	const basePath =
+		row.node_type_code === "section"
+			? buildMafiosopediaInfoPath({ family: "sections", slug: row.node_slug })
+			: row.node_type_code === "class"
+				? buildMafiosopediaInfoPath({ family: "classes", slug: row.node_slug })
+				: row.node_type_code === "category"
+					? buildMafiosopediaInfoPath({ family: "categories", slug: row.node_slug })
+					: buildMafiosopediaInfoPath({
+							family: "subcategories",
+							slug: row.node_slug,
+						});
 
-	if (row.node_type_code === "class") {
-		return buildMafiosopediaInfoPath({ family: "classes", slug: row.node_slug });
-	}
-
-	if (row.node_type_code === "category") {
-		return buildMafiosopediaInfoPath({ family: "categories", slug: row.node_slug });
-	}
-
-	return buildMafiosopediaInfoPath({ family: "subcategories", slug: row.node_slug });
+	return `${basePath}${releaseQuery(releaseFilters)}`;
 }
 
-function mapDirectoryRow(row: MafiosopediaClassificationDirectoryRow): MafiosopediaHubDirectoryCardDoc {
+function mapDirectoryRow(
+	row: MafiosopediaClassificationDirectoryRow,
+	releaseFilters: readonly MafiosopediaReleaseFilterCode[],
+): MafiosopediaHubDirectoryCardDoc {
 	return {
 		id: String(row.node_id),
 		nodeTypeCode: row.node_type_code,
@@ -110,7 +145,7 @@ function mapDirectoryRow(row: MafiosopediaClassificationDirectoryRow): Mafiosope
 		slug: row.node_slug,
 		name: row.node_name,
 		description: row.description,
-		href: directoryHref(row),
+		href: directoryHref(row, releaseFilters),
 		itemCount: toNumber(row.item_count),
 		assetCount: toNumber(row.asset_count),
 		recipeCount: toNumber(row.recipe_count),
@@ -129,7 +164,9 @@ function mapDirectoryRow(row: MafiosopediaClassificationDirectoryRow): Mafiosope
 	};
 }
 
-function mapOptionRow(row: MafiosopediaClassificationOptionRow): MafiosopediaClassificationFilterOption {
+function mapOptionRow(
+	row: MafiosopediaClassificationOptionRow,
+): MafiosopediaClassificationFilterOption {
 	return {
 		value: row.value_code,
 		label: row.display_name,
@@ -137,131 +174,304 @@ function mapOptionRow(row: MafiosopediaClassificationOptionRow): MafiosopediaCla
 	};
 }
 
-const BASE_ENTITY_CTE = `WITH filtered_entities AS (
-		SELECT detail.entity_id,
-			   detail.entity_type_code,
-			   detail.entity_slug,
-			   detail.entity_name,
-			   detail.section_code,
-			   detail.section_slug,
-			   detail.section_name,
-			   detail.entity_class_id,
-			   detail.entity_class_code,
-			   detail.entity_class_name,
-			   detail.entity_category_id,
-			   detail.entity_category_code,
-			   detail.entity_category_name,
-			   detail.entity_category_slug,
-			   detail.entity_subcategory_id,
-			   detail.entity_subcategory_code,
-			   detail.entity_subcategory_name,
-			   detail.entity_subcategory_slug,
-			   media.media_file_id,
-			   media.width_px,
-			   media.height_px,
-			   media.mime_type
-		FROM web_view.mafiosopedia_entity_detail detail
-		LEFT JOIN LATERAL (SELECT media_row.media_file_id,
-							 media_row.width_px,
-							 media_row.height_px,
-							 media_row.mime_type
-					  FROM web_view.mafiosopedia_entity_detail_media media_row
-					  WHERE media_row.entity_id = detail.entity_id
-					    AND media_row.public_display_flag = true
-					  ORDER BY CASE WHEN media_row.media_file_id = detail.primary_icon_media_file_id THEN 0 ELSE 1 END,
-							   media_row.selected_icon_rank,
-							   media_row.selected_header_rank,
-							   media_row.primary_flag DESC,
-							   media_row.sort_order,
-							   media_row.entity_media_id
-					  LIMIT 1) media ON true
-		WHERE detail.public_visible_flag = true
-		  AND detail.detail_visible_flag = true
-		  AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
-		  AND ($2::text IS NULL OR detail.entity_class_code = $2)
-		  AND ($3::text IS NULL OR detail.entity_category_slug = $3)
-	)`;
-
-function filterValues(
-	filters: MafiosopediaClassificationDirectoryFilters,
-): [string | null, string | null, string | null] {
-	return [filters.section, filters.entityClassCode, filters.categorySlug];
+function usesDefaultRelease(
+	releaseFilters: readonly MafiosopediaReleaseFilterCode[],
+): boolean {
+	return !hasNonDefaultMafiosopediaReleaseFilters(releaseFilters);
 }
 
+type MafiosopediaMaterializedDirectoryViewName =
+	| "web_view.mafiosopedia_hub_sections"
+	| "web_view.mafiosopedia_hub_classes"
+	| "web_view.mafiosopedia_hub_categories"
+	| "web_view.mafiosopedia_hub_subcategories";
 
-export async function listMafiosopediaSectionDirectoryCards(): Promise<MafiosopediaHubDirectoryCardDoc[]> {
+async function listMafiosopediaMaterializedDirectoryCards(
+	viewName: MafiosopediaMaterializedDirectoryViewName,
+	releaseFilters: readonly MafiosopediaReleaseFilterCode[],
+): Promise<MafiosopediaHubDirectoryCardDoc[]> {
 	const result = await query<MafiosopediaClassificationDirectoryRow>(
-		`SELECT 'section'::text AS node_type_code,
-				section_row.section_id AS node_id,
-				section_row.section_code AS node_code,
-				section_row.section_slug AS node_slug,
-				section_row.section_name AS node_name,
-				section_row.description,
-				section_row.item_count,
-				COALESCE(counts.asset_count, 0) AS asset_count,
-				COALESCE(counts.recipe_count, 0) AS recipe_count,
-				1 AS section_count,
-				section_row.sort_order,
-				section_row.updated_dt,
-				sample.entity_type_code AS sample_entity_type_code,
-				sample.entity_name AS sample_entity_name,
-				sample.entity_slug AS sample_entity_slug,
-				sample.media_file_id AS sample_media_id,
-				sample.width_px AS sample_media_width_px,
-				sample.height_px AS sample_media_height_px,
-				sample.mime_type AS sample_media_mime_type
-		 FROM web_view.mafiosopedia_section_directory_rows section_row
-		 LEFT JOIN LATERAL (SELECT COUNT(*) FILTER (WHERE detail.entity_type_code = 'asset') AS asset_count,
-							  COUNT(*) FILTER (WHERE detail.entity_type_code = 'recipe') AS recipe_count
-					   FROM web_view.mafiosopedia_entity_detail detail
-					   WHERE detail.public_visible_flag = true
-					     AND detail.detail_visible_flag = true
-					     AND detail.section_slug = section_row.section_slug) counts ON true
-		 LEFT JOIN LATERAL (SELECT detail.entity_type_code,
-							  detail.entity_name,
-							  detail.entity_slug,
-							  media.media_file_id,
-							  media.width_px,
-							  media.height_px,
-							  media.mime_type
-					   FROM web_view.mafiosopedia_entity_detail detail
-					   LEFT JOIN LATERAL (SELECT media_row.media_file_id,
-												media_row.width_px,
-												media_row.height_px,
-												media_row.mime_type
-									 FROM web_view.mafiosopedia_entity_detail_media media_row
-									 WHERE media_row.entity_id = detail.entity_id
-									   AND media_row.public_display_flag = true
-									 ORDER BY CASE WHEN media_row.media_file_id = detail.primary_icon_media_file_id THEN 0 ELSE 1 END,
-											  media_row.selected_icon_rank,
-											  media_row.selected_header_rank,
-											  media_row.primary_flag DESC,
-											  media_row.sort_order,
-											  media_row.entity_media_id
-									 LIMIT 1) media ON true
-					   WHERE detail.public_visible_flag = true
-					     AND detail.detail_visible_flag = true
-					     AND detail.section_slug = section_row.section_slug
-					   ORDER BY (media.media_file_id IS NULL),
-								detail.entity_name,
-								detail.entity_id
-					   LIMIT 1) sample ON true
-		 WHERE section_row.public_visible_flag = true
-		    OR section_row.show_when_empty_flag = true
-		 ORDER BY section_row.section_name,
-				  section_row.section_id`,
+		`SELECT node_type_code,
+			node_id,
+			node_code,
+			node_slug,
+			node_name,
+			description,
+			item_count,
+			asset_count,
+			recipe_count,
+			section_count,
+			sort_order,
+			updated_dt,
+			sample_entity_type_code,
+			sample_entity_name,
+			sample_entity_slug,
+			sample_media_id,
+			sample_media_width_px,
+			sample_media_height_px,
+			sample_media_mime_type
+		 FROM ${viewName}
+		 WHERE item_count > 0
+		 ORDER BY sort_order,
+			node_name,
+			node_id`,
 	);
 
-	return result.rows.map(mapDirectoryRow);
+	return result.rows.map((row) => mapDirectoryRow(row, releaseFilters));
 }
 
-export async function listMafiosopediaClassDirectoryCards(
-	filters: Pick<MafiosopediaClassificationDirectoryFilters, "section">,
+async function listMafiosopediaMaterializedClassificationOptions(args: {
+	viewName:
+		| "web_view.mafiosopedia_hub_classes"
+		| "web_view.mafiosopedia_hub_categories"
+		| "web_view.mafiosopedia_hub_subcategories";
+	valueColumn: "node_code" | "node_name";
+}): Promise<MafiosopediaClassificationFilterOption[]> {
+	const result = await query<MafiosopediaClassificationOptionRow>(
+		`SELECT ${args.valueColumn} AS value_code,
+			node_name AS display_name,
+			item_count
+		 FROM ${args.viewName}
+		 WHERE item_count > 0
+		 ORDER BY sort_order,
+			node_name,
+			node_id`,
+	);
+
+	return result.rows.map(mapOptionRow);
+}
+
+const BASE_ENTITY_CTE = `WITH filtered_entities AS (
+	SELECT detail.entity_id,
+		   detail.entity_type_code,
+		   detail.entity_slug,
+		   detail.entity_name,
+		   detail.entity_code,
+		   detail.section_id,
+		   detail.section_code,
+		   detail.section_slug,
+		   detail.section_name,
+		   detail.entity_class_id,
+		   detail.entity_class_code,
+		   detail.entity_class_name,
+		   detail.entity_category_id,
+		   detail.entity_category_code,
+		   detail.entity_category_name,
+		   detail.entity_category_slug,
+		   detail.entity_subcategory_id,
+		   detail.entity_subcategory_code,
+		   detail.entity_subcategory_name,
+		   detail.entity_subcategory_slug,
+		   media.media_file_id,
+		   media.width_px,
+		   media.height_px,
+		   media.mime_type,
+		   class_media.media_file_id AS class_media_file_id,
+		   class_media.width_px AS class_media_width_px,
+		   class_media.height_px AS class_media_height_px,
+		   class_media.mime_type AS class_media_mime_type,
+		   category_media.media_file_id AS category_media_file_id,
+		   category_media.width_px AS category_media_width_px,
+		   category_media.height_px AS category_media_height_px,
+		   category_media.mime_type AS category_media_mime_type,
+		   subcategory_media.media_file_id AS subcategory_media_file_id,
+		   subcategory_media.width_px AS subcategory_media_width_px,
+		   subcategory_media.height_px AS subcategory_media_height_px,
+		   subcategory_media.mime_type AS subcategory_media_mime_type,
+		   entity_type_media.media_file_id AS entity_type_media_file_id,
+		   entity_type_media.width_px AS entity_type_media_width_px,
+		   entity_type_media.height_px AS entity_type_media_height_px,
+		   entity_type_media.mime_type AS entity_type_media_mime_type
+	FROM web_view.mafiosopedia_entity_detail detail
+	JOIN web_view.mafiosopedia_entity_release_status release_status
+	  ON release_status.entity_id = detail.entity_id
+	LEFT JOIN LATERAL (
+		SELECT media_row.media_file_id,
+			   media_row.width_px,
+			   media_row.height_px,
+			   media_row.mime_type
+		FROM web_view.mafiosopedia_entity_detail_media media_row
+		WHERE media_row.entity_id = detail.entity_id
+		  AND media_row.public_display_flag = true
+		  AND media_row.media_role_code IN ('icon', 'thumbnail', 'brand_logo')
+		ORDER BY CASE WHEN media_row.media_file_id = detail.primary_icon_media_file_id THEN 0 ELSE 1 END,
+			 media_row.selected_icon_rank,
+			 media_row.selected_header_rank,
+			 media_row.primary_flag DESC,
+			 media_row.sort_order,
+			 media_row.entity_media_id
+		LIMIT 1
+	) media ON true
+	LEFT JOIN LATERAL (
+		SELECT class_media_row.media_file_id,
+			   class_media_row.width_px,
+			   class_media_row.height_px,
+			   class_media_row.mime_type
+		FROM web_view.mafiosopedia_classification_media_lookup class_media_row
+		WHERE class_media_row.target_level_code = 'class'
+		  AND class_media_row.entity_type_code = detail.entity_type_code
+		  AND class_media_row.entity_class_code = detail.entity_class_code
+		ORDER BY class_media_row.sort_order,
+			 class_media_row.classification_media_id
+		LIMIT 1
+	) class_media ON true
+	LEFT JOIN LATERAL (
+		SELECT media_candidate.media_file_id,
+			   media_candidate.width_px,
+			   media_candidate.height_px,
+			   media_candidate.mime_type
+		FROM (VALUES
+			(10, 'category'::text, detail.entity_class_code,
+				CASE WHEN detail.entity_type_code = 'location' AND detail.entity_code LIKE 'district_%' THEN 'district' ELSE detail.entity_category_code END,
+				NULL::text),
+			(20, 'class'::text, detail.entity_class_code, NULL::text, NULL::text),
+			(30, 'entity_type'::text, NULL::text, NULL::text, NULL::text)
+		) candidate(rank_order, target_level_code, entity_class_code, entity_category_code, entity_subcategory_code)
+		JOIN web_view.mafiosopedia_classification_media_lookup media_candidate
+		  ON media_candidate.target_level_code = candidate.target_level_code
+		 AND media_candidate.entity_type_code = detail.entity_type_code
+		 AND media_candidate.entity_class_code IS NOT DISTINCT FROM candidate.entity_class_code
+		 AND media_candidate.entity_category_code IS NOT DISTINCT FROM candidate.entity_category_code
+		 AND media_candidate.entity_subcategory_code IS NOT DISTINCT FROM candidate.entity_subcategory_code
+		ORDER BY candidate.rank_order,
+			 media_candidate.sort_order,
+			 media_candidate.classification_media_id
+		LIMIT 1
+	) category_media ON true
+	LEFT JOIN LATERAL (
+		SELECT media_candidate.media_file_id,
+			   media_candidate.width_px,
+			   media_candidate.height_px,
+			   media_candidate.mime_type
+		FROM (VALUES
+			(10, 'subcategory'::text, detail.entity_class_code,
+				CASE WHEN detail.entity_type_code = 'location' AND detail.entity_code LIKE 'town_%' THEN 'district' ELSE detail.entity_category_code END,
+				CASE WHEN detail.entity_type_code = 'location' AND detail.entity_code LIKE 'town_%' THEN 'town'
+				     WHEN detail.entity_type_code = 'location' AND detail.entity_code LIKE '%skyscraper%' THEN 'skyscraper'
+				     ELSE detail.entity_subcategory_code END),
+			(20, 'category'::text, detail.entity_class_code,
+				CASE WHEN detail.entity_type_code = 'location' AND detail.entity_code LIKE 'district_%' THEN 'district' ELSE detail.entity_category_code END,
+				NULL::text),
+			(30, 'class'::text, detail.entity_class_code, NULL::text, NULL::text),
+			(40, 'entity_type'::text, NULL::text, NULL::text, NULL::text)
+		) candidate(rank_order, target_level_code, entity_class_code, entity_category_code, entity_subcategory_code)
+		JOIN web_view.mafiosopedia_classification_media_lookup media_candidate
+		  ON media_candidate.target_level_code = candidate.target_level_code
+		 AND media_candidate.entity_type_code = detail.entity_type_code
+		 AND media_candidate.entity_class_code IS NOT DISTINCT FROM candidate.entity_class_code
+		 AND media_candidate.entity_category_code IS NOT DISTINCT FROM candidate.entity_category_code
+		 AND media_candidate.entity_subcategory_code IS NOT DISTINCT FROM candidate.entity_subcategory_code
+		ORDER BY candidate.rank_order,
+			 media_candidate.sort_order,
+			 media_candidate.classification_media_id
+		LIMIT 1
+	) subcategory_media ON true
+	LEFT JOIN LATERAL (
+		SELECT entity_type_media_row.media_file_id,
+			   entity_type_media_row.width_px,
+			   entity_type_media_row.height_px,
+			   entity_type_media_row.mime_type
+		FROM web_view.mafiosopedia_classification_media_lookup entity_type_media_row
+		WHERE entity_type_media_row.target_level_code = 'entity_type'
+		  AND entity_type_media_row.entity_type_code = detail.entity_type_code
+		ORDER BY entity_type_media_row.sort_order,
+			 entity_type_media_row.classification_media_id
+		LIMIT 1
+	) entity_type_media ON true
+	WHERE ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
+	  AND ($2::text IS NULL OR detail.entity_class_code = $2)
+	  AND ($3::text IS NULL
+			OR detail.entity_category_slug = $3
+			OR lower(btrim(detail.entity_category_name)) = lower(btrim($3)))
+	  AND ${releaseFilterWhere(4)}
+)`;
+
+function directoryValues(
+	filters: MafiosopediaClassificationDirectoryFilters,
+): [
+	string | null,
+	string | null,
+	string | null,
+	boolean,
+	boolean,
+	boolean,
+	boolean,
+] {
+	return [
+		filters.section,
+		filters.entityClassCode,
+		filters.categorySlug,
+		...releaseFilterValues(filters.releaseFilters),
+	];
+}
+
+export async function listMafiosopediaSectionDirectoryCards(
+	releaseFilters: MafiosopediaReleaseFilterCode[],
 ): Promise<MafiosopediaHubDirectoryCardDoc[]> {
+	if (usesDefaultRelease(releaseFilters)) {
+		return listMafiosopediaMaterializedDirectoryCards(
+			"web_view.mafiosopedia_hub_sections",
+			releaseFilters,
+		);
+	}
+
 	const result = await query<MafiosopediaClassificationDirectoryRow>(
 		`${BASE_ENTITY_CTE}, ranked_entities AS (
 			SELECT filtered_entities.*,
-				   row_number() OVER (PARTITION BY filtered_entities.entity_class_code ORDER BY (filtered_entities.media_file_id IS NULL), filtered_entities.entity_category_name, filtered_entities.entity_subcategory_name, filtered_entities.entity_name, filtered_entities.entity_id) AS sample_rank
+				   row_number() OVER (PARTITION BY filtered_entities.section_id ORDER BY (filtered_entities.entity_type_media_file_id IS NULL), (filtered_entities.class_media_file_id IS NULL), (filtered_entities.media_file_id IS NULL), filtered_entities.entity_name, filtered_entities.entity_id) AS sample_rank
+			FROM filtered_entities
+			WHERE filtered_entities.section_id IS NOT NULL
+		)
+		SELECT 'section'::text AS node_type_code,
+			   section_id AS node_id,
+			   MIN(section_code) AS node_code,
+			   MIN(section_slug) AS node_slug,
+			   MIN(section_name) AS node_name,
+			   NULL::text AS description,
+			   COUNT(*) AS item_count,
+			   COUNT(*) FILTER (WHERE entity_type_code = 'asset') AS asset_count,
+			   COUNT(*) FILTER (WHERE entity_type_code = 'recipe') AS recipe_count,
+			   1::bigint AS section_count,
+			   row_number() OVER (ORDER BY MIN(section_name), section_id)::integer AS sort_order,
+			   NULL::timestamp with time zone AS updated_dt,
+			   MAX(entity_type_code) FILTER (WHERE sample_rank = 1) AS sample_entity_type_code,
+			   MAX(entity_name) FILTER (WHERE sample_rank = 1) AS sample_entity_name,
+			   MAX(entity_slug) FILTER (WHERE sample_rank = 1) AS sample_entity_slug,
+			   COALESCE(MAX(entity_type_media_file_id) FILTER (WHERE sample_rank = 1), MAX(class_media_file_id) FILTER (WHERE sample_rank = 1), MAX(media_file_id) FILTER (WHERE sample_rank = 1)) AS sample_media_id,
+			   COALESCE(MAX(entity_type_media_width_px) FILTER (WHERE sample_rank = 1), MAX(class_media_width_px) FILTER (WHERE sample_rank = 1), MAX(width_px) FILTER (WHERE sample_rank = 1)) AS sample_media_width_px,
+			   COALESCE(MAX(entity_type_media_height_px) FILTER (WHERE sample_rank = 1), MAX(class_media_height_px) FILTER (WHERE sample_rank = 1), MAX(height_px) FILTER (WHERE sample_rank = 1)) AS sample_media_height_px,
+			   COALESCE(MAX(entity_type_media_mime_type) FILTER (WHERE sample_rank = 1), MAX(class_media_mime_type) FILTER (WHERE sample_rank = 1), MAX(mime_type) FILTER (WHERE sample_rank = 1)) AS sample_media_mime_type
+		FROM ranked_entities
+		GROUP BY section_id
+		ORDER BY MIN(section_name), section_id`,
+		directoryValues({
+			section: null,
+			entityClassCode: null,
+			categorySlug: null,
+			releaseFilters,
+		}),
+	);
+
+	return result.rows.map((row) => mapDirectoryRow(row, releaseFilters));
+}
+
+export async function listMafiosopediaClassDirectoryCards(
+	filters: Pick<
+		MafiosopediaClassificationDirectoryFilters,
+		"section" | "releaseFilters"
+	>,
+): Promise<MafiosopediaHubDirectoryCardDoc[]> {
+	if (!filters.section && usesDefaultRelease(filters.releaseFilters)) {
+		return listMafiosopediaMaterializedDirectoryCards(
+			"web_view.mafiosopedia_hub_classes",
+			filters.releaseFilters,
+		);
+	}
+
+	const result = await query<MafiosopediaClassificationDirectoryRow>(
+		`${BASE_ENTITY_CTE}, ranked_entities AS (
+			SELECT filtered_entities.*,
+				   row_number() OVER (PARTITION BY filtered_entities.entity_class_code ORDER BY (filtered_entities.class_media_file_id IS NULL), (filtered_entities.media_file_id IS NULL), filtered_entities.entity_name, filtered_entities.entity_id) AS sample_rank
 			FROM filtered_entities
 			WHERE filtered_entities.entity_class_code IS NOT NULL
 		)
@@ -275,35 +485,51 @@ export async function listMafiosopediaClassDirectoryCards(
 			   COUNT(*) FILTER (WHERE entity_type_code = 'asset') AS asset_count,
 			   COUNT(*) FILTER (WHERE entity_type_code = 'recipe') AS recipe_count,
 			   COUNT(DISTINCT section_code) FILTER (WHERE section_code IS NOT NULL) AS section_count,
-			   MIN(entity_class_name) AS sort_label,
-			   row_number() OVER (ORDER BY MIN(section_name) NULLS LAST, MIN(entity_class_name) NULLS LAST, entity_class_code)::integer AS sort_order,
+			   row_number() OVER (ORDER BY MIN(entity_class_name), entity_class_code)::integer AS sort_order,
 			   NULL::timestamp with time zone AS updated_dt,
 			   MAX(entity_type_code) FILTER (WHERE sample_rank = 1) AS sample_entity_type_code,
 			   MAX(entity_name) FILTER (WHERE sample_rank = 1) AS sample_entity_name,
 			   MAX(entity_slug) FILTER (WHERE sample_rank = 1) AS sample_entity_slug,
-			   MAX(media_file_id) FILTER (WHERE sample_rank = 1) AS sample_media_id,
-			   MAX(width_px) FILTER (WHERE sample_rank = 1) AS sample_media_width_px,
-			   MAX(height_px) FILTER (WHERE sample_rank = 1) AS sample_media_height_px,
-			   MAX(mime_type) FILTER (WHERE sample_rank = 1) AS sample_media_mime_type
+			   COALESCE(MAX(class_media_file_id) FILTER (WHERE sample_rank = 1), MAX(media_file_id) FILTER (WHERE sample_rank = 1)) AS sample_media_id,
+			   COALESCE(MAX(class_media_width_px) FILTER (WHERE sample_rank = 1), MAX(width_px) FILTER (WHERE sample_rank = 1)) AS sample_media_width_px,
+			   COALESCE(MAX(class_media_height_px) FILTER (WHERE sample_rank = 1), MAX(height_px) FILTER (WHERE sample_rank = 1)) AS sample_media_height_px,
+			   COALESCE(MAX(class_media_mime_type) FILTER (WHERE sample_rank = 1), MAX(mime_type) FILTER (WHERE sample_rank = 1)) AS sample_media_mime_type
 		FROM ranked_entities
 		GROUP BY entity_class_id,
-				 entity_class_code
-		ORDER BY MIN(section_name) NULLS LAST,
-				 MIN(entity_class_name) NULLS LAST,
-				 entity_class_code`,
-		[filters.section, null, null],
+			 entity_class_code
+		ORDER BY MIN(entity_class_name), entity_class_code`,
+		directoryValues({
+			section: filters.section,
+			entityClassCode: null,
+			categorySlug: null,
+			releaseFilters: filters.releaseFilters,
+		}),
 	);
 
-	return result.rows.map(mapDirectoryRow);
+	return result.rows.map((row) => mapDirectoryRow(row, filters.releaseFilters));
 }
 
 export async function listMafiosopediaCategoryDirectoryCards(
-	filters: Pick<MafiosopediaClassificationDirectoryFilters, "section" | "entityClassCode">,
+	filters: Pick<
+		MafiosopediaClassificationDirectoryFilters,
+		"section" | "entityClassCode" | "releaseFilters"
+	>,
 ): Promise<MafiosopediaHubDirectoryCardDoc[]> {
+	if (
+		!filters.section &&
+		!filters.entityClassCode &&
+		usesDefaultRelease(filters.releaseFilters)
+	) {
+		return listMafiosopediaMaterializedDirectoryCards(
+			"web_view.mafiosopedia_hub_categories",
+			filters.releaseFilters,
+		);
+	}
+
 	const result = await query<MafiosopediaClassificationDirectoryRow>(
 		`${BASE_ENTITY_CTE}, ranked_entities AS (
 			SELECT filtered_entities.*,
-				   row_number() OVER (PARTITION BY filtered_entities.entity_category_slug ORDER BY (filtered_entities.media_file_id IS NULL), filtered_entities.entity_subcategory_name, filtered_entities.entity_name, filtered_entities.entity_id) AS sample_rank
+				   row_number() OVER (PARTITION BY filtered_entities.entity_category_slug ORDER BY (filtered_entities.category_media_file_id IS NULL), (filtered_entities.media_file_id IS NULL), filtered_entities.entity_name, filtered_entities.entity_id) AS sample_rank
 			FROM filtered_entities
 			WHERE filtered_entities.entity_category_slug IS NOT NULL
 		)
@@ -317,38 +543,48 @@ export async function listMafiosopediaCategoryDirectoryCards(
 			   COUNT(*) FILTER (WHERE entity_type_code = 'asset') AS asset_count,
 			   COUNT(*) FILTER (WHERE entity_type_code = 'recipe') AS recipe_count,
 			   COUNT(DISTINCT section_code) FILTER (WHERE section_code IS NOT NULL) AS section_count,
-			   row_number() OVER (ORDER BY MIN(section_name) NULLS LAST, MIN(entity_class_name) NULLS LAST, MIN(entity_category_name) NULLS LAST, entity_category_slug)::integer AS sort_order,
+			   row_number() OVER (ORDER BY MIN(entity_category_name), entity_category_slug)::integer AS sort_order,
 			   NULL::timestamp with time zone AS updated_dt,
 			   MAX(entity_type_code) FILTER (WHERE sample_rank = 1) AS sample_entity_type_code,
 			   MAX(entity_name) FILTER (WHERE sample_rank = 1) AS sample_entity_name,
 			   MAX(entity_slug) FILTER (WHERE sample_rank = 1) AS sample_entity_slug,
-			   MAX(media_file_id) FILTER (WHERE sample_rank = 1) AS sample_media_id,
-			   MAX(width_px) FILTER (WHERE sample_rank = 1) AS sample_media_width_px,
-			   MAX(height_px) FILTER (WHERE sample_rank = 1) AS sample_media_height_px,
-			   MAX(mime_type) FILTER (WHERE sample_rank = 1) AS sample_media_mime_type
+			   COALESCE(MAX(category_media_file_id) FILTER (WHERE sample_rank = 1), MAX(media_file_id) FILTER (WHERE sample_rank = 1)) AS sample_media_id,
+			   COALESCE(MAX(category_media_width_px) FILTER (WHERE sample_rank = 1), MAX(width_px) FILTER (WHERE sample_rank = 1)) AS sample_media_width_px,
+			   COALESCE(MAX(category_media_height_px) FILTER (WHERE sample_rank = 1), MAX(height_px) FILTER (WHERE sample_rank = 1)) AS sample_media_height_px,
+			   COALESCE(MAX(category_media_mime_type) FILTER (WHERE sample_rank = 1), MAX(mime_type) FILTER (WHERE sample_rank = 1)) AS sample_media_mime_type
 		FROM ranked_entities
 		GROUP BY entity_category_slug
-		ORDER BY MIN(section_name) NULLS LAST,
-				 MIN(entity_class_name) NULLS LAST,
-				 MIN(entity_category_name) NULLS LAST,
-				 entity_category_slug`,
-		[filters.section, filters.entityClassCode, null],
+		ORDER BY MIN(entity_category_name), entity_category_slug`,
+		directoryValues({
+			section: filters.section,
+			entityClassCode: filters.entityClassCode,
+			categorySlug: null,
+			releaseFilters: filters.releaseFilters,
+		}),
 	);
 
-	return result.rows.map(mapDirectoryRow);
+	return result.rows.map((row) => mapDirectoryRow(row, filters.releaseFilters));
 }
 
 export async function listMafiosopediaSubcategoryDirectoryCards(
-	filters: MafiosopediaClassificationDirectoryFilters = {
-		section: null,
-		entityClassCode: null,
-		categorySlug: null,
-	},
+	filters: MafiosopediaClassificationDirectoryFilters,
 ): Promise<MafiosopediaHubDirectoryCardDoc[]> {
+	if (
+		!filters.section &&
+		!filters.entityClassCode &&
+		!filters.categorySlug &&
+		usesDefaultRelease(filters.releaseFilters)
+	) {
+		return listMafiosopediaMaterializedDirectoryCards(
+			"web_view.mafiosopedia_hub_subcategories",
+			filters.releaseFilters,
+		);
+	}
+
 	const result = await query<MafiosopediaClassificationDirectoryRow>(
 		`${BASE_ENTITY_CTE}, ranked_entities AS (
 			SELECT filtered_entities.*,
-				   row_number() OVER (PARTITION BY filtered_entities.entity_subcategory_slug ORDER BY (filtered_entities.media_file_id IS NULL), filtered_entities.entity_name, filtered_entities.entity_id) AS sample_rank
+				   row_number() OVER (PARTITION BY filtered_entities.entity_subcategory_slug ORDER BY (filtered_entities.subcategory_media_file_id IS NULL), (filtered_entities.media_file_id IS NULL), filtered_entities.entity_name, filtered_entities.entity_id) AS sample_rank
 			FROM filtered_entities
 			WHERE filtered_entities.entity_subcategory_slug IS NOT NULL
 		)
@@ -362,69 +598,88 @@ export async function listMafiosopediaSubcategoryDirectoryCards(
 			   COUNT(*) FILTER (WHERE entity_type_code = 'asset') AS asset_count,
 			   COUNT(*) FILTER (WHERE entity_type_code = 'recipe') AS recipe_count,
 			   COUNT(DISTINCT section_code) FILTER (WHERE section_code IS NOT NULL) AS section_count,
-			   row_number() OVER (ORDER BY MIN(section_name) NULLS LAST, MIN(entity_class_name) NULLS LAST, MIN(entity_category_name) NULLS LAST, MIN(entity_subcategory_name) NULLS LAST, entity_subcategory_slug)::integer AS sort_order,
+			   row_number() OVER (ORDER BY MIN(entity_subcategory_name), entity_subcategory_slug)::integer AS sort_order,
 			   NULL::timestamp with time zone AS updated_dt,
 			   MAX(entity_type_code) FILTER (WHERE sample_rank = 1) AS sample_entity_type_code,
 			   MAX(entity_name) FILTER (WHERE sample_rank = 1) AS sample_entity_name,
 			   MAX(entity_slug) FILTER (WHERE sample_rank = 1) AS sample_entity_slug,
-			   MAX(media_file_id) FILTER (WHERE sample_rank = 1) AS sample_media_id,
-			   MAX(width_px) FILTER (WHERE sample_rank = 1) AS sample_media_width_px,
-			   MAX(height_px) FILTER (WHERE sample_rank = 1) AS sample_media_height_px,
-			   MAX(mime_type) FILTER (WHERE sample_rank = 1) AS sample_media_mime_type
+			   COALESCE(MAX(subcategory_media_file_id) FILTER (WHERE sample_rank = 1), MAX(media_file_id) FILTER (WHERE sample_rank = 1)) AS sample_media_id,
+			   COALESCE(MAX(subcategory_media_width_px) FILTER (WHERE sample_rank = 1), MAX(width_px) FILTER (WHERE sample_rank = 1)) AS sample_media_width_px,
+			   COALESCE(MAX(subcategory_media_height_px) FILTER (WHERE sample_rank = 1), MAX(height_px) FILTER (WHERE sample_rank = 1)) AS sample_media_height_px,
+			   COALESCE(MAX(subcategory_media_mime_type) FILTER (WHERE sample_rank = 1), MAX(mime_type) FILTER (WHERE sample_rank = 1)) AS sample_media_mime_type
 		FROM ranked_entities
 		GROUP BY entity_subcategory_slug
-		ORDER BY MIN(section_name) NULLS LAST,
-				 MIN(entity_class_name) NULLS LAST,
-				 MIN(entity_category_name) NULLS LAST,
-				 MIN(entity_subcategory_name) NULLS LAST,
-				 entity_subcategory_slug`,
-		filterValues(filters),
+		ORDER BY MIN(entity_subcategory_name), entity_subcategory_slug`,
+		directoryValues(filters),
 	);
 
-	return result.rows.map(mapDirectoryRow);
+	return result.rows.map((row) => mapDirectoryRow(row, filters.releaseFilters));
 }
 
 export async function listMafiosopediaClassFilterOptions(
-	filters: Pick<MafiosopediaClassificationDirectoryFilters, "section">,
+	filters: Pick<
+		MafiosopediaClassificationDirectoryFilters,
+		"section" | "releaseFilters"
+	>,
 ): Promise<MafiosopediaClassificationFilterOption[]> {
+	if (!filters.section && usesDefaultRelease(filters.releaseFilters)) {
+		return listMafiosopediaMaterializedClassificationOptions({
+			viewName: "web_view.mafiosopedia_hub_classes",
+			valueColumn: "node_code",
+		});
+	}
+
+	const releaseValues = releaseFilterValues(filters.releaseFilters);
 	const result = await query<MafiosopediaClassificationOptionRow>(
 		`SELECT detail.entity_class_code AS value_code,
 			   MIN(detail.entity_class_name) AS display_name,
 			   COUNT(*) AS item_count
-		 FROM web_view.mafiosopedia_entity_detail detail
-		 WHERE detail.public_visible_flag = true
-		   AND detail.detail_visible_flag = true
-		   AND detail.entity_class_code IS NOT NULL
-		   AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
-		 GROUP BY detail.entity_class_code
-		 ORDER BY MIN(detail.section_name) NULLS LAST,
-				  MIN(detail.entity_class_name) NULLS LAST,
-				  detail.entity_class_code`,
-		[filters.section],
+		FROM web_view.mafiosopedia_entity_detail detail
+		JOIN web_view.mafiosopedia_entity_release_status release_status
+		  ON release_status.entity_id = detail.entity_id
+		WHERE detail.entity_class_code IS NOT NULL
+		  AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
+		  AND ${releaseFilterWhere(2)}
+		GROUP BY detail.entity_class_code
+		ORDER BY MIN(detail.entity_class_name), detail.entity_class_code`,
+		[filters.section, ...releaseValues],
 	);
 
 	return result.rows.map(mapOptionRow);
 }
 
 export async function listMafiosopediaCategoryFilterOptions(
-	filters: Pick<MafiosopediaClassificationDirectoryFilters, "section" | "entityClassCode">,
+	filters: Pick<
+		MafiosopediaClassificationDirectoryFilters,
+		"section" | "entityClassCode" | "releaseFilters"
+	>,
 ): Promise<MafiosopediaClassificationFilterOption[]> {
+	if (
+		!filters.section &&
+		!filters.entityClassCode &&
+		usesDefaultRelease(filters.releaseFilters)
+	) {
+		return listMafiosopediaMaterializedClassificationOptions({
+			viewName: "web_view.mafiosopedia_hub_categories",
+			valueColumn: "node_name",
+		});
+	}
+
+	const releaseValues = releaseFilterValues(filters.releaseFilters);
 	const result = await query<MafiosopediaClassificationOptionRow>(
-		`SELECT detail.entity_category_slug AS value_code,
+		`SELECT MIN(detail.entity_category_name) AS value_code,
 			   MIN(detail.entity_category_name) AS display_name,
 			   COUNT(*) AS item_count
-		 FROM web_view.mafiosopedia_entity_detail detail
-		 WHERE detail.public_visible_flag = true
-		   AND detail.detail_visible_flag = true
-		   AND detail.entity_category_slug IS NOT NULL
-		   AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
-		   AND ($2::text IS NULL OR detail.entity_class_code = $2)
-		 GROUP BY detail.entity_category_slug
-		 ORDER BY MIN(detail.section_name) NULLS LAST,
-				  MIN(detail.entity_class_name) NULLS LAST,
-				  MIN(detail.entity_category_name) NULLS LAST,
-				  detail.entity_category_slug`,
-		[filters.section, filters.entityClassCode],
+		FROM web_view.mafiosopedia_entity_detail detail
+		JOIN web_view.mafiosopedia_entity_release_status release_status
+		  ON release_status.entity_id = detail.entity_id
+		WHERE detail.entity_category_slug IS NOT NULL
+		  AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
+		  AND ($2::text IS NULL OR detail.entity_class_code = $2)
+		  AND ${releaseFilterWhere(3)}
+		GROUP BY lower(btrim(detail.entity_category_name))
+		ORDER BY MIN(detail.entity_category_name)`,
+		[filters.section, filters.entityClassCode, ...releaseValues],
 	);
 
 	return result.rows.map(mapOptionRow);
@@ -433,25 +688,44 @@ export async function listMafiosopediaCategoryFilterOptions(
 export async function listMafiosopediaSubcategoryFilterOptions(
 	filters: MafiosopediaClassificationDirectoryFilters,
 ): Promise<MafiosopediaClassificationFilterOption[]> {
+	if (
+		!filters.section &&
+		!filters.entityClassCode &&
+		!filters.categorySlug &&
+		usesDefaultRelease(filters.releaseFilters)
+	) {
+		return listMafiosopediaMaterializedClassificationOptions({
+			viewName: "web_view.mafiosopedia_hub_subcategories",
+			valueColumn: "node_name",
+		});
+	}
+
+	const releaseValues = releaseFilterValues(filters.releaseFilters);
 	const result = await query<MafiosopediaClassificationOptionRow>(
-		`SELECT detail.entity_subcategory_slug AS value_code,
+		`SELECT MIN(detail.entity_subcategory_name) AS value_code,
 			   MIN(detail.entity_subcategory_name) AS display_name,
 			   COUNT(*) AS item_count
-		 FROM web_view.mafiosopedia_entity_detail detail
-		 WHERE detail.public_visible_flag = true
-		   AND detail.detail_visible_flag = true
-		   AND detail.entity_subcategory_slug IS NOT NULL
-		   AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
-		   AND ($2::text IS NULL OR detail.entity_class_code = $2)
-		   AND ($3::text IS NULL OR detail.entity_category_slug = $3)
-		 GROUP BY detail.entity_subcategory_slug
-		 ORDER BY MIN(detail.section_name) NULLS LAST,
-			  MIN(detail.entity_class_name) NULLS LAST,
-			  MIN(detail.entity_category_name) NULLS LAST,
-			  MIN(detail.entity_subcategory_name) NULLS LAST,
-			  detail.entity_subcategory_slug`,
-		filterValues(filters),
+		FROM web_view.mafiosopedia_entity_detail detail
+		JOIN web_view.mafiosopedia_entity_release_status release_status
+		  ON release_status.entity_id = detail.entity_id
+		WHERE detail.entity_subcategory_slug IS NOT NULL
+		  AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
+		  AND ($2::text IS NULL OR detail.entity_class_code = $2)
+		  AND ($3::text IS NULL
+			OR detail.entity_category_slug = $3
+			OR lower(btrim(detail.entity_category_name)) = lower(btrim($3)))
+		  AND ${releaseFilterWhere(4)}
+		GROUP BY lower(btrim(detail.entity_subcategory_name))
+		ORDER BY MIN(detail.entity_subcategory_name)`,
+		[
+			filters.section,
+			filters.entityClassCode,
+			filters.categorySlug,
+			...releaseValues,
+		],
 	);
 
 	return result.rows.map(mapOptionRow);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Shared schema-driven panel form renderer for admin and utility surfaces                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -300,10 +302,7 @@ function RenderField(props: {
 			const checked = Boolean(val);
 
 			const LabelSpacer = (
-				<Label
-					aria-hidden="true"
-					className="panel-form-label-spacer"
-				>
+				<Label aria-hidden="true" className="panel-form-label-spacer">
 					&nbsp;
 				</Label>
 			);
@@ -708,7 +707,7 @@ export default function PanelForm({
 			contentMaxWidthPx={contentMaxWidthPx}
 			renderSave={() => (
 				<Button
-					variant="green"
+					variant="primary"
 					onClick={handleSubmit}
 					disabled={submitting}
 					loading={submitting}
@@ -733,7 +732,9 @@ export default function PanelForm({
 				<div className="panel-form-body">
 					<div className="panel-form-rows">
 						{normalizedRows.map((row, i) => {
-							const visibleCells = row.filter((cell) => isFieldVisible(fieldMap.get(cell.field)));
+							const visibleCells = row.filter((cell) =>
+								isFieldVisible(fieldMap.get(cell.field)),
+							);
 							if (visibleCells.length === 0) return null;
 
 							return (
@@ -741,7 +742,8 @@ export default function PanelForm({
 									{visibleCells.map((cell, j) => {
 										const def = fieldMap.get(cell.field);
 										const spanClass = SPAN_CLASS[cell.span] ?? SPAN_CLASS[12];
-										if (!def) return <div key={j} className={`panel-form-cell ${spanClass}`} />;
+										if (!def)
+											return <div key={j} className={`panel-form-cell ${spanClass}`} />;
 										return (
 											<div key={j} className={`panel-form-cell ${spanClass}`}>
 												<RenderField
@@ -765,3 +767,5 @@ export default function PanelForm({
 		</Panel>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

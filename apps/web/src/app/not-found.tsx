@@ -4,6 +4,7 @@
 //// Generic public unavailable route rendered from internal DB content with a safe fallback.                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import PublicInternalContentPageRoute from "@/components/public/PublicInternalContentPageRoute";
 import PublicUnavailablePage from "@/components/public/PublicUnavailablePage";
@@ -16,3 +17,5 @@ export default function NotFound() {
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

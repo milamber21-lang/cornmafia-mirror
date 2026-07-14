@@ -4,6 +4,7 @@
 //// DB-first admin content kinds API with route-prefix controls                                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -174,7 +175,8 @@ function parseMutationData(
 	if (!rendererCode) {
 		return {
 			ok: false,
-			message: "Renderer must be page, map, tool, app, event, custom, external_link, youtube, stream, or calendar.",
+			message:
+				"Renderer must be page, map, tool, app, event, custom, external_link, youtube, stream, or calendar.",
 		};
 	}
 
@@ -347,3 +349,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

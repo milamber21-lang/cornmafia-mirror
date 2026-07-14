@@ -4,6 +4,7 @@
 //// Read-only admin API route for canonical game properties available to Riseopedia.                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse } from "next/server";
 
@@ -38,8 +39,11 @@ export async function POST(): Promise<Response> {
 		{
 			ok: false,
 			code: "VALIDATION_REQUIRED",
-			message: "Riseopedia properties are read from canonical game_entity_properties_c. Edit property mapping in the game-data layer.",
+			message:
+				"Riseopedia properties are read from canonical game_entity_properties_c. Edit property mapping in the game-data layer.",
 		},
 		{ status: 410 },
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// DB-first member profile and CSS theme style option helpers for signed-in users.                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -99,7 +100,9 @@ const MEMBER_THEME_OPTIONS: MemberThemeOption[] = [
 	},
 ];
 
-export function isMemberThemeStyleCode(value: string): value is MemberThemeStyleCode {
+export function isMemberThemeStyleCode(
+	value: string,
+): value is MemberThemeStyleCode {
 	return value === "dark" || value === "light" || value === "vintage";
 }
 
@@ -249,3 +252,5 @@ export async function listMemberThemeOptions(
 		return codeMatch || labelMatch;
 	});
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

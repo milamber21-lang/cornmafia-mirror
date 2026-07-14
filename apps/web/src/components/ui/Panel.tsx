@@ -4,6 +4,8 @@
 //// Slide-in panel shell with sticky header and close handling                                                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -166,11 +168,19 @@ export default function Panel({
 	return (
 		<div
 			aria-hidden={!open}
-			className={open ? "ui-panel-root ui-panel-root--open" : "ui-panel-root ui-panel-root--closed"}
+			className={
+				open
+					? "ui-panel-root ui-panel-root--open"
+					: "ui-panel-root ui-panel-root--closed"
+			}
 		>
 			{/* Backdrop */}
 			<div
-				className={open ? "ui-panel-backdrop ui-panel-backdrop--open" : "ui-panel-backdrop ui-panel-backdrop--closed"}
+				className={
+					open
+						? "ui-panel-backdrop ui-panel-backdrop--open"
+						: "ui-panel-backdrop ui-panel-backdrop--closed"
+				}
 				onClick={() => {
 					if (!open) return;
 					if (!backdropClosable) return;
@@ -210,7 +220,7 @@ export default function Panel({
 								renderRight()
 							) : (
 								<Button
-									variant="neutral"
+									variant="secondary"
 									onClick={() => {
 										void attemptClose();
 									}}
@@ -229,10 +239,7 @@ export default function Panel({
 				{/* Body — the ONLY scroll container */}
 				<div className="ui-panel-body ui-scroll sb-stable">
 					{constrain ? (
-						<div
-							className="ui-panel-body__constrained"
-							style={constrainedStyle}
-						>
+						<div className="ui-panel-body__constrained" style={constrainedStyle}>
 							{children}
 						</div>
 					) : (
@@ -243,3 +250,5 @@ export default function Panel({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

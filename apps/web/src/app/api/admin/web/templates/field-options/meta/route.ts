@@ -4,11 +4,16 @@
 //// Admin meta route for contextual template field-option inputs                                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
 import { findTemplateFieldListAdminById } from "@/lib/data/templates";
-import { jsonError, parsePositiveInt, requireAdminResponse } from "@/lib/server/admin-route";
+import {
+	jsonError,
+	parsePositiveInt,
+	requireAdminResponse,
+} from "@/lib/server/admin-route";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +23,9 @@ export async function GET(request: NextRequest): Promise<Response> {
 		return guardResponse;
 	}
 
-	const fieldListId = parsePositiveInt(request.nextUrl.searchParams.get("fieldListId"));
+	const fieldListId = parsePositiveInt(
+		request.nextUrl.searchParams.get("fieldListId"),
+	);
 	if (!fieldListId) {
 		return jsonError("VALIDATION_REQUIRED", "Field list is required.", 400);
 	}
@@ -46,3 +53,5 @@ export async function GET(request: NextRequest): Promise<Response> {
 		return jsonError("SERVER_ERROR", message, 500);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

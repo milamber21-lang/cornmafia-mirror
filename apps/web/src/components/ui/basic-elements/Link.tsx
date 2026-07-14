@@ -4,6 +4,8 @@
 //// Exports the shared Link primitive                                                                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import NextLink, { type LinkProps } from "next/link";
 import type { AnchorHTMLAttributes } from "react";
 
@@ -15,3 +17,5 @@ export default function Link({
 }: LinkProps & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps>) {
 	return <NextLink {...rest} className={cn(className)} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

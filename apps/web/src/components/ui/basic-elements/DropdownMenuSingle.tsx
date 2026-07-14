@@ -4,6 +4,8 @@
 //// Single-select dropdown menu with local open-state handling and optional clear action                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
@@ -69,7 +71,12 @@ export default function DropdownMenuSingle({
 				onClick={() => setOpen((v) => !v)}
 				className={cn("ui-dropdown__button", `ui-dropdown__button--${size}`)}
 			>
-				<span className={cn(!selected && "ui-dropdown__placeholder")}>
+				<span
+					className={cn(
+						"ui-dropdown__label",
+						!selected && "ui-dropdown__placeholder",
+					)}
+				>
 					{selected?.label ?? placeholder}
 				</span>
 				<span aria-hidden className="ui-dropdown__chevron">
@@ -78,12 +85,7 @@ export default function DropdownMenuSingle({
 			</button>
 
 			{open && (
-				<div
-					ref={popRef}
-					role="listbox"
-					id={uid}
-					className="ui-dropdown__menu"
-				>
+				<div ref={popRef} role="listbox" id={uid} className="ui-dropdown__menu">
 					{allowClear ? (
 						<button
 							type="button"
@@ -126,3 +128,5 @@ export default function DropdownMenuSingle({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

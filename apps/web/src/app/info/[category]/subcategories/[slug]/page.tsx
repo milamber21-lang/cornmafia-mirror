@@ -1,21 +1,22 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/app/info/[category]/subcategories/[slug]/page.tsx                                      ////
-//// Language: TSX                                                                                             ////
-//// DB-gated /info wiki subcategory entity overview route populated from entity read rows.                    ////
+//// Language: TSX                                                                                               ////
+//// DB-gated global semantic subcategory overview with Mafiosopedia release multi-select state.                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import RiseopediaEntityBrowser from "@/components/riseopedia/RiseopediaEntityBrowser";
+import RiseopediaEntityBrowser from "@/components/riseopedia/browse/RiseopediaEntityBrowser";
 import {
 	getOpediaWikiConfig,
 	listOpediaEntities,
 	listOpediaSubcategoryDirectoryCards,
 } from "@/lib/data/opedia-wiki";
-import type { RiseopediaEntityListFilters } from "@/lib/data/riseopedia-entities";
+import { parseMafiosopediaReleaseFilters } from "@/lib/data/mafiosopedia-release";
 import {
 	firstSearchParam,
 	parsePage,
@@ -42,6 +43,7 @@ type PageProps = {
 		q?: RiseopediaSearchParamValue;
 		page?: RiseopediaSearchParamValue;
 		pageSize?: RiseopediaSearchParamValue;
+		release?: RiseopediaSearchParamValue;
 	}>;
 };
 
@@ -62,28 +64,37 @@ export default async function InfoEntitySubcategoryPage({
 		categorySlug,
 		subcategorySlug: "subcategories",
 	});
-
 	if (!routeContent) {
 		notFound();
 	}
 
-	const subcategoryCards = await listOpediaSubcategoryDirectoryCards(wiki);
+	const resolvedSearchParams = await searchParams;
+	const releaseFilters =
+		wiki.code === "mafiosopedia"
+			? parseMafiosopediaReleaseFilters(resolvedSearchParams.release ?? null)
+			: parseMafiosopediaReleaseFilters(null);
+	const subcategoryCards = await listOpediaSubcategoryDirectoryCards(wiki, {
+		section: null,
+		entityClassCode: null,
+		categorySlug: null,
+		releaseFilters,
+	});
 	const subcategoryCard = subcategoryCards.find(
-		(row) => row.slug === entitySubcategorySlug || row.code === entitySubcategorySlug,
+		(row) =>
+			row.slug === entitySubcategorySlug || row.code === entitySubcategorySlug,
 	);
-
 	if (!subcategoryCard) {
 		notFound();
 	}
 
-	const resolvedSearchParams = await searchParams;
-	const listFilters: RiseopediaEntityListFilters = {
+	const listFilters = {
 		search: firstSearchParam(resolvedSearchParams.q),
 		section: null,
 		entityClassCode: null,
 		categorySlug: null,
 		subcategorySlug: subcategoryCard.slug,
-		cardPlacementCode: "subcategory",
+		releaseFilters,
+		cardPlacementCode: "subcategory" as const,
 		page: parsePage(firstSearchParam(resolvedSearchParams.page)),
 		pageSize: parsePageSize(firstSearchParam(resolvedSearchParams.pageSize)),
 	};
@@ -94,29 +105,33 @@ export default async function InfoEntitySubcategoryPage({
 		<section className="public-collection-shell">
 			<div className="card public-collection-page riseopedia-page">
 				<RiseopediaEntityBrowser
-					result={result}
-					search={listFilters.search}
 					basePath={basePath}
-					filters={{
-						section: null,
-						entityClassCode: null,
-						categorySlug: null,
-						subcategorySlug: subcategoryCard.slug,
-					}}
 					breadcrumbs={[
 						{ label: wiki.title, href: wiki.browsePath },
 						{ label: "Subcategories", href: wiki.subcategoriesPath },
 						{ label: subcategoryCard.name },
 					]}
 					description={subcategoryCard.description}
+					emptyReadModelLabel={wiki.emptyPublicLabel}
 					eyebrow="Subcategory"
+					filters={{
+						section: null,
+						entityClassCode: null,
+						categorySlug: null,
+						subcategorySlug: subcategoryCard.slug,
+						releaseFilters,
+					}}
+					result={result}
+					search={listFilters.search}
 					searchPlaceholder={`Search ${subcategoryCard.name} entries...`}
+					showReleaseFilter={wiki.code === "mafiosopedia"}
 					title={subcategoryCard.name}
 					wikiCode={wiki.code}
 					wikiName={wiki.title}
-					emptyReadModelLabel={wiki.emptyPublicLabel}
 				/>
 			</div>
 		</section>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

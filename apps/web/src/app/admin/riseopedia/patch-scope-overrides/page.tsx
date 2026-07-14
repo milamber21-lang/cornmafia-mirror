@@ -4,6 +4,7 @@
 //// Admin page for classification-level Riseopedia patch overrides.                                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -25,11 +26,19 @@ export default async function PatchScopeOverridesAdminPage(): Promise<JSX.Elemen
 		return <RiseopediaAdminGuard title="Patch Overrides" reason={guard.reason} />;
 	}
 
-	const [meta, rows] = await Promise.all([listRiseopediaAdminMeta(), listRiseopediaPatchAdmin()]);
+	const [meta, rows] = await Promise.all([
+		listRiseopediaAdminMeta(),
+		listRiseopediaPatchAdmin(),
+	]);
 
 	return (
 		<RiseopediaAdminPageChrome title="Patch Overrides">
-			<RiseopediaPatchScopeOverridesTable initialRows={rows.scopeOverrides} meta={meta} />
+			<RiseopediaPatchScopeOverridesTable
+				initialRows={rows.scopeOverrides}
+				meta={meta}
+			/>
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

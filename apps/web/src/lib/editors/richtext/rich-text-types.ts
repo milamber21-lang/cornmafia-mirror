@@ -4,6 +4,9 @@
 //// Shared RichText Lexical JSON types and root normalization helpers.                                           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
+import type { RichTextLinkTarget } from "./rich-text-link-targets";
 
 export type RichTextLexicalNode = {
 	type: string;
@@ -12,6 +15,7 @@ export type RichTextLexicalNode = {
 	listType?: "bullet" | "number" | "check";
 	format?: string | number;
 	version?: number;
+	linkTarget?: RichTextLinkTarget;
 	mediaId?: string | number;
 	media_id?: string | number;
 	mediaID?: string | number;
@@ -30,6 +34,7 @@ export type RichTextLexicalNode = {
 		href?: string;
 		linkType?: string;
 		newTab?: boolean;
+		linkTarget?: RichTextLinkTarget;
 		mediaId?: string | number;
 		media_id?: string | number;
 		mediaID?: string | number;
@@ -89,3 +94,5 @@ export function normalizeRichTextLexicalRoot(
 export function normalizeLexical(input: unknown): LexicalRoot | null {
 	return normalizeRichTextLexicalRoot(input);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

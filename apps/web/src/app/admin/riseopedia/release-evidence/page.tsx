@@ -4,6 +4,7 @@
 //// Read-only admin page for Riseopedia entity release evidence.                                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -24,21 +25,31 @@ export interface ReleaseEvidenceAdminPageProps {
 }
 
 function readSafeDecisionReturnHref(value: string | undefined): string {
-	if (typeof value !== "string" || !value.startsWith("/admin/riseopedia/release-decisions")) {
+	if (
+		typeof value !== "string" ||
+		!value.startsWith("/admin/riseopedia/release-decisions")
+	) {
 		return "/admin/riseopedia/release-decisions";
 	}
 
 	return value;
 }
 
-export default async function ReleaseEvidenceAdminPage({ searchParams }: ReleaseEvidenceAdminPageProps): Promise<JSX.Element> {
+export default async function ReleaseEvidenceAdminPage({
+	searchParams,
+}: ReleaseEvidenceAdminPageProps): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Release Evidence" reason={guard.reason} />;
+		return (
+			<RiseopediaAdminGuard title="Release Evidence" reason={guard.reason} />
+		);
 	}
 
 	const resolvedSearchParams = searchParams ? await searchParams : {};
-	const entityId = typeof resolvedSearchParams.entityId === "string" ? resolvedSearchParams.entityId : "";
+	const entityId =
+		typeof resolvedSearchParams.entityId === "string"
+			? resolvedSearchParams.entityId
+			: "";
 	const rows = await listRiseopediaReleaseAdmin();
 	const evidenceRows = entityId
 		? rows.evidence.filter((row) => String(row.entity_id ?? "") === entityId)
@@ -54,3 +65,5 @@ export default async function ReleaseEvidenceAdminPage({ searchParams }: Release
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Imperative client confirmation and notice dialog helpers used instead of browser dialogs.                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -59,22 +61,18 @@ function ConfirmDialogHost({
 				onMouseDown={(event) => event.stopPropagation()}
 			>
 				<div className="ui-confirm-dialog__header">
-					<h2 className="ui-confirm-dialog__title">
-						{options.title}
-					</h2>
+					<h2 className="ui-confirm-dialog__title">{options.title}</h2>
 				</div>
 
-				<div className="ui-confirm-dialog__body">
-					{options.message}
-				</div>
+				<div className="ui-confirm-dialog__body">{options.message}</div>
 
 				<div className="ui-confirm-dialog__footer">
-					<Button type="button" variant="neutral" onClick={() => onResolve(false)}>
+					<Button type="button" variant="secondary" onClick={() => onResolve(false)}>
 						{cancelLabel}
 					</Button>
 					<Button
 						type="button"
-						variant={options.destructive ? "accent" : "green"}
+						variant={options.destructive ? "danger" : "primary"}
 						onClick={() => onResolve(true)}
 					>
 						{confirmLabel}
@@ -124,3 +122,5 @@ export function showClientNotice(options: {
 		cancelLabel: "Close",
 	}).then(() => undefined);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

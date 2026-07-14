@@ -4,6 +4,8 @@
 //// Shared map viewer types and permission-gate helper.                                                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 export type RoleName = string;
 
 export type PermissionGate = {
@@ -70,3 +72,5 @@ export function passesGate(roles: string[], gate?: PermissionGate): boolean {
 	}
 	return true;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

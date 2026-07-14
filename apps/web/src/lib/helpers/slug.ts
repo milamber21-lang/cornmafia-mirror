@@ -4,6 +4,7 @@
 //// Shared slug normalization helpers for admin mutation routes and panels                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 export function slugifyLoose(input: string): string {
 	return input
@@ -14,3 +15,5 @@ export function slugifyLoose(input: string): string {
 		.replace(/-+/g, "-")
 		.replace(/^-|-$/g, "");
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

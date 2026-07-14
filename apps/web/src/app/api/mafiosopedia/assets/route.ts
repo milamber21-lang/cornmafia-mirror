@@ -4,6 +4,7 @@
 //// Public Mafiosopedia asset list API backed by override-aware web_view read contracts.                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -58,7 +59,12 @@ export async function GET(request: NextRequest): Promise<Response> {
 		const result = await listMafiosopediaAssets(parseFilters(request));
 		return NextResponse.json(result, { status: 200 });
 	} catch (error: unknown) {
-		const message = error instanceof Error ? error.message : "Failed to load Mafiosopedia assets.";
+		const message =
+			error instanceof Error
+				? error.message
+				: "Failed to load Mafiosopedia assets.";
 		return NextResponse.json({ ok: false, message }, { status: 500 });
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// DB-first admin YouTube channel allowlist read and mutation helpers                                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -47,7 +48,9 @@ export type YoutubeChannelOption = {
 };
 
 function toIsoString(value: string | Date): string {
-	return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+	return value instanceof Date
+		? value.toISOString()
+		: new Date(value).toISOString();
 }
 
 function toPositiveInt(value: unknown): number | null {
@@ -63,7 +66,9 @@ function toPositiveInt(value: unknown): number | null {
 	return null;
 }
 
-function mapYoutubeChannelRow(row: YoutubeChannelAdminDbRow): YoutubeChannelAdminItem {
+function mapYoutubeChannelRow(
+	row: YoutubeChannelAdminDbRow,
+): YoutubeChannelAdminItem {
 	return {
 		id: String(row.youtube_channel_id),
 		youtubeChannelId: String(row.youtube_channel_id),
@@ -78,7 +83,9 @@ function mapYoutubeChannelRow(row: YoutubeChannelAdminDbRow): YoutubeChannelAdmi
 	};
 }
 
-export async function listYoutubeChannelsAdmin(): Promise<YoutubeChannelAdminItem[]> {
+export async function listYoutubeChannelsAdmin(): Promise<
+	YoutubeChannelAdminItem[]
+> {
 	const result = await query<YoutubeChannelAdminDbRow>(
 		`
 			SELECT youtube_channel_id,
@@ -125,7 +132,9 @@ export async function findYoutubeChannelAdminById(
 	return row ? mapYoutubeChannelRow(row) : null;
 }
 
-export async function listYoutubeChannelOptions(): Promise<YoutubeChannelOption[]> {
+export async function listYoutubeChannelOptions(): Promise<
+	YoutubeChannelOption[]
+> {
 	const result = await query<YoutubeChannelAdminDbRow>(
 		`
 			SELECT youtube_channel_id,
@@ -219,3 +228,5 @@ export async function deleteYoutubeChannelAdmin(args: {
 		[args.actorDiscordId, args.youtubeChannelId],
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

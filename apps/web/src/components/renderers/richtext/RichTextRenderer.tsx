@@ -4,7 +4,7 @@
 //// RichText renderer for stored editor state with hardened URL handling.                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import React from "react";
 import Image from "next/image";
@@ -15,6 +15,11 @@ import {
 	type LexicalNode,
 	type LexicalRoot,
 } from "@/lib/editors/richtext/rich-text-types";
+import {
+	normalizeRichTextLinkTarget,
+	richTextLinkTargetOpensNewTab,
+	type RichTextLinkTarget,
+} from "@/lib/editors/richtext/rich-text-link-targets";
 import {
 	normalizeMediaUrlToRouteScope,
 	type MediaRouteScope,
@@ -27,6 +32,7 @@ const FALLBACK_IMAGE_HEIGHT = 800;
 const EXTERNAL_LINK_SURFACE_SCOPES = new Set(["admin", "public"]);
 
 type ExternalLinkSurfaceScope = "admin" | "public";
+type ImageFrameStyle = "none" | "border";
 
 type RenderContext = {
 	allowedExternalHrefs: Set<string>;
@@ -43,6 +49,13 @@ function asStr(value: unknown): string | null {
 
 function asBool(value: unknown): boolean | null {
 	return typeof value === "boolean" ? value : null;
+}
+
+function normalizeImageFrameStyle(
+	frameStyle: unknown,
+	legacyBorder: unknown,
+): ImageFrameStyle {
+	return frameStyle === "border" || legacyBorder === true ? "border" : "none";
 }
 
 function asNum(value: unknown): number | null {
@@ -109,12 +122,31 @@ function getLinkHrefFromNode(node: LexicalNode): string | null {
 	return asStr(fields?.url);
 }
 
+function getStructuredLinkTargetFromNode(
+	node: LexicalNode,
+): RichTextLinkTarget | null {
+	const rawFields = (node as { fields?: unknown }).fields;
+	const fields = isObj(rawFields)
+		? (rawFields as Record<string, unknown>)
+		: undefined;
+	const rawTarget = fields?.linkTarget ?? node.linkTarget;
+
+	return normalizeRichTextLinkTarget(rawTarget);
+}
+
 function collectExternalHrefCandidates(
 	node: LexicalNode,
 	candidates: Set<string>,
 ): void {
-	if (node.type === "link") {
-		const candidate = normalizeStoredRichTextLinkHref(getLinkHrefFromNode(node));
+	const structuredTarget = getStructuredLinkTargetFromNode(node);
+	const rawHref = structuredTarget?.href ?? getLinkHrefFromNode(node);
+
+	if (
+		node.type === "link" ||
+		node.type === "image" ||
+		node.type === "resizable-image"
+	) {
+		const candidate = normalizeStoredRichTextLinkHref(rawHref);
 
 		if (candidate.ok && candidate.kind === "external") {
 			candidates.add(candidate.href);
@@ -184,7 +216,9 @@ function sanitizeRichTextHref(
 		return candidate.href;
 	}
 
-	return context.allowedExternalHrefs.has(candidate.href) ? candidate.href : null;
+	return context.allowedExternalHrefs.has(candidate.href)
+		? candidate.href
+		: null;
 }
 
 function isAllowedMediaRoute(value: string): boolean {
@@ -263,10 +297,15 @@ type AlignKeyword =
 type ResolvedAlign = "left" | "right" | "center" | "justify";
 type WrapValue = "wrap" | "no-wrap";
 
-type RuntimeCssVariables = React.CSSProperties & Partial<Record<
-	"--richtext-rendered-img-width" | "--richtext-rendered-img-height" | "--rt-indent-size",
-	string
->>;
+type RuntimeCssVariables = React.CSSProperties &
+	Partial<
+		Record<
+			| "--richtext-rendered-img-width"
+			| "--richtext-rendered-img-height"
+			| "--rt-indent-size",
+			string
+		>
+	>;
 
 function getBlockAlign(node: LexicalNode): ResolvedAlign | undefined {
 	const format = (node as { format?: unknown }).format;
@@ -331,7 +370,9 @@ function indentClassForBlocks(node: LexicalNode): string | undefined {
 	return getBlockIndentLevel(node) > 0 ? "rt-indent" : undefined;
 }
 
-function indentStyleForBlocks(node: LexicalNode): React.CSSProperties | undefined {
+function indentStyleForBlocks(
+	node: LexicalNode,
+): React.CSSProperties | undefined {
 	const level = getBlockIndentLevel(node);
 
 	if (level === 0) {
@@ -344,7 +385,9 @@ function indentStyleForBlocks(node: LexicalNode): React.CSSProperties | undefine
 	return style;
 }
 
-function classNames(...values: Array<string | undefined | false>): string | undefined {
+function classNames(
+	...values: Array<string | undefined | false>
+): string | undefined {
 	const classes = values.filter((value): value is string => Boolean(value));
 	return classes.length > 0 ? classes.join(" ") : undefined;
 }
@@ -370,7 +413,10 @@ function renderedImageStyle(
 	return style;
 }
 
-function renderInline(node: LexicalNode, context: RenderContext): React.ReactNode {
+function renderInline(
+	node: LexicalNode,
+	context: RenderContext,
+): React.ReactNode {
 	if (node.type === "text") {
 		const text = (node as { text?: unknown }).text;
 		const rawText = typeof text === "string" ? text : "";
@@ -481,6 +527,7 @@ function renderInlineImage(
 	const align: "left" | "right" | "center" =
 		rawAlign === "left" || rawAlign === "right" ? rawAlign : "center";
 	const rawWrap = asStr(fields.wrap);
+	const frameStyle = normalizeImageFrameStyle(fields.frameStyle, fields.border);
 	const wrap: WrapValue =
 		rawWrap === "wrap" || rawWrap === "no-wrap"
 			? rawWrap
@@ -497,30 +544,61 @@ function renderInlineImage(
 		align === "left" ? "is-left" : align === "right" ? "is-right" : "is-center",
 	);
 
+	if (frameStyle === "border") {
+		classes.push("has-border");
+	}
+
 	const intrinsicWidth = savedWidth ?? FALLBACK_IMAGE_WIDTH;
 	const intrinsicHeight = savedHeight ?? FALLBACK_IMAGE_HEIGHT;
 	const imageStyle = renderedImageStyle(savedWidth, savedHeight);
 	const sizesAttribute = savedWidth ? `${savedWidth}px` : "100vw";
+	const linkTarget = getStructuredLinkTargetFromNode(node);
+	const linkHref = linkTarget
+		? sanitizeRichTextHref(linkTarget.href, context)
+		: null;
+	const openInNewTab = linkTarget
+		? richTextLinkTargetOpensNewTab(linkTarget)
+		: false;
+	const externalHref = linkHref ? isExternalHref(linkHref) : false;
+	const image = (
+		<Image
+			unoptimized
+			src={src}
+			alt={alt}
+			width={intrinsicWidth}
+			height={intrinsicHeight}
+			sizes={sizesAttribute}
+			priority={false}
+			draggable={false}
+			className="richtext-img__image"
+			style={imageStyle}
+		/>
+	);
 
 	return (
 		<span
 			key={key}
 			className={classes.join(" ")}
 			data-lexical-image="container"
+			data-frame-style={frameStyle}
+			data-richtext-link-kind={linkTarget?.kind}
 			contentEditable={false}
 		>
-			<Image
-				unoptimized
-				src={src}
-				alt={alt}
-				width={intrinsicWidth}
-				height={intrinsicHeight}
-				sizes={sizesAttribute}
-				priority={false}
-				draggable={false}
-				className="richtext-img__image"
-				style={imageStyle}
-			/>
+			{linkHref ? (
+				<a
+					href={linkHref}
+					target={openInNewTab ? "_blank" : undefined}
+					rel={openInNewTab || externalHref ? "noopener noreferrer" : undefined}
+					referrerPolicy={
+						externalHref ? "strict-origin-when-cross-origin" : undefined
+					}
+					className="richtext-img__link"
+				>
+					{image}
+				</a>
+			) : (
+				image
+			)}
 		</span>
 	);
 }
@@ -647,7 +725,10 @@ function renderBlock(
 		case "paragraph": {
 			const kids = (node as { children?: unknown }).children;
 			const children = Array.isArray(kids) ? (kids as LexicalNode[]) : [];
-			const className = classNames(alignClassForBlocks(node), indentClassForBlocks(node));
+			const className = classNames(
+				alignClassForBlocks(node),
+				indentClassForBlocks(node),
+			);
 
 			return (
 				<p key={key} className={className} style={style}>
@@ -667,7 +748,13 @@ function renderBlock(
 		}
 
 		case "horizontalrule":
-			return <hr key={key} className={classNames("rt-hr", indentClassForBlocks(node))} style={style} />;
+			return (
+				<hr
+					key={key}
+					className={classNames("rt-hr", indentClassForBlocks(node))}
+					style={style}
+				/>
+			);
 
 		case "heading": {
 			const rawTag = (node as { tag?: unknown }).tag;
@@ -678,7 +765,10 @@ function renderBlock(
 				: "h2";
 			const kids = (node as { children?: unknown }).children;
 			const children = Array.isArray(kids) ? (kids as LexicalNode[]) : [];
-			const className = classNames(alignClassForBlocks(node), indentClassForBlocks(node));
+			const className = classNames(
+				alignClassForBlocks(node),
+				indentClassForBlocks(node),
+			);
 
 			return React.createElement(
 				Tag,
@@ -744,7 +834,11 @@ function renderBlock(
 			const children = Array.isArray(kids) ? (kids as LexicalNode[]) : [];
 
 			return (
-				<blockquote key={key} className={classNames("rt-quote", indentClassForBlocks(node))} style={style}>
+				<blockquote
+					key={key}
+					className={classNames("rt-quote", indentClassForBlocks(node))}
+					style={style}
+				>
 					{children.map((child, index) => (
 						<span key={index}>{renderInline(child, context)}</span>
 					))}
@@ -755,7 +849,10 @@ function renderBlock(
 		default: {
 			const kids = (node as { children?: unknown }).children;
 			const children = Array.isArray(kids) ? (kids as LexicalNode[]) : [];
-			const className = classNames(alignClassForBlocks(node), indentClassForBlocks(node));
+			const className = classNames(
+				alignClassForBlocks(node),
+				indentClassForBlocks(node),
+			);
 
 			return (
 				<div key={key} className={className} style={style}>
@@ -772,12 +869,14 @@ export type RichTextRendererProps = {
 	value: unknown;
 	externalLinkSurfaceScope?: ExternalLinkSurfaceScope;
 	mediaRouteScope?: MediaRouteScope;
+	proseVariant?: "main" | "aside" | "default";
 };
 
 export default async function RichTextRenderer({
 	value,
 	externalLinkSurfaceScope = "public",
 	mediaRouteScope = "app",
+	proseVariant = "default",
 }: RichTextRendererProps) {
 	const normalizedValue = normalizeRichTextLexicalRoot(value);
 	if (!normalizedValue?.root) {
@@ -795,9 +894,18 @@ export default async function RichTextRenderer({
 		mediaRouteScope,
 	};
 
+	const proseClassName =
+		proseVariant === "main"
+			? "content-prose--main"
+			: proseVariant === "aside"
+				? "content-prose--aside"
+				: "content-prose--default";
+
 	return (
-		<div className="richtext">
+		<div className={`richtext content-prose ${proseClassName}`}>
 			{renderBlock(normalizedValue.root, undefined, context)}
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

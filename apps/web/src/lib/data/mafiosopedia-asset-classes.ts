@@ -4,6 +4,7 @@
 //// DB-first Mafiosopedia asset class helpers for hub cards and filters.                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -67,7 +68,9 @@ function toIsoString(value: Date | string | null): string | null {
 	return value instanceof Date ? value.toISOString() : value;
 }
 
-function mapAssetClassRow(row: MafiosopediaAssetClassRow): MafiosopediaAssetClassDoc {
+function mapAssetClassRow(
+	row: MafiosopediaAssetClassRow,
+): MafiosopediaAssetClassDoc {
 	return {
 		id: String(row.asset_class_id),
 		code: row.asset_class_code,
@@ -118,7 +121,6 @@ export async function listMafiosopediaAssetClasses(): Promise<
 	return result.rows.map(mapAssetClassRow);
 }
 
-
 export async function listMafiosopediaAssetClassMediaSamples(): Promise<
 	MafiosopediaAssetClassMediaSample[]
 > {
@@ -139,3 +141,5 @@ export async function listMafiosopediaAssetClassMediaSamples(): Promise<
 
 	return result.rows.map(mapAssetClassMediaSampleRow);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

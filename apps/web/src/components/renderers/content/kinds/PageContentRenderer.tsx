@@ -4,6 +4,8 @@
 //// Default article-style content renderer shell.                                                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { JSX } from "react";
 
 import ContentRenderShell from "../ContentRenderShell";
@@ -20,3 +22,5 @@ export default function PageContentRenderer({
 }: PageContentRendererProps): JSX.Element {
 	return <ContentRenderShell model={model} debug={debug} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

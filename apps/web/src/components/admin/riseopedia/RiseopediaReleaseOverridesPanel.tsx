@@ -4,6 +4,8 @@
 //// Dedicated Riseopedia release override panel.                                                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -12,17 +14,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import PanelForm from "@/components/ui/PanelForm";
 import { readResponseMessage } from "@/lib/helpers/http-response";
 
-import {
-	buildInitialValues,
-	buildPayloadData,
-} from "./RiseopediaAdminHelpers";
+import { buildInitialValues, buildPayloadData } from "./RiseopediaAdminHelpers";
 import {
 	buildRiseopediaPanelFieldDef,
 	buildRiseopediaPanelRows,
 } from "./RiseopediaAdminPanelHelpers";
-import {
-	buildRiseopediaReleaseOverrideFields,
-} from "./RiseopediaAdminPanelFieldBuilders";
+import { buildRiseopediaReleaseOverrideFields } from "./RiseopediaAdminPanelFieldBuilders";
 import type {
 	RiseopediaAdminPanelMode,
 	RiseopediaAdminRow,
@@ -123,7 +120,11 @@ export default function RiseopediaReleaseOverridesPanel({
 				setTopError("");
 				onClose();
 			}}
-			title={mode === "create" ? "Create entity release override" : "Edit entity release override"}
+			title={
+				mode === "create"
+					? "Create entity release override"
+					: "Edit entity release override"
+			}
 			width="50%"
 			showSave={true}
 			mode={mode}
@@ -144,3 +145,5 @@ export default function RiseopediaReleaseOverridesPanel({
 }
 
 export { RiseopediaReleaseOverridesPanel };
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

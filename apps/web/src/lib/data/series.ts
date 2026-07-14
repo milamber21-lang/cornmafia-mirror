@@ -4,6 +4,8 @@
 //// DB-first admin series read helpers and lookup loaders                                                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 import { query } from "@/lib/data/pg";
@@ -194,10 +196,14 @@ const SERIES_ADMIN_FILTER_WHERE = `
 `;
 
 function toIsoString(value: string | Date): string {
-	return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+	return value instanceof Date
+		? value.toISOString()
+		: new Date(value).toISOString();
 }
 
-function normalizeSortDir(sortDir: SeriesAdminSortDir | undefined): SeriesAdminSortDir {
+function normalizeSortDir(
+	sortDir: SeriesAdminSortDir | undefined,
+): SeriesAdminSortDir {
 	return sortDir === "desc" ? "desc" : "asc";
 }
 
@@ -293,7 +299,9 @@ function mapSeriesRow(row: SeriesAdminDbRow): SeriesAdminItem {
 		readEffectiveMinRank: row.read_effective_rank,
 		writePolicy: mapExplicitWritePolicy(row.write_policy_code),
 		writeMinRank: row.write_rank,
-		writeEffectivePolicy: mapEffectiveWritePolicy(row.write_effective_policy_code),
+		writeEffectivePolicy: mapEffectiveWritePolicy(
+			row.write_effective_policy_code,
+		),
 		writeEffectiveMinRank: row.write_effective_rank,
 		iconKey: {
 			id: String(row.icon_key_id),
@@ -398,7 +406,9 @@ export async function listSeriesAdminPage(args: {
 	};
 }
 
-export async function listSeriesAdmin(search: string = ""): Promise<SeriesAdminItem[]> {
+export async function listSeriesAdmin(
+	search: string = "",
+): Promise<SeriesAdminItem[]> {
 	const normalizedSearch = search.trim();
 	const orderBy = buildSeriesAdminOrderBy("title", "asc");
 
@@ -449,3 +459,5 @@ export async function listSeriesLookup(): Promise<SeriesLookupItem[]> {
 
 	return result.rows.map(mapSeriesLookupRow);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

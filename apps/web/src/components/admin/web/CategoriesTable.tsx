@@ -4,6 +4,8 @@
 //// Small-list admin table for categories with local search and row-owned mutations                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -61,8 +63,7 @@ export default function CategoriesTable({
 	const [page, setPage] = React.useState<number>(1);
 	const [pageSize, setPageSize] = React.useState<number>(20);
 	const [sortKey, setSortKey] = React.useState<SortKey>("title");
-	const [sortDirection, setSortDirection] =
-		React.useState<SortDirection>("asc");
+	const [sortDirection, setSortDirection] = React.useState<SortDirection>("asc");
 
 	const handleSortChange = React.useCallback(
 		(nextSortKey: SortKey): void => {
@@ -311,7 +312,10 @@ export default function CategoriesTable({
 		<>
 			<div className="admin-table-stack">
 				<div className="admin-table-toolbar">
-					<div className="admin-table-toolbar-spacer admin-table-toolbar-spacer--action" aria-hidden="true" />
+					<div
+						className="admin-table-toolbar-spacer admin-table-toolbar-spacer--action"
+						aria-hidden="true"
+					/>
 
 					<div className="admin-table-toolbar-search">
 						<AdminTableSearchInput
@@ -325,7 +329,7 @@ export default function CategoriesTable({
 					</div>
 
 					<div className="admin-table-toolbar-action">
-						<Button variant="green" onClick={openCreate}>
+						<Button variant="primary" onClick={openCreate}>
 							New Category
 						</Button>
 					</div>
@@ -423,7 +427,7 @@ export default function CategoriesTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant={row.navHidden ? "neutral" : "green"}
+												variant={row.navHidden ? "secondary" : "success"}
 												onClick={() => void toggleHidden(row)}
 												loading={busyId === row.id}
 											>
@@ -432,7 +436,7 @@ export default function CategoriesTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="accent"
+												variant="danger"
 												onClick={() => void deleteRow(row)}
 												loading={busyId === row.id}
 											>
@@ -441,7 +445,7 @@ export default function CategoriesTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="neutral"
+												variant="secondary"
 												onClick={() => openEdit(row)}
 												disabled={busyId !== null}
 											>
@@ -478,3 +482,5 @@ export default function CategoriesTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

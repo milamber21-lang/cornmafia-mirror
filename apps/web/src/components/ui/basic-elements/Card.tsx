@@ -4,6 +4,8 @@
 //// Exports the shared Card primitive                                                                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { HTMLAttributes } from "react";
 
 import { cn } from "../../../lib/cn";
@@ -14,3 +16,5 @@ export default function Card({
 }: HTMLAttributes<HTMLDivElement>) {
 	return <div {...rest} className={cn("card", className)} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

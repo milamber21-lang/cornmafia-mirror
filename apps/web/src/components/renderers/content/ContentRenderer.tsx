@@ -4,9 +4,11 @@
 //// Main full-content renderer dispatcher for current and future renderer-code families.                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
+import RiseopediaEntityPreviewProvider from "@/components/riseopedia/context/RiseopediaEntityPreviewProvider";
 import AppContentRenderer from "./kinds/AppContentRenderer";
 import CalendarContentRenderer from "./kinds/CalendarContentRenderer";
 import CustomContentRenderer from "./kinds/CustomContentRenderer";
@@ -23,7 +25,10 @@ type ContentRendererProps = {
 	debug?: boolean;
 };
 
-export default function ContentRenderer({ model, debug = false }: ContentRendererProps): JSX.Element {
+function renderContentByCode(
+	model: ContentRenderModel,
+	debug: boolean,
+): JSX.Element {
 	const rendererCode = model.doc.rendererCode.trim().toLowerCase();
 
 	switch (rendererCode) {
@@ -48,3 +53,22 @@ export default function ContentRenderer({ model, debug = false }: ContentRendere
 			return <PageContentRenderer model={model} debug={debug} />;
 	}
 }
+
+export default function ContentRenderer({
+	model,
+	debug = false,
+}: ContentRendererProps): JSX.Element {
+	const renderedContent = renderContentByCode(model, debug);
+
+	if (model.surfaceScope !== "public") {
+		return renderedContent;
+	}
+
+	return (
+		<RiseopediaEntityPreviewProvider wikiCode="riseopedia">
+			{renderedContent}
+		</RiseopediaEntityPreviewProvider>
+	);
+}
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

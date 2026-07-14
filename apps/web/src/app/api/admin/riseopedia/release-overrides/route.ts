@@ -4,6 +4,7 @@
 //// Admin API route for Riseopedia entity release overrides.                                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -13,6 +14,7 @@ import {
 	upsertRiseopediaEntityReleaseOverrideAdmin,
 } from "@/lib/data/riseopedia-admin";
 import { jsonError, requireAdminResponse } from "@/lib/server/admin-route";
+import { assertSameOriginMutation } from "@/lib/server/mutation-origin";
 import {
 	classifyRiseopediaAdminError,
 	getBoolean,
@@ -46,6 +48,11 @@ export async function GET(): Promise<Response> {
 }
 
 export async function POST(request: NextRequest): Promise<Response> {
+	const originResponse = assertSameOriginMutation(request);
+	if (originResponse) {
+		return originResponse;
+	}
+
 	const actorOrResponse = await requireRiseopediaAdminActor();
 	if (actorOrResponse instanceof NextResponse) {
 		return actorOrResponse;
@@ -72,7 +79,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const entityId = getPositiveInt(data, "entityId");
 			const overrideStateCode = getRequiredCode(data, "overrideStateCode");
 			if (!entityTypeCode || !entityId || !overrideStateCode) {
-				return jsonError("VALIDATION_REQUIRED", "Entity type, entity, and override state are required.", 400);
+				return jsonError(
+					"VALIDATION_REQUIRED",
+					"Entity type, entity, and override state are required.",
+					400,
+				);
 			}
 
 			const id = await upsertRiseopediaEntityReleaseOverrideAdmin({
@@ -96,7 +107,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
 			}
 
-			await deleteRiseopediaEntityReleaseOverrideAdmin({ actorDiscordId: actorOrResponse, entityReleaseOverrideId });
+			await deleteRiseopediaEntityReleaseOverrideAdmin({
+				actorDiscordId: actorOrResponse,
+				entityReleaseOverrideId,
+			});
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 
@@ -106,3 +120,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

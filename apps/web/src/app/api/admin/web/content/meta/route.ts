@@ -4,6 +4,7 @@
 //// Admin content metadata route for placement, template, media, series, and dynamic field options                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse } from "next/server";
 
@@ -51,32 +52,33 @@ export async function GET(request: Request): Promise<NextResponse> {
 			listEnabledThemeColorOptions(),
 		]);
 
-		const [templates, series, media, templateFields, fieldOptions] = await Promise.all([
-			categoryId === null
-				? Promise.resolve([])
-				: listContentTemplatesForPlacement({
-						categoryId,
-						subcategoryId,
-						surfaceScopeCode: "admin",
-						currentTemplateId: contentId === null ? null : templateId,
-					}),
-			categoryId === null
-				? Promise.resolve([])
-				: listContentSeriesOptions({ categoryId, subcategoryId }),
-			categoryId === null
-				? Promise.resolve([])
-				: listContentMediaOptions({ categoryId, subcategoryId }),
-			templateId === null
-				? Promise.resolve([])
-				: contentId === null
-					? listContentTemplateFields(templateId)
-					: listContentTemplateFieldsForContent({ contentId, templateId }),
-			templateId === null
-				? Promise.resolve([])
-				: contentId === null
-					? listContentTemplateFieldOptions(templateId)
-					: listContentTemplateFieldOptionsForContent({ contentId, templateId }),
-		]);
+		const [templates, series, media, templateFields, fieldOptions] =
+			await Promise.all([
+				categoryId === null
+					? Promise.resolve([])
+					: listContentTemplatesForPlacement({
+							categoryId,
+							subcategoryId,
+							surfaceScopeCode: "admin",
+							currentTemplateId: contentId === null ? null : templateId,
+						}),
+				categoryId === null
+					? Promise.resolve([])
+					: listContentSeriesOptions({ categoryId, subcategoryId }),
+				categoryId === null
+					? Promise.resolve([])
+					: listContentMediaOptions({ categoryId, subcategoryId }),
+				templateId === null
+					? Promise.resolve([])
+					: contentId === null
+						? listContentTemplateFields(templateId)
+						: listContentTemplateFieldsForContent({ contentId, templateId }),
+				templateId === null
+					? Promise.resolve([])
+					: contentId === null
+						? listContentTemplateFieldOptions(templateId)
+						: listContentTemplateFieldOptionsForContent({ contentId, templateId }),
+			]);
 
 		return NextResponse.json({
 			categories,
@@ -98,3 +100,5 @@ export async function GET(request: Request): Promise<NextResponse> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

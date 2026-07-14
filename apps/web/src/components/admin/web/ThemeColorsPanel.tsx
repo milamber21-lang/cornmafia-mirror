@@ -4,6 +4,8 @@
 //// Admin panel for creating and editing theme colors                                                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -106,7 +108,8 @@ export default function ThemeColorsPanel({
 				type: "text",
 				name: "preview",
 				label: "Preview",
-				placeholder: "#CC262D, currentColor, --color-accent, or var(--color-accent)",
+				placeholder:
+					"#CC262D, currentColor, --color-accent, or var(--color-accent)",
 				validate: validateThemeColorPreviewValue,
 			},
 			{
@@ -214,3 +217,5 @@ export default function ThemeColorsPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

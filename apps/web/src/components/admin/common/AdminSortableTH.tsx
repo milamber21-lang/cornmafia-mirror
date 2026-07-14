@@ -4,6 +4,8 @@
 //// Shared sortable admin table header cell for admin table surfaces.                                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
@@ -42,10 +44,18 @@ export default function AdminSortableTH<TSortKey extends string>({
 	className,
 }: AdminSortableTHProps<TSortKey>): JSX.Element {
 	const active = sortKey === activeSortKey;
-	const Icon = active ? (sortDirection === "asc" ? ArrowUp : ArrowDown) : ChevronsUpDown;
+	const Icon = active
+		? sortDirection === "asc"
+			? ArrowUp
+			: ArrowDown
+		: ChevronsUpDown;
 
 	return (
-		<TH className={className} scope="col" aria-sort={getAriaSort(active, sortDirection)}>
+		<TH
+			className={className}
+			scope="col"
+			aria-sort={getAriaSort(active, sortDirection)}
+		>
 			<button
 				type="button"
 				className={cn(
@@ -63,3 +73,5 @@ export default function AdminSortableTH<TSortKey extends string>({
 		</TH>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

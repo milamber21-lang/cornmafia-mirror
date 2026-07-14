@@ -4,6 +4,8 @@
 //// Per-template field placements table with admin actions                                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -384,7 +386,6 @@ export default function TemplateFieldsTable({
 		[busyId, refreshFromServer, runDeleteTemplateField, templateCode],
 	);
 
-
 	const handleSortChange = useCallback(
 		(nextSortKey: SortKey): void => {
 			setSortDirection((currentDirection) =>
@@ -420,7 +421,7 @@ export default function TemplateFieldsTable({
 					</div>
 
 					<div className="admin-table-toolbar-action admin-table-toolbar-action--end">
-						<Button onClick={openCreate} variant="green">
+						<Button onClick={openCreate} variant="primary">
 							New Template Field
 						</Button>
 					</div>
@@ -443,11 +444,41 @@ export default function TemplateFieldsTable({
 						</colgroup>
 						<THead>
 							<TR>
-								<AdminSortableTH label="Order" sortKey="order" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Template Name" sortKey="template" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Field" sortKey="field" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Label" sortKey="label" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Type" sortKey="type" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
+								<AdminSortableTH
+									label="Order"
+									sortKey="order"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Template Name"
+									sortKey="template"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Field"
+									sortKey="field"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Label"
+									sortKey="label"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Type"
+									sortKey="type"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
 								<TH className="admin-table-cell--center">Required</TH>
 								<TH className="admin-table-cell--center">Status</TH>
 								<TH className="admin-table-cell--center">Delete</TH>
@@ -468,7 +499,9 @@ export default function TemplateFieldsTable({
 									return (
 										<TR key={row.id}>
 											<TD className="admin-table-cell--center">{row.displayOrder}</TD>
-											<TD className="admin-table-cell--center">{row.templateLabel || templateLabel}</TD>
+											<TD className="admin-table-cell--center">
+												{row.templateLabel || templateLabel}
+											</TD>
 											<TD className="admin-table-cell--center">{row.fieldListLabel}</TD>
 											<TD className="admin-table-cell--center">
 												{row.labelOverride || row.fieldListLabel}
@@ -477,7 +510,7 @@ export default function TemplateFieldsTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													type="button"
-													variant={row.required ? "green" : "neutral"}
+													variant={row.required ? "success" : "secondary"}
 													className="admin-table-status-toggle"
 													disabled={disabled}
 													onClick={() => void toggleRequired(row)}
@@ -488,20 +521,20 @@ export default function TemplateFieldsTable({
 													{row.required ? "Yes" : "No"}
 												</Button>
 											</TD>
-						    				<TD className="admin-table-cell--center">
-						    					<Button
-						    						variant={row.enabled ? "green" : "neutral"}
-						    						disabled={disabled}
-							    					onClick={() => void toggleEnabled(row)}
-							    					aria-label={row.enabled ? "Enabled" : "Disabled"}
-							    				>
-							    					{row.enabled ? "Enabled" : "Disabled"}
-							    				</Button>
-							    			</TD>
+											<TD className="admin-table-cell--center">
+												<Button
+													variant={row.enabled ? "success" : "secondary"}
+													disabled={disabled}
+													onClick={() => void toggleEnabled(row)}
+													aria-label={row.enabled ? "Enabled" : "Disabled"}
+												>
+													{row.enabled ? "Enabled" : "Disabled"}
+												</Button>
+											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => void deleteTemplateField(row)}
-													variant="accent"
+													variant="danger"
 													disabled={disabled}
 												>
 													Delete
@@ -510,7 +543,7 @@ export default function TemplateFieldsTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => openEdit(row)}
-													variant="neutral"
+													variant="secondary"
 													disabled={disabled}
 												>
 													Edit
@@ -549,3 +582,5 @@ export default function TemplateFieldsTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

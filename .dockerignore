@@ -1,6 +1,7 @@
 # FILE: .dockerignore
 # Language: Dockerignore
 # Root Docker context exclusions for source-only, secret-safe image builds.
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 .git
 .gitignore
@@ -32,6 +33,8 @@ coverage
 coverage/**
 **/coverage
 **/coverage/**
+*.tsbuildinfo
+**/*.tsbuildinfo
 
 .env
 .env.*
@@ -85,3 +88,5 @@ logs/**
 apps/web/public/tiles
 apps/web/public/tiles/**
 scripts/game-maps.txt
+
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

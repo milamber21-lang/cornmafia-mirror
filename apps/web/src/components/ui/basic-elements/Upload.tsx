@@ -4,6 +4,8 @@
 //// Upload control with centered shared FilePreview rendering for selected files                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -171,7 +173,7 @@ export default function Upload({
 						<Button
 							type="button"
 							size="md"
-							variant="neutral"
+							variant="secondary"
 							onClick={pickFiles}
 							disabled={disabled}
 						>
@@ -211,3 +213,5 @@ export default function Upload({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

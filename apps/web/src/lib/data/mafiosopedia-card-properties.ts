@@ -4,6 +4,7 @@
 //// Shared strict mapper for Mafiosopedia overview-card element JSON rows.                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 export type MafiosopediaOverviewCardMode = "compact" | "full";
 
@@ -24,14 +25,20 @@ function isStringRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function readString(value: Record<string, unknown>, key: string): string | null {
+function readString(
+	value: Record<string, unknown>,
+	key: string,
+): string | null {
 	const fieldValue = value[key];
 	return typeof fieldValue === "string" && fieldValue.trim().length > 0
 		? fieldValue
 		: null;
 }
 
-function readNullableString(value: Record<string, unknown>, key: string): string | null {
+function readNullableString(
+	value: Record<string, unknown>,
+	key: string,
+): string | null {
 	const fieldValue = value[key];
 	if (fieldValue === null || fieldValue === undefined) {
 		return null;
@@ -60,7 +67,9 @@ function normalizeCardMode(value: string | null): MafiosopediaOverviewCardMode {
 	return value === "full" ? "full" : "compact";
 }
 
-export function mapMafiosopediaCardProperties(value: unknown): MafiosopediaCardProperty[] {
+export function mapMafiosopediaCardProperties(
+	value: unknown,
+): MafiosopediaCardProperty[] {
 	if (!Array.isArray(value)) {
 		return [];
 	}
@@ -116,6 +125,10 @@ export function mapMafiosopediaCardProperties(value: unknown): MafiosopediaCardP
 	});
 }
 
-export function normalizeMafiosopediaCardMode(value: string | null | undefined): MafiosopediaOverviewCardMode {
+export function normalizeMafiosopediaCardMode(
+	value: string | null | undefined,
+): MafiosopediaOverviewCardMode {
 	return value === "full" ? "full" : "compact";
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

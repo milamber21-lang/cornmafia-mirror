@@ -4,6 +4,8 @@
 //// Admin panel for creating and editing web icons                                                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -274,9 +276,7 @@ export default function IconsPanel({
 							type="button"
 							aria-pressed={current === "lucide"}
 							className={`admin-segmented-control__button ${
-								current === "lucide"
-									? "admin-segmented-control__button--active"
-									: ""
+								current === "lucide" ? "admin-segmented-control__button--active" : ""
 							}`}
 							onClick={() => pick("lucide")}
 						>
@@ -286,9 +286,7 @@ export default function IconsPanel({
 							type="button"
 							aria-pressed={current === "media"}
 							className={`admin-segmented-control__button ${
-								current === "media"
-									? "admin-segmented-control__button--active"
-									: ""
+								current === "media" ? "admin-segmented-control__button--active" : ""
 							}`}
 							onClick={() => pick("media")}
 						>
@@ -398,7 +396,9 @@ export default function IconsPanel({
 							{iconKey ? (
 								<IconRender iconKey={iconKey} size={180} mediaRouteScope="admin" />
 							) : (
-								<span className="media-icon-preview-empty">Select an SVG from Media</span>
+								<span className="media-icon-preview-empty">
+									Select an SVG from Media
+								</span>
 							)}
 						</div>
 					</div>
@@ -539,3 +539,5 @@ export default function IconsPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

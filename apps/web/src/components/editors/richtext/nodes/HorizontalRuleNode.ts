@@ -4,6 +4,8 @@
 //// Lexical horizontal rule node used by the RichText editor.                                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import * as React from "react";
 import type { ReactElement } from "react";
 import {
@@ -209,3 +211,5 @@ function HRDecoration(props: HRDecorationProps): ReactElement {
 		React.createElement("hr", { className: "rt-hr" } as Record<string, unknown>),
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -1,18 +1,22 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/lib/data/mafiosopedia-media.ts                                                        ////
 //// Language: TS                                                                                           ////
-//// DB-first Mafiosopedia media resolver for safe media-id app-side streaming.                                 ////
+//// DB-first Mafiosopedia media resolver for safe media-id app-side streaming.                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
 import { query } from "@/lib/data/pg";
 
+export type MafiosopediaMediaSourceRootCode = "patch" | "manual";
+
 export type MafiosopediaMediaFile = {
 	mediaId: string;
 	mediaKey: string;
 	mediaRelPath: string;
+	sourceRootCode: MafiosopediaMediaSourceRootCode;
 	formatCode: string;
 	mimeType: string;
 	width: number;
@@ -29,6 +33,7 @@ type MafiosopediaMediaFileRow = {
 	media_file_id: string | number;
 	media_key: string;
 	media_rel_path: string;
+	source_root_code: string | null;
 	format_code: string;
 	mime_type: string;
 	width_px: number;
@@ -62,6 +67,12 @@ function toIsoString(value: Date | string | null): string | null {
 	return value instanceof Date ? value.toISOString() : value;
 }
 
+function toMafiosopediaMediaSourceRootCode(
+	value: string | null,
+): MafiosopediaMediaSourceRootCode {
+	return value === "manual" ? "manual" : "patch";
+}
+
 function mapMafiosopediaMediaFileRow(
 	row: MafiosopediaMediaFileRow,
 ): MafiosopediaMediaFile | null {
@@ -73,6 +84,7 @@ function mapMafiosopediaMediaFileRow(
 		mediaId: String(row.media_file_id),
 		mediaKey: row.media_key,
 		mediaRelPath: row.media_rel_path,
+		sourceRootCode: toMafiosopediaMediaSourceRootCode(row.source_root_code),
 		formatCode: row.format_code,
 		mimeType: row.mime_type,
 		width: row.width_px,
@@ -93,6 +105,7 @@ export async function findActiveMafiosopediaMediaFileById(
 		`SELECT media_file_id,
 				media_key,
 				media_rel_path,
+				source_root_code,
 				format_code,
 				mime_type,
 				width_px,
@@ -112,3 +125,5 @@ export async function findActiveMafiosopediaMediaFileById(
 	const row = result.rows[0] ?? null;
 	return row ? mapMafiosopediaMediaFileRow(row) : null;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

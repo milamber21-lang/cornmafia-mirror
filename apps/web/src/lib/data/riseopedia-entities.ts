@@ -4,6 +4,7 @@
 //// DB-first public Riseopedia entity list helpers for overview and classification result cards.              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -52,7 +53,12 @@ export type RiseopediaEntityDoc = {
 	cardProperties: RiseopediaEntityCardProperty[];
 };
 
-export type RiseopediaEntityCardPlacementCode = "hub" | "section" | "class" | "category" | "subcategory";
+export type RiseopediaEntityCardPlacementCode =
+	| "hub"
+	| "section"
+	| "class"
+	| "category"
+	| "subcategory";
 
 export type RiseopediaEntityListFilters = {
 	search: string | null;
@@ -139,15 +145,23 @@ const ENTITY_FILTER_WHERE = `detail.public_visible_flag = true
 				OR detail.entity_subcategory_name ILIKE $1)
 		   AND ($2::text IS NULL OR detail.section_code = $2 OR detail.section_slug = $2)
 		   AND ($3::text IS NULL OR detail.entity_class_code = $3)
-		   AND ($4::text IS NULL OR detail.entity_category_slug = $4)
-		   AND ($5::text IS NULL OR detail.entity_subcategory_slug = $5)`;
+		   AND ($4::text IS NULL
+				OR detail.entity_category_slug = $4
+				OR lower(btrim(detail.entity_category_name)) = lower(btrim($4)))
+		   AND ($5::text IS NULL
+				OR detail.entity_subcategory_slug = $5
+				OR lower(btrim(detail.entity_subcategory_name)) = lower(btrim($5)))`;
 
 const ENTITY_SCOPE_WHERE = `detail.public_visible_flag = true
 		   AND detail.detail_visible_flag = true
 		   AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
 		   AND ($2::text IS NULL OR detail.entity_class_code = $2)
-		   AND ($3::text IS NULL OR detail.entity_category_slug = $3)
-		   AND ($4::text IS NULL OR detail.entity_subcategory_slug = $4)`;
+		   AND ($3::text IS NULL
+				OR detail.entity_category_slug = $3
+				OR lower(btrim(detail.entity_category_name)) = lower(btrim($3)))
+		   AND ($4::text IS NULL
+				OR detail.entity_subcategory_slug = $4
+				OR lower(btrim(detail.entity_subcategory_name)) = lower(btrim($4)))`;
 
 function toNumber(value: string | number): number {
 	const parsed = typeof value === "number" ? value : Number(value);
@@ -155,7 +169,9 @@ function toNumber(value: string | number): number {
 }
 
 function normalizedPageSize(pageSize: number): number {
-	return Number.isInteger(pageSize) && pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
+	return Number.isInteger(pageSize) && pageSize > 0
+		? pageSize
+		: DEFAULT_PAGE_SIZE;
 }
 
 function totalPages(totalDocs: number, pageSize: number): number {
@@ -185,13 +201,9 @@ function normalizedPlacement(
 	return placementCode ?? DEFAULT_CARD_PLACEMENT;
 }
 
-function filterValues(filters: RiseopediaEntityListFilters): [
-	string | null,
-	string | null,
-	string | null,
-	string | null,
-	string | null,
-] {
+function filterValues(
+	filters: RiseopediaEntityListFilters,
+): [string | null, string | null, string | null, string | null, string | null] {
 	return [
 		normalizedSearch(filters.search),
 		filters.section,
@@ -255,12 +267,37 @@ function mapEntityRow(row: RiseopediaEntityRow): RiseopediaEntityDoc {
 	};
 }
 
-function mapFilterOptionRow(row: RiseopediaFilterOptionRow): RiseopediaEntityFilterOption {
+function mapFilterOptionRow(
+	row: RiseopediaFilterOptionRow,
+): RiseopediaEntityFilterOption {
 	return {
 		value: row.option_value,
 		label: row.option_label,
 		count: toNumber(row.option_count),
 	};
+}
+
+type RiseopediaMaterializedEntityOptionViewName =
+	| "web_view.riseopedia_hub_classes"
+	| "web_view.riseopedia_hub_categories"
+	| "web_view.riseopedia_hub_subcategories";
+
+async function listRiseopediaMaterializedEntityFilterOptions(args: {
+	viewName: RiseopediaMaterializedEntityOptionViewName;
+	valueColumn: "node_code" | "node_name";
+}): Promise<RiseopediaEntityFilterOption[]> {
+	const result = await query<RiseopediaFilterOptionRow>(
+		`SELECT ${args.valueColumn} AS option_value,
+			node_name AS option_label,
+			item_count AS option_count
+		 FROM ${args.viewName}
+		 WHERE item_count > 0
+		 ORDER BY sort_order,
+			node_name,
+			node_id`,
+	);
+
+	return result.rows.map(mapFilterOptionRow);
 }
 
 export async function listRiseopediaEntities(
@@ -323,13 +360,34 @@ export async function listRiseopediaEntities(
 		 LEFT JOIN web_view.riseopedia_entity_overview_card_resolved_rules resolved
 		   ON resolved.entity_id = detail.entity_id
 		  AND resolved.placement_code = $8
-		 LEFT JOIN LATERAL (SELECT media_row.media_file_id,
-						  media_row.width_px,
-						  media_row.height_px,
-						  media_row.mime_type
+		 LEFT JOIN LATERAL (SELECT COALESCE(card_media.media_file_id, media_row.media_file_id) AS media_file_id,
+						  COALESCE(card_media.width_px, media_row.width_px) AS width_px,
+						  COALESCE(card_media.height_px, media_row.height_px) AS height_px,
+						  COALESCE(card_media.mime_type, media_row.mime_type) AS mime_type
 				   FROM web_view.riseopedia_entity_detail_media media_row
+				   LEFT JOIN LATERAL (SELECT card_file.media_file_id,
+								  card_file.width_px,
+								  card_file.height_px,
+								  card_file.mime_type
+							   FROM web_view.riseopedia_media_files_source_v card_file
+							   WHERE card_file.media_id = media_row.media_id
+							   ORDER BY CASE
+									WHEN COALESCE(resolved.card_mode_code, 'compact') = 'full'
+									 AND lower(card_file.media_rel_path) LIKE '%icon_128/%' THEN 0
+									WHEN COALESCE(resolved.card_mode_code, 'compact') = 'full'
+									 AND card_file.width_px = 128
+									 AND card_file.height_px = 128 THEN 1
+									WHEN lower(card_file.media_rel_path) LIKE '%icon_64/%' THEN 2
+									WHEN card_file.width_px = 64 AND card_file.height_px = 64 THEN 3
+									WHEN lower(card_file.media_rel_path) LIKE '%icon_128/%' THEN 20
+									WHEN card_file.width_px = 128 AND card_file.height_px = 128 THEN 21
+									ELSE 100
+								END,
+								card_file.media_file_id
+							   LIMIT 1) card_media ON true
 				   WHERE media_row.entity_id = detail.entity_id
 				     AND media_row.public_display_flag = true
+				     AND media_row.media_role_code IN ('icon'::text, 'thumbnail'::text, 'brand_logo'::text)
 				   ORDER BY CASE WHEN media_row.media_file_id = detail.primary_icon_media_file_id THEN 0 ELSE 1 END,
 						media_row.selected_icon_rank,
 						media_row.selected_header_rank,
@@ -377,6 +435,13 @@ export async function listRiseopediaEntities(
 export async function listRiseopediaEntityClassFilterOptions(
 	filters: Pick<RiseopediaEntityFilterOptionFilters, "section">,
 ): Promise<RiseopediaEntityFilterOption[]> {
+	if (!filters.section) {
+		return listRiseopediaMaterializedEntityFilterOptions({
+			viewName: "web_view.riseopedia_hub_classes",
+			valueColumn: "node_code",
+		});
+	}
+
 	const result = await query<RiseopediaFilterOptionRow>(
 		`SELECT detail.entity_class_code AS option_value,
 			detail.entity_class_name AS option_label,
@@ -398,11 +463,21 @@ export async function listRiseopediaEntityClassFilterOptions(
 }
 
 export async function listRiseopediaEntityCategoryFilterOptions(
-	filters: Pick<RiseopediaEntityFilterOptionFilters, "section" | "entityClassCode">,
+	filters: Pick<
+		RiseopediaEntityFilterOptionFilters,
+		"section" | "entityClassCode"
+	>,
 ): Promise<RiseopediaEntityFilterOption[]> {
+	if (!filters.section && !filters.entityClassCode) {
+		return listRiseopediaMaterializedEntityFilterOptions({
+			viewName: "web_view.riseopedia_hub_categories",
+			valueColumn: "node_name",
+		});
+	}
+
 	const result = await query<RiseopediaFilterOptionRow>(
-		`SELECT detail.entity_category_slug AS option_value,
-			detail.entity_category_name AS option_label,
+		`SELECT MIN(detail.entity_category_name) AS option_value,
+			MIN(detail.entity_category_name) AS option_label,
 			COUNT(*)::bigint AS option_count
 		 FROM web_view.riseopedia_entity_detail detail
 		 WHERE detail.entity_category_slug IS NOT NULL
@@ -411,14 +486,8 @@ export async function listRiseopediaEntityCategoryFilterOptions(
 		   AND detail.detail_visible_flag = true
 		   AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
 		   AND ($2::text IS NULL OR detail.entity_class_code = $2)
-		 GROUP BY detail.entity_category_slug,
-			  detail.entity_category_name,
-			  detail.section_name,
-			  detail.entity_class_name
-		 ORDER BY detail.section_name NULLS LAST,
-			  detail.entity_class_name NULLS LAST,
-			  detail.entity_category_name,
-			  detail.entity_category_slug`,
+		 GROUP BY lower(btrim(detail.entity_category_name))
+		 ORDER BY MIN(detail.entity_category_name)`,
 		[filters.section, filters.entityClassCode],
 	);
 
@@ -426,28 +495,32 @@ export async function listRiseopediaEntityCategoryFilterOptions(
 }
 
 export async function listRiseopediaEntitySubcategoryFilterOptions(
-	filters: Pick<RiseopediaEntityFilterOptionFilters, "section" | "entityClassCode" | "categorySlug">,
+	filters: Pick<
+		RiseopediaEntityFilterOptionFilters,
+		"section" | "entityClassCode" | "categorySlug"
+	>,
 ): Promise<RiseopediaEntityFilterOption[]> {
+	if (!filters.section && !filters.entityClassCode && !filters.categorySlug) {
+		return listRiseopediaMaterializedEntityFilterOptions({
+			viewName: "web_view.riseopedia_hub_subcategories",
+			valueColumn: "node_name",
+		});
+	}
+
 	const result = await query<RiseopediaFilterOptionRow>(
-		`SELECT detail.entity_subcategory_slug AS option_value,
-			detail.entity_subcategory_name AS option_label,
+		`SELECT MIN(detail.entity_subcategory_name) AS option_value,
+			MIN(detail.entity_subcategory_name) AS option_label,
 			COUNT(*)::bigint AS option_count
 		 FROM web_view.riseopedia_entity_detail detail
 		 WHERE detail.entity_subcategory_slug IS NOT NULL
 		   AND detail.entity_subcategory_name IS NOT NULL
 		   AND ${ENTITY_SCOPE_WHERE}
-		 GROUP BY detail.entity_subcategory_slug,
-			  detail.entity_subcategory_name,
-			  detail.section_name,
-			  detail.entity_class_name,
-			  detail.entity_category_name
-		 ORDER BY detail.section_name NULLS LAST,
-			  detail.entity_class_name NULLS LAST,
-			  detail.entity_category_name NULLS LAST,
-			  detail.entity_subcategory_name,
-			  detail.entity_subcategory_slug`,
+		 GROUP BY lower(btrim(detail.entity_subcategory_name))
+		 ORDER BY MIN(detail.entity_subcategory_name)`,
 		[filters.section, filters.entityClassCode, filters.categorySlug, null],
 	);
 
 	return result.rows.map(mapFilterOptionRow);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

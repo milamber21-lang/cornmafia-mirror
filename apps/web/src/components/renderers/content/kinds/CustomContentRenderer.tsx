@@ -4,6 +4,8 @@
 //// Custom content renderer shell for fallback custom layouts.                                                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { JSX } from "react";
 
 import ContentRenderShell from "../ContentRenderShell";
@@ -20,3 +22,5 @@ export default function CustomContentRenderer({
 }: CustomContentRendererProps): JSX.Element {
 	return <ContentRenderShell model={model} debug={debug} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// Admin page for Riseopedia entity release decisions.                                                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -35,10 +36,14 @@ function readSearchParam(value: string | undefined): string {
 	return typeof value === "string" ? value : "";
 }
 
-export default async function ReleaseDecisionsAdminPage({ searchParams }: ReleaseDecisionsAdminPageProps): Promise<JSX.Element> {
+export default async function ReleaseDecisionsAdminPage({
+	searchParams,
+}: ReleaseDecisionsAdminPageProps): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Entity Decisions" reason={guard.reason} />;
+		return (
+			<RiseopediaAdminGuard title="Entity Decisions" reason={guard.reason} />
+		);
 	}
 
 	const resolvedSearchParams = searchParams ? await searchParams : {};
@@ -50,7 +55,10 @@ export default async function ReleaseDecisionsAdminPage({ searchParams }: Releas
 		releaseState: readSearchParam(resolvedSearchParams.releaseState),
 		overrideSource: readSearchParam(resolvedSearchParams.overrideSource),
 	};
-	const [meta, rows] = await Promise.all([listRiseopediaAdminMeta(), listRiseopediaReleaseAdmin()]);
+	const [meta, rows] = await Promise.all([
+		listRiseopediaAdminMeta(),
+		listRiseopediaReleaseAdmin(),
+	]);
 
 	return (
 		<RiseopediaAdminPageChrome title="Entity Decisions">
@@ -63,3 +71,5 @@ export default async function ReleaseDecisionsAdminPage({ searchParams }: Releas
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

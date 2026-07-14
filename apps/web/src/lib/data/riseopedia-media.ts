@@ -1,18 +1,22 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/lib/data/riseopedia-media.ts                                                        ////
 //// Language: TS                                                                                           ////
-//// DB-first Riseopedia media resolver for safe media-id app-side streaming.                                 ////
+//// DB-first Riseopedia media resolver for safe media-id app-side streaming.                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
 import { query } from "@/lib/data/pg";
 
+export type RiseopediaMediaSourceRootCode = "patch" | "manual";
+
 export type RiseopediaMediaFile = {
 	mediaId: string;
 	mediaKey: string;
 	mediaRelPath: string;
+	sourceRootCode: RiseopediaMediaSourceRootCode;
 	formatCode: string;
 	mimeType: string;
 	width: number;
@@ -29,6 +33,7 @@ type RiseopediaMediaFileRow = {
 	media_file_id: string | number;
 	media_key: string;
 	media_rel_path: string;
+	source_root_code: string | null;
 	format_code: string;
 	mime_type: string;
 	width_px: number;
@@ -62,6 +67,12 @@ function toIsoString(value: Date | string | null): string | null {
 	return value instanceof Date ? value.toISOString() : value;
 }
 
+function toRiseopediaMediaSourceRootCode(
+	value: string | null,
+): RiseopediaMediaSourceRootCode {
+	return value === "manual" ? "manual" : "patch";
+}
+
 function mapRiseopediaMediaFileRow(
 	row: RiseopediaMediaFileRow,
 ): RiseopediaMediaFile | null {
@@ -73,6 +84,7 @@ function mapRiseopediaMediaFileRow(
 		mediaId: String(row.media_file_id),
 		mediaKey: row.media_key,
 		mediaRelPath: row.media_rel_path,
+		sourceRootCode: toRiseopediaMediaSourceRootCode(row.source_root_code),
 		formatCode: row.format_code,
 		mimeType: row.mime_type,
 		width: row.width_px,
@@ -93,6 +105,7 @@ export async function findActiveRiseopediaMediaFileById(
 		`SELECT media_file_id,
 				media_key,
 				media_rel_path,
+				source_root_code,
 				format_code,
 				mime_type,
 				width_px,
@@ -112,3 +125,5 @@ export async function findActiveRiseopediaMediaFileById(
 	const row = result.rows[0] ?? null;
 	return row ? mapRiseopediaMediaFileRow(row) : null;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// DB-first normal public content route with strict category, subcategory, and content path resolution          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import PublicContentRoutePage from "@/components/public/PublicContentRoutePage";
 
@@ -20,3 +21,5 @@ type PageProps = {
 export default async function Page({ params }: PageProps) {
 	return <PublicContentRoutePage params={params} publicRoutePrefix={null} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

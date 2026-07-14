@@ -4,6 +4,7 @@
 //// Admin page for Riseopedia relationship display rules.                                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -23,7 +24,12 @@ export const dynamic = "force-dynamic";
 export default async function RelationshipDisplayRulesAdminPage(): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Relationship Display Rules" reason={guard.reason} />;
+		return (
+			<RiseopediaAdminGuard
+				title="Relationship Display Rules"
+				reason={guard.reason}
+			/>
+		);
 	}
 
 	const [meta, rows] = await Promise.all([
@@ -37,7 +43,12 @@ export default async function RelationshipDisplayRulesAdminPage(): Promise<JSX.E
 			description="Control which canonical entity relationships appear as Obtained from, Used for, or hidden on Riseopedia detail pages."
 		>
 			<RiseopediaAdminNav active="relationship-display-rules" />
-			<RiseopediaRelationshipDisplayRulesTable initialRows={rows.rules} meta={meta} />
+			<RiseopediaRelationshipDisplayRulesTable
+				initialRows={rows.rules}
+				meta={meta}
+			/>
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

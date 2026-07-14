@@ -4,6 +4,7 @@
 //// Editor-facing rendered view for the rich-text image node, including resize and move controls.               ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -23,6 +24,7 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
 import { mergeRegister } from "@lexical/utils";
 import { Button } from "@/components/ui/basic-elements/Button";
+import IconRender from "@/components/ui/IconRender";
 import {
 	IMAGE_MIN_WIDTH,
 	applyMoveMode,
@@ -40,6 +42,7 @@ import {
 } from "./image-node-helpers";
 import type {
 	ImageAlign,
+	ImageFrameStyle,
 	ImageMoveDropPreview,
 	ImageNodeViewProps,
 	ImageSize,
@@ -65,7 +68,9 @@ type ImageNodeRuntimeStyle = React.CSSProperties & {
 	"--richtext-drop-preview-height"?: string;
 };
 
-function formatCssLength(value: number | string | undefined): string | undefined {
+function formatCssLength(
+	value: number | string | undefined,
+): string | undefined {
 	if (typeof value === "number") {
 		return `${value}px`;
 	}
@@ -117,6 +122,8 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 		height,
 		align = "center",
 		wrap = "no-wrap",
+		frameStyle = "none",
+		linkTarget,
 		nodeKey,
 	} = props;
 
@@ -135,7 +142,10 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 		React.useState<ImageMoveDropPreview | null>(null);
 	const [editor] = useLexicalComposerContext();
 
-	const movePreviewSize = readRenderedImageSize(containerRef.current, displaySize);
+	const movePreviewSize = readRenderedImageSize(
+		containerRef.current,
+		displaySize,
+	);
 
 	const [isSelected, setSelected, clearSelection] =
 		useLexicalNodeSelection(nodeKey);
@@ -274,9 +284,11 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 		else if (align === "right") parts.push("is-right");
 		else parts.push("is-center");
 		if (isSelected) parts.push("is-selected");
+		if (frameStyle === "border") parts.push("has-border");
+		if (linkTarget) parts.push("is-linked");
 		if (moving) parts.push("is-moving");
 		return parts.join(" ");
-	}, [align, effectiveWrap, isSelected, moving]);
+	}, [align, effectiveWrap, frameStyle, isSelected, linkTarget, moving]);
 
 	const resizeHandleClass = `richtext-img-resize-handle is-${resizeEdge}${
 		dragging ? " is-dragging" : ""
@@ -335,8 +347,9 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 	const updateMovePreview = React.useCallback(
 		(clientX: number, clientY: number): void => {
 			const rootElement =
-				(editor as unknown as { getRootElement?: () => HTMLElement | null })
-					.getRootElement?.() ?? null;
+				(
+					editor as unknown as { getRootElement?: () => HTMLElement | null }
+				).getRootElement?.() ?? null;
 			const nextPreview = resolveMoveDropPreview(rootElement, clientX, clientY);
 
 			moveDropPreviewRef.current = nextPreview;
@@ -362,7 +375,6 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 		},
 		[clearSelection, setSelected, updateMovePreview],
 	);
-
 
 	React.useEffect(() => {
 		if (!moving) {
@@ -542,6 +554,18 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 		[editor, nodeKey, align],
 	);
 
+	const applyFrameStyle = React.useCallback(
+		(next: ImageFrameStyle) => {
+			editor.update(() => {
+				const node = $getNodeByKey(nodeKey);
+				if (isImageNodeWritable(node)) {
+					node.setFrameStyle(next);
+				}
+			});
+		},
+		[editor, nodeKey],
+	);
+
 	const toolbarClassName = `richtext-img-toolbar richtext-img-toolbar--${align}`;
 	const imageRuntimeStyle = buildImageRuntimeStyle(displaySize);
 
@@ -556,6 +580,8 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 				data-media-id={mediaId ?? undefined}
 				data-align={align}
 				data-wrap={effectiveWrap}
+				data-frame-style={frameStyle}
+				data-richtext-link-kind={linkTarget?.kind}
 				contentEditable={false}
 				tabIndex={0}
 			>
@@ -574,6 +600,8 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 			data-media-id={mediaId ?? undefined}
 			data-align={align}
 			data-wrap={effectiveWrap}
+			data-frame-style={frameStyle}
+			data-richtext-link-kind={linkTarget?.kind}
 			contentEditable={false}
 			tabIndex={0}
 			onClick={(e) => {
@@ -592,6 +620,17 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 				style={imageRuntimeStyle}
 				draggable={false}
 			/>
+
+			{linkTarget ? (
+				<span
+					className="richtext-img-link-badge"
+					title={`Linked to ${linkTarget.href}`}
+					aria-label="Image has an active link"
+				>
+					<IconRender fallback={{ lucideName: "Link2" }} size={13} />
+					<span>Linked</span>
+				</span>
+			) : null}
 
 			{editable && isSelected ? (
 				<div
@@ -638,7 +677,7 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 			{editable && isSelected ? (
 				<div
 					role="toolbar"
-					aria-label="Image alignment and wrapping"
+					aria-label="Image alignment, wrapping, and border"
 					className={toolbarClassName}
 					onMouseDown={(e) => {
 						e.preventDefault();
@@ -647,7 +686,7 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 				>
 					<Button
 						size="xs"
-						variant={align === "left" ? "accent" : "neutral"}
+						variant={align === "left" ? "primary" : "secondary"}
 						onClick={() => applyAlign("left")}
 						title="Align left"
 					>
@@ -655,7 +694,11 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 					</Button>
 					<Button
 						size="xs"
-						variant={align === "center" && effectiveWrap === "no-wrap" ? "accent" : "neutral"}
+						variant={
+							align === "center" && effectiveWrap === "no-wrap"
+								? "primary"
+								: "secondary"
+						}
 						onClick={() => applyAlign("center")}
 						title="Align center and disable text wrap"
 					>
@@ -663,7 +706,7 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 					</Button>
 					<Button
 						size="xs"
-						variant={align === "right" ? "accent" : "neutral"}
+						variant={align === "right" ? "primary" : "secondary"}
 						onClick={() => applyAlign("right")}
 						title="Align right"
 					>
@@ -674,7 +717,7 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 
 					<Button
 						size="xs"
-						variant={effectiveWrap === "wrap" ? "accent" : "neutral"}
+						variant={effectiveWrap === "wrap" ? "primary" : "secondary"}
 						onClick={() => applyWrap("wrap")}
 						title="Text wraps"
 					>
@@ -682,15 +725,43 @@ export function ImageNodeView(props: ImageNodeViewProps): React.ReactElement {
 					</Button>
 					<Button
 						size="xs"
-						variant={effectiveWrap === "no-wrap" ? "accent" : "neutral"}
+						variant={effectiveWrap === "no-wrap" ? "primary" : "secondary"}
 						onClick={() => applyWrap("no-wrap")}
 						title="No text wrap"
 					>
 						No wrap
 					</Button>
+
+					<span className="richtext-img-toolbar__separator" aria-hidden="true" />
+
+					<Button
+						size="xs"
+						variant={frameStyle === "border" ? "primary" : "secondary"}
+						onClick={() =>
+							applyFrameStyle(frameStyle === "border" ? "none" : "border")
+						}
+						title={
+							frameStyle === "border" ? "Remove image border" : "Add image border"
+						}
+						aria-pressed={frameStyle === "border"}
+					>
+						Border
+					</Button>
+
+					{linkTarget ? (
+						<>
+							<span className="richtext-img-toolbar__separator" aria-hidden="true" />
+							<span className="richtext-img-toolbar__link-status">
+								<IconRender fallback={{ lucideName: "Link2" }} size={12} />
+								Linked
+							</span>
+						</>
+					) : null}
 				</div>
 			) : null}
 		</span>
 	);
 }
 ImageNodeView.displayName = "ImageNodeView";
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

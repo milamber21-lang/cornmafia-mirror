@@ -4,6 +4,7 @@
 //// Small-list admin table for managing YouTube channel allowlist rows                                           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -64,7 +65,9 @@ export default function YoutubeChannelsTable({
 	const [search, setSearch] = useState("");
 	const [panelOpen, setPanelOpen] = useState(false);
 	const [panelMode, setPanelMode] = useState<"create" | "edit">("create");
-	const [selectedRow, setSelectedRow] = useState<YoutubeChannelAdminItem | null>(null);
+	const [selectedRow, setSelectedRow] = useState<YoutubeChannelAdminItem | null>(
+		null,
+	);
 	const [page, setPage] = useState<number>(1);
 	const [pageSize, setPageSize] = useState<number>(20);
 	const [sortKey, setSortKey] = useState<SortKey>("title");
@@ -104,9 +107,15 @@ export default function YoutubeChannelsTable({
 			let comparison = 0;
 
 			if (sortKey === "channelId") {
-				comparison = compareAdminText(left.channelExternalId, right.channelExternalId);
+				comparison = compareAdminText(
+					left.channelExternalId,
+					right.channelExternalId,
+				);
 			} else if (sortKey === "handle") {
-				comparison = compareAdminOptionalText(left.channelHandle, right.channelHandle);
+				comparison = compareAdminOptionalText(
+					left.channelHandle,
+					right.channelHandle,
+				);
 			} else if (sortKey === "url") {
 				comparison = compareAdminOptionalText(left.channelUrl, right.channelUrl);
 			} else if (sortKey === "comment") {
@@ -280,7 +289,7 @@ export default function YoutubeChannelsTable({
 					</div>
 
 					<div className="admin-table-toolbar-action">
-						<Button variant="green" onClick={openCreate}>
+						<Button variant="primary" onClick={openCreate}>
 							Add YouTube Channel
 						</Button>
 					</div>
@@ -364,12 +373,21 @@ export default function YoutubeChannelsTable({
 									<TR key={row.id}>
 										<TD className="admin-table-cell--center">{row.channelTitle}</TD>
 										<TD className="admin-table-cell--center">
-											<span className="admin-table-break-all">{row.channelExternalId}</span>
+											<span className="admin-table-break-all">
+												{row.channelExternalId}
+											</span>
 										</TD>
-										<TD className="admin-table-cell--center">{row.channelHandle ?? "-"}</TD>
+										<TD className="admin-table-cell--center">
+											{row.channelHandle ?? "-"}
+										</TD>
 										<TD className="admin-table-cell--center">
 											{row.channelUrl ? (
-												<a href={row.channelUrl} target="_blank" rel="noreferrer" className="admin-table-break-all">
+												<a
+													href={row.channelUrl}
+													target="_blank"
+													rel="noreferrer"
+													className="admin-table-break-all"
+												>
 													{row.channelUrl}
 												</a>
 											) : (
@@ -379,7 +397,7 @@ export default function YoutubeChannelsTable({
 										<TD className="admin-table-cell--center">{row.comment ?? "-"}</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant={row.enabled ? "green" : "neutral"}
+												variant={row.enabled ? "success" : "secondary"}
 												disabled={disabled}
 												loading={disabled}
 												onClick={() => void toggleEnabled(row)}
@@ -390,7 +408,7 @@ export default function YoutubeChannelsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="accent"
+												variant="danger"
 												disabled={disabled}
 												loading={disabled}
 												onClick={() => void deleteYoutubeChannel(row)}
@@ -400,7 +418,7 @@ export default function YoutubeChannelsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="neutral"
+												variant="secondary"
 												disabled={disabled}
 												onClick={() => openEdit(row)}
 											>
@@ -413,7 +431,10 @@ export default function YoutubeChannelsTable({
 
 							{pageRows.length === 0 ? (
 								<TR>
-									<TD colSpan={8} className="admin-table-empty-cell admin-table-empty-cell--spacious">
+									<TD
+										colSpan={8}
+										className="admin-table-empty-cell admin-table-empty-cell--spacious"
+									>
 										No YouTube channels match your search.
 									</TD>
 								</TR>
@@ -445,3 +466,5 @@ export default function YoutubeChannelsTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

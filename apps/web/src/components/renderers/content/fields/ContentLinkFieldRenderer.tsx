@@ -1,11 +1,14 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/renderers/content/fields/ContentLinkFieldRenderer.tsx                          ////
 //// Language: TSX                                                                                                ////
-//// Renders content-reference fields with a safe placeholder until DB link metadata is exposed to the model.     ////
+//// Renders resolved content-reference fields without exposing raw internal content IDs.                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
+
+import { Link } from "@/components/ui";
 
 import ContentFieldFrame from "../ContentFieldFrame";
 import { hasRenderableValue } from "../field-utils";
@@ -25,10 +28,22 @@ export default function ContentLinkFieldRenderer({
 	}
 
 	return (
-		<ContentFieldFrame field={field} showLabel={showLabel} valueTextClassName="content-field-value">
-			<div className="content-field-reference">
-				Content reference id {String(field.value)}
-			</div>
+		<ContentFieldFrame
+			field={field}
+			showLabel={showLabel}
+			valueTextClassName="content-field-value"
+		>
+			{field.contentLink ? (
+				<Link className="content-field-link" href={field.contentLink.href}>
+					{field.contentLink.title}
+				</Link>
+			) : (
+				<p className="content-field-muted-message">
+					Linked content is unavailable.
+				</p>
+			)}
 		</ContentFieldFrame>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

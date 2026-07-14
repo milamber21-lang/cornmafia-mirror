@@ -1,4 +1,6 @@
 <!-- FILE: docs/codebase_rules.md -->
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->
+
 # Corn Mafia Codebase Rules
 
 ## Purpose
@@ -108,7 +110,7 @@ Event handlers and callbacks should use concrete types where known. If unknown i
 Do not use unsafe catch handling such as:
 
 ```ts
-e as Error
+e as Error;
 ```
 
 Prefer helper functions that safely extract messages from `unknown`.
@@ -201,11 +203,13 @@ The project direction is DB-first.
 Use these database layers:
 
 ```text
-game_data     = raw game imports, patch/source metadata, and game_transform_* source transformation rules
-web_priv      = canonical private truth, private helpers, validation helpers, sync helpers, access helpers, and private business internals
-web_api       = app-callable business functions, write functions, approved action functions, and guarded admin wrappers
-web_view      = app read surfaces, lookup surfaces, admin/member/public read contracts
-web_analytics = QA, audit, validation, data-quality, and admin/operational analytics views
+game_data       = raw imports, patch/source metadata, discovery evidence, and game_transform_* rules
+web_game        = canonical transformed game truth, history, relationships, media, properties, release facts, and sync internals
+web_riseopedia  = Riseopedia/Mafiosopedia publication, sections, display policy, presentation mappings, and refresh internals
+web_priv        = auth, Discord, CMS, member, navigation, media, template, access, and platform-private truth
+web_api         = app-callable business functions, writes, approved actions, and guarded admin wrappers
+web_view        = app read surfaces and admin/member/public read contracts
+web_analytics   = QA, audit, validation, data-quality, and operator analytics
 ```
 
 Application contract:
@@ -214,7 +218,7 @@ Application contract:
 - sensitive admin analytics are exposed through guarded `web_api` functions when app access is needed
 - `web_analytics` is not a public read contract and must not replace `web_view`
 - app writes through `web_api`
-- app must not directly perform CRUD on `web_priv`
+- app must not directly perform CRUD on `web_priv`, `web_game`, or `web_riseopedia`
 - app must not directly perform CRUD on `game_data` import or transform tables
 - app code must not make the runtime user behave like the owner
 - `public` must not be reintroduced as the main project schema
@@ -707,15 +711,15 @@ Use plural table names by default.
 
 Table suffixes:
 
-| Suffix | Meaning |
-|---|---|
-| no suffix | current-state table |
-| `_f` | fact / log-style table |
-| `_h` | history / SCD2 / historized table |
-| `_c` | code / reference table |
-| `_r` | many-to-many relationship table |
-| `_r_h` | historized relationship table |
-| `_l` | lookup / source-resolution / lightweight reference table |
+| Suffix    | Meaning                                                  |
+| --------- | -------------------------------------------------------- |
+| no suffix | current-state table                                      |
+| `_f`      | fact / log-style table                                   |
+| `_h`      | history / SCD2 / historized table                        |
+| `_c`      | code / reference table                                   |
+| `_r`      | many-to-many relationship table                          |
+| `_r_h`    | historized relationship table                            |
+| `_l`      | lookup / source-resolution / lightweight reference table |
 
 Current-state tables store the current truth only.
 
@@ -752,9 +756,10 @@ Project-specific schema and naming rules:
 
 ```text
 game_data.game_transform_*_c = source transformation/configuration rules
-web_priv.game_*              = canonical current-state game truth
-web_priv.game_*_h            = patch/history snapshots where needed
-web_priv.game_*_r            = relationships and bridge tables
+web_game.game_*              = canonical game current/history/relationship facts and sync internals
+web_riseopedia.riseopedia_*  = wiki product configuration
+web_riseopedia.game_*        = wiki publication/presentation mappings
+web_priv.auth_/discord_/web_*= platform-private truth
 web_analytics.*              = QA/read-only analytics views and summaries
 ```
 
@@ -770,9 +775,8 @@ game_transform_* = import/source transformation and resolution rules
 ```
 
 Transform/config tables belong in `game_data` unless there is a specific reason they must be canonical current truth.
-Canonical app truth belongs in `web_priv`.
+Canonical game truth belongs in `web_game`; platform-private truth belongs in `web_priv`; wiki product policy belongs in `web_riseopedia`.
 QA and audit diagnostics belong in `web_analytics`.
-
 
 ---
 
@@ -817,14 +821,14 @@ Use `_flg` only when mirroring existing legacy/source naming or an existing tabl
 
 Preserve the project sentinel convention.
 
-| Value | Meaning |
-|---|---|
-| `XNA` | source value missing / not available |
-| `XER` | source value exists but cannot be resolved / error state |
-| `-1` | missing / not available numeric value |
-| `-2` | unresolved / error numeric value |
-| `1900-01-01` | low/default missing date |
-| `2999-12-31` | open-ended validity date |
+| Value        | Meaning                                                  |
+| ------------ | -------------------------------------------------------- |
+| `XNA`        | source value missing / not available                     |
+| `XER`        | source value exists but cannot be resolved / error state |
+| `-1`         | missing / not available numeric value                    |
+| `-2`         | unresolved / error numeric value                         |
+| `1900-01-01` | low/default missing date                                 |
+| `2999-12-31` | open-ended validity date                                 |
 
 Common helper functions may include:
 
@@ -874,18 +878,18 @@ Current approved prefixes:
 
 Verb meanings:
 
-| Verb | Meaning |
-|---|---|
-| `assert` | validate required condition and raise if false |
-| `find` | lookup helper, nullable is acceptable |
-| `get` | return computed result |
-| `insert` | create only |
-| `update` | update only |
-| `upsert` | insert-or-update for current synced truth |
-| `replace` | replace full set |
-| `sync` | external truth to DB synchronization |
-| `recalculate` | derived values |
-| `record` | audit/history action |
+| Verb          | Meaning                                        |
+| ------------- | ---------------------------------------------- |
+| `assert`      | validate required condition and raise if false |
+| `find`        | lookup helper, nullable is acceptable          |
+| `get`         | return computed result                         |
+| `insert`      | create only                                    |
+| `update`      | update only                                    |
+| `upsert`      | insert-or-update for current synced truth      |
+| `replace`     | replace full set                               |
+| `sync`        | external truth to DB synchronization           |
+| `recalculate` | derived values                                 |
+| `record`      | audit/history action                           |
 
 ---
 
@@ -1092,7 +1096,7 @@ Check for:
 - server-driven families using local/client-owned list behavior incorrectly
 - small-list families depending on query params for create/edit/list context without proven reason
 - admin/member workflow flattening
-- direct `web_priv` access from app source
+- direct private-schema (`web_priv`, `web_game`, `web_riseopedia`, `game_data`, `web_analytics`) access from app source
 - security-sensitive route mistakes
 - stale or undocumented inline style exceptions
 
@@ -1117,87 +1121,118 @@ Reason:
 
 ## 31. Game data and property handling rules
 
-Game data uses a source-to-canonical model.
+Game data uses a source-to-canonical-to-product model.
 
 Authoritative placement:
 
 ```text
 game_data
-	raw source imports
-	patch/source file metadata
-	game_transform_* rules
-	manual source-to-canonical transformation rules
-	import evidence used by rebuild logic
+	raw imports, patch/source metadata, discovery evidence, game_transform_* rules
 
-web_priv
-	canonical current game truth
-	private rebuild/promotion/revalidation functions
-	canonical current-state tables and history snapshots
+web_game
+	canonical entities, variants, source mappings, properties, media, relationships,
+	domain facts, histories, release facts, patch changes, transform candidates, and sync
+
+web_riseopedia
+	publication channels, sections, display profiles/body blocks/cards, semantic rules,
+	presentation media mappings, and wiki read-model refresh
 
 web_view
-	app-facing read contracts and compatibility read models
+	app-facing channel/public/admin read contracts
 
 web_analytics
-	QA/audit/read-only diagnostics
+	QA and operator diagnostics
 ```
 
 Transform rules:
 
-- put source classification, identity, naming, variant, relationship, recipe-ref-resolution, and generic-group alias rules under `game_data.game_transform_*`
-- do not put transform rules in app routes
-- do not encode one-off source mistakes in UI code
-- promotion/rebuild functions may live in `web_priv` and read transform rules from `game_data`
-- source mappings and aliases are evidence/resolution helpers, not canonical public identity
+- source identity, naming, classification, variant, coordinate, relationship, media, property, loot, progression, and release rules belong in existing `game_data.game_transform_*` families;
+- do not encode source mistakes in UI/routes;
+- reuse value maps, source links, relationship connections, and rule parts before proposing a new rule family;
+- candidate functions and canonical writers live in `web_game`;
+- product display/publication policy lives in `web_riseopedia`;
+- mappings and aliases are evidence, not canonical public identity.
 
-Current canonical game model:
+Current canonical entity types:
 
-- `web_priv.game_entities` is cross-domain identity
-- `web_priv.game_assets` and `web_priv.game_recipes` are domain tables linked to entities
-- `web_priv.game_entity_variants_r` stores concrete canonical variants
-- `web_priv.game_entity_variant_values_r` stores variant dimensions such as rarity, tier, color, body, denomination, and edition
-- `web_priv.game_entity_variant_source_mappings_r` stores import/source evidence for concrete variants
-- `web_priv.game_entity_variant_aliases` stores generated resolver aliases for messy source strings
-- `web_priv.game_entity_brands_c` and `web_priv.game_entity_brand_links_r` store entity-only brand assignments
-- `web_priv.game_entity_property_values` stores transformed, queryable, variant-linked property values
-- `web_priv.game_entity_media_r` stores entity/variant media assignments with source mapping evidence
+```text
+asset
+recipe
+location
+mechanic
+perk
+poi
+quest
+```
 
-Retired asset-level concepts:
+Current canonical model:
 
-- do not recreate `game_asset_aliases`
-- do not recreate `game_asset_source_mappings_r`
-- do not recreate `game_asset_brands_c` or `game_asset_brand_links_r`
-- do not recreate `game_asset_rarities_c`
-- do not recreate `game_variant_groups_c` or `game_variant_values_c`
+- `web_game.game_entities` owns cross-domain identity;
+- there are no separate current-state `game_assets` or `game_recipes` tables;
+- concrete variants live in `web_game.game_entity_variants_r`;
+- variant dimensions/values live in `game_entity_variant_groups_c`, `game_entity_variant_value_codes_c`, and `game_entity_variant_values_r`;
+- source evidence lives in `game_entity_variant_source_mappings_r`;
+- aliases resolve messy references and slugs but are not durable relationship targets;
+- brands are entity-level;
+- properties are typed, variant/source-aware values;
+- media is canonical media/file/assignment data, not a normal property;
+- recipes use component/output/generic/catalyst tables;
+- quests, mechanics, progression, coordinates, routes, spawn areas, placements, and loot use their current canonical tables;
+- relationships use deterministic natural keys and provenance tie-breakers.
+
+ID-preserving sync:
+
+1. build deterministic candidates;
+2. update existing rows by natural key only when values differ;
+3. insert missing rows;
+4. delete/deactivate stale generated rows only when the candidate disappeared;
+5. preserve manual/override rows;
+6. identical input must converge without ID or semantic churn.
 
 Property rules:
 
-- raw source payloads are evidence, not normal public properties
-- source file roles and source identity values belong to source mappings or analytics evidence, not normal public properties
-- media paths belong to `game_media_*` / `game_entity_media_*`, not normal properties
-- brands belong under `game_entity_brand*`, not as generic properties
-- rarity belongs under entity variant values, not as a generic property and not as an asset-level code table
-- structured source objects should be exploded into atomic/child rows only when useful for filtering, analytics, or display
-- arrays should be exploded only when their item meaning is known or analytics needs indexed evidence
-- grouped/source-derived assets need property rows tied to `entity_variant_id` and `entity_variant_source_mapping_id` when source rows differ
+- raw payloads and source identity remain evidence;
+- zero is not globally null;
+- XNA/-1 means missing/not applicable and XER/-2 means unresolved/error;
+- media, brands, rarity, and source paths are not generic display properties;
+- arrays/objects are exploded only when meaning is known and useful;
+- exact property-value links require one unambiguous canonical target.
 
-Recipe generic and catalyst rules:
+Recipe rules:
 
-- generic recipe requirements are canonical recipe concepts, not asset groups
-- keep canonical generic groups under `web_priv.game_recipe_generic_group_types_c`, `web_priv.game_recipe_generic_groups_c`, and `web_priv.game_recipe_generic_connections_r`
-- keep generic group alias/ref-resolution rules under `game_data.game_transform_recipe_generic_group_aliases_c`
-- catalysts live under `web_priv.game_recipe_catalysts_r`
-- do not reintroduce `game_recipe_generic_requirement_*` or `game_recipe_catalyst_requirements_*` names
+- generic requirements use `web_game.game_recipe_generic_group_types_c`, `game_recipe_generic_groups_c`, and `game_recipe_generic_connections_r`;
+- catalysts use `web_game.game_recipe_catalysts_r`;
+- returned tools represented as catalysts must not also create false component/output relationships.
 
-History rules:
+History and release:
 
-- current-state tables store current truth only
-- `_h` tables preserve patch snapshots where needed
-- `game_sync_patch_history` and the variant history helper must preserve variant/source links for properties and variants
-- current variant history tables are `game_entity_variants_r_h`, `game_entity_variant_values_r_h`, and `game_entity_variant_source_mappings_r_h`
+- current-state tables store current truth;
+- `_h` tables preserve patch snapshots;
+- `web_game.game_sync_patch_history` creates histories;
+- `web_game.game_sync_patch_entity_patch_changes` creates patch-note facts;
+- canonical release evidence/decisions live in `web_game`;
+- publication channels and wiki display policy live in `web_riseopedia`.
 
-Revalidation and rebuild rules:
+Revalidation and runtime:
 
-- app-callable revalidation should be exposed as guarded functions, not unguarded procedures
-- private rebuild/revalidation logic should live under `web_priv`
-- expose only guarded `web_api` wrappers when app/admin runtime needs to trigger it
-- manual operator procedures are acceptable only when they are explicitly operational and documented
+- owner/operator sync functions stay private in `web_game`;
+- runtime actions are exposed only through guarded `web_api` functions when intentionally needed;
+- `cm_client` receives no direct private-schema usage or private-function execution;
+- manual operator procedures are acceptable only when explicit and documented.
+
+Retired concepts must not be recreated:
+
+```text
+domain_entity_id
+game_asset_aliases
+game_asset_source_mappings_r
+game_asset_brands_c / game_asset_brand_links_r
+game_asset_rarities_c
+game_variant_groups_c / game_variant_values_c
+game_recipe_generic_requirement_*
+game_recipe_catalyst_requirements_*
+game_entity_property_expectations_r
+canonical game or Riseopedia configuration tables under web_priv
+```
+
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->

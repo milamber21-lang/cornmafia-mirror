@@ -4,6 +4,8 @@
 //// Template field types table with admin actions                                                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -250,7 +252,6 @@ export default function TemplateFieldTypesTable({
 		[busyId, refreshFromServer],
 	);
 
-
 	const handleSortChange = useCallback(
 		(nextSortKey: SortKey): void => {
 			setSortDirection((currentDirection) =>
@@ -282,7 +283,7 @@ export default function TemplateFieldTypesTable({
 					</div>
 
 					<div className="admin-table-toolbar-action">
-						<Button onClick={openCreate} variant="green">
+						<Button onClick={openCreate} variant="primary">
 							New Field Type
 						</Button>
 					</div>
@@ -341,23 +342,25 @@ export default function TemplateFieldTypesTable({
 									const disabled = busyId === row.id;
 									return (
 										<TR key={row.id}>
-											<TD className="admin-table-cell--center admin-table-cell--strong">{row.fieldTypeCode}</TD>
+											<TD className="admin-table-cell--center admin-table-cell--strong">
+												{row.fieldTypeCode}
+											</TD>
 											<TD className="admin-table-cell--center">{row.label}</TD>
 											<TD className="admin-table-cell--center">{row.valueColumnName}</TD>
-				    						<TD className="admin-table-cell--center">
-				    							<Button
-					    							variant={row.enabled ? "green" : "neutral"}
-					    							disabled={disabled}
-					    							onClick={() => void toggleEnabled(row)}
-					    							aria-label={row.enabled ? "Enabled" : "Disabled"}
-					    						>
-						    						{row.enabled ? "Enabled" : "Disabled"}
-						    					</Button>
-						    				</TD>
+											<TD className="admin-table-cell--center">
+												<Button
+													variant={row.enabled ? "success" : "secondary"}
+													disabled={disabled}
+													onClick={() => void toggleEnabled(row)}
+													aria-label={row.enabled ? "Enabled" : "Disabled"}
+												>
+													{row.enabled ? "Enabled" : "Disabled"}
+												</Button>
+											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => void deleteFieldType(row)}
-													variant="accent"
+													variant="danger"
 													disabled={disabled}
 												>
 													Delete
@@ -366,7 +369,7 @@ export default function TemplateFieldTypesTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => openEdit(row)}
-													variant="neutral"
+													variant="secondary"
 													disabled={disabled}
 												>
 													Edit
@@ -403,3 +406,5 @@ export default function TemplateFieldTypesTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

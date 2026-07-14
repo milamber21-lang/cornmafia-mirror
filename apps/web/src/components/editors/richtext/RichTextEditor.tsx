@@ -4,6 +4,8 @@
 //// RichText editor wrapper with media insertion and toolbar command wiring.                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -24,6 +26,7 @@ import {
 	isObject,
 	type LexicalRootJSON,
 	type RichTextEditorCanvasLayoutMode,
+	type RichTextEditorCanvasWidthCode,
 	type UnknownRecord,
 	type LexicalNodeJSON,
 } from "./RichTextEditorTypes";
@@ -33,8 +36,14 @@ import {
 	ImageNode,
 	$createImageNode,
 	type ImageAlign,
+	type ImageFrameStyle,
 	type ImageWrap,
 } from "./nodes/ImageNode";
+import {
+	$createRichTextLinkNode,
+	$setRichTextLinkTargetOnSelection,
+	RichTextLinkNode,
+} from "./nodes/RichTextLinkNode";
 import {
 	HorizontalRuleNode,
 	$createHorizontalRuleNode,
@@ -209,6 +218,7 @@ type Props = {
 	sourceValue?: unknown;
 	toolbarLayout?: ToolbarItem[];
 	canvasLayoutMode?: RichTextEditorCanvasLayoutMode;
+	canvasWidthCode?: RichTextEditorCanvasWidthCode;
 };
 
 type JSONNode = { type?: unknown; children?: unknown; [k: string]: unknown };
@@ -429,6 +439,7 @@ export default function RichTextEditor({
 	mediaContext = "admin",
 	toolbarLayout = DEFAULT_TOOLBAR_LAYOUT,
 	canvasLayoutMode = "full",
+	canvasWidthCode = "full",
 }: Props) {
 	const [hydrated, setHydrated] = useState(false);
 	useEffect(() => setHydrated(true), []);
@@ -599,6 +610,7 @@ export default function RichTextEditor({
 		if (deps.HeadingNode) out.push(deps.HeadingNode);
 		if (deps.QuoteNode) out.push(deps.QuoteNode);
 		if (deps.LinkNode) out.push(deps.LinkNode);
+		out.push(RichTextLinkNode);
 		out.push(deps.HorizontalRuleNode ?? HorizontalRuleNode);
 		return out;
 	}, [
@@ -647,6 +659,9 @@ export default function RichTextEditor({
 	const asWrap = useCallback((v: unknown): ImageWrap | undefined => {
 		return v === "wrap" || v === "no-wrap" ? v : undefined;
 	}, []);
+	const asFrameStyle = useCallback((v: unknown): ImageFrameStyle => {
+		return v === "border" ? "border" : "none";
+	}, []);
 
 	const initEditorState = useCallback(
 		(editor: unknown) => {
@@ -664,7 +679,18 @@ export default function RichTextEditor({
 						height: opts?.height,
 						align: asAlign(opts?.align),
 						wrap: asWrap(opts?.wrap),
+						frameStyle: asFrameStyle(opts?.frameStyle),
+						linkTarget: opts?.linkTarget,
 					}),
+				createRichTextLinkNode: (url, attributes, linkTarget) =>
+					$createRichTextLinkNode(
+						url,
+						{
+							target: attributes?.target ?? null,
+							rel: attributes?.rel ?? null,
+						},
+						linkTarget,
+					),
 				createHorizontalRuleNode:
 					typeof deps.HorizontalRuleCreator === "function"
 						? (deps.HorizontalRuleCreator as () => unknown)
@@ -697,6 +723,7 @@ export default function RichTextEditor({
 			lexicalNS,
 			deps.HorizontalRuleCreator,
 			asAlign,
+			asFrameStyle,
 			asWrap,
 			$getRoot,
 			$createParagraphNode,
@@ -828,6 +855,7 @@ export default function RichTextEditor({
 						height: insertedHeight,
 						align: "left",
 						wrap: "wrap",
+						frameStyle: "none",
 					});
 
 					if ($isRangeSelection(sel)) {
@@ -857,7 +885,8 @@ export default function RichTextEditor({
 				height: insertedHeight,
 				align: "left",
 				wrap: "wrap",
-				version: 1,
+				frameStyle: "none",
+				version: 3,
 			};
 
 			const next: LexicalRootJSON = {
@@ -935,6 +964,13 @@ export default function RichTextEditor({
 					return;
 				}
 
+				if (payload.linkTarget && isObject(linkNode)) {
+					const setLinkTarget = (linkNode as UnknownRecord).setLinkTarget;
+					if (isFunction(setLinkTarget)) {
+						setLinkTarget.call(linkNode, payload.linkTarget);
+					}
+				}
+
 				appendChildrenToNode(linkNode, [$createTextNode(label)]);
 				$insertNodes([linkNode]);
 				didInsert = true;
@@ -944,6 +980,51 @@ export default function RichTextEditor({
 		},
 		[$createTextNode, $insertNodes, lexicalNS],
 	);
+	const applyLinkTargetToSelection = useCallback(
+		(payload: LinkTogglePayload): void => {
+			if (!payload.linkTarget) {
+				return;
+			}
+
+			const editor = editorRef.current as {
+				update?: (fn: () => void) => void;
+			} | null;
+			if (!editor?.update) {
+				return;
+			}
+
+			editor.update(() => {
+				$setRichTextLinkTargetOnSelection(payload.linkTarget ?? null);
+			});
+		},
+		[],
+	);
+
+	const applyImageLinkTargetToSelection = useCallback(
+		(payload: LinkTogglePayload | null): void => {
+			const editor = editorRef.current as {
+				update?: (fn: () => void) => void;
+			} | null;
+			if (!editor?.update || !$getSelection) return;
+
+			editor.update(() => {
+				const selection = $getSelection();
+				const getNodes = isObject(selection) ? selection.getNodes : null;
+				const nodes = isFunction(getNodes) ? getNodes.call(selection) : [];
+				if (!Array.isArray(nodes)) return;
+
+				for (const node of nodes) {
+					if (readNodeType(node) !== "resizable-image" || !isObject(node)) continue;
+					const setLinkTarget = (node as UnknownRecord).setLinkTarget;
+					if (isFunction(setLinkTarget)) {
+						setLinkTarget.call(node, payload?.linkTarget ?? null);
+					}
+				}
+			});
+		},
+		[$getSelection],
+	);
+
 	const setBlockType = useCallback(
 		(type: "paragraph" | "quote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6") => {
 			const ref = editorRef.current as {
@@ -1019,6 +1100,7 @@ export default function RichTextEditor({
 				className={editorFrameClassName}
 				data-richtext-fullscreen={fullscreenOpen ? "true" : "false"}
 				data-richtext-editor-canvas-layout={canvasLayoutMode}
+				data-richtext-editor-canvas-width={canvasWidthCode}
 			>
 				<div className={editorFrameContentClassName}>
 					{ready ? (
@@ -1042,6 +1124,7 @@ export default function RichTextEditor({
 							editable={!readOnly}
 							fullscreenActive={fullscreenOpen}
 							canvasLayoutMode={canvasLayoutMode}
+							canvasWidthCode={canvasWidthCode}
 							editorSessionKey={effectiveEditorSessionKey}
 							onChange={onChange}
 							init={initEditorState}
@@ -1051,7 +1134,6 @@ export default function RichTextEditor({
 								withUpdate,
 								selection,
 								linkOpenSignal,
-								linkAnchor,
 							}) => {
 								const formatTextCmd = FORMAT_TEXT_COMMAND ?? formatTextCommand;
 								return (
@@ -1062,7 +1144,6 @@ export default function RichTextEditor({
 										layout={runtimeLayout}
 										selection={selection}
 										openLinkOnSignal={linkOpenSignal}
-										linkAnchor={linkAnchor ?? undefined}
 										dispatch={dispatch}
 										commands={{
 											FORMAT_TEXT_COMMAND: formatTextCmd,
@@ -1080,6 +1161,9 @@ export default function RichTextEditor({
 										onChooseImage={openMediaPicker}
 										onClearFormatting={clearFormatting}
 										onInsertLinkLabel={insertLinkLabel}
+										onApplyLinkTarget={applyLinkTargetToSelection}
+										onApplyImageLinkTarget={applyImageLinkTargetToSelection}
+										linkPickerContext={mediaContext}
 										onInsertHorizontalRule={() => {
 											if (!withUpdate) return;
 											withUpdate(() => {
@@ -1159,3 +1243,5 @@ export default function RichTextEditor({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

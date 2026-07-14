@@ -4,6 +4,8 @@
 //// Media filename and text sanitization helpers                                                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 function replaceControlCharacters(input: string): string {
 	let output = "";
 
@@ -67,3 +69,5 @@ export function getSafeExtension(displayFilename: string): string {
 
 	return `.${extension}`;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

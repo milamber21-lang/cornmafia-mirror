@@ -4,6 +4,7 @@
 //// Admin API route for table-driven Riseopedia relationship display rules.                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -28,7 +29,9 @@ import {
 export const dynamic = "force-dynamic";
 
 function getStringId(value: unknown): string | null {
-	return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+	return typeof value === "string" && value.trim().length > 0
+		? value.trim()
+		: null;
 }
 
 export async function GET(): Promise<Response> {
@@ -73,8 +76,17 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const perspectiveCode = getRequiredCode(data, "perspectiveCode");
 			const dependencyBlockCode = getRequiredCode(data, "dependencyBlockCode");
 			const dependencyBlockLabel = getStringId(data.dependencyBlockLabel);
-			if (!relationshipCode || !perspectiveCode || !dependencyBlockCode || !dependencyBlockLabel) {
-				return jsonError("VALIDATION_REQUIRED", "Relationship, perspective, block code, and block label are required.", 400);
+			if (
+				!relationshipCode ||
+				!perspectiveCode ||
+				!dependencyBlockCode ||
+				!dependencyBlockLabel
+			) {
+				return jsonError(
+					"VALIDATION_REQUIRED",
+					"Relationship, perspective, block code, and block label are required.",
+					400,
+				);
 			}
 
 			const id = await upsertRiseopediaRelationshipDisplayRuleAdmin({
@@ -98,7 +110,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
 			}
 
-			await deleteRiseopediaRelationshipDisplayRuleAdmin({ actorDiscordId: actorOrResponse, ruleKey });
+			await deleteRiseopediaRelationshipDisplayRuleAdmin({
+				actorDiscordId: actorOrResponse,
+				ruleKey,
+			});
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 
@@ -108,3 +123,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

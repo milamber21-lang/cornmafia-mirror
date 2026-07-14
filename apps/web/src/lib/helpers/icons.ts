@@ -4,6 +4,7 @@
 //// Shared icon helpers for DB-first admin and icon consumers                                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import {
 	buildMediaFileUrl,
@@ -38,8 +39,12 @@ export function normalizeIconSource(value: unknown): IconSourceCode {
 }
 
 export function normalizeLucideName(input: string): string {
-	return input
+	const separated = input
 		.trim()
+		.replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+		.replace(/([A-Z])([A-Z][a-z])/g, "$1 $2");
+
+	return separated
 		.toLowerCase()
 		.split(/[^a-z0-9]+/g)
 		.filter(Boolean)
@@ -141,3 +146,5 @@ export function mapIconToRenderInput(
 		enabled: typeof icon.enabled === "boolean" ? icon.enabled : undefined,
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

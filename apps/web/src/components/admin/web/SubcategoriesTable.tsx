@@ -4,6 +4,8 @@
 //// Subcategories table with local category filtering, search, and row-based panel lifecycle                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -86,8 +88,7 @@ export default function SubcategoriesTable({
 	const [panelMode, setPanelMode] = React.useState<"create" | "edit">("create");
 	const [selectedRow, setSelectedRow] = React.useState<Row | null>(null);
 	const [sortKey, setSortKey] = React.useState<SortKey>("title");
-	const [sortDirection, setSortDirection] =
-		React.useState<SortDirection>("asc");
+	const [sortDirection, setSortDirection] = React.useState<SortDirection>("asc");
 
 	const handleSortChange = React.useCallback(
 		(nextSortKey: SortKey): void => {
@@ -194,10 +195,7 @@ export default function SubcategoriesTable({
 					getIconSortLabel(right),
 				);
 			} else if (sortKey === "category") {
-				comparison = compareAdminText(
-					left.category.title,
-					right.category.title,
-				);
+				comparison = compareAdminText(left.category.title, right.category.title);
 			} else if (sortKey === "read") {
 				comparison = compareAdminText(
 					formatRankPolicySummary(
@@ -337,7 +335,7 @@ export default function SubcategoriesTable({
 					</div>
 
 					<div className="admin-table-toolbar-action">
-						<Button variant="green" onClick={openCreate}>
+						<Button variant="primary" onClick={openCreate}>
 							New Subcategory
 						</Button>
 					</div>
@@ -456,7 +454,7 @@ export default function SubcategoriesTable({
 											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant="accent"
+													variant="danger"
 													onClick={() => void handleDelete(row)}
 													disabled={rowBusy || busyId !== null}
 												>
@@ -465,7 +463,7 @@ export default function SubcategoriesTable({
 											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant="neutral"
+													variant="secondary"
 													onClick={() => openEdit(row)}
 													disabled={busyId !== null}
 												>
@@ -511,3 +509,5 @@ export default function SubcategoriesTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

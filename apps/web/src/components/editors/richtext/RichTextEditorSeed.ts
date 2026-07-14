@@ -4,12 +4,19 @@
 //// Safely seeds Lexical editor state from normalized stored RichText JSON.                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import {
 	isFunction,
 	isObject,
 	LexicalRootJSON,
 	UnknownRecord,
 } from "./RichTextEditorTypes";
+import {
+	normalizeRichTextLinkTarget,
+	type RichTextLinkTarget,
+} from "@/lib/editors/richtext/rich-text-link-targets";
+import type { ImageFrameStyle } from "./nodes/image-node-types";
 
 const asObj = (v: unknown): Record<string, unknown> | null =>
 	typeof v === "object" && v !== null ? (v as Record<string, unknown>) : null;
@@ -48,7 +55,14 @@ export type SeederFactories = {
 			height?: number;
 			align?: string;
 			wrap?: string;
+			frameStyle?: ImageFrameStyle;
+			linkTarget?: RichTextLinkTarget;
 		},
+	) => unknown;
+	createRichTextLinkNode?: (
+		url: string,
+		attributes?: { target?: string | null; rel?: string | null },
+		linkTarget?: RichTextLinkTarget | null,
 	) => unknown;
 	createHorizontalRuleNode?: () => unknown;
 };
@@ -136,32 +150,46 @@ function seedStructured(
 		return undefined;
 	};
 
-	function makeLink(url: string, target: string | null): unknown {
+	function makeLink(
+		url: string,
+		target: string | null,
+		linkTarget: RichTextLinkTarget | null,
+	): unknown {
+		if (fx.createRichTextLinkNode) {
+			return fx.createRichTextLinkNode(
+				url,
+				target ? { target } : undefined,
+				linkTarget,
+			);
+		}
+
 		if (!linkFactoryAny) {
 			return $createTextNode("");
 		}
 
-		// Try modern signature first
+		let linkNode: unknown = null;
 		try {
-			const maybe = (
+			linkNode = (
 				linkFactoryAny as (u: string, attrs?: Record<string, unknown>) => unknown
 			)(url, target ? { target } : undefined);
-			if (maybe && typeof (maybe as { append?: unknown }).append !== "undefined") {
-				return maybe;
+		} catch {
+			try {
+				linkNode = (
+					linkFactoryAny as (payload: Record<string, unknown>) => unknown
+				)({ url, target });
+			} catch {
+				linkNode = null;
 			}
-		} catch {}
+		}
 
-		// Legacy/object signature
-		try {
-			const maybe = (
-				linkFactoryAny as (payload: Record<string, unknown>) => unknown
-			)({ url, target });
-			if (maybe && typeof (maybe as { append?: unknown }).append !== "undefined") {
-				return maybe;
-			}
-		} catch {}
+		if (linkNode && linkTarget) {
+			call(linkNode, "setLinkTarget", linkTarget);
+		}
 
-		return $createTextNode("");
+		return linkNode &&
+			typeof (linkNode as { append?: unknown }).append !== "undefined"
+			? linkNode
+			: $createTextNode("");
 	}
 
 	function buildInline(node: Record<string, unknown>): unknown {
@@ -234,7 +262,11 @@ function seedStructured(
 						? "_blank"
 						: null;
 
-			const link = makeLink(url, target);
+			const linkTarget = normalizeRichTextLinkTarget(
+				f.linkTarget ?? (node as { linkTarget?: unknown }).linkTarget,
+				{ href: url, newTab: target === "_blank" },
+			);
+			const link = makeLink(url, target, linkTarget);
 			for (const c of asArr(node.children)) {
 				const built = asObj(c) ? buildInline(c as Record<string, unknown>) : null;
 				if (built) call(link, "append", built);
@@ -254,6 +286,13 @@ function seedStructured(
 			const height = asNum(fields.height) ?? undefined;
 			const align = asStr(fields.align) ?? undefined;
 			const wrap = asStr(fields.wrap) ?? undefined;
+			const frameStyle: ImageFrameStyle =
+				asStr(fields.frameStyle) === "border" || asBool(fields.border) === true
+					? "border"
+					: "none";
+			const linkTarget = normalizeRichTextLinkTarget(
+				fields.linkTarget ?? (node as { linkTarget?: unknown }).linkTarget,
+			);
 			if (src)
 				return fx.createResizableImageNode(src, {
 					mediaId,
@@ -262,6 +301,8 @@ function seedStructured(
 					height,
 					align,
 					wrap,
+					frameStyle,
+					linkTarget: linkTarget ?? undefined,
 				});
 		}
 
@@ -492,3 +533,5 @@ export function seedEditorSafely(
 
 	return false;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

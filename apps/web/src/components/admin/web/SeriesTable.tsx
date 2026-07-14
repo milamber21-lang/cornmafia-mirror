@@ -4,6 +4,8 @@
 //// Series table with server-driven query state and parent-owned panel lifecycle                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -230,7 +232,10 @@ export default function SeriesTable({
 	const [panelMode, setPanelMode] = React.useState<"create" | "edit">("create");
 	const [selectedRow, setSelectedRow] = React.useState<SeriesItem | null>(null);
 
-	const categoryOptions = React.useMemo(() => buildCategoryOptions(meta), [meta]);
+	const categoryOptions = React.useMemo(
+		() => buildCategoryOptions(meta),
+		[meta],
+	);
 	const subcategoryOptions = React.useMemo(
 		() => buildSubcategoryOptions(meta, categoryFilter),
 		[categoryFilter, meta],
@@ -497,7 +502,7 @@ export default function SeriesTable({
 								setSelectedRow(null);
 								setPanelOpen(true);
 							}}
-							variant="green"
+							variant="primary"
 							aria-label="Create series"
 						>
 							New Series
@@ -613,8 +618,12 @@ export default function SeriesTable({
 												</div>
 											</TD>
 											<TD className="admin-table-cell--center">{row.title}</TD>
-											<TD className="admin-table-cell--center">{row.categoryTitle || "-"}</TD>
-											<TD className="admin-table-cell--center">{row.subcategoryTitle || "-"}</TD>
+											<TD className="admin-table-cell--center">
+												{row.categoryTitle || "-"}
+											</TD>
+											<TD className="admin-table-cell--center">
+												{row.subcategoryTitle || "-"}
+											</TD>
 											<TD className="admin-table-cell--center">
 												{formatRankPolicySummary(
 													row.readEffectivePolicy ?? "public",
@@ -629,10 +638,12 @@ export default function SeriesTable({
 													roles,
 												)}
 											</TD>
-											<TD className="admin-table-cell--center">{row.authorUsername || "-"}</TD>
+											<TD className="admin-table-cell--center">
+												{row.authorUsername || "-"}
+											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant="accent"
+													variant="danger"
 													onClick={() => {
 														void handleDelete(row);
 													}}
@@ -643,7 +654,7 @@ export default function SeriesTable({
 											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant="neutral"
+													variant="secondary"
 													onClick={() => {
 														setPanelMode("edit");
 														setSelectedRow(row);
@@ -687,3 +698,5 @@ export default function SeriesTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

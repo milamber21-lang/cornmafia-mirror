@@ -4,6 +4,8 @@
 //// Dedicated Riseopedia patch publication panel.                                                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -12,17 +14,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import PanelForm from "@/components/ui/PanelForm";
 import { readResponseMessage } from "@/lib/helpers/http-response";
 
-import {
-	buildInitialValues,
-	buildPayloadData,
-} from "./RiseopediaAdminHelpers";
+import { buildInitialValues, buildPayloadData } from "./RiseopediaAdminHelpers";
 import {
 	buildRiseopediaPanelFieldDef,
 	buildRiseopediaPanelRows,
 } from "./RiseopediaAdminPanelHelpers";
-import {
-	buildRiseopediaPatchPublicationFields,
-} from "./RiseopediaAdminPanelFieldBuilders";
+import { buildRiseopediaPatchPublicationFields } from "./RiseopediaAdminPanelFieldBuilders";
 import type {
 	RiseopediaAdminPanelMode,
 	RiseopediaAdminRow,
@@ -126,7 +123,9 @@ export default function RiseopediaPatchPublicationsPanel({
 				setTopError("");
 				onClose();
 			}}
-			title={mode === "create" ? "Create patch publication" : "Edit patch publication"}
+			title={
+				mode === "create" ? "Create patch publication" : "Edit patch publication"
+			}
 			width="50%"
 			showSave={true}
 			mode={mode}
@@ -147,3 +146,5 @@ export default function RiseopediaPatchPublicationsPanel({
 }
 
 export { RiseopediaPatchPublicationsPanel };
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

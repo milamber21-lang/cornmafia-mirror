@@ -4,6 +4,8 @@
 //// Small-list admin table for selected template field-list editor toolbar tools                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -60,8 +62,10 @@ export default function TemplateFieldListToolsTable({
 	availableTools,
 	fieldList,
 }: TemplateFieldListToolsTableProps): JSX.Element {
-	const [rows, setRows] = useState<TemplateFieldListToolAdminItem[]>(initialRows);
-	const [tools, setTools] = useState<TemplateFieldToolAdminItem[]>(availableTools);
+	const [rows, setRows] =
+		useState<TemplateFieldListToolAdminItem[]>(initialRows);
+	const [tools, setTools] =
+		useState<TemplateFieldToolAdminItem[]>(availableTools);
 	const [busyId, setBusyId] = useState<string | null>(null);
 	const [error, setError] = useState("");
 	const [search, setSearch] = useState("");
@@ -246,7 +250,6 @@ export default function TemplateFieldListToolsTable({
 		[busyId, fieldList.label, refreshFromServer],
 	);
 
-
 	const handleSortChange = useCallback(
 		(nextSortKey: SortKey): void => {
 			setSortDirection((currentDirection) =>
@@ -284,7 +287,7 @@ export default function TemplateFieldListToolsTable({
 					<div className="admin-table-toolbar-action admin-table-toolbar-action--end">
 						<Button
 							onClick={openCreate}
-							variant="green"
+							variant="primary"
 							disabled={selectableTools.length === 0}
 						>
 							Add Tool
@@ -306,10 +309,34 @@ export default function TemplateFieldListToolsTable({
 						</colgroup>
 						<THead>
 							<TR>
-								<AdminSortableTH label="Order" sortKey="order" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Tool" sortKey="tool" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Label" sortKey="label" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Group" sortKey="group" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
+								<AdminSortableTH
+									label="Order"
+									sortKey="order"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Tool"
+									sortKey="tool"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Label"
+									sortKey="label"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Group"
+									sortKey="group"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
 								<TH className="admin-table-cell--center">Status</TH>
 								<TH className="admin-table-cell--center">Remove</TH>
 							</TR>
@@ -318,10 +345,7 @@ export default function TemplateFieldListToolsTable({
 						<TBody>
 							{pageRows.length === 0 ? (
 								<TR>
-									<TD
-										colSpan={6}
-										className="admin-table-empty-cell"
-									>
+									<TD colSpan={6} className="admin-table-empty-cell">
 										No selected field tools found.
 									</TD>
 								</TR>
@@ -346,7 +370,7 @@ export default function TemplateFieldListToolsTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => void removeFieldTool(row)}
-													variant="accent"
+													variant="danger"
 													disabled={disabled}
 												>
 													Remove
@@ -383,3 +407,5 @@ export default function TemplateFieldListToolsTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

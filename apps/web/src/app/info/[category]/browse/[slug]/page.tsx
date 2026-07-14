@@ -4,6 +4,7 @@
 //// DB-gated /info browse shortcut route for fixed Riseopedia browse navigation aliases.                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -34,6 +35,9 @@ type PageProps = {
 		category: string;
 		slug: string;
 	}>;
+	searchParams: Promise<{
+		release?: string | string[];
+	}>;
 };
 
 function isBrowseShortcutSlug(value: string): value is BrowseShortcutSlug {
@@ -42,12 +46,20 @@ function isBrowseShortcutSlug(value: string): value is BrowseShortcutSlug {
 
 export default async function InfoBrowseShortcutPage({
 	params,
+	searchParams,
 }: PageProps): Promise<never> {
-	const resolvedParams = await params;
+	const [resolvedParams, resolvedSearchParams] = await Promise.all([
+		params,
+		searchParams,
+	]);
 	const categorySlug = normalizeInfoRouteSegment(resolvedParams.category);
 	const shortcutSlug = normalizeInfoRouteSegment(resolvedParams.slug);
 
-	if (!categorySlug || !isRiseopediaInfoCategory(categorySlug) || !shortcutSlug) {
+	if (
+		!categorySlug ||
+		!isRiseopediaInfoCategory(categorySlug) ||
+		!shortcutSlug
+	) {
 		notFound();
 	}
 
@@ -74,5 +86,12 @@ export default async function InfoBrowseShortcutPage({
 		notFound();
 	}
 
-	redirect(`/info/${categorySlug}/${targetSubcategorySlug}`);
+	const release = Array.isArray(resolvedSearchParams.release)
+		? resolvedSearchParams.release[0]
+		: resolvedSearchParams.release;
+	const releaseQuery = release ? `?release=${encodeURIComponent(release)}` : "";
+
+	redirect(`/info/${categorySlug}/${targetSubcategorySlug}${releaseQuery}`);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

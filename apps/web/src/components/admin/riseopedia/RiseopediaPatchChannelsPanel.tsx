@@ -4,6 +4,8 @@
 //// Dedicated Riseopedia patch channel panel.                                                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -12,17 +14,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import PanelForm from "@/components/ui/PanelForm";
 import { readResponseMessage } from "@/lib/helpers/http-response";
 
-import {
-	buildInitialValues,
-	buildPayloadData,
-} from "./RiseopediaAdminHelpers";
+import { buildInitialValues, buildPayloadData } from "./RiseopediaAdminHelpers";
 import {
 	buildRiseopediaPanelFieldDef,
 	buildRiseopediaPanelRows,
 } from "./RiseopediaAdminPanelHelpers";
-import {
-	buildRiseopediaPatchChannelFields,
-} from "./RiseopediaAdminPanelFieldBuilders";
+import { buildRiseopediaPatchChannelFields } from "./RiseopediaAdminPanelFieldBuilders";
 import type {
 	RiseopediaAdminPanelMode,
 	RiseopediaAdminRow,
@@ -52,10 +49,7 @@ export default function RiseopediaPatchChannelsPanel({
 		}
 	}, [mode, open, row]);
 
-	const fields = useMemo(
-		() => buildRiseopediaPatchChannelFields(),
-		[],
-	);
+	const fields = useMemo(() => buildRiseopediaPatchChannelFields(), []);
 
 	const defaultValues = useMemo(
 		() => buildInitialValues(fields, row),
@@ -120,7 +114,11 @@ export default function RiseopediaPatchChannelsPanel({
 				setTopError("");
 				onClose();
 			}}
-			title={mode === "create" ? "Create patch publication channel" : "Edit patch publication channel"}
+			title={
+				mode === "create"
+					? "Create patch publication channel"
+					: "Edit patch publication channel"
+			}
 			width="50%"
 			showSave={true}
 			mode={mode}
@@ -141,3 +139,5 @@ export default function RiseopediaPatchChannelsPanel({
 }
 
 export { RiseopediaPatchChannelsPanel };
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

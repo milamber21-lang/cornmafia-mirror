@@ -4,6 +4,7 @@
 //// Admin API route for rebuilt Riseopedia section classification rules.                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -12,7 +13,11 @@ import {
 	listRiseopediaAdminSections,
 	upsertRiseopediaSectionClassificationRuleAdmin,
 } from "@/lib/data/riseopedia-admin";
-import { jsonError, parsePositiveInt, requireAdminResponse } from "@/lib/server/admin-route";
+import {
+	jsonError,
+	parsePositiveInt,
+	requireAdminResponse,
+} from "@/lib/server/admin-route";
 import {
 	classifyRiseopediaAdminError,
 	getBoolean,
@@ -37,12 +42,16 @@ export async function GET(request: NextRequest): Promise<Response> {
 		return guardResponse;
 	}
 
-	const scopedId = parsePositiveInt(request.nextUrl.searchParams.get("sectionId"));
+	const scopedId = parsePositiveInt(
+		request.nextUrl.searchParams.get("sectionId"),
+	);
 
 	try {
 		const rows = await listRiseopediaAdminSections();
 		const filteredRows = scopedId
-			? rows.classificationRules.filter((row) => String(row.section_id ?? "") === String(scopedId))
+			? rows.classificationRules.filter(
+					(row) => String(row.section_id ?? "") === String(scopedId),
+				)
 			: rows.classificationRules;
 		return NextResponse.json({ rows: filteredRows }, { status: 200 });
 	} catch (error: unknown) {
@@ -77,7 +86,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const sectionId = getPositiveInt(data, "sectionId");
 			const entityTypeCode = getRequiredCode(data, "entityTypeCode");
 			if (!sectionId || !entityTypeCode) {
-				return jsonError("VALIDATION_REQUIRED", "Section and entity type are required.", 400);
+				return jsonError(
+					"VALIDATION_REQUIRED",
+					"Section and entity type are required.",
+					400,
+				);
 			}
 
 			const id = await upsertRiseopediaSectionClassificationRuleAdmin({
@@ -102,7 +115,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
 			}
 
-			await deleteRiseopediaSectionClassificationRuleAdmin({ actorDiscordId: actorOrResponse, sectionClassificationRuleId });
+			await deleteRiseopediaSectionClassificationRuleAdmin({
+				actorDiscordId: actorOrResponse,
+				sectionClassificationRuleId,
+			});
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 
@@ -112,3 +128,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

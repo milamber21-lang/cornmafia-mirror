@@ -4,6 +4,8 @@
 //// Resolve current access from web_view-backed auth cache                                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 import { colorIntToHex } from "@/lib/discord/guild";
@@ -301,3 +303,5 @@ export async function resolveAccessForUser(
 		isRoleRefreshDue: actorAccess.is_role_refresh_due,
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

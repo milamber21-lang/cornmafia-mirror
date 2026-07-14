@@ -4,6 +4,7 @@
 //// Admin page for designing one DB-first navigation panel tree                                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 import Link from "next/link";
@@ -46,7 +47,9 @@ export default async function NavigationPanelDesignerPage({
 			return (
 				<div className="admin-guard-shell">
 					<h1 className="admin-guard-title">Navigation Designer</h1>
-					<p className="admin-guard-message">You need to sign in to access the admin area.</p>
+					<p className="admin-guard-message">
+						You need to sign in to access the admin area.
+					</p>
 					<Link href="/login" className="admin-guard-link">
 						Go to login
 					</Link>
@@ -58,7 +61,7 @@ export default async function NavigationPanelDesignerPage({
 			<div className="admin-guard-shell">
 				<h1 className="admin-guard-title">Navigation Designer</h1>
 				<p className="admin-guard-message">Admin access is required.</p>
-				<ButtonLink href="/admin/web/navigation" variant="neutral">
+				<ButtonLink href="/admin/web/navigation" variant="secondary">
 					Go back
 				</ButtonLink>
 			</div>
@@ -89,7 +92,7 @@ export default async function NavigationPanelDesignerPage({
 				<div>
 					<h1 className="admin-page-card-title">Navigation Designer</h1>
 				</div>
-				<ButtonLink href="/admin/web/navigation" variant="neutral">
+				<ButtonLink href="/admin/web/navigation" variant="secondary">
 					Panels
 				</ButtonLink>
 			</div>
@@ -103,3 +106,5 @@ export default async function NavigationPanelDesignerPage({
 		</section>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

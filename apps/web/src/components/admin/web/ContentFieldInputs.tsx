@@ -4,6 +4,7 @@
 //// Field-type-aware dynamic admin content inputs with centered selected-media preview rows                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -12,16 +13,9 @@ import * as React from "react";
 import RichTextEditor, {
 	type RichTextEditorMediaContext,
 } from "@/components/editors/richtext/RichTextEditor";
-import type {
-	RichTextEditorCanvasLayoutMode,
-} from "@/components/editors/richtext/RichTextEditorTypes";
+import type { RichTextEditorCanvasLayoutMode } from "@/components/editors/richtext/RichTextEditorTypes";
 import FilePreview from "@/components/ui/basic-elements/FilePreview";
-import {
-	Checkbox,
-	Input,
-	Label,
-	Textarea,
-} from "@/components/ui";
+import { Checkbox, Input, Label, Textarea } from "@/components/ui";
 import DropdownMenuSingle, {
 	type SingleOption,
 } from "@/components/ui/basic-elements/DropdownMenuSingle";
@@ -29,6 +23,7 @@ import {
 	createEmptyRichTextJson,
 	isRichTextJsonEmpty,
 } from "@/lib/editors/richtext/rich-text-json";
+import { isContentSystemFieldListCode } from "@/lib/helpers/content-system-fields";
 import type {
 	ContentMediaOption,
 	ContentSeriesOption,
@@ -38,7 +33,7 @@ import type {
 
 type Values = Record<string, unknown>;
 
-type ContentFieldInputsProps = {
+export type ContentFieldInputsProps = {
 	fields: ContentTemplateField[];
 	fieldOptions: ContentTemplateFieldOption[];
 	media: ContentMediaOption[];
@@ -109,9 +104,8 @@ function mediaOptions(rows: ContentMediaOption[]): SingleOption[] {
 function seriesOptions(rows: ContentSeriesOption[]): SingleOption[] {
 	return rows.map((row) => ({
 		value: row.id,
-		label: row.subcategoryId === null
-			? `${row.title} (category-level)`
-			: row.title,
+		label:
+			row.subcategoryId === null ? `${row.title} (category-level)` : row.title,
 	}));
 }
 
@@ -162,23 +156,30 @@ function hasRenderableInputValue(
 	return true;
 }
 
-function isAsideDestination(field: ContentTemplateField): boolean {
-	return (
-		field.renderDestinationCode === "right" ||
-		field.renderDestinationCode === "left"
-	);
-}
-
 function getRichTextEditorCanvasLayoutMode(
 	field: ContentTemplateField,
-	hasRenderableAsideFields: boolean,
+	hasRenderableLeftFields: boolean,
+	hasRenderableRightFields: boolean,
 ): RichTextEditorCanvasLayoutMode {
-	if (isAsideDestination(field)) {
-		return "aside";
+	if (field.renderDestinationCode === "left") {
+		return "left-aside";
+	}
+
+	if (field.renderDestinationCode === "right") {
+		return "right-aside";
 	}
 
 	if (field.renderDestinationCode === "main") {
-		return hasRenderableAsideFields ? "main-with-aside" : "main-full";
+		if (hasRenderableLeftFields && hasRenderableRightFields) {
+			return "main-with-both";
+		}
+		if (hasRenderableLeftFields) {
+			return "main-with-left";
+		}
+		if (hasRenderableRightFields) {
+			return "main-with-right";
+		}
+		return "main-full";
 	}
 
 	return "full";
@@ -192,7 +193,11 @@ function EmptyFieldsMessage(): React.JSX.Element {
 	);
 }
 
-function FieldLabel({ field }: { field: ContentTemplateField }): React.JSX.Element {
+function FieldLabel({
+	field,
+}: {
+	field: ContentTemplateField;
+}): React.JSX.Element {
 	return (
 		<Label>
 			{field.label}
@@ -272,21 +277,28 @@ export default function ContentFieldInputs({
 	onChange,
 	readOnly = false,
 }: ContentFieldInputsProps): React.JSX.Element {
-	if (fields.length === 0) {
+	const editableFields = fields.filter(
+		(field) => !isContentSystemFieldListCode(field.fieldListCode),
+	);
+
+	if (editableFields.length === 0) {
 		return <EmptyFieldsMessage />;
 	}
 
-	const hasRenderableAsideFields = fields.some((field) => {
-		if (!isAsideDestination(field)) {
-			return false;
-		}
-
-		return hasRenderableInputValue(field, values[fieldId(field)]);
-	});
+	const hasRenderableLeftFields = editableFields.some(
+		(field) =>
+			field.renderDestinationCode === "left" &&
+			hasRenderableInputValue(field, values[fieldId(field)]),
+	);
+	const hasRenderableRightFields = editableFields.some(
+		(field) =>
+			field.renderDestinationCode === "right" &&
+			hasRenderableInputValue(field, values[fieldId(field)]),
+	);
 
 	return (
 		<div className="admin-content-fields-grid">
-			{fields.map((field) => {
+			{editableFields.map((field) => {
 				const id = fieldId(field);
 				const value = values[id];
 				const fieldReadOnly = readOnly || !field.isEnabled;
@@ -301,9 +313,7 @@ export default function ContentFieldInputs({
 								value={valueAsString(value)}
 								onChange={(event) => onChange(id, event.target.value)}
 								placeholder={
-									isYoutubeField
-										? "https://www.youtube.com/watch?v=..."
-										: undefined
+									isYoutubeField ? "https://www.youtube.com/watch?v=..." : undefined
 								}
 								disabled={fieldReadOnly}
 							/>
@@ -332,7 +342,9 @@ export default function ContentFieldInputs({
 								options={seriesOptions(series)}
 								value={valueAsString(value)}
 								onChange={(nextValue) => onChange(id, nextValue)}
-								placeholder={series.length === 0 ? "No series available" : "Select series"}
+								placeholder={
+									series.length === 0 ? "No series available" : "Select series"
+								}
 								disabled={fieldReadOnly || series.length === 0}
 							/>
 						</FieldShell>
@@ -407,9 +419,7 @@ export default function ContentFieldInputs({
 							<div className="admin-content-field-checkbox-shell">
 								<Checkbox
 									checked={valueAsBoolean(value)}
-									onChange={(event) =>
-										onChange(id, event.currentTarget.checked)
-									}
+									onChange={(event) => onChange(id, event.currentTarget.checked)}
 									label={`${field.label}${field.isRequired ? " *" : ""}`}
 									block
 									disabled={fieldReadOnly}
@@ -459,8 +469,10 @@ export default function ContentFieldInputs({
 								mediaContext={editorMediaContext}
 								canvasLayoutMode={getRichTextEditorCanvasLayoutMode(
 									field,
-									hasRenderableAsideFields,
+									hasRenderableLeftFields,
+									hasRenderableRightFields,
 								)}
+								canvasWidthCode={field.layoutWidthCode}
 							/>
 						</FieldShell>
 					);
@@ -481,3 +493,5 @@ export default function ContentFieldInputs({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

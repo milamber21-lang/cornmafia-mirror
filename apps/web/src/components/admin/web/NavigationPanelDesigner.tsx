@@ -4,6 +4,7 @@
 //// DB-first orchestration component for one admin navigation panel tree designer.                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -22,17 +23,9 @@ import {
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
-import {
-	arrayMove,
-	sortableKeyboardCoordinates,
-} from "@dnd-kit/sortable";
+import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
-import {
-	AlertBanner,
-	Button,
-	IconRender,
-	UiChip,
-} from "@/components/ui";
+import { AlertBanner, Button, IconRender, UiChip } from "@/components/ui";
 import { confirmAction } from "@/lib/client/confirm-dialog";
 import type {
 	NavigationCategoryLookupItem,
@@ -83,9 +76,12 @@ export default function NavigationPanelDesigner({
 	const [doc, setDoc] = useState<DesignerPanelTree>(() =>
 		hydrateNavigationPanelTree(initialDoc),
 	);
-	const [categories, setCategories] = useState<NavigationCategoryLookupItem[]>(initialCategories);
-	const [subcategories, setSubcategories] = useState<NavigationSubcategoryLookupItem[]>(initialSubcategories);
-	const [content, setContent] = useState<NavigationContentLookupItem[]>(initialContent);
+	const [categories, setCategories] =
+		useState<NavigationCategoryLookupItem[]>(initialCategories);
+	const [subcategories, setSubcategories] =
+		useState<NavigationSubcategoryLookupItem[]>(initialSubcategories);
+	const [content, setContent] =
+		useState<NavigationContentLookupItem[]>(initialContent);
 	const [dirty, setDirty] = useState(false);
 	const dirtyRef = useRef(false);
 	const confirmNavigationRef = useRef(false);
@@ -94,12 +90,16 @@ export default function NavigationPanelDesigner({
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState("");
-	const [validationIssues, setValidationIssues] = useState<NavigationDesignerValidationIssue[]>([]);
+	const [validationIssues, setValidationIssues] = useState<
+		NavigationDesignerValidationIssue[]
+	>([]);
 	const [modal, setModal] = useState<ModalMode | null>(null);
 	const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
 
 	const categorySlotLimit = normalizeLimit(doc.panel.maxCategories);
-	const subcategorySlotLimit = normalizeLimit(doc.panel.maxSubcategoriesPerCategory);
+	const subcategorySlotLimit = normalizeLimit(
+		doc.panel.maxSubcategoriesPerCategory,
+	);
 	const targetSlotLimit = normalizeLimit(doc.panel.maxTargetsPerSubcategory);
 
 	const createEditorId = useCallback((prefix: string): string => {
@@ -109,7 +109,9 @@ export default function NavigationPanelDesigner({
 
 	const sensors = useSensors(
 		useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
-		useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+		useSensor(TouchSensor, {
+			activationConstraint: { delay: 150, tolerance: 5 },
+		}),
 		useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
 	);
 
@@ -146,7 +148,9 @@ export default function NavigationPanelDesigner({
 		return closestCenter({
 			...args,
 			droppableContainers:
-				matchingContainers.length > 0 ? matchingContainers : args.droppableContainers,
+				matchingContainers.length > 0
+					? matchingContainers
+					: args.droppableContainers,
 		});
 	}, []);
 
@@ -316,7 +320,9 @@ export default function NavigationPanelDesigner({
 
 			setDoc(hydrateNavigationPanelTree(payload.doc));
 			setCategories(Array.isArray(payload.categories) ? payload.categories : []);
-			setSubcategories(Array.isArray(payload.subcategories) ? payload.subcategories : []);
+			setSubcategories(
+				Array.isArray(payload.subcategories) ? payload.subcategories : [],
+			);
 			setContent(Array.isArray(payload.content) ? payload.content : []);
 			dirtyRef.current = false;
 			setDirty(false);
@@ -419,7 +425,10 @@ export default function NavigationPanelDesigner({
 
 	const addSubcategory = useCallback(
 		(categoryEditorId: string, row: NavigationSubcategoryLookupItem): void => {
-			const categoryIndex = findCategoryIndexByEditorId(doc.items, categoryEditorId);
+			const categoryIndex = findCategoryIndexByEditorId(
+				doc.items,
+				categoryEditorId,
+			);
 			const category = categoryIndex >= 0 ? doc.items[categoryIndex] : null;
 			if (!category) {
 				return;
@@ -430,7 +439,11 @@ export default function NavigationPanelDesigner({
 				return;
 			}
 
-			if (category.subcategories.some((item) => item.subcategoryId === row.subcategoryId)) {
+			if (
+				category.subcategories.some(
+					(item) => item.subcategoryId === row.subcategoryId,
+				)
+			) {
 				return;
 			}
 
@@ -465,7 +478,10 @@ export default function NavigationPanelDesigner({
 			subcategoryEditorId: string,
 			row: NavigationContentLookupItem,
 		): void => {
-			const categoryIndex = findCategoryIndexByEditorId(doc.items, categoryEditorId);
+			const categoryIndex = findCategoryIndexByEditorId(
+				doc.items,
+				categoryEditorId,
+			);
 			const category = categoryIndex >= 0 ? doc.items[categoryIndex] : null;
 			if (!category) {
 				return;
@@ -539,7 +555,10 @@ export default function NavigationPanelDesigner({
 
 	const removeSubcategory = useCallback(
 		(categoryEditorId: string, subcategoryEditorId: string): void => {
-			const categoryIndex = findCategoryIndexByEditorId(doc.items, categoryEditorId);
+			const categoryIndex = findCategoryIndexByEditorId(
+				doc.items,
+				categoryEditorId,
+			);
 			const category = categoryIndex >= 0 ? doc.items[categoryIndex] : null;
 			if (!category) {
 				return;
@@ -563,7 +582,10 @@ export default function NavigationPanelDesigner({
 			subcategoryEditorId: string,
 			contentEditorId: string,
 		): void => {
-			const categoryIndex = findCategoryIndexByEditorId(doc.items, categoryEditorId);
+			const categoryIndex = findCategoryIndexByEditorId(
+				doc.items,
+				categoryEditorId,
+			);
 			const category = categoryIndex >= 0 ? doc.items[categoryIndex] : null;
 			if (!category) {
 				return;
@@ -729,7 +751,7 @@ export default function NavigationPanelDesigner({
 					</div>
 					<div className="admin-nav-designer-header__actions">
 						<Button
-							variant="accent"
+							variant="secondary"
 							onClick={() => void reload()}
 							type="button"
 							disabled={loading || saving}
@@ -737,7 +759,7 @@ export default function NavigationPanelDesigner({
 							Reload
 						</Button>
 						<Button
-							variant="green"
+							variant="primary"
 							onClick={() => void save()}
 							disabled={!dirty || loading || saving}
 							loading={saving}
@@ -759,7 +781,9 @@ export default function NavigationPanelDesigner({
 					<div className="admin-nav-designer-alert">
 						<AlertBanner tone="error" dismissible autoHideMs={0}>
 							<div className="admin-nav-designer-validation">
-								<div className="admin-nav-designer-validation__title">Fix these navigation items before saving:</div>
+								<div className="admin-nav-designer-validation__title">
+									Fix these navigation items before saving:
+								</div>
 								<ul className="admin-nav-designer-validation__list">
 									{validationIssues.map((issue) => (
 										<li key={issue.key}>{issue.message}</li>
@@ -777,7 +801,8 @@ export default function NavigationPanelDesigner({
 				{hasStaleItems ? (
 					<div className="admin-nav-designer-alert">
 						<AlertBanner tone="warning">
-							Some saved navigation rows are stale. They remain visible so you can remove or replace them intentionally.
+							Some saved navigation rows are stale. They remain visible so you can
+							remove or replace them intentionally.
 						</AlertBanner>
 					</div>
 				) : null}
@@ -861,9 +886,7 @@ export default function NavigationPanelDesigner({
 						subcategories={subcategories}
 						usedSubcategoryIds={
 							new Set(
-								activeCategoryForModal.subcategories.map(
-									(row) => row.subcategoryId,
-								),
+								activeCategoryForModal.subcategories.map((row) => row.subcategoryId),
 							)
 						}
 						onPick={(row) => addSubcategory(modal.categoryEditorId, row)}
@@ -876,7 +899,9 @@ export default function NavigationPanelDesigner({
 				title="Add content"
 				onClose={() => setModal(null)}
 			>
-				{modal?.type === "content" && activeCategoryForModal && activeSubcategoryForModal ? (
+				{modal?.type === "content" &&
+				activeCategoryForModal &&
+				activeSubcategoryForModal ? (
 					<ContentPicker
 						categoryId={activeCategoryForModal.categoryId}
 						subcategoryId={activeSubcategoryForModal.subcategoryId}
@@ -884,11 +909,7 @@ export default function NavigationPanelDesigner({
 							new Set(activeSubcategoryForModal.content.map((row) => row.contentId))
 						}
 						onPick={(row) =>
-							addContent(
-								modal.categoryEditorId,
-								modal.subcategoryEditorId,
-								row,
-							)
+							addContent(modal.categoryEditorId, modal.subcategoryEditorId, row)
 						}
 					/>
 				) : null}
@@ -896,3 +917,5 @@ export default function NavigationPanelDesigner({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

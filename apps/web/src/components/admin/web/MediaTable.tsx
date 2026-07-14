@@ -4,6 +4,8 @@
 //// Admin media table with server-driven query state and parent-owned panel lifecycle                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -75,7 +77,12 @@ type Props = {
 	subcategories?: SubcategoryOption[];
 };
 
-type SortKey = "alt" | "originalFilename" | "category" | "subcategory" | "owner";
+type SortKey =
+	| "alt"
+	| "originalFilename"
+	| "category"
+	| "subcategory"
+	| "owner";
 
 type QueryPatch = Partial<{
 	page: number;
@@ -135,7 +142,6 @@ function toNonNegativeInt(value: unknown): number {
 
 	return 0;
 }
-
 
 function readSortKeyParam(value: string | null): SortKey {
 	return value && SORT_KEYS.has(value as SortKey) ? (value as SortKey) : "alt";
@@ -356,7 +362,16 @@ export default function MediaTable({
 		} finally {
 			setLoading(false);
 		}
-	}, [categoryId, page, pageSize, searchValue, setParams, sortDirection, sortKey, subcategoryId]);
+	}, [
+		categoryId,
+		page,
+		pageSize,
+		searchValue,
+		setParams,
+		sortDirection,
+		sortKey,
+		subcategoryId,
+	]);
 
 	React.useEffect(() => {
 		void refreshCurrentQuery();
@@ -419,7 +434,6 @@ export default function MediaTable({
 		},
 		[busyId, refreshCurrentQuery],
 	);
-
 
 	const handleSortChange = React.useCallback(
 		(nextSortKey: SortKey): void => {
@@ -489,7 +503,7 @@ export default function MediaTable({
 
 					<div className="admin-table-toolbar-action">
 						<Button
-							variant="green"
+							variant="primary"
 							aria-label="Upload media"
 							onClick={() => {
 								setPanelMode("create");
@@ -559,7 +573,10 @@ export default function MediaTable({
 						<TBody>
 							{loading && rows.length === 0 ? (
 								<TR>
-									<TD colSpan={7} className="admin-table-empty-cell admin-table-empty-cell--spacious">
+									<TD
+										colSpan={7}
+										className="admin-table-empty-cell admin-table-empty-cell--spacious"
+									>
 										Loading...
 									</TD>
 								</TR>
@@ -567,7 +584,10 @@ export default function MediaTable({
 
 							{!loading && rows.length === 0 ? (
 								<TR>
-									<TD colSpan={7} className="admin-table-empty-cell admin-table-empty-cell--spacious">
+									<TD
+										colSpan={7}
+										className="admin-table-empty-cell admin-table-empty-cell--spacious"
+									>
 										No media matches your filters.
 									</TD>
 								</TR>
@@ -582,12 +602,16 @@ export default function MediaTable({
 										<TD className="admin-table-cell--center admin-table-break-all">
 											{row.originalFilename || "—"}
 										</TD>
-										<TD className="admin-table-cell--center">{row.categoryName || "—"}</TD>
-										<TD className="admin-table-cell--center">{row.subcategoryName || "—"}</TD>
+										<TD className="admin-table-cell--center">
+											{row.categoryName || "—"}
+										</TD>
+										<TD className="admin-table-cell--center">
+											{row.subcategoryName || "—"}
+										</TD>
 										<TD className="admin-table-cell--center">{buildOwnerLabel(row)}</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="accent"
+												variant="danger"
 												onClick={() => void handleDelete(row.id)}
 												disabled={busyId !== null}
 											>
@@ -596,7 +620,7 @@ export default function MediaTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="neutral"
+												variant="secondary"
 												disabled={busyId !== null}
 												onClick={() => {
 													setPanelMode("edit");
@@ -654,3 +678,5 @@ export default function MediaTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

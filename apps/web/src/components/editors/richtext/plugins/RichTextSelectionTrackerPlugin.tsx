@@ -4,6 +4,7 @@
 //// Lexical plugin that reports current toolbar selection state.                                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -208,7 +209,7 @@ export function RichTextSelectionTrackerPlugin({
 				let hops = 0;
 				while (cur && hops < 24) {
 					const ct = getTypeName(cur);
-					if (ct === "link") snap.hasLink = true;
+					if (ct === "link" || ct === "richtext-link") snap.hasLink = true;
 					if (ct === "list" && snap.list === null) {
 						const k = getListKind(cur);
 						if (k) snap.list = k;
@@ -257,3 +258,5 @@ export function RichTextSelectionTrackerPlugin({
 
 	return null;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

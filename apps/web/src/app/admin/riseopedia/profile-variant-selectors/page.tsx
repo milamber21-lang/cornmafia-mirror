@@ -4,6 +4,7 @@
 //// Admin page for rebuilt Riseopedia display profile variant selectors.                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -23,10 +24,15 @@ export const dynamic = "force-dynamic";
 export default async function ProfileVariantSelectorsAdminPage(): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Variant Selectors" reason={guard.reason} />;
+		return (
+			<RiseopediaAdminGuard title="Variant Selectors" reason={guard.reason} />
+		);
 	}
 
-	const [meta, rows] = await Promise.all([listRiseopediaAdminMeta(), listRiseopediaAdminDisplayProfiles()]);
+	const [meta, rows] = await Promise.all([
+		listRiseopediaAdminMeta(),
+		listRiseopediaAdminDisplayProfiles(),
+	]);
 
 	return (
 		<RiseopediaAdminPageChrome
@@ -34,7 +40,13 @@ export default async function ProfileVariantSelectorsAdminPage(): Promise<JSX.El
 			description="Choose which canonical variant group appears as the detail-page selector for each profile."
 		>
 			<RiseopediaAdminNav active="profile-variant-selectors" />
-			<RiseopediaProfileVariantSelectorsTable initialRows={rows.variantSelectors} displayProfiles={rows.profiles} meta={meta} />
+			<RiseopediaProfileVariantSelectorsTable
+				initialRows={rows.variantSelectors}
+				displayProfiles={rows.profiles}
+				meta={meta}
+			/>
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

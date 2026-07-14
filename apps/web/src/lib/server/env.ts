@@ -4,10 +4,17 @@
 //// Central server-side environment validation for runtime secrets, URLs, and DB role boundaries.               ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
-const OWNER_DATABASE_USERS = new Set(["cm", "postgres", "root", "admin", "owner"]);
+const OWNER_DATABASE_USERS = new Set([
+	"cm",
+	"postgres",
+	"root",
+	"admin",
+	"owner",
+]);
 
 const BLOCKED_EXACT_VALUES = new Set([
 	"",
@@ -111,7 +118,9 @@ function assertHttpUrl(name: string, value: string): void {
 	if (isProductionRuntime() && name !== "WEB_INTERNAL_URL") {
 		const hostname = parsed.hostname.toLowerCase();
 		if (hostname === "localhost" || hostname.includes("example")) {
-			throw new Error(`Env ${name} must not use a placeholder host in production.`);
+			throw new Error(
+				`Env ${name} must not use a placeholder host in production.`,
+			);
 		}
 	}
 }
@@ -223,12 +232,16 @@ export function getRuntimeDatabaseUrl(): string {
 	const parsed = parseUrl("WEB_DATABASE_URL or DATABASE_URL", value);
 
 	if (parsed.protocol !== "postgresql:" && parsed.protocol !== "postgres:") {
-		throw new Error("WEB_DATABASE_URL or DATABASE_URL must use postgresql protocol.");
+		throw new Error(
+			"WEB_DATABASE_URL or DATABASE_URL must use postgresql protocol.",
+		);
 	}
 
 	const runtimeUser = decodeURIComponent(parsed.username).trim().toLowerCase();
 	if (!runtimeUser) {
-		throw new Error("WEB_DATABASE_URL or DATABASE_URL must include a runtime database user.");
+		throw new Error(
+			"WEB_DATABASE_URL or DATABASE_URL must include a runtime database user.",
+		);
 	}
 
 	if (isProductionRuntime() && OWNER_DATABASE_USERS.has(runtimeUser)) {
@@ -274,3 +287,5 @@ export function assertWebRuntimeEnvReady(): void {
 
 	runtimeEnvValidated = true;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

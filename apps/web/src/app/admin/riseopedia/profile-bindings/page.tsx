@@ -4,6 +4,7 @@
 //// Admin page for rebuilt Riseopedia display profile bindings.                                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -23,10 +24,15 @@ export const dynamic = "force-dynamic";
 export default async function ProfileBindingsAdminPage(): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Profile Bindings" reason={guard.reason} />;
+		return (
+			<RiseopediaAdminGuard title="Profile Bindings" reason={guard.reason} />
+		);
 	}
 
-	const [meta, rows] = await Promise.all([listRiseopediaAdminMeta(), listRiseopediaAdminDisplayProfiles()]);
+	const [meta, rows] = await Promise.all([
+		listRiseopediaAdminMeta(),
+		listRiseopediaAdminDisplayProfiles(),
+	]);
 
 	return (
 		<RiseopediaAdminPageChrome
@@ -34,7 +40,13 @@ export default async function ProfileBindingsAdminPage(): Promise<JSX.Element> {
 			description="Map canonical game classifications to display profiles."
 		>
 			<RiseopediaAdminNav active="profile-bindings" />
-			<RiseopediaProfileBindingsTable initialRows={rows.bindings} displayProfiles={rows.profiles} meta={meta} />
+			<RiseopediaProfileBindingsTable
+				initialRows={rows.bindings}
+				displayProfiles={rows.profiles}
+				meta={meta}
+			/>
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

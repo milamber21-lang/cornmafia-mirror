@@ -4,6 +4,7 @@
 //// Header-authenticated POST-only cache-tag revalidation endpoint for controlled cache refreshes.             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { timingSafeEqual } from "crypto";
 
@@ -98,7 +99,8 @@ function rejectUrlParams(req: Request): NextResponse | null {
 		return NextResponse.json(
 			{
 				ok: false,
-				error: "Use POST JSON and a token header; URL secrets and URL tags are not accepted.",
+				error:
+					"Use POST JSON and a token header; URL secrets and URL tags are not accepted.",
 			},
 			{ status: 400 },
 		);
@@ -141,7 +143,9 @@ function assertJsonRequest(req: Request): NextResponse | null {
 	return null;
 }
 
-async function readRevalidateBody(req: Request): Promise<RevalidateBody | null> {
+async function readRevalidateBody(
+	req: Request,
+): Promise<RevalidateBody | null> {
 	try {
 		const json = (await req.json()) as unknown;
 		return isRecord(json) ? json : null;
@@ -168,7 +172,9 @@ function validateRevalidateTag(tag: string): string | null {
 		return "Tag contains unsupported characters.";
 	}
 
-	if (!ALLOWED_REVALIDATE_TAG_PREFIXES.some((prefix) => tag.startsWith(prefix))) {
+	if (
+		!ALLOWED_REVALIDATE_TAG_PREFIXES.some((prefix) => tag.startsWith(prefix))
+	) {
 		return "Tag prefix is not allowed.";
 	}
 
@@ -185,10 +191,7 @@ function revalidateRequestedTag(tag: string): NextResponse {
 	}
 
 	revalidateTag(tag, "max");
-	return NextResponse.json(
-		{ ok: true, revalidated: tag },
-		{ status: 200 },
-	);
+	return NextResponse.json({ ok: true, revalidated: tag }, { status: 200 });
 }
 
 export async function GET(): Promise<NextResponse> {
@@ -201,7 +204,7 @@ export async function POST(req: Request): Promise<NextResponse> {
 		return sameOriginResponse;
 	}
 
-	const rateLimitResponse = checkRateLimit({
+	const rateLimitResponse = await checkRateLimit({
 		request: req,
 		bucket: "revalidate-tag",
 		limit: REVALIDATE_RATE_LIMIT_COUNT,
@@ -237,3 +240,5 @@ export async function POST(req: Request): Promise<NextResponse> {
 
 	return revalidateRequestedTag(tag);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

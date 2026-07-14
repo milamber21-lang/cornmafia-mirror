@@ -4,6 +4,8 @@
 //// DB-first member authoring lookup helpers for public/member workspace surfaces.                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 import { query } from "@/lib/data/pg";
@@ -90,3 +92,5 @@ export function findMemberAuthorableCollection(args: {
 		) ?? null
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

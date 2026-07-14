@@ -4,6 +4,7 @@
 //// Admin API route for Riseopedia display profile rows.                                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -72,8 +73,19 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const displayProfileCode = getRequiredCode(data, "displayProfileCode");
 			const displayProfileName = getRequiredString(data, "displayProfileName");
 			const entityTypeCode = getRequiredCode(data, "entityTypeCode");
-			if (!channelCode || !displayProfileCode || !displayProfileName || !entityTypeCode) {
-				return jsonError("VALIDATION_REQUIRED", "Channel, display profile code, name, and entity type are required.", 400);
+			const bodyRendererCode =
+				getRequiredCode(data, "bodyRendererCode") ?? "generic_body";
+			if (
+				!channelCode ||
+				!displayProfileCode ||
+				!displayProfileName ||
+				!entityTypeCode
+			) {
+				return jsonError(
+					"VALIDATION_REQUIRED",
+					"Channel, display profile code, name, and entity type are required.",
+					400,
+				);
 			}
 
 			const id = await upsertRiseopediaDisplayProfileAdmin({
@@ -83,6 +95,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 				displayProfileCode,
 				displayProfileName,
 				entityTypeCode,
+				bodyRendererCode,
 				description: getNullableString(data, "description"),
 				sortOrder: getNonNegativeInt(data, "sortOrder", 1000),
 				active: getBoolean(data, "active", true),
@@ -97,7 +110,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
 			}
 
-			await deleteRiseopediaDisplayProfileAdmin({ actorDiscordId: actorOrResponse, displayProfileId });
+			await deleteRiseopediaDisplayProfileAdmin({
+				actorDiscordId: actorOrResponse,
+				displayProfileId,
+			});
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 
@@ -107,3 +123,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

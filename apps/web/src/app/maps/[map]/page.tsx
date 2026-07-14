@@ -4,6 +4,8 @@
 //// Server page that loads map overlay data and renders the map viewer.                                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 import MapViewer from "@/components/maps/MapViewer";
 import type { OverlaysResponse } from "@/components/maps/types";
@@ -74,3 +76,5 @@ export default async function Page({
 		</section>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

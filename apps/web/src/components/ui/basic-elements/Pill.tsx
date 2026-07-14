@@ -4,6 +4,8 @@
 //// Shared pill and pill-swatch primitives for small semantic badges                                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -100,9 +102,13 @@ export function Pill({
 			aria-pressed={ariaPressed}
 			aria-disabled={disabled || undefined}
 		>
-			{leftIcon && <span className="ui-pill__icon ui-pill__icon--left">{leftIcon}</span>}
+			{leftIcon && (
+				<span className="ui-pill__icon ui-pill__icon--left">{leftIcon}</span>
+			)}
 			{children && <span className="ui-pill__label">{children}</span>}
-			{rightIcon && <span className="ui-pill__icon ui-pill__icon--right">{rightIcon}</span>}
+			{rightIcon && (
+				<span className="ui-pill__icon ui-pill__icon--right">{rightIcon}</span>
+			)}
 		</span>
 	);
 }
@@ -127,7 +133,11 @@ export function PillSwatch({
 		!noTint &&
 		(normalized.startsWith("#") || normalized.startsWith("var("));
 	const background = hasColor ? normalized : undefined;
-	const label = noTint ? "Original / no tint" : hasColor ? normalized : "undefined";
+	const label = noTint
+		? "Original / no tint"
+		: hasColor
+			? normalized
+			: "undefined";
 	const style: PillSwatchStyle = background
 		? {
 				"--ui-pill-swatch-bg": background,
@@ -148,3 +158,5 @@ export function PillSwatch({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

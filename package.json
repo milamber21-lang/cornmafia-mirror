@@ -1,30 +1,41 @@
 {
   "name": "cm",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "format": "prettier --write \"apps/**/*.{ts,tsx,js,jsx,json,md,css}\"",
-    "format:check": "prettier --check .",
+    "format:prettier": "node scripts/prettier-repo.mjs write",
+    "format:write": "node scripts/prettier-repo.mjs write",
+    "format": "npm run format:prettier && npm run watermark:add && npm run format:check && npm run watermark:verify",
+    "format:check": "node scripts/prettier-repo.mjs check",
+    "watermark:add": "node scripts/wooden-engine-watermark.mjs add",
+    "watermark:verify": "node scripts/wooden-engine-watermark.mjs verify",
     "headers:add": "node scripts/add-headers.mjs",
     "jsdoc:add": "node scripts/add-jsdoc.mjs",
     "lint": "eslint \"apps/web/**/*.{ts,tsx,js,jsx}\"",
     "lint:fix": "eslint \"apps/web/**/*.{ts,tsx,js,jsx}\" --fix",
     "lint:web": "npm run lint",
     "lint:web:fix": "npm run lint:fix",
-    "test": "npm run test:security",
+    "typecheck:web": "npm --prefix apps/web run typecheck",
+    "build:web": "npm --prefix apps/web run build",
+    "test": "npm run test:security && npm run test:web",
+    "test:web": "npm --prefix apps/web run test:ci",
+    "test:web:watch": "npm --prefix apps/web run test:watch",
     "test:security": "node scripts/security-posture-check.mjs",
     "audit:web:prod": "node scripts/audit-production-dependencies.mjs",
-    "ci:security": "npm run test:security && npm run audit:web:prod"
+    "ci:security": "npm run test:security && npm run audit:web:prod",
+    "ci:quality": "npm run format:check && npm run watermark:verify && npm run lint && npm run typecheck:web && npm run test:web && npm run build:web",
+    "ci": "npm run ci:security && npm run ci:quality"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/milamber21-lang/cornmafia.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "WoodenElf",
+  "license": "UNLICENSED",
   "bugs": {
     "url": "https://github.com/milamber21-lang/cornmafia/issues"
   },

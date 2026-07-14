@@ -4,6 +4,8 @@
 //// Server-side media upload content validation based on verified bytes instead of browser MIME claims             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 import { sanitizeSvg } from "@/lib/helpers/svg-sanitizer";
@@ -177,7 +179,9 @@ function decodeUtf8Strict(buffer: Buffer): string | null {
 	}
 }
 
-function normalizeDeclaredMimeType(value: string): VerifiedMediaMimeType | null {
+function normalizeDeclaredMimeType(
+	value: string,
+): VerifiedMediaMimeType | null {
 	const normalizedValue = value.trim().toLowerCase().split(";")[0] ?? "";
 	return DECLARED_MIME_ALIASES[normalizedValue] ?? null;
 }
@@ -280,7 +284,9 @@ export async function validateUploadedMediaFile(args: {
 	}
 
 	if (!args.allowedMimeTypes.has(detectedMimeType)) {
-		throw new UploadValidationError(`Unsupported MIME type: ${detectedMimeType}.`);
+		throw new UploadValidationError(
+			`Unsupported MIME type: ${detectedMimeType}.`,
+		);
 	}
 
 	const declaredMimeType = getDeclaredMimeType(args.file);
@@ -298,3 +304,5 @@ export async function validateUploadedMediaFile(args: {
 		declaredMimeType,
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

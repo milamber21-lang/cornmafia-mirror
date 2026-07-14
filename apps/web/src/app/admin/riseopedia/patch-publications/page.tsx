@@ -4,6 +4,7 @@
 //// Admin page for Riseopedia patch publication state.                                                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -22,14 +23,25 @@ export const dynamic = "force-dynamic";
 export default async function PatchPublicationsAdminPage(): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Patch Publications" reason={guard.reason} />;
+		return (
+			<RiseopediaAdminGuard title="Patch Publications" reason={guard.reason} />
+		);
 	}
 
-	const [meta, rows] = await Promise.all([listRiseopediaAdminMeta(), listRiseopediaPatchAdmin()]);
+	const [meta, rows] = await Promise.all([
+		listRiseopediaAdminMeta(),
+		listRiseopediaPatchAdmin(),
+	]);
 
 	return (
 		<RiseopediaAdminPageChrome title="Patch Publications">
-			<RiseopediaPatchPublicationsTable initialRows={rows.publications} channels={rows.channels} meta={meta} />
+			<RiseopediaPatchPublicationsTable
+				initialRows={rows.publications}
+				channels={rows.channels}
+				meta={meta}
+			/>
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

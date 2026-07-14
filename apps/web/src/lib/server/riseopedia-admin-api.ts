@@ -4,6 +4,7 @@
 //// Shared parser helpers for Riseopedia admin infrastructure API routes.                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -31,7 +32,9 @@ export function asObject(value: unknown): ObjectBody | null {
 		: null;
 }
 
-export async function readObjectBody(request: Request): Promise<ObjectBody | NextResponse> {
+export async function readObjectBody(
+	request: Request,
+): Promise<ObjectBody | NextResponse> {
 	let body: unknown;
 	try {
 		body = await request.json();
@@ -40,10 +43,14 @@ export async function readObjectBody(request: Request): Promise<ObjectBody | Nex
 	}
 
 	const payload = asObject(body);
-	return payload ?? jsonError("VALIDATION_REQUIRED", "Invalid request body.", 400);
+	return (
+		payload ?? jsonError("VALIDATION_REQUIRED", "Invalid request body.", 400)
+	);
 }
 
-export async function requireRiseopediaAdminActor(): Promise<string | NextResponse> {
+export async function requireRiseopediaAdminActor(): Promise<
+	string | NextResponse
+> {
 	return requireActorDiscordId();
 }
 
@@ -52,7 +59,10 @@ export function classifyRiseopediaAdminError(error: unknown): {
 	status: number;
 	message: string;
 } {
-	const message = error instanceof Error ? error.message : "Failed to process Riseopedia admin request.";
+	const message =
+		error instanceof Error
+			? error.message
+			: "Failed to process Riseopedia admin request.";
 	const normalized = message.toLowerCase();
 
 	if (normalized.includes("not found") || normalized.includes("was not found")) {
@@ -97,11 +107,17 @@ export function getRequiredId(payload: ObjectBody, key = "id"): number | null {
 	return parsePositiveInt(payload[key]);
 }
 
-export function getRequiredString(data: ObjectBody, key: string): string | null {
+export function getRequiredString(
+	data: ObjectBody,
+	key: string,
+): string | null {
 	return normalizeNonEmptyString(data[key]);
 }
 
-export function getNullableString(data: ObjectBody, key: string): string | null {
+export function getNullableString(
+	data: ObjectBody,
+	key: string,
+): string | null {
 	return normalizeNullableString(data[key]);
 }
 
@@ -109,15 +125,26 @@ export function getRequiredCode(data: ObjectBody, key: string): string | null {
 	return normalizeCode(data[key]);
 }
 
-export function getRequiredBoolean(data: ObjectBody, key: string): boolean | null {
+export function getRequiredBoolean(
+	data: ObjectBody,
+	key: string,
+): boolean | null {
 	return parseRequiredBoolean(data[key]);
 }
 
-export function getBoolean(data: ObjectBody, key: string, fallback: boolean): boolean {
+export function getBoolean(
+	data: ObjectBody,
+	key: string,
+	fallback: boolean,
+): boolean {
 	return parseRequiredBoolean(data[key]) ?? fallback;
 }
 
-export function getNonNegativeInt(data: ObjectBody, key: string, fallback: number): number {
+export function getNonNegativeInt(
+	data: ObjectBody,
+	key: string,
+	fallback: number,
+): number {
 	return parseNonNegativeInt(data[key]) ?? fallback;
 }
 
@@ -125,7 +152,10 @@ export function getPositiveInt(data: ObjectBody, key: string): number | null {
 	return parsePositiveInt(data[key]);
 }
 
-export function getNullablePositiveInt(data: ObjectBody, key: string): number | null {
+export function getNullablePositiveInt(
+	data: ObjectBody,
+	key: string,
+): number | null {
 	const value = data[key];
 	if (value === null || value === undefined || value === "") {
 		return null;
@@ -134,7 +164,10 @@ export function getNullablePositiveInt(data: ObjectBody, key: string): number | 
 	return parsePositiveInt(value);
 }
 
-export function getNullableTimestampText(data: ObjectBody, key: string): string | null {
+export function getNullableTimestampText(
+	data: ObjectBody,
+	key: string,
+): string | null {
 	const value = normalizeNullableString(data[key]);
 	if (!value) {
 		return null;
@@ -143,3 +176,5 @@ export function getNullableTimestampText(data: ObjectBody, key: string): string 
 	const parsed = Date.parse(value);
 	return Number.isNaN(parsed) ? value : value;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

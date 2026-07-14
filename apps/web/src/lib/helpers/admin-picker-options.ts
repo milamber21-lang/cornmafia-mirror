@@ -4,13 +4,16 @@
 //// Small helpers for consistently sorting admin picker options by the visible option text                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 export type AdminPickerOption = {
 	value: string;
 	label: string;
 };
 
-export function sortAdminPickerOptions<T extends AdminPickerOption>(options: T[]): T[] {
+export function sortAdminPickerOptions<T extends AdminPickerOption>(
+	options: T[],
+): T[] {
 	return options.slice().sort((left, right) => {
 		const labelCompare = left.label.localeCompare(right.label, undefined, {
 			numeric: true,
@@ -27,3 +30,5 @@ export function sortAdminPickerOptions<T extends AdminPickerOption>(options: T[]
 		});
 	});
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

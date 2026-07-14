@@ -4,6 +4,8 @@
 //// Exports the shared Label primitive                                                                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { LabelHTMLAttributes } from "react";
 
 import { cn } from "../../../lib/cn";
@@ -14,3 +16,5 @@ export default function Label({
 }: LabelHTMLAttributes<HTMLLabelElement>) {
 	return <label {...rest} className={cn("ui-label", className)} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

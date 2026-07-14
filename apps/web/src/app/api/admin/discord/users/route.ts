@@ -4,6 +4,7 @@
 //// DB-first admin Discord users API with shared admin route helpers and server-driven list responses            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -25,7 +26,6 @@ import {
 } from "@/lib/server/admin-route";
 
 export const dynamic = "force-dynamic";
-
 
 const USER_SORT_BY_VALUES = new Set<DiscordUserAdminSortBy>([
 	"discordId",
@@ -136,3 +136,5 @@ export async function POST(req: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

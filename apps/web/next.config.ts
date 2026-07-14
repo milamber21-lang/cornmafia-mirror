@@ -4,6 +4,7 @@
 //// Next.js configuration for image hosts, package transpilation, and central browser security headers           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { NextConfig } from "next";
 import { fileURLToPath } from "node:url";
@@ -52,7 +53,8 @@ const securityHeaders = [
 	},
 	{
 		key: "Permissions-Policy",
-		value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(self)",
+		value:
+			"camera=(), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(self)",
 	},
 	{
 		key: "Cross-Origin-Opener-Policy",
@@ -103,3 +105,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

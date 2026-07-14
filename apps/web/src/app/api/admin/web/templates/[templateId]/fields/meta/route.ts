@@ -4,6 +4,7 @@
 //// Admin meta route for per-template field placement options                                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -42,12 +43,17 @@ export async function GET(
 		return jsonError("VALIDATION_REQUIRED", "Invalid template id.", 400);
 	}
 
-	const rawCurrentFieldListId = request.nextUrl.searchParams.get("currentFieldListId");
+	const rawCurrentFieldListId =
+		request.nextUrl.searchParams.get("currentFieldListId");
 	const currentFieldListId = rawCurrentFieldListId
 		? parsePositiveInt(rawCurrentFieldListId)
 		: null;
 	if (rawCurrentFieldListId && !currentFieldListId) {
-		return jsonError("VALIDATION_REQUIRED", "Invalid current field list id.", 400);
+		return jsonError(
+			"VALIDATION_REQUIRED",
+			"Invalid current field list id.",
+			400,
+		);
 	}
 
 	try {
@@ -64,3 +70,5 @@ export async function GET(
 		return jsonError("SERVER_ERROR", message, 500);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

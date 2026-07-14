@@ -1,25 +1,39 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/me/MemberSeriesDashboard.tsx                                                   ////
 //// Language: TSX                                                                                              ////
-//// Client member series dashboard with R6B layout, filters, delete guard, and member-safe actions.             ////
+//// Shared member series dashboard with browse filters, management cards, delete guard, and safe actions.      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
-import { Layers3, Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import {
 	AlertBanner,
+	BrowseFilterPanel,
+	BrowsePageHeader,
+	BrowsePanelHeader,
+	BrowseResultsPanel,
 	Button,
 	ButtonLink,
 	DropdownMenuSingle,
+	IconVisual,
 	Input,
 	Pagination,
+	StatusPill,
+	SurfaceState,
 	Textarea,
 } from "@/components/ui";
+import MemberManagementCard from "@/components/me/MemberManagementCard";
 import Panel from "@/components/ui/Panel";
 import { confirmAction } from "@/lib/client/confirm-dialog";
+import {
+	compareDisplayText,
+	formatDisplayDate,
+} from "@/lib/helpers/display-format";
 import type { MemberAuthorableCollection } from "@/lib/data/member-authoring";
 import type {
 	MemberSeriesDeleteBlocker,
@@ -69,7 +83,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isSeriesItem(value: unknown): value is MemberSeriesItem {
-	return isRecord(value) && typeof value.id === "string" && typeof value.title === "string";
+	return (
+		isRecord(value) &&
+		typeof value.id === "string" &&
+		typeof value.title === "string"
+	);
 }
 
 function isCollection(value: unknown): value is MemberAuthorableCollection {
@@ -90,17 +108,7 @@ function isDeleteBlocker(value: unknown): value is MemberSeriesDeleteBlocker {
 }
 
 function formatDate(value: string): string {
-	if (!value) {
-		return "-";
-	}
-	const date = new Date(value);
-	return Number.isNaN(date.getTime())
-		? value
-		: date.toLocaleDateString(undefined, {
-				year: "numeric",
-				month: "short",
-				day: "numeric",
-			});
+	return formatDisplayDate(value) ?? (value || "-");
 }
 
 function normalizeSearch(value: string): string {
@@ -125,16 +133,22 @@ function matchesFilters(args: {
 	subcategoryId: string;
 }): boolean {
 	const categoryMatches =
-		args.categoryId === ALL_FILTER_VALUE || args.row.categoryId === args.categoryId;
+		args.categoryId === ALL_FILTER_VALUE ||
+		args.row.categoryId === args.categoryId;
 	const subcategoryMatches =
-		args.subcategoryId === ALL_FILTER_VALUE || args.row.subcategoryId === args.subcategoryId;
+		args.subcategoryId === ALL_FILTER_VALUE ||
+		args.row.subcategoryId === args.subcategoryId;
 
 	return categoryMatches && subcategoryMatches;
 }
 
-function compareSeries(left: MemberSeriesItem, right: MemberSeriesItem, sort: SortCode): number {
+function compareSeries(
+	left: MemberSeriesItem,
+	right: MemberSeriesItem,
+	sort: SortCode,
+): number {
 	if (sort === "title") {
-		return left.title.localeCompare(right.title, undefined, { sensitivity: "base" });
+		return compareDisplayText(left.title, right.title);
 	}
 
 	const leftDate = left.updatedAt ? new Date(left.updatedAt).getTime() : 0;
@@ -144,7 +158,9 @@ function compareSeries(left: MemberSeriesItem, right: MemberSeriesItem, sort: So
 		return sort === "oldest" ? leftDate - rightDate : rightDate - leftDate;
 	}
 
-	return left.title.localeCompare(right.title, undefined, { sensitivity: "base" });
+	return left.title.localeCompare(right.title, undefined, {
+		sensitivity: "base",
+	});
 }
 
 function getPageRows<T>(rows: T[], page: number, pageSize: number): T[] {
@@ -171,13 +187,13 @@ function uniqueSortedOptions(args: {
 		{ value: ALL_FILTER_VALUE, label: "All" },
 		...Array.from(byValue.entries())
 			.map(([value, label]) => ({ value, label }))
-			.sort((left, right) =>
-				left.label.localeCompare(right.label, undefined, { sensitivity: "base" }),
-			),
+			.sort((left, right) => compareDisplayText(left.label, right.label)),
 	];
 }
 
-function buildCollectionOptions(collections: MemberAuthorableCollection[]): FilterOption[] {
+function buildCollectionOptions(
+	collections: MemberAuthorableCollection[],
+): FilterOption[] {
 	return collections.map((collection) => ({
 		value: `${collection.categoryId}:${collection.subcategoryId}`,
 		label: collection.label,
@@ -195,7 +211,10 @@ function readDeleteBlockers(payload: unknown): MemberSeriesDeleteBlocker[] {
 async function readDeleteError(response: Response): Promise<DeleteError> {
 	const text = await response.text();
 	if (!text) {
-		return { message: `Failed to delete series (${response.status}).`, blockers: [] };
+		return {
+			message: `Failed to delete series (${response.status}).`,
+			blockers: [],
+		};
 	}
 
 	try {
@@ -213,7 +232,11 @@ async function readDeleteError(response: Response): Promise<DeleteError> {
 	}
 }
 
-function SeriesDependencyList({ error }: { error: DeleteError }): React.JSX.Element {
+function SeriesDependencyList({
+	error,
+}: {
+	error: DeleteError;
+}): React.JSX.Element {
 	return (
 		<AlertBanner tone="error">
 			<div className="member-dependency-list">
@@ -224,7 +247,9 @@ function SeriesDependencyList({ error }: { error: DeleteError }): React.JSX.Elem
 							<li key={blocker.contentId}>
 								<span className="member-dependency-list__title">{blocker.title}</span>
 								<span className="member-dependency-list__meta">
-									{" "}- {blocker.categoryTitle} / {blocker.subcategoryTitle} / {blocker.statusCode}
+									{" "}
+									- {blocker.categoryTitle} / {blocker.subcategoryTitle} /{" "}
+									{blocker.statusCode}
 								</span>
 							</li>
 						))}
@@ -254,7 +279,9 @@ export default function MemberSeriesDashboard({
 	const [deleteError, setDeleteError] = React.useState<DeleteError | null>(null);
 	const [panelOpen, setPanelOpen] = React.useState(false);
 	const [panelMode, setPanelMode] = React.useState<PanelMode>("create");
-	const [selectedRow, setSelectedRow] = React.useState<MemberSeriesItem | null>(null);
+	const [selectedRow, setSelectedRow] = React.useState<MemberSeriesItem | null>(
+		null,
+	);
 	const [title, setTitle] = React.useState("");
 	const [description, setDescription] = React.useState("");
 	const [collectionValue, setCollectionValue] = React.useState("");
@@ -276,7 +303,9 @@ export default function MemberSeriesDashboard({
 				collections:
 					categoryId === ALL_FILTER_VALUE
 						? collections
-						: collections.filter((collection) => collection.categoryId === categoryId),
+						: collections.filter(
+								(collection) => collection.categoryId === categoryId,
+							),
 				getValue: (collection) => collection.subcategoryId,
 				getLabel: (collection) => collection.subcategoryTitle,
 			}),
@@ -342,7 +371,8 @@ export default function MemberSeriesDashboard({
 			return;
 		}
 
-		const [nextCategoryId = "", nextSubcategoryId = ""] = collectionValue.split(":");
+		const [nextCategoryId = "", nextSubcategoryId = ""] =
+			collectionValue.split(":");
 		if (panelMode === "create" && (!nextCategoryId || !nextSubcategoryId)) {
 			setTopError("Collection is required.");
 			return;
@@ -380,13 +410,19 @@ export default function MemberSeriesDashboard({
 				credentials: "include",
 			});
 			if (!response.ok) {
-				throw new Error(await readResponseMessage(response, "Failed to save series."));
+				throw new Error(
+					await readResponseMessage(response, "Failed to save series."),
+				);
 			}
 			const responsePayload = (await response.json()) as SeriesApiResponse;
 			await refreshFromPayload(responsePayload);
 			setPanelOpen(false);
 		} catch (submitError: unknown) {
-			setTopError(submitError instanceof Error ? submitError.message : "Failed to save series.");
+			setTopError(
+				submitError instanceof Error
+					? submitError.message
+					: "Failed to save series.",
+			);
 		} finally {
 			setSubmitting(false);
 		}
@@ -409,7 +445,10 @@ export default function MemberSeriesDashboard({
 			const response = await fetch("/api/me/series", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ op: "delete", id: row.id } satisfies SeriesMutationPayload),
+				body: JSON.stringify({
+					op: "delete",
+					id: row.id,
+				} satisfies SeriesMutationPayload),
 				credentials: "include",
 			});
 			if (!response.ok) {
@@ -423,100 +462,172 @@ export default function MemberSeriesDashboard({
 			}
 			await refreshFromPayload((await response.json()) as SeriesApiResponse);
 		} catch (deleteErrorValue: unknown) {
-			setError(deleteErrorValue instanceof Error ? deleteErrorValue.message : "Failed to delete series.");
+			setError(
+				deleteErrorValue instanceof Error
+					? deleteErrorValue.message
+					: "Failed to delete series.",
+			);
 		}
 	}
 
 	const dirtyGuard =
 		panelMode === "create"
 			? title.trim().length > 0 || description.trim().length > 0
-			: title !== (selectedRow?.title ?? "") || description !== (selectedRow?.description ?? "");
+			: title !== (selectedRow?.title ?? "") ||
+				description !== (selectedRow?.description ?? "");
 
 	return (
-		<main className="card member-dashboard-main">
-			<section className="member-hero">
-				<div className="member-hero__main">
-					<div className="member-hero__icon">
-						<Layers3 className="member-icon member-icon--lg" aria-hidden />
+		<main className="member-dashboard-main member-browse-page">
+			<BrowsePageHeader
+				className="member-browse-header"
+				breadcrumbs={[{ label: "Member", href: "/me" }, { label: "Series" }]}
+				title="My series"
+				actions={<StatusPill tone="info">{rows.length} manageable</StatusPill>}
+				description={
+					<div className="member-browse-header__secondary-actions">
+						<Button
+							type="button"
+							size="sm"
+							variant="primary"
+							onClick={openCreatePanel}
+							leftIcon={<Plus aria-hidden />}
+						>
+							Create series
+						</Button>
+						<ButtonLink href="/me" variant="secondary" size="sm">
+							Back to profile
+						</ButtonLink>
 					</div>
-					<div>
-						<h1 className="member-hero__title">My series</h1>
-						<p className="member-hero__text">Create and maintain series used by your public/member content.</p>
-					</div>
-				</div>
-				<div className="member-hero__actions">
-					<Button type="button" variant="green" onClick={openCreatePanel} leftIcon={<Plus className="member-icon member-icon--sm" aria-hidden />}>Create series</Button>
-					<ButtonLink href="/me" variant="neutral">Back to profile</ButtonLink>
-				</div>
-			</section>
+				}
+			/>
 
 			{error ? <AlertBanner tone="error">{error}</AlertBanner> : null}
 			{deleteError ? <SeriesDependencyList error={deleteError} /> : null}
 
-			<section className="member-panel">
-				<div className="member-filter-grid member-filter-grid--series">
-					<DropdownMenuSingle
-						options={categoryOptions}
-						value={categoryId}
-						onChange={(value) => {
-							const nextCategoryId = value || ALL_FILTER_VALUE;
-							setCategoryId(nextCategoryId);
-							setSubcategoryId(ALL_FILTER_VALUE);
-							setPage(1);
-						}}
-						ariaLabel="Filter by category"
-						className="member-control-full"
-					/>
-					<DropdownMenuSingle
-						options={subcategoryOptions}
-						value={subcategoryId}
-						onChange={(value) => {
-							setSubcategoryId(value || ALL_FILTER_VALUE);
-							setPage(1);
-						}}
-						ariaLabel="Filter by collection"
-						className="member-control-full"
-					/>
-					<Input
-						type="search"
-						value={search}
-						onChange={(event) => {
-							setSearch(event.currentTarget.value);
-							setPage(1);
-						}}
-						placeholder="Search series..."
-					/>
-					<DropdownMenuSingle
-						options={SORT_OPTIONS}
-						value={sort}
-						onChange={(value) => {
-							setSort(value === "title" || value === "oldest" ? value : "newest");
-							setPage(1);
-						}}
-						ariaLabel="Sort series"
-						className="member-control-full"
-					/>
+			<BrowseFilterPanel
+				className="member-browse-filter-panel"
+				aria-label="Member series filters"
+			>
+				<div className="member-browse-filter-controls member-browse-filter-controls--series">
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={categoryOptions}
+							value={categoryId}
+							onChange={(value) => {
+								const nextCategoryId = value || ALL_FILTER_VALUE;
+								setCategoryId(nextCategoryId);
+								setSubcategoryId(ALL_FILTER_VALUE);
+								setPage(1);
+							}}
+							ariaLabel="Filter by category"
+							className="member-control-full"
+						/>
+					</div>
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={subcategoryOptions}
+							value={subcategoryId}
+							onChange={(value) => {
+								setSubcategoryId(value || ALL_FILTER_VALUE);
+								setPage(1);
+							}}
+							ariaLabel="Filter by collection"
+							className="member-control-full"
+						/>
+					</div>
+					<div className="member-browse-filter__search">
+						<label className="sr-only" htmlFor="member-series-search">
+							Search series
+						</label>
+						<Input
+							id="member-series-search"
+							type="search"
+							value={search}
+							onChange={(event) => {
+								setSearch(event.currentTarget.value);
+								setPage(1);
+							}}
+							placeholder="Search series..."
+						/>
+					</div>
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={SORT_OPTIONS}
+							value={sort}
+							onChange={(value) => {
+								setSort(value === "title" || value === "oldest" ? value : "newest");
+								setPage(1);
+							}}
+							ariaLabel="Sort series"
+							className="member-control-full"
+						/>
+					</div>
 				</div>
+			</BrowseFilterPanel>
+
+			<BrowseResultsPanel
+				className="member-browse-results-panel"
+				aria-label="Member series results"
+			>
+				<BrowsePanelHeader
+					title="Series"
+					description={`Showing ${filteredRows.length} of ${rows.length} manageable series.`}
+				/>
 
 				{visibleRows.length > 0 ? (
-					<div className="member-card-grid">
+					<div className="member-management-grid">
 						{visibleRows.map((row) => (
-							<article key={row.id} className="member-card">
-								<div className="member-card__eyebrow">{row.categoryTitle} / {row.subcategoryTitle}</div>
-								<h2 className="member-card__title member-card__title--xl">{row.title}</h2>
-								<p className="member-card__description">{row.description || "No description yet."}</p>
-								<div className="member-card__footer-row">
-									<span>Updated {formatDate(row.updatedAt)}</span>
-									<div className="member-card__actions">
-										<Button type="button" size="sm" variant="neutral" onClick={() => openEditPanel(row)} leftIcon={<Pencil className="member-icon member-icon--sm" aria-hidden />}>Edit</Button>
-										<Button type="button" size="sm" variant="accent" onClick={() => void deleteRow(row)} leftIcon={<Trash2 className="member-icon member-icon--sm" aria-hidden />}>Delete</Button>
-									</div>
-								</div>
-							</article>
+							<MemberManagementCard
+								key={row.id}
+								visual={
+									<IconVisual
+										iconKey={null}
+										iconColor={null}
+										fallback={{ lucideName: "Layers3" }}
+										mediaRouteScope="app"
+										size="card"
+										title={row.title}
+									/>
+								}
+								eyebrow={`${row.categoryTitle} / ${row.subcategoryTitle}`}
+								title={row.title}
+								summary={row.description.trim() || null}
+								details={
+									<span className="member-management-card__meta">
+										<span>Updated {formatDate(row.updatedAt)}</span>
+									</span>
+								}
+								actions={
+									<>
+										<Button
+											type="button"
+											size="sm"
+											variant="secondary"
+											onClick={() => openEditPanel(row)}
+											leftIcon={<Pencil aria-hidden />}
+										>
+											Edit
+										</Button>
+										<Button
+											type="button"
+											size="sm"
+											variant="danger"
+											onClick={() => void deleteRow(row)}
+											leftIcon={<Trash2 aria-hidden />}
+										>
+											Delete
+										</Button>
+									</>
+								}
+							/>
 						))}
 					</div>
 				) : (
-					<div className="member-empty-state">No manageable series found.</div>
+					<SurfaceState
+						kind="empty"
+						title="No manageable series"
+						description="No series match the current filters."
+					/>
 				)}
 
 				<Pagination
@@ -531,7 +642,7 @@ export default function MemberSeriesDashboard({
 					pageSizeOptions={[...PAGE_SIZE_OPTIONS]}
 					pageSizeLabel=""
 				/>
-			</section>
+			</BrowseResultsPanel>
 
 			<Panel
 				open={panelOpen}
@@ -541,7 +652,14 @@ export default function MemberSeriesDashboard({
 				loading={submitting}
 				dirtyGuard={dirtyGuard}
 				renderSave={() => (
-					<Button type="button" variant="green" loading={submitting} onClick={() => void submitPanel()}>Save</Button>
+					<Button
+						type="button"
+						variant="primary"
+						loading={submitting}
+						onClick={() => void submitPanel()}
+					>
+						Save
+					</Button>
 				)}
 			>
 				<div className="member-panel-form-stack">
@@ -559,14 +677,23 @@ export default function MemberSeriesDashboard({
 					) : null}
 					<div>
 						<label className="member-panel-field-label">Title</label>
-						<Input value={title} onChange={(event) => setTitle(event.currentTarget.value)} />
+						<Input
+							value={title}
+							onChange={(event) => setTitle(event.currentTarget.value)}
+						/>
 					</div>
 					<div>
 						<label className="member-panel-field-label">Description</label>
-						<Textarea rows={6} value={description} onChange={(event) => setDescription(event.currentTarget.value)} />
+						<Textarea
+							rows={6}
+							value={description}
+							onChange={(event) => setDescription(event.currentTarget.value)}
+						/>
 					</div>
 				</div>
 			</Panel>
 		</main>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// RichText editor toolbar with grouped content tools and right-side editor UI actions.                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -14,7 +15,9 @@ import { Button } from "../../ui/basic-elements/Button";
 import LinkPickerPopup, {
 	type LinkApplyValue,
 	type LinkTogglePayload,
+	type RichTextLinkPickerContext,
 } from "./nodes/LinkPickerPopup";
+import { prefetchRichTextLinkPickerContext } from "./nodes/richtext-link-picker-cache";
 
 export type SelectionSummary = {
 	formats: {
@@ -238,18 +241,13 @@ type Props = {
 	onInsertHorizontalRule?: () => void;
 	onClearFormatting?: () => void;
 	onInsertLinkLabel?: (payload: LinkTogglePayload, label: string) => boolean;
+	onApplyLinkTarget?: (payload: LinkTogglePayload) => void;
+	onApplyImageLinkTarget?: (payload: LinkTogglePayload | null) => void;
+	linkPickerContext?: RichTextLinkPickerContext;
 	onToggleFullscreen?: () => void;
 	setBlockType?: (type: BlockType) => void;
 	fullscreenActive?: boolean;
 	openLinkOnSignal?: number;
-	linkAnchor?: {
-		top: number;
-		left: number;
-		right: number;
-		bottom: number;
-		width: number;
-		height: number;
-	} | null;
 };
 
 function stripTrailingHistoryItems(layout: ToolbarItem[]): ToolbarItem[] {
@@ -386,25 +384,50 @@ export default function RichTextEditorToolbar({
 	onInsertHorizontalRule,
 	onClearFormatting,
 	onInsertLinkLabel,
+	onApplyLinkTarget,
+	onApplyImageLinkTarget,
+	linkPickerContext = "admin",
 	onToggleFullscreen,
 	setBlockType,
 	fullscreenActive,
 	openLinkOnSignal,
-	linkAnchor,
 }: Props): React.JSX.Element {
 	const [linkOpen, setLinkOpen] = React.useState(false);
-	const [anchor, setAnchor] = React.useState(linkAnchor ?? null);
-	const lastSignal = React.useRef<number | undefined>(undefined);
+	const lastSignal = React.useRef<number | undefined>(openLinkOnSignal);
+
+	const prefetchLinkPicker = React.useCallback(() => {
+		prefetchRichTextLinkPickerContext(linkPickerContext);
+	}, [linkPickerContext]);
+
+	React.useEffect(() => {
+		if (typeof window === "undefined") {
+			return;
+		}
+
+		type IdleWindow = Window & {
+			requestIdleCallback?: (
+				callback: () => void,
+				options?: { timeout: number },
+			) => number;
+			cancelIdleCallback?: (handle: number) => void;
+		};
+		const idleWindow = window as IdleWindow;
+		if (!idleWindow.requestIdleCallback) {
+			return;
+		}
+
+		const handle = idleWindow.requestIdleCallback(prefetchLinkPicker, {
+			timeout: 1600,
+		});
+		return () => idleWindow.cancelIdleCallback?.(handle);
+	}, [prefetchLinkPicker]);
 
 	React.useEffect(() => {
 		if (openLinkOnSignal === undefined) return;
 		if (openLinkOnSignal === lastSignal.current) return;
 		lastSignal.current = openLinkOnSignal;
-		if (linkAnchor) {
-			setAnchor(linkAnchor);
-			setLinkOpen(true);
-		}
-	}, [openLinkOnSignal, linkAnchor]);
+		setLinkOpen(true);
+	}, [openLinkOnSignal]);
 
 	function doCommand(command?: unknown, payload?: unknown): void {
 		if (!dispatch || !command) return;
@@ -412,6 +435,11 @@ export default function RichTextEditorToolbar({
 	}
 
 	function onLinkApply(value: LinkApplyValue | null): void {
+		if (selection?.at.image) {
+			onApplyImageLinkTarget?.(value?.payload ?? null);
+			return;
+		}
+
 		if (!value) {
 			doCommand(commands?.TOGGLE_LINK_COMMAND, null);
 			return;
@@ -425,14 +453,14 @@ export default function RichTextEditorToolbar({
 		}
 
 		doCommand(commands?.TOGGLE_LINK_COMMAND, value.payload);
+		onApplyLinkTarget?.(value.payload);
 	}
 
-	function buttonProps(key: string, active: boolean | undefined) {
+	function buttonProps(_key: string, active: boolean | undefined) {
 		return {
-			key,
 			size: "xs" as const,
 			disabled,
-			variant: active ? ("accent" as const) : ("neutral" as const),
+			variant: active ? ("primary" as const) : ("secondary" as const),
 			"aria-pressed": Boolean(active),
 			"data-active": active ? "true" : "false",
 			className: "richtext-toolbar-button",
@@ -444,10 +472,7 @@ export default function RichTextEditorToolbar({
 
 		if (item === "sep") {
 			return (
-				<span
-					key={`sep-${index}`}
-					className="richtext-toolbar-separator"
-				>
+				<span key={`sep-${index}`} className="richtext-toolbar-separator">
 					|
 				</span>
 			);
@@ -732,10 +757,9 @@ export default function RichTextEditorToolbar({
 				<React.Fragment key="link-toggle">
 					<Button
 						{...buttonProps("link", selection?.hasLink)}
-						onClick={() => {
-							setAnchor(linkAnchor ?? null);
-							setLinkOpen((isOpen) => !isOpen);
-						}}
+						onPointerEnter={prefetchLinkPicker}
+						onFocus={prefetchLinkPicker}
+						onClick={() => setLinkOpen((isOpen) => !isOpen)}
 						{...toolbarHint(selection?.hasLink ? "Edit link" : "Add link")}
 					>
 						Link
@@ -744,8 +768,8 @@ export default function RichTextEditorToolbar({
 						? createPortal(
 								<LinkPickerPopup
 									open
-									anchorRect={anchor}
 									onApply={onLinkApply}
+									mediaContext={linkPickerContext}
 									onClose={() => setLinkOpen(false)}
 								/>,
 								document.body,
@@ -798,7 +822,7 @@ export default function RichTextEditorToolbar({
 				type="button"
 				size="xs"
 				disabled={disabled}
-				variant={fullscreenActive ? "accent" : "neutral"}
+				variant={fullscreenActive ? "primary" : "secondary"}
 				aria-pressed={Boolean(fullscreenActive)}
 				data-active={fullscreenActive ? "true" : "false"}
 				className="richtext-toolbar-button richtext-toolbar-button--icon"
@@ -819,12 +843,14 @@ export default function RichTextEditorToolbar({
 		<div className="richtext-toolbar-wrap">
 			<div className="richtext-toolbar">
 				<div className="richtext-toolbar__items">
-					{visibleLayout.map((item, index) => renderItem(item, index))}
+					{visibleLayout.map((item, index) => (
+						<React.Fragment key={`${item}-${index}`}>
+							{renderItem(item, index)}
+						</React.Fragment>
+					))}
 				</div>
 				{fullscreenButton ? (
-					<div className="richtext-toolbar__fullscreen">
-						{fullscreenButton}
-					</div>
+					<div className="richtext-toolbar__fullscreen">{fullscreenButton}</div>
 				) : null}
 			</div>
 		</div>
@@ -880,3 +906,5 @@ function CollapseIcon(): React.JSX.Element {
 		</svg>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

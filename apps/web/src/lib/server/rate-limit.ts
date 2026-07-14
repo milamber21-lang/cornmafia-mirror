@@ -1,18 +1,18 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/lib/server/rate-limit.ts                                                                 ////
-//// Language: TS                                                                                               ////
-//// Lightweight in-process route rate limiter for abuse-sensitive app and API endpoints.                        ////
+//// Language: TS                                                                                                ////
+//// Shared PostgreSQL-backed route limiter for abuse-sensitive app and API endpoints.                           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
+import { createHash } from "node:crypto";
+
 import { NextResponse } from "next/server";
 
-type RateLimitBucket = {
-	count: number;
-	resetAt: number;
-};
+import { query } from "@/lib/data/pg";
 
 export type RateLimitConfig = {
 	request: Request;
@@ -22,8 +22,10 @@ export type RateLimitConfig = {
 	identity?: string | null;
 };
 
-const buckets = new Map<string, RateLimitBucket>();
-const MAX_BUCKETS = 5000;
+type RateLimitResultRow = {
+	allowed_flag: boolean;
+	retry_after_seconds: number | string;
+};
 
 function readFirstHeaderValue(value: string | null): string | null {
 	if (!value) {
@@ -34,15 +36,13 @@ function readFirstHeaderValue(value: string | null): string | null {
 	return first && first.length > 0 ? first : null;
 }
 
-function readClientAddress(request: Request): string {
-	const forwardedFor = readFirstHeaderValue(request.headers.get("x-forwarded-for"));
-	if (forwardedFor) {
-		return forwardedFor;
-	}
+function trustProxyHeaders(): boolean {
+	return process.env.CM_TRUST_PROXY_HEADERS?.trim().toLowerCase() === "true";
+}
 
-	const realIp = readFirstHeaderValue(request.headers.get("x-real-ip"));
-	if (realIp) {
-		return realIp;
+function readClientAddress(request: Request): string {
+	if (!trustProxyHeaders()) {
+		return "untrusted-proxy";
 	}
 
 	const cfConnectingIp = readFirstHeaderValue(
@@ -52,71 +52,94 @@ function readClientAddress(request: Request): string {
 		return cfConnectingIp;
 	}
 
-	return "unknown";
-}
-
-function cleanupExpiredBuckets(now: number): void {
-	if (buckets.size <= MAX_BUCKETS) {
-		return;
-	}
-
-	for (const [key, bucket] of buckets.entries()) {
-		if (bucket.resetAt <= now) {
-			buckets.delete(key);
-		}
-	}
-
-	if (buckets.size <= MAX_BUCKETS) {
-		return;
-	}
-
-	const overflowCount = buckets.size - MAX_BUCKETS;
-	let removed = 0;
-	for (const key of buckets.keys()) {
-		buckets.delete(key);
-		removed += 1;
-		if (removed >= overflowCount) {
-			return;
-		}
-	}
-}
-
-function buildRateLimitKey(config: RateLimitConfig): string {
-	const identity = config.identity?.trim()
-		? `actor:${config.identity.trim()}`
-		: `ip:${readClientAddress(config.request)}`;
-
-	return `${config.bucket}:${identity}`;
-}
-
-export function checkRateLimit(config: RateLimitConfig): NextResponse | null {
-	const now = Date.now();
-	const key = buildRateLimitKey(config);
-	const existing = buckets.get(key);
-	const resetAt = existing && existing.resetAt > now
-		? existing.resetAt
-		: now + config.windowMs;
-	const count = existing && existing.resetAt > now ? existing.count + 1 : 1;
-
-	buckets.set(key, { count, resetAt });
-	cleanupExpiredBuckets(now);
-
-	if (count <= config.limit) {
-		return null;
-	}
-
-	const retryAfterSeconds = Math.max(1, Math.ceil((resetAt - now) / 1000));
-	return NextResponse.json(
-		{
-			ok: false,
-			code: "RATE_LIMITED",
-			message: "Too many requests. Please try again shortly.",
-		},
-		{
-			status: 429,
-			headers: {
-				"Retry-After": String(retryAfterSeconds),
-			},
-		},
+	const forwardedFor = readFirstHeaderValue(
+		request.headers.get("x-forwarded-for"),
 	);
+	if (forwardedFor) {
+		return forwardedFor;
+	}
+
+	const realIp = readFirstHeaderValue(request.headers.get("x-real-ip"));
+	return realIp ?? "unknown";
 }
+
+function buildIdentity(config: RateLimitConfig): string {
+	const explicitIdentity = config.identity?.trim();
+	return explicitIdentity
+		? `actor:${explicitIdentity}`
+		: `ip:${readClientAddress(config.request)}`;
+}
+
+function buildIdentityHash(config: RateLimitConfig): string {
+	return createHash("sha256")
+		.update(`${config.bucket}\0${buildIdentity(config)}`, "utf8")
+		.digest("hex");
+}
+
+function readRetryAfterSeconds(value: number | string): number {
+	const parsed = typeof value === "number" ? value : Number(value);
+	return Number.isFinite(parsed) ? Math.max(1, Math.ceil(parsed)) : 30;
+}
+
+function errorMessage(error: unknown): string {
+	return error instanceof Error ? error.message : "Unknown rate-limit error.";
+}
+
+export async function checkRateLimit(
+	config: RateLimitConfig,
+): Promise<NextResponse | null> {
+	try {
+		const result = await query<RateLimitResultRow>(
+			`
+				SELECT allowed_flag,
+				       retry_after_seconds
+				FROM web_api.web_consume_rate_limit($1, $2, $3, $4)
+			`,
+			[config.bucket, buildIdentityHash(config), config.limit, config.windowMs],
+		);
+		const row = result.rows[0];
+
+		if (!row) {
+			throw new Error("Rate-limit function returned no row.");
+		}
+
+		if (row.allowed_flag) {
+			return null;
+		}
+
+		const retryAfterSeconds = readRetryAfterSeconds(row.retry_after_seconds);
+		return NextResponse.json(
+			{
+				ok: false,
+				code: "RATE_LIMITED",
+				message: "Too many requests. Please try again shortly.",
+			},
+			{
+				status: 429,
+				headers: {
+					"Retry-After": String(retryAfterSeconds),
+				},
+			},
+		);
+	} catch (error: unknown) {
+		console.error(
+			"[rate-limit] Shared limiter unavailable:",
+			errorMessage(error),
+		);
+		return NextResponse.json(
+			{
+				ok: false,
+				code: "RATE_LIMIT_UNAVAILABLE",
+				message: "Request protection is temporarily unavailable.",
+			},
+			{
+				status: 503,
+				headers: {
+					"Retry-After": "30",
+				},
+			},
+		);
+	}
+}
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

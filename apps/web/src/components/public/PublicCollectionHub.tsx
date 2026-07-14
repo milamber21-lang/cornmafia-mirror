@@ -1,28 +1,38 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/public/PublicCollectionHub.tsx                                                  ////
-//// Language: TSX                                                                                               ////
-//// Clean public collection hub shell with carded header, filters, pagination, and role-aware actions             ////
+//// Language: TSX                                                                                                 ////
+//// Public collection hub using the shared browse header, external filters, result cards, and member actions.    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
 import * as React from "react";
-import Link from "next/link";
-import { ArrowRight, BookOpen, Plus, Settings } from "lucide-react";
+import { LibraryBig, Plus, SearchX, Settings } from "lucide-react";
 
 import MemberContentCreatePanel from "@/components/me/MemberContentCreatePanel";
-import IconRender from "@/components/ui/IconRender";
+import PublicContentCard from "@/components/public/PublicContentCard";
 import {
+	BrowseFilterPanel,
+	BrowsePageHeader,
+	BrowseResultsPanel,
 	ButtonLink,
 	DropdownMenuSingle,
 	Input,
 	Pagination,
+	StatusPill,
+	SurfaceState,
 } from "@/components/ui";
 import type {
 	PublicCollectionContentCard,
 	PublicCollectionResult,
 } from "@/lib/data/public-content";
+import {
+	compareDisplayText,
+	formatDisplayInteger,
+} from "@/lib/helpers/display-format";
 
 export type PublicCollectionSortCode = "newest" | "title";
 
@@ -49,28 +59,18 @@ const SORT_OPTIONS: { value: PublicCollectionSortCode; label: string }[] = [
 	{ value: "title", label: "Title A-Z" },
 ];
 
-function formatDate(value: string | null): string | null {
-	if (!value) {
-		return null;
-	}
-
-	const date = new Date(value);
-	if (Number.isNaN(date.getTime())) {
-		return null;
-	}
-
-	return new Intl.DateTimeFormat("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	}).format(date);
+function formatCount(value: number, singular: string, plural: string): string {
+	return `${formatDisplayInteger(value)} ${value === 1 ? singular : plural}`;
 }
 
 function normalizeSearchText(value: string): string {
 	return value.trim().toLowerCase();
 }
 
-function cardMatchesSearch(card: PublicCollectionContentCard, search: string): boolean {
+function cardMatchesSearch(
+	card: PublicCollectionContentCard,
+	search: string,
+): boolean {
 	const normalizedSearch = normalizeSearchText(search);
 	if (!normalizedSearch) {
 		return true;
@@ -97,7 +97,8 @@ function cardMatchesFilters(args: {
 		args.contentKindCode === ALL_FILTER_VALUE ||
 		args.card.contentKindCode === args.contentKindCode;
 	const templateMatches =
-		args.templateId === ALL_FILTER_VALUE || args.card.templateId === args.templateId;
+		args.templateId === ALL_FILTER_VALUE ||
+		args.card.templateId === args.templateId;
 
 	return contentKindMatches && templateMatches;
 }
@@ -108,21 +109,19 @@ function compareCards(
 	sort: PublicCollectionSortCode,
 ): number {
 	if (sort === "title") {
-		return left.title.localeCompare(right.title, undefined, {
-			sensitivity: "base",
-		});
+		return compareDisplayText(left.title, right.title);
 	}
 
 	const leftDate = left.publishedAt ? new Date(left.publishedAt).getTime() : 0;
-	const rightDate = right.publishedAt ? new Date(right.publishedAt).getTime() : 0;
+	const rightDate = right.publishedAt
+		? new Date(right.publishedAt).getTime()
+		: 0;
 
 	if (leftDate !== rightDate) {
 		return rightDate - leftDate;
 	}
 
-	return left.title.localeCompare(right.title, undefined, {
-		sensitivity: "base",
-	});
+	return compareDisplayText(left.title, right.title);
 }
 
 function buildCollectionPath(collection: PublicCollectionResult): string {
@@ -166,9 +165,7 @@ function uniqueSortedOptions(args: {
 		{ value: ALL_FILTER_VALUE, label: args.allLabel },
 		...Array.from(byValue.entries())
 			.map(([value, label]) => ({ value, label }))
-			.sort((left, right) =>
-				left.label.localeCompare(right.label, undefined, { sensitivity: "base" }),
-			),
+			.sort((left, right) => compareDisplayText(left.label, right.label)),
 	];
 }
 
@@ -184,68 +181,6 @@ function hasCompatibleCard(args: {
 			templateId: args.templateId,
 		}),
 	);
-}
-
-function PublicCollectionModuleSlot(): JSX.Element | null {
-	return null;
-}
-
-function PublicCollectionCard({ card }: { card: PublicCollectionContentCard }): JSX.Element {
-	const publishedLabel = formatDate(card.publishedAt) ?? "No date";
-	const icon = card.iconKey ? (
-		<span className="public-collection-card__icon" aria-hidden>
-			<IconRender
-				iconKey={card.iconKey}
-				iconColor={card.iconColor}
-				mediaRouteScope="app"
-				size={20}
-				title={card.title}
-			/>
-		</span>
-	) : (
-		<span className="public-collection-card__icon public-collection-card__icon--fallback" aria-hidden>
-			<BookOpen className="public-collection-card__icon-glyph" />
-		</span>
-	);
-	const body = (
-		<>
-			{icon}
-
-			<span className="public-collection-card__body">
-				<span className="public-collection-card__meta">
-					<span className="public-collection-card__meta-item">{card.contentKindLabel}</span>
-					<span className="public-collection-card__meta-separator" aria-hidden>
-						/
-					</span>
-					<span className="public-collection-card__meta-item">{card.templateLabel}</span>
-					<span className="public-collection-card__meta-separator" aria-hidden>
-						/
-					</span>
-					<span className="public-collection-card__meta-item">{publishedLabel}</span>
-				</span>
-
-				<span className="public-collection-card__title">{card.title}</span>
-
-				{card.summary ? (
-					<span className="public-collection-card__summary">{card.summary}</span>
-				) : null}
-			</span>
-
-			{card.publicHref ? (
-				<ArrowRight className="public-collection-card__arrow" aria-hidden />
-			) : null}
-		</>
-	);
-
-	if (card.publicHref) {
-		return (
-			<Link className="public-collection-card" href={card.publicHref}>
-				{body}
-			</Link>
-		);
-	}
-
-	return <article className="public-collection-card">{body}</article>;
 }
 
 function PublicCollectionControls({
@@ -291,16 +226,18 @@ function PublicCollectionControls({
 				className="public-collection-control"
 			/>
 
-			<label className="public-collection-sr-label" htmlFor="collection-search">
-				Search
-			</label>
-			<Input
-				id="collection-search"
-				type="search"
-				value={search}
-				onChange={(event) => onSearchChange(event.currentTarget.value)}
-				placeholder={`Search ${collectionTitle.toLowerCase()}...`}
-			/>
+			<div className="public-browse-filter-search">
+				<label className="public-collection-sr-label" htmlFor="collection-search">
+					Search
+				</label>
+				<Input
+					id="collection-search"
+					type="search"
+					value={search}
+					onChange={(event) => onSearchChange(event.currentTarget.value)}
+					placeholder={`Search ${collectionTitle.toLowerCase()}...`}
+				/>
+			</div>
 
 			<DropdownMenuSingle
 				options={SORT_OPTIONS}
@@ -315,25 +252,37 @@ function PublicCollectionControls({
 
 function PublicCollectionEmptyState({
 	canCreate,
-	search,
+	hasActiveFilters,
+	hasContent,
 }: {
 	canCreate: boolean;
-	search: string;
+	hasActiveFilters: boolean;
+	hasContent: boolean;
 }): JSX.Element {
-	const title = search ? "No matching content found." : "No visible content here yet.";
-	const message = search
-		? "Try a different search term."
-		: canCreate
-			? "You can create the first entry for this collection when authoring is enabled."
-			: "New content will appear here when it is published and visible to your role.";
+	if (hasContent && hasActiveFilters) {
+		return (
+			<SurfaceState
+				kind="empty"
+				align="center"
+				icon={<SearchX aria-hidden />}
+				title="No content matches these filters"
+				description="Try another search term or reset one of the selected filters."
+			/>
+		);
+	}
 
 	return (
-		<div className="public-empty-state">
-			<h2 className="public-empty-state__title">{title}</h2>
-			<p className="public-empty-state__message">
-				{message}
-			</p>
-		</div>
+		<SurfaceState
+			kind="empty"
+			align="center"
+			icon={<LibraryBig aria-hidden />}
+			title="No visible content here yet"
+			description={
+				canCreate
+					? "You can create the first entry for this collection when authoring is enabled."
+					: "New content will appear here when it is published and visible to your role."
+			}
+		/>
 	);
 }
 
@@ -352,7 +301,9 @@ export default function PublicCollectionHub({
 	const [sort, setSort] = React.useState<PublicCollectionSortCode>(initialSort);
 	const [templateId, setTemplateId] = React.useState(ALL_FILTER_VALUE);
 	const [page, setPage] = React.useState(initialPage);
-	const [pageSize, setPageSize] = React.useState(() => getPageSizeValue(initialPageSize));
+	const [pageSize, setPageSize] = React.useState(() =>
+		getPageSizeValue(initialPageSize),
+	);
 	const [createOpen, setCreateOpen] = React.useState(
 		initialCreateOpen && collection.actions.canCreate,
 	);
@@ -409,6 +360,10 @@ export default function PublicCollectionHub({
 	const currentPage = clampPage(page, filteredCards.length, pageSize);
 	const startIndex = (currentPage - 1) * pageSize;
 	const visibleCards = filteredCards.slice(startIndex, startIndex + pageSize);
+	const hasActiveFilters =
+		normalizeSearchText(search).length > 0 ||
+		contentKindCode !== ALL_FILTER_VALUE ||
+		templateId !== ALL_FILTER_VALUE;
 
 	React.useEffect(() => {
 		const nextPage = clampPage(page, filteredCards.length, pageSize);
@@ -417,53 +372,56 @@ export default function PublicCollectionHub({
 		}
 	}, [filteredCards.length, page, pageSize]);
 
+	const headerActions = (
+		<div className="public-overview-header-actions">
+			<StatusPill tone="muted">
+				{formatCount(filteredCards.length, "matching entry", "matching entries")}
+			</StatusPill>
+			{collection.actions.hasManageableContent ? (
+				<ButtonLink
+					href={memberManagePath}
+					variant="secondary"
+					leftIcon={
+						<Settings className="public-collection-action-icon" aria-hidden />
+					}
+				>
+					Manage
+				</ButtonLink>
+			) : null}
+
+			{collection.actions.canCreate ? (
+				<ButtonLink
+					href={`${collectionPath}?action=create`}
+					variant="primary"
+					leftIcon={<Plus className="public-collection-action-icon" aria-hidden />}
+					onClick={() => setCreateOpen(true)}
+				>
+					Create
+				</ButtonLink>
+			) : null}
+		</div>
+	);
+
 	return (
 		<section className="public-collection-shell">
-			<div className="card public-collection-page">
-				<section className="public-collection-hero">
-					<div className="public-collection-hero__main">
-						<div className="public-collection-hero__icon">
-							<BookOpen className="public-collection-hero__icon-glyph" aria-hidden />
-						</div>
-						<div>
-							<div className="public-collection-hero__eyebrow">
-								{collection.category.title}
-							</div>
-							<h1 className="public-collection-hero__title">
-								{collection.collection.title}
-							</h1>
-						</div>
-					</div>
+			<div className="public-collection-page">
+				<BrowsePageHeader
+					className="public-overview-header"
+					breadcrumbs={[
+						{
+							label: collection.category.title,
+							href: `/${collection.category.slug}`,
+						},
+						{ label: collection.collection.title },
+					]}
+					title={collection.collection.title}
+					actions={headerActions}
+				/>
 
-					{collection.actions.hasManageableContent || collection.actions.canCreate ? (
-						<div className="public-collection-hero__actions">
-							{collection.actions.hasManageableContent ? (
-								<ButtonLink
-									href={memberManagePath}
-									variant="neutral"
-									leftIcon={<Settings className="public-collection-action-icon" aria-hidden />}
-								>
-									Manage
-								</ButtonLink>
-							) : null}
-
-							{collection.actions.canCreate ? (
-								<ButtonLink
-									href={`${collectionPath}?action=create`}
-									variant="green"
-									leftIcon={<Plus className="public-collection-action-icon" aria-hidden />}
-									onClick={() => setCreateOpen(true)}
-								>
-									Create
-								</ButtonLink>
-							) : null}
-						</div>
-					) : null}
-				</section>
-
-				<PublicCollectionModuleSlot />
-
-				<section className="public-collection-panel">
+				<BrowseFilterPanel
+					className="public-collection-filter-panel"
+					aria-label={`${collection.collection.title} content filters`}
+				>
 					<PublicCollectionControls
 						collectionTitle={collection.collection.title}
 						contentKindCode={contentKindCode}
@@ -511,12 +469,17 @@ export default function PublicCollectionHub({
 							}
 						}}
 					/>
+				</BrowseFilterPanel>
 
+				<BrowseResultsPanel
+					className="public-collection-results-panel"
+					aria-label={`${collection.collection.title} content results`}
+				>
 					{visibleCards.length > 0 ? (
 						<>
 							<div className="public-collection-grid">
 								{visibleCards.map((card) => (
-									<PublicCollectionCard key={card.id} card={card} />
+									<PublicContentCard key={card.id} card={card} />
 								))}
 							</div>
 
@@ -537,10 +500,11 @@ export default function PublicCollectionHub({
 					) : (
 						<PublicCollectionEmptyState
 							canCreate={collection.actions.canCreate}
-							search={search}
+							hasActiveFilters={hasActiveFilters}
+							hasContent={collection.content.length > 0}
 						/>
 					)}
-				</section>
+				</BrowseResultsPanel>
 			</div>
 
 			<MemberContentCreatePanel
@@ -554,3 +518,5 @@ export default function PublicCollectionHub({
 		</section>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

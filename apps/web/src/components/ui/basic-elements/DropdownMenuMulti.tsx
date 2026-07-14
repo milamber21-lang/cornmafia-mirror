@@ -4,6 +4,8 @@
 //// Multi-select dropdown menu with local open-state handling                                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
@@ -77,7 +79,9 @@ export default function DropdownMenuMulti({
 				onClick={() => setOpen((v) => !v)}
 				className={cn("ui-dropdown__button", `ui-dropdown__button--${size}`)}
 			>
-				<span className={cn(value.length === 0 && "ui-dropdown__placeholder")}>{label}</span>
+				<span className={cn(value.length === 0 && "ui-dropdown__placeholder")}>
+					{label}
+				</span>
 				<span aria-hidden className="ui-dropdown__chevron">
 					▾
 				</span>
@@ -117,3 +121,5 @@ export default function DropdownMenuMulti({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

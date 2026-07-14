@@ -1,9 +1,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/lib/helpers/riseopedia-media-files.ts                                                   ////
 //// Language: TS                                                                                             ////
-//// Safe filesystem and URL helpers for generated Riseopedia media files.                                      ////
+//// Safe filesystem and URL helpers for generated Riseopedia media files.                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -32,18 +33,48 @@ function getFallbackGameDataPatchesRoot(): string {
 		runtimeResolve(process.cwd(), "..", "..", "data", "gamedata", "patches"),
 	];
 
-	const existingCandidate = candidates.find((candidate) => existsSync(candidate));
+	const existingCandidate = candidates.find((candidate) =>
+		existsSync(candidate),
+	);
 	return existingCandidate ?? DEFAULT_GAME_DATA_PATCHES_ROOT;
 }
 
 function getGameDataPatchesRoot(): string {
-	return getOptionalAbsolutePathEnv("GAME_DATA_PATCHES_ROOT") ?? getFallbackGameDataPatchesRoot();
+	return (
+		getOptionalAbsolutePathEnv("GAME_DATA_PATCHES_ROOT") ??
+		getFallbackGameDataPatchesRoot()
+	);
+}
+
+function normalizeRiseopediaMediaSourceRootCode(
+	value: string | null | undefined,
+): "patch" | "manual" {
+	return value === "manual" ? "manual" : "patch";
+}
+
+function assertPathInsideGameDataPatchesRoot(args: {
+	root: string;
+	absolutePath: string;
+}): void {
+	const normalizedRoot = path.normalize(args.root);
+	const normalizedAbsolutePath = path.normalize(args.absolutePath);
+
+	if (
+		normalizedAbsolutePath !== normalizedRoot &&
+		!normalizedAbsolutePath.startsWith(`${normalizedRoot}${path.sep}`)
+	) {
+		throw new Error(
+			"Resolved Riseopedia media path escaped GAME_DATA_PATCHES_ROOT.",
+		);
+	}
 }
 
 export function assertSafeRiseopediaPatchCode(value: string): string {
 	const normalized = value.trim();
 	if (!PATCH_CODE_PATTERN.test(normalized)) {
-		throw new Error("Riseopedia patch code is not safe for filesystem resolution.");
+		throw new Error(
+			"Riseopedia patch code is not safe for filesystem resolution.",
+		);
 	}
 
 	return normalized;
@@ -66,20 +97,26 @@ export function buildRiseopediaMediaFileUrl(mediaId: string): string {
 export function resolveRiseopediaMediaAbsolutePath(args: {
 	lastSeenPatchCode: string;
 	mediaRelPath: string;
+	sourceRootCode?: string | null;
 }): string {
 	const root = getGameDataPatchesRoot();
-	const patchCode = assertSafeRiseopediaPatchCode(args.lastSeenPatchCode);
+	const sourceRootCode = normalizeRiseopediaMediaSourceRootCode(
+		args.sourceRootCode,
+	);
 	const safeRelativePath = assertSafeMediaRelativePath(args.mediaRelPath);
-	const absolutePath = runtimeJoin(root, patchCode, ...safeRelativePath.split("/"));
-	const normalizedRoot = path.normalize(root);
-	const normalizedAbsolutePath = path.normalize(absolutePath);
+	const rootFolder =
+		sourceRootCode === "manual"
+			? "Manual"
+			: assertSafeRiseopediaPatchCode(args.lastSeenPatchCode);
+	const absolutePath = runtimeJoin(
+		root,
+		rootFolder,
+		...safeRelativePath.split("/"),
+	);
 
-	if (
-		normalizedAbsolutePath !== normalizedRoot &&
-		!normalizedAbsolutePath.startsWith(`${normalizedRoot}${path.sep}`)
-	) {
-		throw new Error("Resolved Riseopedia media path escaped GAME_DATA_PATCHES_ROOT.");
-	}
+	assertPathInsideGameDataPatchesRoot({ root, absolutePath });
 
-	return normalizedAbsolutePath;
+	return absolutePath;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

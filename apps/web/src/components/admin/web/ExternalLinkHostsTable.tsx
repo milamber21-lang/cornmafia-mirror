@@ -4,6 +4,7 @@
 //// Small-list admin table for managing external link host and path whitelist rules                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -134,9 +135,7 @@ export default function ExternalLinkHostsTable({
 						row.hostMatchModeCode.toLowerCase().includes(normalizedSearch) ||
 						row.pathPattern.toLowerCase().includes(normalizedSearch) ||
 						row.pathMatchModeCode.toLowerCase().includes(normalizedSearch) ||
-						row.allowedSurfaceScopeCode
-							.toLowerCase()
-							.includes(normalizedSearch) ||
+						row.allowedSurfaceScopeCode.toLowerCase().includes(normalizedSearch) ||
 						comment.toLowerCase().includes(normalizedSearch)
 					);
 				})
@@ -336,7 +335,10 @@ export default function ExternalLinkHostsTable({
 		<>
 			<div className="admin-table-stack">
 				<div className="admin-table-toolbar">
-					<div className="admin-table-toolbar-spacer admin-table-toolbar-spacer--wide" aria-hidden="true" />
+					<div
+						className="admin-table-toolbar-spacer admin-table-toolbar-spacer--wide"
+						aria-hidden="true"
+					/>
 
 					<div className="admin-table-toolbar-search">
 						<AdminTableSearchInput
@@ -351,15 +353,15 @@ export default function ExternalLinkHostsTable({
 					</div>
 
 					<div className="admin-table-toolbar-action admin-table-toolbar-action--wide">
-						<Button variant="green" onClick={openCreate}>
+						<Button variant="primary" onClick={openCreate}>
 							Create External Link Rule
 						</Button>
 					</div>
 				</div>
 
 				<div className="admin-helper-note">
-					These rules validate generic external links in rich text and URL fields. Embedded
-					YouTube video content uses the YouTube Channels allowlist instead.
+					These rules validate generic external links in rich text and URL fields.
+					Embedded YouTube video content uses the YouTube Channels allowlist instead.
 				</div>
 
 				{error ? <AlertBanner tone="error">{error}</AlertBanner> : null}
@@ -472,11 +474,15 @@ export default function ExternalLinkHostsTable({
 										<TD className="admin-table-cell--center admin-table-cell--muted">
 											{row.comment ?? "-"}
 										</TD>
-										<TD className="admin-table-cell--center">{formatDate(row.validFrom)}</TD>
-										<TD className="admin-table-cell--center">{formatDate(row.validTo)}</TD>
+										<TD className="admin-table-cell--center">
+											{formatDate(row.validFrom)}
+										</TD>
+										<TD className="admin-table-cell--center">
+											{formatDate(row.validTo)}
+										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant={row.enabled ? "green" : "neutral"}
+												variant={row.enabled ? "success" : "secondary"}
 												disabled={disabled}
 												loading={disabled}
 												onClick={() => void toggleEnabled(row)}
@@ -487,7 +493,7 @@ export default function ExternalLinkHostsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="accent"
+												variant="danger"
 												disabled={disabled}
 												loading={disabled}
 												onClick={() => void deleteExternalLinkHost(row)}
@@ -497,7 +503,7 @@ export default function ExternalLinkHostsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="neutral"
+												variant="secondary"
 												disabled={disabled}
 												onClick={() => openEdit(row)}
 											>
@@ -545,3 +551,5 @@ export default function ExternalLinkHostsTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

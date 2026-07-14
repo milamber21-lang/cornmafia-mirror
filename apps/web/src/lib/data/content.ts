@@ -4,6 +4,7 @@
 //// DB-first admin content read helpers, placement metadata loaders, and mutation callers                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -11,6 +12,10 @@ import { pg, query } from "@/lib/data/pg";
 import type { QueryResult, QueryResultRow } from "pg";
 import { buildAdminMediaFileUrl } from "@/lib/helpers/media-url";
 import type { ExtractedContentMediaReference } from "@/lib/helpers/content-media-references";
+import {
+	isContentSystemFieldListCode,
+	resolveContentSystemFieldValue,
+} from "@/lib/helpers/content-system-fields";
 import type {
 	ContentFieldLabelPositionCode,
 	ContentFieldLabelSeparatorCode,
@@ -24,8 +29,15 @@ import type {
 } from "@/lib/helpers/content-field-values";
 
 export type ContentStatusCode = "draft" | "published" | "archived";
-export type ContentPolicyCode = "inherit" | "public" | "rank_at_least" | "rank_equal";
-export type ContentNavModeCode = "inherit" | "explicit_visible" | "explicit_hidden";
+export type ContentPolicyCode =
+	| "inherit"
+	| "public"
+	| "rank_at_least"
+	| "rank_equal";
+export type ContentNavModeCode =
+	| "inherit"
+	| "explicit_visible"
+	| "explicit_hidden";
 export type ContentIconModeCode = "template_default" | "explicit";
 export type ContentAdminSortBy =
 	| "title"
@@ -52,7 +64,7 @@ export type ContentAdminItem = {
 	publicRoutePrefix: string | null;
 	rendererCode: string;
 	surfaceScopeCode: string;
-	requiresSeries: boolean;
+	allowsSeries: boolean;
 	templateSchemaVersionNo: number;
 	title: string;
 	slug: string;
@@ -136,8 +148,10 @@ export type ContentTemplateOption = {
 	label: string;
 	contentKindCode: string;
 	contentKindLabel: string;
+	publicRoutePrefix: string | null;
+	rendererCode: string;
 	surfaceScopeCode: string;
-	requiresSeries: boolean;
+	allowsSeries: boolean;
 };
 
 export type ContentTemplateFieldOption = {
@@ -156,7 +170,7 @@ export type ContentTemplateField = ContentTemplateFieldDefinition & {
 	templateLabel: string;
 	contentKindCode: string;
 	surfaceScopeCode: string;
-	requiresSeries: boolean;
+	allowsSeries: boolean;
 	fieldListId: string;
 	fieldListCode: string;
 	label: string;
@@ -201,10 +215,18 @@ export type ContentMediaOption = {
 	subcategoryId: string | null;
 };
 
+export type ContentReferencePreview = {
+	id: string;
+	title: string;
+	href: string;
+	statusCode: ContentStatusCode;
+};
+
 export type ContentAdminPreviewField = ContentTemplateField & {
 	value: unknown;
 	optionLabel: string | null;
 	media: ContentMediaOption | null;
+	contentLink: ContentReferencePreview | null;
 };
 
 export type ContentAdminPreview = {
@@ -241,7 +263,7 @@ type ContentAdminDbRow = {
 	public_route_prefix: string | null;
 	renderer_code: string;
 	surface_scope_code: string;
-	requires_series: boolean;
+	allows_series: boolean;
 	template_schema_version_no: number;
 	title: string;
 	slug: string;
@@ -316,8 +338,10 @@ type ContentTemplateDbRow = {
 	label: string;
 	content_kind_code: string;
 	content_kind_label: string;
+	public_route_prefix: string | null;
+	renderer_code: string;
 	surface_scope_code: string;
-	requires_series: boolean;
+	allows_series: boolean;
 	is_enabled: boolean;
 };
 
@@ -328,7 +352,7 @@ type ContentTemplateFieldDbRow = {
 	template_label: string;
 	content_kind_code: string;
 	surface_scope_code: string;
-	requires_series: boolean;
+	allows_series: boolean;
 	field_list_id: number | string;
 	field_list_code: string;
 	label: string;
@@ -405,6 +429,16 @@ type ContentMediaDbRow = {
 	subcategory_id: number | string | null;
 };
 
+type ContentReferenceDbRow = {
+	content_id: number | string;
+	title: string;
+	slug: string;
+	status_code: ContentStatusCode;
+	category_slug: string;
+	subcategory_slug: string | null;
+	public_route_prefix: string | null;
+};
+
 type ContentMediaPathDbRow = {
 	media_id: number | string;
 	storage_rel_path: string;
@@ -425,7 +459,9 @@ type DbExecutor = {
 };
 
 function toIsoString(value: string | Date): string {
-	return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+	return value instanceof Date
+		? value.toISOString()
+		: new Date(value).toISOString();
 }
 
 function toNullableIsoString(value: string | Date | null): string | null {
@@ -495,8 +531,14 @@ function toReadPolicyDbCode(value: ContentPolicyCode): ContentReadPolicyDbCode {
 	return value;
 }
 
-function toWritePolicyDbCode(value: ContentPolicyCode): ContentWritePolicyDbCode {
-	return value === "rank_equal" ? "equal_rank" : value === "rank_at_least" ? "min_rank" : "inherit";
+function toWritePolicyDbCode(
+	value: ContentPolicyCode,
+): ContentWritePolicyDbCode {
+	return value === "rank_equal"
+		? "equal_rank"
+		: value === "rank_at_least"
+			? "min_rank"
+			: "inherit";
 }
 
 function toNavModeDbCode(value: ContentNavModeCode): ContentNavModeDbCode {
@@ -516,7 +558,7 @@ function mapContentRow(row: ContentAdminDbRow): ContentAdminItem {
 		publicRoutePrefix: row.public_route_prefix,
 		rendererCode: row.renderer_code,
 		surfaceScopeCode: row.surface_scope_code,
-		requiresSeries: row.requires_series,
+		allowsSeries: row.allows_series,
 		templateSchemaVersionNo: row.template_schema_version_no,
 		title: row.title,
 		slug: row.slug,
@@ -524,7 +566,8 @@ function mapContentRow(row: ContentAdminDbRow): ContentAdminItem {
 		categoryId: String(row.category_id),
 		categoryTitle: row.category_title,
 		categorySlug: row.category_slug,
-		subcategoryId: row.subcategory_id === null ? null : String(row.subcategory_id),
+		subcategoryId:
+			row.subcategory_id === null ? null : String(row.subcategory_id),
 		subcategoryTitle: row.subcategory_title,
 		subcategorySlug: row.subcategory_slug,
 		seriesId: row.series_id === null ? null : String(row.series_id),
@@ -554,7 +597,9 @@ function mapContentRow(row: ContentAdminDbRow): ContentAdminItem {
 		iconKeySourceCode: row.icon_key_source_code,
 		iconKeyLucideName: row.icon_key_lucide_name,
 		iconMediaId: row.icon_media_id === null ? null : String(row.icon_media_id),
-		iconMediaUrl: iconStorageRelPath ? buildAdminMediaFileUrl(iconStorageRelPath) : null,
+		iconMediaUrl: iconStorageRelPath
+			? buildAdminMediaFileUrl(iconStorageRelPath)
+			: null,
 		iconColorModeCode: row.icon_color_mode_code,
 		iconColorId: row.icon_color_id === null ? null : String(row.icon_color_id),
 		iconColorKey: row.icon_color_key,
@@ -606,8 +651,10 @@ function mapTemplateRow(row: ContentTemplateDbRow): ContentTemplateOption {
 		label: row.label,
 		contentKindCode: row.content_kind_code,
 		contentKindLabel: row.content_kind_label,
+		publicRoutePrefix: row.public_route_prefix,
+		rendererCode: row.renderer_code,
 		surfaceScopeCode: row.surface_scope_code,
-		requiresSeries: row.requires_series,
+		allowsSeries: row.allows_series,
 	};
 }
 
@@ -623,7 +670,7 @@ function mapTemplateFieldRow(
 		templateLabel: row.template_label,
 		contentKindCode: row.content_kind_code,
 		surfaceScopeCode: row.surface_scope_code,
-		requiresSeries: row.requires_series,
+		allowsSeries: row.allows_series,
 		fieldListId: String(row.field_list_id),
 		fieldListCode: row.field_list_code,
 		label: row.label,
@@ -646,7 +693,9 @@ function mapTemplateFieldRow(
 	};
 }
 
-function mapTemplateFieldOptionRow(row: ContentTemplateFieldOptionDbRow): ContentTemplateFieldOption {
+function mapTemplateFieldOptionRow(
+	row: ContentTemplateFieldOptionDbRow,
+): ContentTemplateFieldOption {
 	return {
 		id: String(row.field_option_id),
 		fieldListId: String(row.field_list_id),
@@ -731,14 +780,82 @@ function mapMediaOptionRow(row: ContentMediaDbRow): ContentMediaOption {
 			: row.original_filename,
 		originalFilename: row.original_filename,
 		altText: row.alt_text,
-		url: row.storage_rel_path ? buildAdminMediaFileUrl(row.storage_rel_path) : null,
+		url: row.storage_rel_path
+			? buildAdminMediaFileUrl(row.storage_rel_path)
+			: null,
 		mimeType: row.mime_type,
 		sizeBytes: mapNullableNumber(row.size_bytes),
 		width: row.width_px,
 		height: row.height_px,
 		categoryId: row.category_id === null ? null : String(row.category_id),
-		subcategoryId: row.subcategory_id === null ? null : String(row.subcategory_id),
+		subcategoryId:
+			row.subcategory_id === null ? null : String(row.subcategory_id),
 	};
+}
+
+function buildContentReferenceHref(row: ContentReferenceDbRow): string {
+	if (row.status_code !== "published" || !row.subcategory_slug) {
+		return `/admin/web/content/${String(row.content_id)}/show`;
+	}
+
+	const routeParts = [
+		row.public_route_prefix,
+		row.category_slug,
+		row.subcategory_slug,
+		row.slug,
+	].filter(
+		(part): part is string => typeof part === "string" && part.length > 0,
+	);
+
+	return `/${routeParts.join("/")}`;
+}
+
+function mapContentReferenceRow(
+	row: ContentReferenceDbRow,
+): ContentReferencePreview {
+	return {
+		id: String(row.content_id),
+		title: row.title,
+		href: buildContentReferenceHref(row),
+		statusCode: row.status_code,
+	};
+}
+
+async function listContentReferencesByIds(
+	contentIds: number[],
+): Promise<ContentReferencePreview[]> {
+	const normalizedContentIds = Array.from(
+		new Set(
+			contentIds.filter(
+				(contentId) => Number.isInteger(contentId) && contentId > 0,
+			),
+		),
+	);
+
+	if (normalizedContentIds.length === 0) {
+		return [];
+	}
+
+	const result = await query<ContentReferenceDbRow>(
+		`
+			SELECT content_row.content_id,
+				   content_row.title,
+				   content_row.slug,
+				   content_row.status_code,
+				   content_row.category_slug,
+				   content_row.subcategory_slug,
+				   kind_row.public_route_prefix
+			FROM web_view.web_content_lookup content_row
+			JOIN web_view.web_content_kind_lookup kind_row
+				ON kind_row.content_kind_code = content_row.content_kind_code
+			WHERE content_row.content_id = ANY($1::bigint[])
+			ORDER BY content_row.title ASC,
+					 content_row.content_id ASC
+		`,
+		[normalizedContentIds],
+	);
+
+	return result.rows.map(mapContentReferenceRow);
 }
 
 function createPreviewFieldBuckets(): Record<
@@ -781,7 +898,7 @@ const CONTENT_ADMIN_SELECT = `
 		public_route_prefix,
 		renderer_code,
 		surface_scope_code,
-		requires_series,
+		allows_series,
 		template_schema_version_no,
 		title,
 		slug,
@@ -849,7 +966,9 @@ const CONTENT_ADMIN_SEARCH_WHERE = `
 	AND ($3::bigint IS NULL OR subcategory_id = $3)
 `;
 
-function normalizeContentAdminSortDir(sortDir: ContentAdminSortDir | undefined): ContentAdminSortDir {
+function normalizeContentAdminSortDir(
+	sortDir: ContentAdminSortDir | undefined,
+): ContentAdminSortDir {
 	return sortDir === "desc" ? "desc" : "asc";
 }
 
@@ -887,8 +1006,12 @@ export async function listContentAdminPage(args: {
 	sortDir?: ContentAdminSortDir;
 }): Promise<ContentAdminListPage> {
 	const normalizedSearch = (args.search ?? "").trim();
-	const page = Number.isFinite(args.page) ? Math.max(1, Math.floor(args.page ?? 1)) : 1;
-	const pageSize = Number.isFinite(args.pageSize) ? Math.min(Math.max(Math.floor(args.pageSize ?? 20), 1), 100) : 20;
+	const page = Number.isFinite(args.page)
+		? Math.max(1, Math.floor(args.page ?? 1))
+		: 1;
+	const pageSize = Number.isFinite(args.pageSize)
+		? Math.min(Math.max(Math.floor(args.pageSize ?? 20), 1), 100)
+		: 20;
 	const categoryId = args.categoryId ?? null;
 	const subcategoryId = args.subcategoryId ?? null;
 	const offset = (page - 1) * pageSize;
@@ -910,13 +1033,7 @@ export async function listContentAdminPage(args: {
 				${orderBy}
 				LIMIT $4 OFFSET $5
 			`,
-			[
-				normalizedSearch,
-				categoryId,
-				subcategoryId,
-				pageSize,
-				offset,
-			],
+			[normalizedSearch, categoryId, subcategoryId, pageSize, offset],
 		),
 	]);
 
@@ -932,7 +1049,9 @@ export async function listContentAdminPage(args: {
 	};
 }
 
-export async function findContentAdminById(contentId: number): Promise<ContentAdminItem | null> {
+export async function findContentAdminById(
+	contentId: number,
+): Promise<ContentAdminItem | null> {
 	const result = await query<ContentAdminDbRow>(
 		`
 			${CONTENT_ADMIN_SELECT}
@@ -946,7 +1065,9 @@ export async function findContentAdminById(contentId: number): Promise<ContentAd
 	return row ? mapContentRow(row) : null;
 }
 
-export async function findContentAdminDetailById(contentId: number): Promise<ContentAdminDetail | null> {
+export async function findContentAdminDetailById(
+	contentId: number,
+): Promise<ContentAdminDetail | null> {
 	const doc = await findContentAdminById(contentId);
 	if (!doc) {
 		return null;
@@ -984,7 +1105,9 @@ export async function findContentAdminDetailById(contentId: number): Promise<Con
 	return { ...doc, fieldValues };
 }
 
-export async function listContentCategories(): Promise<ContentCategoryOption[]> {
+export async function listContentCategories(): Promise<
+	ContentCategoryOption[]
+> {
 	const result = await query<ContentCategoryDbRow>(
 		`
 			SELECT
@@ -1003,7 +1126,9 @@ export async function listContentCategories(): Promise<ContentCategoryOption[]> 
 	}));
 }
 
-export async function listContentSubcategories(): Promise<ContentSubcategoryOption[]> {
+export async function listContentSubcategories(): Promise<
+	ContentSubcategoryOption[]
+> {
 	const result = await query<ContentSubcategoryDbRow>(
 		`
 			SELECT
@@ -1034,7 +1159,9 @@ export async function listContentTemplatesForPlacement(args: {
 	surfaceScopeCode?: string | null;
 	currentTemplateId?: number | null;
 }): Promise<ContentTemplateOption[]> {
-	const surfaceScopeCode = (args.surfaceScopeCode ?? "admin").trim().toLowerCase();
+	const surfaceScopeCode = (args.surfaceScopeCode ?? "admin")
+		.trim()
+		.toLowerCase();
 	const currentTemplateId = args.currentTemplateId ?? null;
 	const surfaceScopeCodes =
 		surfaceScopeCode === "admin"
@@ -1056,10 +1183,14 @@ export async function listContentTemplatesForPlacement(args: {
 				t.label,
 				t.content_kind_code,
 				t.content_kind_label,
+				ck.public_route_prefix,
+				ck.renderer_code,
 				t.surface_scope_code,
-				t.requires_series,
+				t.allows_series,
 				t.is_enabled
 			FROM web_view.web_templates_admin t
+			JOIN web_view.web_content_kind_lookup ck
+				ON ck.content_kind_code = t.content_kind_code
 			WHERE t.surface_scope_code = ANY($3::text[])
 			  AND (
 				(
@@ -1099,7 +1230,9 @@ export async function listContentTemplatesForPlacement(args: {
 	return result.rows.map(mapTemplateRow);
 }
 
-export async function listContentTemplateFields(templateId: number): Promise<ContentTemplateField[]> {
+export async function listContentTemplateFields(
+	templateId: number,
+): Promise<ContentTemplateField[]> {
 	const result = await query<ContentTemplateFieldDbRow>(
 		`
 			SELECT
@@ -1109,7 +1242,7 @@ export async function listContentTemplateFields(templateId: number): Promise<Con
 				template_label,
 				content_kind_code,
 				surface_scope_code,
-				requires_series,
+				allows_series,
 				field_list_id,
 				field_list_code,
 				label,
@@ -1156,7 +1289,7 @@ export async function listContentTemplateFieldsForContent(args: {
 				template_label,
 				content_kind_code,
 				surface_scope_code,
-				requires_series,
+				allows_series,
 				field_list_id,
 				field_list_code,
 				label,
@@ -1187,7 +1320,7 @@ export async function listContentTemplateFieldsForContent(args: {
 				c.template_label,
 				c.content_kind_code,
 				c.surface_scope_code,
-				c.requires_series,
+				c.allows_series,
 				v.field_list_id,
 				v.field_list_code,
 				v.field_label AS label,
@@ -1232,7 +1365,9 @@ export async function listContentTemplateFieldsForContent(args: {
 	return mapTemplateFieldRowsWithTools(result.rows, fieldToolCodesByFieldListId);
 }
 
-export async function listContentTemplateFieldOptions(templateId: number): Promise<ContentTemplateFieldOption[]> {
+export async function listContentTemplateFieldOptions(
+	templateId: number,
+): Promise<ContentTemplateFieldOption[]> {
 	const result = await query<ContentTemplateFieldOptionDbRow>(
 		`
 			SELECT
@@ -1345,7 +1480,8 @@ export async function listContentSeriesOptions(args: {
 		title: row.title,
 		slug: row.slug,
 		categoryId: String(row.category_id),
-		subcategoryId: row.subcategory_id === null ? null : String(row.subcategory_id),
+		subcategoryId:
+			row.subcategory_id === null ? null : String(row.subcategory_id),
 		nextPartNo: mapPositiveNumber(row.next_part_no),
 	}));
 }
@@ -1396,9 +1532,7 @@ export async function listContentMediaOptionsByIds(
 ): Promise<ContentMediaOption[]> {
 	const normalizedMediaIds = Array.from(
 		new Set(
-			mediaIds.filter(
-				(mediaId) => Number.isInteger(mediaId) && mediaId > 0,
-			),
+			mediaIds.filter((mediaId) => Number.isInteger(mediaId) && mediaId > 0),
 		),
 	);
 
@@ -1462,19 +1596,44 @@ export async function findContentAdminPreviewById(
 		.map((field) => doc.fieldValues[String(field.templateFieldId)])
 		.map(parsePositiveIntegerValue)
 		.filter((mediaId): mediaId is number => mediaId !== null);
-	const mediaRows = await listContentMediaOptionsByIds(mediaIds);
+	const contentIds = fields
+		.filter((field) => field.valueColumnName === "value_content_id")
+		.map((field) => doc.fieldValues[String(field.templateFieldId)])
+		.map(parsePositiveIntegerValue)
+		.filter(
+			(linkedContentId): linkedContentId is number => linkedContentId !== null,
+		);
+	const [mediaRows, contentReferenceRows] = await Promise.all([
+		listContentMediaOptionsByIds(mediaIds),
+		listContentReferencesByIds(contentIds),
+	]);
 	const mediaById = new Map(mediaRows.map((media) => [media.id, media]));
+	const contentReferenceById = new Map(
+		contentReferenceRows.map((contentReference) => [
+			contentReference.id,
+			contentReference,
+		]),
+	);
 
 	const previewFields = fields
 		.filter((field) => field.isEnabled)
 		.map((field): ContentAdminPreviewField => {
-			const value = doc.fieldValues[String(field.templateFieldId)] ?? null;
+			const value = isContentSystemFieldListCode(field.fieldListCode)
+				? resolveContentSystemFieldValue({
+						fieldListCode: field.fieldListCode,
+						doc,
+					})
+				: (doc.fieldValues[String(field.templateFieldId)] ?? null);
 			const optionKey =
 				field.valueColumnName === "value_option_key" && typeof value === "string"
 					? value
 					: null;
 			const mediaId =
 				field.valueColumnName === "value_media_id"
+					? parsePositiveIntegerValue(value)
+					: null;
+			const linkedContentId =
+				field.valueColumnName === "value_content_id"
 					? parsePositiveIntegerValue(value)
 					: null;
 
@@ -1484,8 +1643,12 @@ export async function findContentAdminPreviewById(
 				optionLabel:
 					optionKey === null
 						? null
-						: optionLabelByKey.get(`${field.fieldListId}:${optionKey}`) ?? null,
-				media: mediaId === null ? null : mediaById.get(String(mediaId)) ?? null,
+						: (optionLabelByKey.get(`${field.fieldListId}:${optionKey}`) ?? null),
+				media: mediaId === null ? null : (mediaById.get(String(mediaId)) ?? null),
+				contentLink:
+					linkedContentId === null
+						? null
+						: (contentReferenceById.get(String(linkedContentId)) ?? null),
 			};
 		});
 
@@ -1510,7 +1673,6 @@ export async function findContentAdminPreviewById(
 		fieldsByDestination,
 	};
 }
-
 
 function normalizeContentMediaReference(
 	reference: ExtractedContentMediaReference,
@@ -1541,7 +1703,10 @@ async function resolveContentMediaReferencePayload(
 		new Set(
 			mediaReferences
 				.map((reference) => reference.storageRelPath)
-				.filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+				.filter(
+					(value): value is string =>
+						typeof value === "string" && value.trim().length > 0,
+				)
 				.map((value) => value.trim()),
 		),
 	);
@@ -1569,7 +1734,9 @@ async function resolveContentMediaReferencePayload(
 		const storageRelPath = reference.storageRelPath?.trim() ?? null;
 		const resolvedMediaId =
 			reference.mediaId ??
-			(storageRelPath === null ? null : mediaIdByPath.get(storageRelPath) ?? null);
+			(storageRelPath === null
+				? null
+				: (mediaIdByPath.get(storageRelPath) ?? null));
 
 		if (resolvedMediaId === null) {
 			if (storageRelPath !== null) {
@@ -1621,14 +1788,9 @@ async function replaceContentMediaReferencesAdmin(
 			SELECT content_id
 			FROM web_api.web_content_media_replace_admin($1, $2, $3::jsonb)
 		`,
-		[
-			args.actorDiscordId,
-			args.contentId,
-			JSON.stringify(mediaPayload),
-		],
+		[args.actorDiscordId, args.contentId, JSON.stringify(mediaPayload)],
 	);
 }
-
 
 export async function createContentAdmin(args: {
 	actorDiscordId: string;
@@ -1877,3 +2039,5 @@ export async function deleteContentAdmin(args: {
 
 	return Number(result.rows[0]?.content_id);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

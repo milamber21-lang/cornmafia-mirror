@@ -1,13 +1,23 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/login/RolesPanel.tsx                                                           ////
 //// Language: TSX                                                                                                ////
-//// Client component that shows the current user role summary as readable member cards.                          ////
+//// Client member access summary using compact role rows and shared material states.                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
 import { Shield, ShieldCheck } from "lucide-react";
+
+import {
+	IconWell,
+	SectionHeader,
+	StatusPill,
+	SurfacePanel,
+	SurfaceState,
+} from "@/components/ui";
 
 type Role = {
 	id: string;
@@ -31,18 +41,18 @@ type RolesResponse =
 
 function getRoleTone(role: Role): string {
 	if (role.isAdmin) {
-		return "member-role-card--admin";
+		return "member-role-row--admin";
 	}
 
 	if (role.isEditor) {
-		return "member-role-card--editor";
+		return "member-role-row--editor";
 	}
 
 	if (role.isAuthenticatedDefault) {
-		return "member-role-card--authenticated";
+		return "member-role-row--authenticated";
 	}
 
-	return "member-role-card--default";
+	return "member-role-row--default";
 }
 
 function getRoleLabel(role: Role): string {
@@ -55,7 +65,7 @@ function getRoleLabel(role: Role): string {
 	}
 
 	if (role.isAuthenticatedDefault) {
-		return "Mafia Guild Member";
+		return "Member access";
 	}
 
 	if (role.isPublicDefault) {
@@ -63,14 +73,6 @@ function getRoleLabel(role: Role): string {
 	}
 
 	return role.source === "virtual" ? "Virtual" : "Discord";
-}
-
-function getRoleLabelClass(role: Role): string {
-	if (role.isAuthenticatedDefault) {
-		return "member-role-card__label member-role-card__label--member";
-	}
-
-	return "member-role-card__label";
 }
 
 function RoleSwatch({ role }: { role: Role }) {
@@ -129,68 +131,68 @@ export default function RolesPanel() {
 	}, []);
 
 	return (
-		<section className="member-roles-section">
-			<header className="member-roles-header">
-				<div>
-					<h2 className="member-roles-title">Guild roles</h2>
-					<p className="member-roles-description">
-						Current Discord and virtual access roles resolved by the platform.
-					</p>
-				</div>
-				<div className="member-roles-resolved-badge">
-					<ShieldCheck className="member-roles-resolved-badge__icon" aria-hidden />
-					Access resolved
-				</div>
-			</header>
+		<SurfacePanel
+			material="structure"
+			density="spacious"
+			className="member-roles-panel"
+		>
+			<SectionHeader
+				eyebrow="Access"
+				title="Guild roles"
+				description="Current Discord and virtual access roles resolved by the platform."
+				action={
+					<StatusPill tone="info">
+						<ShieldCheck className="member-roles-panel__status-icon" aria-hidden />
+						Access resolved
+					</StatusPill>
+				}
+			/>
 
 			{loading ? (
-				<div className="member-roles-grid">
-					{["one", "two", "three"].map((key) => (
-						<div
-							key={key}
-							className="member-roles-skeleton"
-						/>
-					))}
-				</div>
+				<SurfaceState
+					kind="loading"
+					density="compact"
+					title="Loading guild roles"
+					description="Resolving Discord and virtual access for this account."
+				/>
 			) : error ? (
-				<div className="member-roles-error">
-					{error}
-				</div>
+				<SurfaceState
+					kind="error"
+					density="compact"
+					title="Roles unavailable"
+					description={error}
+				/>
 			) : roles.length > 0 ? (
-				<ul className="member-roles-list">
+				<ul className="member-role-list">
 					{roles.map((role) => (
-						<li
-							key={role.id}
-							className={`member-role-card ${getRoleTone(role)}`}
-						>
-							<div className="member-role-card__inner">
-								<div className="member-role-card__icon">
-									{role.isAdmin || role.isEditor ? (
-										<ShieldCheck className="member-role-card__icon-svg" aria-hidden />
-									) : (
-										<Shield className="member-role-card__icon-svg" aria-hidden />
-									)}
+						<li key={role.id} className={`member-role-row ${getRoleTone(role)}`}>
+							<IconWell size="sm" className="member-role-row__icon">
+								{role.isAdmin || role.isEditor ? (
+									<ShieldCheck className="member-role-row__icon-svg" aria-hidden />
+								) : (
+									<Shield className="member-role-row__icon-svg" aria-hidden />
+								)}
+							</IconWell>
+							<div className="member-role-row__copy">
+								<div className="member-role-row__title">
+									<RoleSwatch role={role} />
+									<span className="member-role-row__name">{role.name}</span>
 								</div>
-								<div className="member-role-card__body">
-									<div className="member-role-card__title-row">
-										<RoleSwatch role={role} />
-										<div className="member-role-card__name">
-											{role.name}
-										</div>
-									</div>
-									<div className="member-role-card__label-row">
-										<span className={getRoleLabelClass(role)}>{getRoleLabel(role)}</span>
-									</div>
-								</div>
+								<span className="member-role-row__label">{getRoleLabel(role)}</span>
 							</div>
 						</li>
 					))}
 				</ul>
 			) : (
-				<div className="member-roles-empty">
-					No guild roles found for this account.
-				</div>
+				<SurfaceState
+					kind="empty"
+					density="compact"
+					title="No guild roles"
+					description="No Discord or virtual roles were found for this account."
+				/>
 			)}
-		</section>
+		</SurfacePanel>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

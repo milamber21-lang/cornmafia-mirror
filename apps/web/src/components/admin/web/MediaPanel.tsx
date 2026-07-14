@@ -4,6 +4,8 @@
 //// Admin media panel with separated metadata loading and normalized save lifecycle                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -299,8 +301,7 @@ export default function MediaPanel({
 						...subcategories
 							.filter(
 								(row) =>
-									selectedCategoryId.length > 0 &&
-									row.categoryId === selectedCategoryId,
+									selectedCategoryId.length > 0 && row.categoryId === selectedCategoryId,
 							)
 							.sort((left, right) => compareAdminText(left.name, right.name))
 							.map((row) => ({ value: row.id, label: row.name })),
@@ -365,8 +366,7 @@ export default function MediaPanel({
 						...subcategories
 							.filter(
 								(row) =>
-									selectedCategoryId.length > 0 &&
-									row.categoryId === selectedCategoryId,
+									selectedCategoryId.length > 0 && row.categoryId === selectedCategoryId,
 							)
 							.sort((left, right) => compareAdminText(left.name, right.name))
 							.map((row) => ({ value: row.id, label: row.name })),
@@ -561,3 +561,5 @@ export default function MediaPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// DB-first admin web mutation helpers extracted from route handlers.                                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -50,8 +51,16 @@ export type AdminTemplateFieldRenderDestinationCode =
 	| "bottom"
 	| "hidden";
 export type AdminTemplateFieldLayoutWidthCode = "full" | "half" | "third";
-export type AdminTemplateFieldLayoutAlignCode = "left" | "center" | "right" | "stretch";
-export type AdminTemplateFieldLabelStyleCode = "title" | "label" | "text" | "muted";
+export type AdminTemplateFieldLayoutAlignCode =
+	| "left"
+	| "center"
+	| "right"
+	| "stretch";
+export type AdminTemplateFieldLabelStyleCode =
+	| "title"
+	| "label"
+	| "text"
+	| "muted";
 export type AdminTemplateFieldLabelPositionCode = "above" | "inline";
 export type AdminTemplateFieldLabelSeparatorCode = "none" | "colon" | "dash";
 
@@ -412,7 +421,7 @@ export async function createTemplateAdmin(args: {
 	description: string | null;
 	contentKindCode: string;
 	surfaceScopeCode: AdminTemplateSurfaceScopeCode;
-	requiresSeries: boolean;
+	allowsSeries: boolean;
 	defaultIconKeyId: number;
 	defaultIconColorId: number;
 	enabled: boolean;
@@ -426,7 +435,7 @@ export async function createTemplateAdmin(args: {
 			args.description,
 			args.contentKindCode,
 			args.surfaceScopeCode,
-			args.requiresSeries,
+			args.allowsSeries,
 			args.defaultIconKeyId,
 			args.defaultIconColorId,
 			args.enabled,
@@ -444,7 +453,7 @@ export async function updateTemplateAdmin(args: {
 	description: string | null;
 	contentKindCode: string;
 	surfaceScopeCode: AdminTemplateSurfaceScopeCode;
-	requiresSeries: boolean;
+	allowsSeries: boolean;
 	defaultIconKeyId: number;
 	defaultIconColorId: number;
 	enabled: boolean;
@@ -459,7 +468,7 @@ export async function updateTemplateAdmin(args: {
 			args.description,
 			args.contentKindCode,
 			args.surfaceScopeCode,
-			args.requiresSeries,
+			args.allowsSeries,
 			args.defaultIconKeyId,
 			args.defaultIconColorId,
 			args.enabled,
@@ -467,15 +476,14 @@ export async function updateTemplateAdmin(args: {
 	);
 }
 
-
 export async function deleteTemplateAdmin(
 	actorDiscordId: string,
 	templateId: number,
 ): Promise<void> {
-	await query(
-		`SELECT template_id FROM web_api.web_template_delete($1, $2)`,
-		[actorDiscordId, templateId],
-	);
+	await query(`SELECT template_id FROM web_api.web_template_delete($1, $2)`, [
+		actorDiscordId,
+		templateId,
+	]);
 }
 
 export async function deleteTemplateFieldListAdmin(
@@ -803,3 +811,5 @@ export async function updateTemplateFieldAdmin(args: {
 		],
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

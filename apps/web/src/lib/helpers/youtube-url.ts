@@ -4,6 +4,7 @@
 //// Parses, validates, normalizes, and builds safe embed URLs for YouTube video fields.                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 export type ParsedYoutubeVideoUrl = {
 	videoId: string;
@@ -16,11 +17,11 @@ export type YoutubeAuthorUrlResult =
 			ok: true;
 			videoId: string;
 			canonicalUrl: string;
-		}
+	  }
 	| {
 			ok: false;
 			message: string;
-		};
+	  };
 
 const YOUTUBE_VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
 const YOUTUBE_HOSTS = new Set(["youtube.com", "www.youtube.com"]);
@@ -72,7 +73,9 @@ function buildParsedYoutubeVideoUrl(videoId: string): ParsedYoutubeVideoUrl {
 	};
 }
 
-export function parseYoutubeVideoUrl(value: unknown): ParsedYoutubeVideoUrl | null {
+export function parseYoutubeVideoUrl(
+	value: unknown,
+): ParsedYoutubeVideoUrl | null {
 	if (typeof value !== "string") {
 		return null;
 	}
@@ -110,14 +113,18 @@ export function parseYoutubeVideoUrl(value: unknown): ParsedYoutubeVideoUrl | nu
 	}
 
 	if (parsed.pathname.startsWith("/shorts/")) {
-		const videoId = normalizeVideoId(firstPathSegment(parsed.pathname.replace(/^\/shorts\/?/, "")));
+		const videoId = normalizeVideoId(
+			firstPathSegment(parsed.pathname.replace(/^\/shorts\/?/, "")),
+		);
 		return videoId ? buildParsedYoutubeVideoUrl(videoId) : null;
 	}
 
 	return null;
 }
 
-export function normalizeYoutubeAuthorUrl(value: unknown): YoutubeAuthorUrlResult {
+export function normalizeYoutubeAuthorUrl(
+	value: unknown,
+): YoutubeAuthorUrlResult {
 	if (typeof value !== "string" || value.trim().length === 0) {
 		return {
 			ok: false,
@@ -129,7 +136,8 @@ export function normalizeYoutubeAuthorUrl(value: unknown): YoutubeAuthorUrlResul
 	if (!parsed) {
 		return {
 			ok: false,
-			message: "Enter a valid YouTube video URL, youtu.be URL, or YouTube Shorts URL.",
+			message:
+				"Enter a valid YouTube video URL, youtu.be URL, or YouTube Shorts URL.",
 		};
 	}
 
@@ -139,3 +147,5 @@ export function normalizeYoutubeAuthorUrl(value: unknown): YoutubeAuthorUrlResul
 		canonicalUrl: parsed.canonicalUrl,
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Media filesystem helpers for DB-first web uploads                                                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 import { randomBytes } from "crypto";
@@ -111,7 +113,9 @@ export function buildMediaStorageRelativePath(args: {
 	return path.posix.join(prefix, filename);
 }
 
-function normalizeStoredExtension(extension: string | null | undefined): string | null {
+function normalizeStoredExtension(
+	extension: string | null | undefined,
+): string | null {
 	if (!extension) {
 		return null;
 	}
@@ -208,3 +212,5 @@ export async function deleteMediaFileIfExists(
 		throw error;
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

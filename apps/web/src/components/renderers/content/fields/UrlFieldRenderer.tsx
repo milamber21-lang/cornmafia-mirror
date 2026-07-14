@@ -4,6 +4,7 @@
 //// Renders URL-like content fields with safe internal and external link handling.                               ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 import Link from "next/link";
@@ -52,8 +53,12 @@ export default function UrlFieldRenderer({
 					</Link>
 				)
 			) : (
-				<p className="content-field-value content-field-value--prewrap">{formattedValue}</p>
+				<p className="content-field-value content-field-value--prewrap">
+					{formattedValue}
+				</p>
 			)}
 		</ContentFieldFrame>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

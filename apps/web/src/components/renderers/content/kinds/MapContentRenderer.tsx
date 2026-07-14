@@ -4,6 +4,8 @@
 //// Map content renderer shell for future map-focused layouts.                                                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { JSX } from "react";
 
 import ContentRenderShell from "../ContentRenderShell";
@@ -20,3 +22,5 @@ export default function MapContentRenderer({
 }: MapContentRendererProps): JSX.Element {
 	return <ContentRenderShell model={model} debug={debug} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

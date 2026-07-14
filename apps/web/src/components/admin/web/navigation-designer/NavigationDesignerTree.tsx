@@ -4,6 +4,7 @@
 //// Sortable tree rendering and bubble controls for the admin navigation panel designer.                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -38,12 +39,12 @@ import type {
 	DragData,
 } from "./navigation-designer-types";
 
-type NavigationDesignerRuntimeStyle = CSSProperties & Partial<Record<
-	"--admin-nav-designer-subcategory-min-height",
-	string
->>;
+type NavigationDesignerRuntimeStyle = CSSProperties &
+	Partial<Record<"--admin-nav-designer-subcategory-min-height", string>>;
 
-function classNames(...values: Array<string | undefined | false>): string | undefined {
+function classNames(
+	...values: Array<string | undefined | false>
+): string | undefined {
 	const classes = values.filter((value): value is string => Boolean(value));
 	return classes.length > 0 ? classes.join(" ") : undefined;
 }
@@ -78,11 +79,7 @@ function StaleMarker(props: { isSelectable: boolean }): JSX.Element | null {
 }
 
 function LimitMessage(props: { children: ReactNode }): JSX.Element {
-	return (
-		<p className="admin-nav-designer-limit-message">
-			{props.children}
-		</p>
-	);
+	return <p className="admin-nav-designer-limit-message">{props.children}</p>;
 }
 
 function useBubbleSortable(id: string, data: DragData) {
@@ -193,13 +190,17 @@ function AddCategoryBubble({
 	const hasAvailable = categories.some(
 		(row) => row.isSelectable && !usedCategoryIds.has(row.categoryId),
 	);
-	const disabledReason = hasAvailable ? "" : "No unused categories are available.";
+	const disabledReason = hasAvailable
+		? ""
+		: "No unused categories are available.";
 
 	return (
 		<div className="admin-nav-designer-add-category-bubble">
 			<div className="admin-nav-designer-add-category-bubble__header">
 				<div>
-					<div className="admin-nav-designer-add-category-bubble__title">Add another category</div>
+					<div className="admin-nav-designer-add-category-bubble__title">
+						Add another category
+					</div>
 					<div className="admin-nav-designer-add-category-bubble__description">
 						Categories become the first level of this navigation panel.
 					</div>
@@ -257,7 +258,10 @@ interface AddItemRowProps {
 	categoryEditorId: string;
 	subcategoryEditorId: string;
 	canAdd: boolean;
-	onAddContentClick: (categoryEditorId: string, subcategoryEditorId: string) => void;
+	onAddContentClick: (
+		categoryEditorId: string,
+		subcategoryEditorId: string,
+	) => void;
 }
 
 function AddItemRow({
@@ -291,7 +295,10 @@ interface ItemListColumnProps {
 	subcategoryEditorId: string;
 	contentMap: Map<string, NavigationContentLookupItem>;
 	targetSlotLimit: number | null;
-	onAddContentClick: (categoryEditorId: string, subcategoryEditorId: string) => void;
+	onAddContentClick: (
+		categoryEditorId: string,
+		subcategoryEditorId: string,
+	) => void;
 	onRemoveContent: (
 		categoryEditorId: string,
 		subcategoryEditorId: string,
@@ -365,8 +372,14 @@ interface SubcategoryBubbleProps {
 	subcategoryMap: Map<string, NavigationSubcategoryLookupItem>;
 	contentMap: Map<string, NavigationContentLookupItem>;
 	targetSlotLimit: number | null;
-	onAddContentClick: (categoryEditorId: string, subcategoryEditorId: string) => void;
-	onRemoveSubcategory: (categoryEditorId: string, subcategoryEditorId: string) => void;
+	onAddContentClick: (
+		categoryEditorId: string,
+		subcategoryEditorId: string,
+	) => void;
+	onRemoveSubcategory: (
+		categoryEditorId: string,
+		subcategoryEditorId: string,
+	) => void;
 	onRemoveContent: (
 		categoryEditorId: string,
 		subcategoryEditorId: string,
@@ -476,9 +489,15 @@ interface CategoryBubbleProps {
 	subcategorySlotLimit: number | null;
 	targetSlotLimit: number | null;
 	onAddSubcategoryClick: (categoryEditorId: string) => void;
-	onAddContentClick: (categoryEditorId: string, subcategoryEditorId: string) => void;
+	onAddContentClick: (
+		categoryEditorId: string,
+		subcategoryEditorId: string,
+	) => void;
 	onRemoveCategory: (categoryEditorId: string) => void;
-	onRemoveSubcategory: (categoryEditorId: string, subcategoryEditorId: string) => void;
+	onRemoveSubcategory: (
+		categoryEditorId: string,
+		subcategoryEditorId: string,
+	) => void;
 	onRemoveContent: (
 		categoryEditorId: string,
 		subcategoryEditorId: string,
@@ -604,9 +623,15 @@ export interface NavigationDesignerTreeProps {
 	targetSlotLimit: number | null;
 	onAddCategoryClick: () => void;
 	onAddSubcategoryClick: (categoryEditorId: string) => void;
-	onAddContentClick: (categoryEditorId: string, subcategoryEditorId: string) => void;
+	onAddContentClick: (
+		categoryEditorId: string,
+		subcategoryEditorId: string,
+	) => void;
 	onRemoveCategory: (categoryEditorId: string) => void;
-	onRemoveSubcategory: (categoryEditorId: string, subcategoryEditorId: string) => void;
+	onRemoveSubcategory: (
+		categoryEditorId: string,
+		subcategoryEditorId: string,
+	) => void;
 	onRemoveContent: (
 		categoryEditorId: string,
 		subcategoryEditorId: string,
@@ -660,7 +685,8 @@ export default function NavigationDesignerTree({
 				</SortableContext>
 			) : (
 				<div className="admin-nav-designer-empty-message">
-					No categories in navigation yet. Add a category below to start building this panel.
+					No categories in navigation yet. Add a category below to start building
+					this panel.
 				</div>
 			)}
 
@@ -674,3 +700,5 @@ export default function NavigationDesignerTree({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

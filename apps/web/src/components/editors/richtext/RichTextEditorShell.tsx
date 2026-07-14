@@ -4,6 +4,7 @@
 //// Lexical editor shell with toolbar, plugins, and page-width editing surface.                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -12,13 +13,11 @@ import { normalizeRichTextEditorOutput } from "@/lib/editors/richtext/rich-text-
 
 import type {
 	RichTextEditorCanvasLayoutMode,
+	RichTextEditorCanvasWidthCode,
 	UnknownRecord,
 } from "./RichTextEditorTypes";
 import type { SelectionSummary } from "./RichTextEditorToolbar";
-import {
-	RichTextLinkClickTrackerPlugin,
-	type AnchorRect,
-} from "./plugins/RichTextLinkClickTrackerPlugin";
+import { RichTextLinkClickTrackerPlugin } from "./plugins/RichTextLinkClickTrackerPlugin";
 import { RichTextSelectionTrackerPlugin } from "./plugins/RichTextSelectionTrackerPlugin";
 import { RichTextSemanticPasteCleanupPlugin } from "./plugins/RichTextSemanticPasteCleanupPlugin";
 
@@ -41,6 +40,7 @@ type Props = {
 	editable: boolean;
 	fullscreenActive?: boolean;
 	canvasLayoutMode?: RichTextEditorCanvasLayoutMode;
+	canvasWidthCode?: RichTextEditorCanvasWidthCode;
 	editorSessionKey: string;
 	onChange: (json: unknown) => void;
 	init: (editor: unknown) => void;
@@ -50,7 +50,6 @@ type Props = {
 		withUpdate?: (fn: () => void) => void;
 		selection?: SelectionSummary | null;
 		linkOpenSignal?: number;
-		linkAnchor?: AnchorRect | null;
 	}) => React.ReactNode;
 	onRuntimeError?: (err: unknown) => void;
 };
@@ -93,6 +92,7 @@ export default function RichTextEditorShell({
 	editable,
 	fullscreenActive = false,
 	canvasLayoutMode = "full",
+	canvasWidthCode = "full",
 	editorSessionKey,
 	onChange,
 	init,
@@ -131,9 +131,7 @@ export default function RichTextEditorShell({
 		if (!CheckListPluginComp) {
 			(async () => {
 				try {
-					const mod: unknown = await import(
-						"@lexical/react/LexicalCheckListPlugin"
-					);
+					const mod: unknown = await import("@lexical/react/LexicalCheckListPlugin");
 					const C = asComponent<CheckListPluginProps>(
 						(mod as { default?: unknown }).default,
 					);
@@ -150,7 +148,6 @@ export default function RichTextEditorShell({
 	const [selection, setSelection] = React.useState<SelectionSummary | null>(
 		null,
 	);
-	const [linkAnchor, setLinkAnchor] = React.useState<AnchorRect | null>(null);
 	const [linkSignal, setLinkSignal] = React.useState(0);
 
 	const onEditorChange = (editorState: unknown) => {
@@ -223,22 +220,25 @@ export default function RichTextEditorShell({
 	const richTextShellClassName = fullscreenActive
 		? "richtext-shell richtext-shell--fullscreen"
 		: "richtext-shell";
-	const editorCanvasClassName =
-		"richtext richtext-editor-canvas richtext-editor-canvas--editable";
+	const proseVariant =
+		canvasLayoutMode === "left-aside" ||
+		canvasLayoutMode === "right-aside" ||
+		canvasLayoutMode === "aside"
+			? "content-prose--aside"
+			: "content-prose--main";
+	const editorCanvasClassName = `richtext content-prose ${proseVariant} richtext-editor-canvas richtext-editor-canvas--editable`;
 
 	return (
 		<div
 			className={shellFrameClassName}
 			data-richtext-editor-canvas-layout={canvasLayoutMode}
+			data-richtext-editor-canvas-width={canvasWidthCode}
 		>
 			<div className={shellInnerClassName}>
 				<Composer initialConfig={initialConfig}>
 					<RichTextSelectionTrackerPlugin onSelection={setSelection} />
 					<RichTextLinkClickTrackerPlugin
-						onOpen={(r) => {
-							setLinkAnchor(r);
-							setLinkSignal((s) => s + 1);
-						}}
+						onOpen={() => setLinkSignal((signal) => signal + 1)}
 					/>
 					<RichTextSemanticPasteCleanupPlugin />
 
@@ -249,7 +249,6 @@ export default function RichTextEditorShell({
 								withUpdate,
 								selection,
 								linkOpenSignal: linkSignal,
-								linkAnchor,
 							})
 						: null}
 
@@ -274,3 +273,5 @@ export default function RichTextEditorShell({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

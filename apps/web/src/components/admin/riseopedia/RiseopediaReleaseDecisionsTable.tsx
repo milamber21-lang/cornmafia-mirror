@@ -4,6 +4,8 @@
 //// Read-only/action Riseopedia release decision admin table.                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { Dispatch, JSX, ReactNode, SetStateAction } from "react";
@@ -48,7 +50,11 @@ import {
 	patchFilter,
 } from "./RiseopediaAdminConfigHelpers";
 import { readRowValue } from "./RiseopediaAdminHelpers";
-import type { RiseopediaAdminFilterState, RiseopediaAdminMeta, RiseopediaAdminRows } from "./RiseopediaAdminTypes";
+import type {
+	RiseopediaAdminFilterState,
+	RiseopediaAdminMeta,
+	RiseopediaAdminRows,
+} from "./RiseopediaAdminTypes";
 
 import {
 	readRowValue as tableReadRowValue,
@@ -101,7 +107,9 @@ async function fetchRiseopediaReleaseDecisionRows(): Promise<TableRow[]> {
 	});
 
 	if (!response.ok) {
-		throw new Error(await readResponseMessage(response, "Failed to refresh release decisions."));
+		throw new Error(
+			await readResponseMessage(response, "Failed to refresh release decisions."),
+		);
 	}
 
 	const payload: unknown = await response.json();
@@ -120,25 +128,44 @@ export default function RiseopediaReleaseDecisionsTable({
 			refreshRows={fetchRiseopediaReleaseDecisionRows}
 			searchPlaceholder="Search release decisions"
 			emptyText="No release decisions found."
-			filters={[...releaseDecisionClassificationFilters(meta), patchFilter(meta), releaseStateFilter(meta), releaseOverrideFilter()]}
+			filters={[
+				...releaseDecisionClassificationFilters(meta),
+				patchFilter(meta),
+				releaseStateFilter(meta),
+				releaseOverrideFilter(),
+			]}
 			filtersPlacement="secondaryLeft"
 			toolbarLeft={<RiseopediaAccessControlNav active="decisions" />}
-			toolbarRight={(
-				<ButtonLink href="/admin/riseopedia/release-overrides" variant="green">
+			toolbarRight={
+				<ButtonLink href="/admin/riseopedia/release-overrides" variant="primary">
 					Create override
 				</ButtonLink>
-			)}
+			}
 			rowActions={[
 				{
 					columnLabel: "Override",
-					label: (row) => rowIsLiveCandidate(row) ? "Hide" : "Show",
-					variant: (row) => rowIsLiveCandidate(row) ? "accent" : "green",
+					label: (row) => (rowIsLiveCandidate(row) ? "Hide" : "Show"),
+					variant: (row) => (rowIsLiveCandidate(row) ? "danger" : "primary"),
 					onClick: async (row) => {
-						await createReleaseOverrideFromEvidence(row, rowIsLiveCandidate(row) ? "manual_hidden" : "manual_live");
+						await createReleaseOverrideFromEvidence(
+							row,
+							rowIsLiveCandidate(row) ? "manual_hidden" : "manual_live",
+						);
 					},
 				},
-				{ columnLabel: "Detail", label: "Detail", variant: "neutral", href: buildReleaseDecisionDetailHref },
-				{ columnLabel: "Action", label: "Edit", variant: "neutral", href: buildReleaseDecisionOverrideHref, isVisible: hasManualReleaseOverride },
+				{
+					columnLabel: "Detail",
+					label: "Detail",
+					variant: "secondary",
+					href: buildReleaseDecisionDetailHref,
+				},
+				{
+					columnLabel: "Action",
+					label: "Edit",
+					variant: "secondary",
+					href: buildReleaseDecisionOverrideHref,
+					isVisible: hasManualReleaseOverride,
+				},
 			]}
 			initialSearch={initialSearch}
 			initialFilterState={initialFilterState}
@@ -179,9 +206,13 @@ interface ReleaseDecisionsTableBodyProps {
 
 const RISEOPEDIA_OWNED_READ_ONLY_PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
 const RISEOPEDIA_OWNED_READ_ONLY_EMPTY_FILTERS: TableFilterConfig[] = [];
-const RISEOPEDIA_OWNED_READ_ONLY_EMPTY_ROW_ACTIONS: TableReadOnlyRowActionConfig[] = [];
+const RISEOPEDIA_OWNED_READ_ONLY_EMPTY_ROW_ACTIONS: TableReadOnlyRowActionConfig[] =
+	[];
 
-function formatRiseopediaOwnedReadOnlyCell(row: TableRow, column: TableColumnConfig): string {
+function formatRiseopediaOwnedReadOnlyCell(
+	row: TableRow,
+	column: TableColumnConfig,
+): string {
 	const value = tableReadRowValue(row, column.rowKey);
 	if (column.kind === "boolean") {
 		return tableToBoolean(value) ? "Yes" : "No";
@@ -194,7 +225,9 @@ function formatRiseopediaOwnedReadOnlyCell(row: TableRow, column: TableColumnCon
 	return tableToDisplayText(value);
 }
 
-function getRiseopediaOwnedReadOnlyColumnWidthClassName(column: TableColumnConfig): string {
+function getRiseopediaOwnedReadOnlyColumnWidthClassName(
+	column: TableColumnConfig,
+): string {
 	if (column.width === "narrow") {
 		return "table-col table-col--w-8";
 	}
@@ -217,11 +250,20 @@ function getRiseopediaOwnedReadOnlyColumnWidthClassName(column: TableColumnConfi
 
 	const key = column.rowKey.toLowerCase();
 	const label = column.label.toLowerCase();
-	if (column.kind === "boolean" || column.kind === "count" || column.kind === "status") {
+	if (
+		column.kind === "boolean" ||
+		column.kind === "count" ||
+		column.kind === "status"
+	) {
 		return "table-col table-col--w-10";
 	}
 
-	if (column.strong === true || key.includes("name") || label.includes("name") || label.includes("entity")) {
+	if (
+		column.strong === true ||
+		key.includes("name") ||
+		label.includes("name") ||
+		label.includes("entity")
+	) {
 		return "table-col table-col--w-18";
 	}
 
@@ -239,16 +281,25 @@ function renderRiseopediaOwnedReadOnlyColGroup(args: {
 	return (
 		<colgroup>
 			{args.columns.map((column) => (
-				<col key={`data-${column.rowKey}`} className={getRiseopediaOwnedReadOnlyColumnWidthClassName(column)} />
+				<col
+					key={`data-${column.rowKey}`}
+					className={getRiseopediaOwnedReadOnlyColumnWidthClassName(column)}
+				/>
 			))}
 			{args.rowActions.map((action) => (
-				<col key={`row-action-${action.columnLabel ?? (typeof action.label === "string" ? action.label : "row")}`} className="table-col table-col--w-10" />
+				<col
+					key={`row-action-${action.columnLabel ?? (typeof action.label === "string" ? action.label : "row")}`}
+					className="table-col table-col--w-10"
+				/>
 			))}
 		</colgroup>
 	);
 }
 
-function getRiseopediaOwnedReadOnlyRowSearchText(row: TableRow, columns: TableColumnConfig[]): string {
+function getRiseopediaOwnedReadOnlyRowSearchText(
+	row: TableRow,
+	columns: TableColumnConfig[],
+): string {
 	return columns
 		.filter((column) => column.searchable !== false)
 		.map((column) => formatRiseopediaOwnedReadOnlyCell(row, column))
@@ -256,7 +307,9 @@ function getRiseopediaOwnedReadOnlyRowSearchText(row: TableRow, columns: TableCo
 		.toLowerCase();
 }
 
-function buildRiseopediaOwnedReadOnlyInitialFilterState(filters: TableFilterConfig[]): TableFilterState {
+function buildRiseopediaOwnedReadOnlyInitialFilterState(
+	filters: TableFilterConfig[],
+): TableFilterState {
 	const state: TableFilterState = {};
 	for (const filter of filters) {
 		state[filter.key] = "";
@@ -264,7 +317,10 @@ function buildRiseopediaOwnedReadOnlyInitialFilterState(filters: TableFilterConf
 	return state;
 }
 
-function riseopediaOwnedReadOnlyFilterValueMatches(rowValue: unknown, selectedValue: string): boolean {
+function riseopediaOwnedReadOnlyFilterValueMatches(
+	rowValue: unknown,
+	selectedValue: string,
+): boolean {
 	if (!selectedValue) {
 		return true;
 	}
@@ -272,10 +328,14 @@ function riseopediaOwnedReadOnlyFilterValueMatches(rowValue: unknown, selectedVa
 	if (typeof rowValue === "boolean") {
 		const normalizedSelectedValue = selectedValue.trim().toLowerCase();
 		if (rowValue) {
-			return ["true", "yes", "enabled", "active", "1"].includes(normalizedSelectedValue);
+			return ["true", "yes", "enabled", "active", "1"].includes(
+				normalizedSelectedValue,
+			);
 		}
 
-		return ["false", "no", "disabled", "inactive", "0"].includes(normalizedSelectedValue);
+		return ["false", "no", "disabled", "inactive", "0"].includes(
+			normalizedSelectedValue,
+		);
 	}
 
 	return tableToDisplayText(rowValue) === selectedValue;
@@ -288,7 +348,12 @@ function riseopediaOwnedReadOnlyMatchesFilters(
 ): boolean {
 	for (const filter of filters) {
 		const selectedValue = filterState[filter.key] ?? "";
-		if (!riseopediaOwnedReadOnlyFilterValueMatches(tableReadRowValue(row, filter.rowKey), selectedValue)) {
+		if (
+			!riseopediaOwnedReadOnlyFilterValueMatches(
+				tableReadRowValue(row, filter.rowKey),
+				selectedValue,
+			)
+		) {
 			return false;
 		}
 	}
@@ -300,7 +365,9 @@ function getRiseopediaOwnedReadOnlyFilterOptions(
 	filter: TableFilterConfig,
 	filterState: TableFilterState,
 ): TableOption[] {
-	return filter.optionsBuilder ? filter.optionsBuilder(filterState) : filter.options ?? [];
+	return filter.optionsBuilder
+		? filter.optionsBuilder(filterState)
+		: (filter.options ?? []);
 }
 
 function renderRiseopediaOwnedReadOnlyFilterControlItems(args: {
@@ -342,15 +409,24 @@ function renderRiseopediaOwnedReadOnlyFilterControlItems(args: {
 	));
 }
 
-function renderRiseopediaOwnedReadOnlyToolbarCluster(content: ReactNode): JSX.Element | null {
+function renderRiseopediaOwnedReadOnlyToolbarCluster(
+	content: ReactNode,
+): JSX.Element | null {
 	if (!content) {
 		return null;
 	}
 
-	return <div className="admin-table-toolbar-filter admin-table-toolbar-filter--riseopedia">{content}</div>;
+	return (
+		<div className="admin-table-toolbar-filter admin-table-toolbar-filter--riseopedia">
+			{content}
+		</div>
+	);
 }
 
-function combineRiseopediaOwnedReadOnlyToolbarContent(primary: ReactNode, secondary: ReactNode): ReactNode {
+function combineRiseopediaOwnedReadOnlyToolbarContent(
+	primary: ReactNode,
+	secondary: ReactNode,
+): ReactNode {
 	if (primary && secondary) {
 		return renderRiseopediaOwnedReadOnlyToolbarCluster(
 			<>
@@ -363,7 +439,10 @@ function combineRiseopediaOwnedReadOnlyToolbarContent(primary: ReactNode, second
 	return primary ?? renderRiseopediaOwnedReadOnlyToolbarCluster(secondary);
 }
 
-function getRiseopediaOwnedReadOnlyStableRowKey(row: TableRow, index: number): string {
+function getRiseopediaOwnedReadOnlyStableRowKey(
+	row: TableRow,
+	index: number,
+): string {
 	const preferredKeys = [
 		"release_decision_id",
 		"release_evidence_id",
@@ -383,7 +462,9 @@ function getRiseopediaOwnedReadOnlyActionVariant(
 	action: TableReadOnlyRowActionConfig,
 	row: TableRow,
 ): TableButtonVariant {
-	return typeof action.variant === "function" ? action.variant(row) : action.variant ?? "neutral";
+	return typeof action.variant === "function"
+		? action.variant(row)
+		: (action.variant ?? "secondary");
 }
 
 function ReleaseDecisionsTableBody({
@@ -412,29 +493,48 @@ function ReleaseDecisionsTableBody({
 	}));
 	const [page, setPage] = useState<number>(1);
 	const [pageSize, setPageSize] = useState<number>(20);
-	const [sortKey, setSortKey] = useState<string>(defaultSortKey ?? columns[0]?.rowKey ?? "row");
+	const [sortKey, setSortKey] = useState<string>(
+		defaultSortKey ?? columns[0]?.rowKey ?? "row",
+	);
 	const [sortDirection, setSortDirection] = useState<TableSortDirection>("asc");
 	const [busyRowKey, setBusyRowKey] = useState<string | null>(null);
 	const [error, setError] = useState("");
-	const filterControlItems = renderRiseopediaOwnedReadOnlyFilterControlItems({ filters, filterState, setFilterState, setPage });
-	const primaryLeft = filtersPlacement === "primaryLeft"
-		? combineRiseopediaOwnedReadOnlyToolbarContent(toolbarLeft, filterControlItems)
-		: toolbarLeft;
-	const primaryRight = toolbarRight ?? null;
-	const secondaryLeftContent = filtersPlacement === "secondaryLeft"
-		? renderRiseopediaOwnedReadOnlyToolbarCluster(filterControlItems)
-		: secondaryLeft;
-	const secondaryCenterContent = filtersPlacement === "secondaryCenter"
-		? renderRiseopediaOwnedReadOnlyToolbarCluster(filterControlItems)
-		: secondaryCenter;
-	const hasSecondaryToolbar = Boolean(secondaryLeftContent || secondaryCenterContent || secondaryRight);
-	const secondaryToolbarClassName = filtersPlacement === "secondaryLeft"
-		? "admin-table-toolbar admin-table-toolbar--secondary admin-table-toolbar--secondary-left"
-		: "admin-table-toolbar admin-table-toolbar--secondary";
-	const actionContext = useMemo<TableReadOnlyActionContext>(() => ({
-		search,
+	const filterControlItems = renderRiseopediaOwnedReadOnlyFilterControlItems({
+		filters,
 		filterState,
-	}), [filterState, search]);
+		setFilterState,
+		setPage,
+	});
+	const primaryLeft =
+		filtersPlacement === "primaryLeft"
+			? combineRiseopediaOwnedReadOnlyToolbarContent(
+					toolbarLeft,
+					filterControlItems,
+				)
+			: toolbarLeft;
+	const primaryRight = toolbarRight ?? null;
+	const secondaryLeftContent =
+		filtersPlacement === "secondaryLeft"
+			? renderRiseopediaOwnedReadOnlyToolbarCluster(filterControlItems)
+			: secondaryLeft;
+	const secondaryCenterContent =
+		filtersPlacement === "secondaryCenter"
+			? renderRiseopediaOwnedReadOnlyToolbarCluster(filterControlItems)
+			: secondaryCenter;
+	const hasSecondaryToolbar = Boolean(
+		secondaryLeftContent || secondaryCenterContent || secondaryRight,
+	);
+	const secondaryToolbarClassName =
+		filtersPlacement === "secondaryLeft"
+			? "admin-table-toolbar admin-table-toolbar--secondary admin-table-toolbar--secondary-left"
+			: "admin-table-toolbar admin-table-toolbar--secondary";
+	const actionContext = useMemo<TableReadOnlyActionContext>(
+		() => ({
+			search,
+			filterState,
+		}),
+		[filterState, search],
+	);
 
 	const filteredRows = useMemo(() => {
 		const normalizedSearch = search.trim().toLowerCase();
@@ -444,14 +544,22 @@ function ReleaseDecisionsTableBody({
 			}
 
 			return normalizedSearch
-				? getRiseopediaOwnedReadOnlyRowSearchText(row, columns).includes(normalizedSearch)
+				? getRiseopediaOwnedReadOnlyRowSearchText(row, columns).includes(
+						normalizedSearch,
+					)
 				: true;
 		});
 
 		return nextRows.slice().sort((left, right) => {
 			const comparison = tableCompareAdminText(
-				formatRiseopediaOwnedReadOnlyCell(left, { rowKey: sortKey, label: sortKey }),
-				formatRiseopediaOwnedReadOnlyCell(right, { rowKey: sortKey, label: sortKey }),
+				formatRiseopediaOwnedReadOnlyCell(left, {
+					rowKey: sortKey,
+					label: sortKey,
+				}),
+				formatRiseopediaOwnedReadOnlyCell(right, {
+					rowKey: sortKey,
+					label: sortKey,
+				}),
 			);
 
 			return tableApplyAdminSortDirection(comparison, sortDirection);
@@ -464,7 +572,11 @@ function ReleaseDecisionsTableBody({
 	}, [filteredRows, page, pageSize]);
 
 	const runRowAction = useCallback(
-		async (row: TableRow, action: TableReadOnlyRowActionConfig, rowKey: string): Promise<void> => {
+		async (
+			row: TableRow,
+			action: TableReadOnlyRowActionConfig,
+			rowKey: string,
+		): Promise<void> => {
 			if (busyRowKey) {
 				return;
 			}
@@ -500,7 +612,12 @@ function ReleaseDecisionsTableBody({
 		<div className="admin-table-stack">
 			<div className="admin-table-toolbar">
 				<div className="admin-table-toolbar-nav">
-					{primaryLeft ?? <div className="admin-table-toolbar-spacer admin-table-toolbar-spacer--action" aria-hidden="true" />}
+					{primaryLeft ?? (
+						<div
+							className="admin-table-toolbar-spacer admin-table-toolbar-spacer--action"
+							aria-hidden="true"
+						/>
+					)}
 				</div>
 
 				<div className="admin-table-toolbar-search">
@@ -515,7 +632,12 @@ function ReleaseDecisionsTableBody({
 				</div>
 
 				<div className="admin-table-toolbar-action">
-					{primaryRight ?? <div className="admin-table-toolbar-spacer admin-table-toolbar-spacer--action" aria-hidden="true" />}
+					{primaryRight ?? (
+						<div
+							className="admin-table-toolbar-spacer admin-table-toolbar-spacer--action"
+							aria-hidden="true"
+						/>
+					)}
 				</div>
 			</div>
 
@@ -549,7 +671,10 @@ function ReleaseDecisionsTableBody({
 										sortDirection={sortDirection}
 										onSortChange={(nextSortKey) => {
 											setSortDirection((currentDirection) =>
-												tableGetNextSortDirection(sortKey === nextSortKey, currentDirection),
+												tableGetNextSortDirection(
+													sortKey === nextSortKey,
+													currentDirection,
+												),
 											);
 											setSortKey(nextSortKey);
 											setPage(1);
@@ -558,7 +683,10 @@ function ReleaseDecisionsTableBody({
 								),
 							)}
 							{rowActions.map((action) => (
-								<TableTH key={`action-${action.columnLabel ?? (typeof action.label === "string" ? action.label : "row")}`} className="admin-table-cell--center">
+								<TableTH
+									key={`action-${action.columnLabel ?? (typeof action.label === "string" ? action.label : "row")}`}
+									className="admin-table-cell--center"
+								>
 									{action.columnLabel ?? "Action"}
 								</TableTH>
 							))}
@@ -578,13 +706,22 @@ function ReleaseDecisionsTableBody({
 											</TableTD>
 										))}
 										{rowActions.map((action) => {
-											const label = typeof action.label === "function" ? action.label(row) : action.label;
+											const label =
+												typeof action.label === "function"
+													? action.label(row)
+													: action.label;
 											const visible = action.isVisible ? action.isVisible(row) : true;
 											return (
-												<TableTD key={`${rowKey}-${action.columnLabel ?? label}`} className="admin-table-cell--center">
+												<TableTD
+													key={`${rowKey}-${action.columnLabel ?? label}`}
+													className="admin-table-cell--center"
+												>
 													{visible ? (
 														action.href ? (
-															<TableButtonLink href={action.href(row, actionContext)} variant={getRiseopediaOwnedReadOnlyActionVariant(action, row)}>
+															<TableButtonLink
+																href={action.href(row, actionContext)}
+																variant={getRiseopediaOwnedReadOnlyActionVariant(action, row)}
+															>
 																{label}
 															</TableButtonLink>
 														) : (
@@ -606,7 +743,10 @@ function ReleaseDecisionsTableBody({
 							})
 						) : (
 							<TableTR>
-								<TableTD colSpan={columns.length + rowActions.length} className="admin-table-empty-cell">
+								<TableTD
+									colSpan={columns.length + rowActions.length}
+									className="admin-table-empty-cell"
+								>
 									{emptyText}
 								</TableTD>
 							</TableTR>
@@ -630,3 +770,4 @@ function ReleaseDecisionsTableBody({
 	);
 }
 
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

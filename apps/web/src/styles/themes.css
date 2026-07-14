@@ -1,385 +1,1110 @@
 /* FILE: apps/web/src/styles/themes.css
    Corn Mafia CSS theme profiles and transition aliases for app-facing colors.
 */
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */
 
 :root,
 .cm-dark:root,
 .cm-dark {
-	/* Core theme roles. */
-	--theme-bg: var(--base-ink-900);
-	--theme-surface: var(--base-ink-825);
-	--theme-surface-muted: color-mix(in oklab, var(--theme-surface) 72%, transparent);
-	--theme-card: var(--theme-surface);
-	--theme-muted-bg: var(--theme-surface-muted);
-	--theme-text: var(--base-gray-50);
-	--theme-text-muted: var(--base-gray-350);
-	--theme-border: var(--base-ink-650);
-	--theme-border-strong: color-mix(in oklab, var(--theme-border) 70%, var(--theme-text));
-	--theme-overlay: color-mix(in oklab, var(--base-black) 45%, transparent);
-	--theme-ink: var(--brand-black);
-	--theme-contrast: var(--brand-white);
+  /* Core theme roles. */
+  --theme-bg: var(--base-ink-900);
+  --theme-surface: var(--base-ink-825);
+  --theme-surface-muted: color-mix(
+    in oklab,
+    var(--theme-surface) 72%,
+    transparent
+  );
+  --theme-card: var(--theme-surface);
+  --theme-muted-bg: var(--theme-surface-muted);
+  --theme-text: var(--base-gray-50);
+  --theme-text-muted: var(--base-gray-350);
+  --theme-border: var(--base-ink-650);
+  --theme-border-strong: color-mix(
+    in oklab,
+    var(--theme-border) 70%,
+    var(--theme-text)
+  );
+  --theme-overlay: color-mix(in oklab, var(--base-black) 45%, transparent);
+  --theme-ink: var(--brand-black);
+  --theme-contrast: var(--brand-white);
 
-	/* Brand and action roles. */
-	--theme-accent: var(--brand-red);
-	--theme-accent-strong: var(--brand-red-strong);
-	--theme-accent-muted: color-mix(in oklab, var(--theme-accent) 72%, var(--theme-ink));
-	--theme-accent-soft: color-mix(in oklab, var(--theme-accent) 16%, transparent);
-	--theme-accent-faint: color-mix(in oklab, var(--theme-accent) 8%, transparent);
-	--theme-accent-border: color-mix(in oklab, var(--theme-accent) 55%, var(--theme-border));
-	--theme-accent-contrast: var(--brand-white);
-	--theme-focus: var(--brand-red);
-	--theme-green: var(--brand-green);
-	--theme-green-soft: color-mix(in oklab, var(--theme-green) 10%, var(--theme-surface));
-	--theme-green-border: color-mix(in oklab, var(--theme-green) 45%, var(--theme-border));
+  /* Brand and action roles. */
+  --theme-accent: var(--brand-red);
+  --theme-accent-strong: var(--brand-red-strong);
+  --theme-accent-muted: color-mix(
+    in oklab,
+    var(--theme-accent) 72%,
+    var(--theme-ink)
+  );
+  --theme-accent-soft: color-mix(
+    in oklab,
+    var(--theme-accent) 16%,
+    transparent
+  );
+  --theme-accent-faint: color-mix(
+    in oklab,
+    var(--theme-accent) 8%,
+    transparent
+  );
+  --theme-accent-border: color-mix(
+    in oklab,
+    var(--theme-accent) 55%,
+    var(--theme-border)
+  );
+  --theme-accent-contrast: var(--brand-white);
+  --theme-focus: var(--brand-red);
+  --theme-green: var(--brand-green);
+  --theme-green-soft: color-mix(
+    in oklab,
+    var(--theme-green) 10%,
+    var(--theme-surface)
+  );
+  --theme-green-border: color-mix(
+    in oklab,
+    var(--theme-green) 45%,
+    var(--theme-border)
+  );
 
-	/* Semantic status roles. */
-	--theme-danger: var(--base-red-400);
-	--theme-danger-text: var(--base-red-100);
-	--theme-danger-strong: var(--base-red-800);
-	--theme-danger-soft: color-mix(in oklab, var(--theme-danger) 12%, transparent);
-	--theme-danger-border: color-mix(in oklab, var(--theme-danger) 48%, var(--theme-border));
+  /* Semantic status roles. */
+  --theme-danger: var(--base-red-400);
+  --theme-danger-text: var(--base-red-100);
+  --theme-danger-strong: var(--base-red-800);
+  --theme-danger-soft: color-mix(
+    in oklab,
+    var(--theme-danger) 12%,
+    transparent
+  );
+  --theme-danger-border: color-mix(
+    in oklab,
+    var(--theme-danger) 48%,
+    var(--theme-border)
+  );
 
-	--theme-success: var(--base-green-400);
-	--theme-success-text: var(--base-green-100);
-	--theme-success-strong: var(--base-green-900);
-	--theme-success-soft: color-mix(in oklab, var(--theme-success) 12%, transparent);
-	--theme-success-border: color-mix(in oklab, var(--theme-success) 48%, var(--theme-border));
+  --theme-success: var(--base-green-400);
+  --theme-success-text: var(--base-green-100);
+  --theme-success-strong: var(--base-green-900);
+  --theme-success-soft: color-mix(
+    in oklab,
+    var(--theme-success) 12%,
+    transparent
+  );
+  --theme-success-border: color-mix(
+    in oklab,
+    var(--theme-success) 48%,
+    var(--theme-border)
+  );
 
-	--theme-warning: var(--brand-gold);
-	--theme-warning-soft: color-mix(in oklab, var(--theme-warning) 12%, transparent);
-	--theme-warning-border: color-mix(in oklab, var(--theme-warning) 55%, var(--theme-border));
+  --theme-warning: var(--brand-gold);
+  --theme-warning-soft: color-mix(
+    in oklab,
+    var(--theme-warning) 12%,
+    transparent
+  );
+  --theme-warning-border: color-mix(
+    in oklab,
+    var(--theme-warning) 55%,
+    var(--theme-border)
+  );
 
-	--theme-info: var(--base-blue-400);
-	--theme-info-text: var(--base-blue-100);
-	--theme-info-strong: var(--base-blue-900);
-	--theme-info-soft: color-mix(in oklab, var(--theme-info) 12%, transparent);
-	--theme-info-border: color-mix(in oklab, var(--theme-info) 48%, var(--theme-border));
+  --theme-info: var(--base-blue-400);
+  --theme-info-text: var(--base-blue-100);
+  --theme-info-strong: var(--base-blue-900);
+  --theme-info-soft: color-mix(in oklab, var(--theme-info) 12%, transparent);
+  --theme-info-border: color-mix(
+    in oklab,
+    var(--theme-info) 48%,
+    var(--theme-border)
+  );
 
-	/* Surface roles. */
-	--theme-surface-transparent: rgb(from var(--theme-surface) r g b / 0%);
-	--theme-surface-glass-98: rgb(from var(--theme-bg) r g b / 98%);
-	--theme-surface-card: var(--theme-surface);
-	--theme-surface-card-muted: color-mix(in oklab, var(--theme-surface) 54%, transparent);
-	--theme-surface-icon-bg: color-mix(in oklab, var(--theme-ink) 20%, transparent);
-	--theme-surface-overlay-soft: color-mix(in oklab, var(--theme-ink) 40%, transparent);
-	--theme-surface-overlay-picker: color-mix(in oklab, var(--theme-ink) 30%, transparent);
-	--theme-surface-overlay-strong: color-mix(in oklab, var(--theme-ink) 60%, transparent);
-	--theme-surface-muted-soft: color-mix(in oklab, var(--theme-surface) 40%, transparent);
-	--theme-surface-muted-card: color-mix(in oklab, var(--theme-surface) 72%, transparent);
-	--theme-surface-ink-soft: color-mix(in oklab, var(--theme-ink) 20%, transparent);
-	--theme-surface-ink-muted: color-mix(in oklab, var(--theme-ink) 10%, transparent);
+  /* Surface roles. */
+  --theme-surface-transparent: rgb(from var(--theme-surface) r g b / 0%);
+  --theme-surface-glass-98: rgb(from var(--theme-bg) r g b / 98%);
+  --theme-surface-card: var(--theme-surface);
+  --theme-surface-card-muted: color-mix(
+    in oklab,
+    var(--theme-surface) 54%,
+    transparent
+  );
+  --theme-surface-icon-bg: color-mix(
+    in oklab,
+    var(--theme-ink) 20%,
+    transparent
+  );
+  --theme-surface-overlay-soft: color-mix(
+    in oklab,
+    var(--theme-ink) 40%,
+    transparent
+  );
+  --theme-surface-overlay-picker: color-mix(
+    in oklab,
+    var(--theme-ink) 30%,
+    transparent
+  );
+  --theme-surface-overlay-strong: color-mix(
+    in oklab,
+    var(--theme-ink) 60%,
+    transparent
+  );
+  --theme-surface-muted-soft: color-mix(
+    in oklab,
+    var(--theme-surface) 40%,
+    transparent
+  );
+  --theme-surface-muted-card: color-mix(
+    in oklab,
+    var(--theme-surface) 72%,
+    transparent
+  );
+  --theme-surface-ink-soft: color-mix(
+    in oklab,
+    var(--theme-ink) 20%,
+    transparent
+  );
+  --theme-surface-ink-muted: color-mix(
+    in oklab,
+    var(--theme-ink) 10%,
+    transparent
+  );
 
-	/* Official game rarity roles. */
-	--theme-rarity-common: var(--rarity-common);
-	--theme-rarity-uncommon: var(--rarity-uncommon);
-	--theme-rarity-rare: var(--rarity-rare);
-	--theme-rarity-legendary: var(--rarity-legendary);
-	--theme-rarity-mythic: var(--rarity-mythic);
-	--theme-rarity-any-gradient: linear-gradient(90deg,
-		var(--theme-rarity-common) 8%,
-		var(--theme-rarity-uncommon) 30%,
-		var(--theme-rarity-rare) 60%,
-		var(--theme-rarity-legendary) 85%,
-		var(--theme-rarity-mythic));
+  /* Official game rarity roles. */
+  --theme-rarity-common: var(--rarity-common);
+  --theme-rarity-uncommon: var(--rarity-uncommon);
+  --theme-rarity-rare: var(--rarity-rare);
+  --theme-rarity-legendary: var(--rarity-legendary);
+  --theme-rarity-mythic: var(--rarity-mythic);
+  --theme-rarity-any-gradient: linear-gradient(
+    90deg,
+    var(--theme-rarity-common) 8%,
+    var(--theme-rarity-uncommon) 30%,
+    var(--theme-rarity-rare) 60%,
+    var(--theme-rarity-legendary) 85%,
+    var(--theme-rarity-mythic)
+  );
 
-	/* Feature color roles. */
-	--theme-map-bg: var(--base-ink-910);
-	--theme-map-marker-border: var(--brand-white);
-	--theme-richtext-code-bg: color-mix(in oklab, var(--base-gray-500) 12%, transparent);
-	--theme-editor-picker-surface-bg: rgb(from var(--theme-bg) r g b / 98%);
+  /* Feature color roles. */
+  --theme-map-bg: var(--base-ink-910);
+  --theme-map-marker-border: var(--brand-white);
+  --theme-richtext-code-bg: color-mix(
+    in oklab,
+    var(--base-gray-500) 12%,
+    transparent
+  );
+  --theme-editor-picker-surface-bg: rgb(from var(--theme-bg) r g b / 98%);
 
-	/* Derived reusable color roles. */
-	--theme-page-gradient-accent-start: color-mix(in oklab, var(--theme-accent) 14%, var(--theme-bg));
-	--theme-page-gradient-accent-mid: color-mix(in oklab, var(--theme-accent) 6%, var(--theme-bg));
+  /* Derived reusable color roles. */
+  --theme-page-gradient-accent-start: color-mix(
+    in oklab,
+    var(--theme-accent) 14%,
+    var(--theme-bg)
+  );
+  --theme-page-gradient-accent-mid: color-mix(
+    in oklab,
+    var(--theme-accent) 6%,
+    var(--theme-bg)
+  );
 
-	--theme-bg-alpha-58: color-mix(in oklab, var(--theme-bg) 58%, transparent);
-	--theme-bg-alpha-60: color-mix(in oklab, var(--theme-bg) 60%, transparent);
-	--theme-bg-alpha-62: color-mix(in oklab, var(--theme-bg) 62%, transparent);
-	--theme-bg-surface-72: color-mix(in oklab, var(--theme-bg) 72%, var(--theme-surface));
-	--theme-bg-surface-86: color-mix(in oklab, var(--theme-bg) 86%, var(--theme-surface));
-	--theme-bg-surface-88: color-mix(in oklab, var(--theme-bg) 88%, var(--theme-surface));
+  --theme-bg-alpha-58: color-mix(in oklab, var(--theme-bg) 58%, transparent);
+  --theme-bg-alpha-60: color-mix(in oklab, var(--theme-bg) 60%, transparent);
+  --theme-bg-alpha-62: color-mix(in oklab, var(--theme-bg) 62%, transparent);
+  --theme-bg-surface-72: color-mix(
+    in oklab,
+    var(--theme-bg) 72%,
+    var(--theme-surface)
+  );
+  --theme-bg-surface-86: color-mix(
+    in oklab,
+    var(--theme-bg) 86%,
+    var(--theme-surface)
+  );
+  --theme-bg-surface-88: color-mix(
+    in oklab,
+    var(--theme-bg) 88%,
+    var(--theme-surface)
+  );
 
-	--theme-surface-alpha-48: color-mix(in oklab, var(--theme-surface) 48%, transparent);
-	--theme-surface-alpha-60: color-mix(in oklab, var(--theme-surface) 60%, transparent);
-	--theme-surface-alpha-70: color-mix(in oklab, var(--theme-surface) 70%, transparent);
-	--theme-surface-alpha-76: color-mix(in oklab, var(--theme-surface) 76%, transparent);
-	--theme-surface-alpha-80: color-mix(in oklab, var(--theme-surface) 80%, transparent);
-	--theme-surface-accent-12: color-mix(in oklab, var(--theme-surface) 88%, var(--theme-accent) 12%);
-	--theme-surface-border-70: color-mix(in oklab, var(--theme-surface) 70%, var(--theme-border));
+  --theme-surface-alpha-48: color-mix(
+    in oklab,
+    var(--theme-surface) 48%,
+    transparent
+  );
+  --theme-surface-alpha-60: color-mix(
+    in oklab,
+    var(--theme-surface) 60%,
+    transparent
+  );
+  --theme-surface-alpha-70: color-mix(
+    in oklab,
+    var(--theme-surface) 70%,
+    transparent
+  );
+  --theme-surface-alpha-76: color-mix(
+    in oklab,
+    var(--theme-surface) 76%,
+    transparent
+  );
+  --theme-surface-alpha-80: color-mix(
+    in oklab,
+    var(--theme-surface) 80%,
+    transparent
+  );
+  --theme-surface-accent-12: color-mix(
+    in oklab,
+    var(--theme-surface) 88%,
+    var(--theme-accent) 12%
+  );
+  --theme-surface-border-70: color-mix(
+    in oklab,
+    var(--theme-surface) 70%,
+    var(--theme-border)
+  );
 
-	--theme-accent-alpha-10: color-mix(in oklab, var(--theme-accent) 10%, transparent);
-	--theme-accent-alpha-12: color-mix(in oklab, var(--theme-accent) 12%, transparent);
-	--theme-accent-alpha-14: color-mix(in oklab, var(--theme-accent) 14%, transparent);
-	--theme-accent-alpha-18: color-mix(in oklab, var(--theme-accent) 18%, transparent);
-	--theme-accent-alpha-22: color-mix(in oklab, var(--theme-accent) 22%, transparent);
-	--theme-accent-alpha-65: color-mix(in oklab, var(--theme-accent) 65%, transparent);
-	--theme-accent-border-40: color-mix(in oklab, var(--theme-accent) 40%, var(--theme-border));
-	--theme-accent-border-70: color-mix(in oklab, var(--theme-accent) 70%, var(--theme-border));
-	--theme-accent-border-72: color-mix(in oklab, var(--theme-accent) 72%, var(--theme-border));
-	--theme-accent-border-78: color-mix(in oklab, var(--theme-accent) 78%, var(--theme-border));
-	--theme-accent-surface-soft: color-mix(in oklab, var(--theme-accent) 10%, var(--theme-surface));
+  --theme-accent-alpha-10: color-mix(
+    in oklab,
+    var(--theme-accent) 10%,
+    transparent
+  );
+  --theme-accent-alpha-12: color-mix(
+    in oklab,
+    var(--theme-accent) 12%,
+    transparent
+  );
+  --theme-accent-alpha-14: color-mix(
+    in oklab,
+    var(--theme-accent) 14%,
+    transparent
+  );
+  --theme-accent-alpha-18: color-mix(
+    in oklab,
+    var(--theme-accent) 18%,
+    transparent
+  );
+  --theme-accent-alpha-22: color-mix(
+    in oklab,
+    var(--theme-accent) 22%,
+    transparent
+  );
+  --theme-accent-alpha-65: color-mix(
+    in oklab,
+    var(--theme-accent) 65%,
+    transparent
+  );
+  --theme-accent-border-40: color-mix(
+    in oklab,
+    var(--theme-accent) 40%,
+    var(--theme-border)
+  );
+  --theme-accent-border-70: color-mix(
+    in oklab,
+    var(--theme-accent) 70%,
+    var(--theme-border)
+  );
+  --theme-accent-border-72: color-mix(
+    in oklab,
+    var(--theme-accent) 72%,
+    var(--theme-border)
+  );
+  --theme-accent-border-78: color-mix(
+    in oklab,
+    var(--theme-accent) 78%,
+    var(--theme-border)
+  );
+  --theme-accent-surface-soft: color-mix(
+    in oklab,
+    var(--theme-accent) 10%,
+    var(--theme-surface)
+  );
 
-	--theme-focus-border: color-mix(in oklab, var(--theme-focus) 55%, var(--theme-border));
-	--theme-focus-soft: color-mix(in oklab, var(--theme-focus) 10%, var(--theme-surface));
+  --theme-focus-border: color-mix(
+    in oklab,
+    var(--theme-focus) 55%,
+    var(--theme-border)
+  );
+  --theme-focus-soft: color-mix(
+    in oklab,
+    var(--theme-focus) 10%,
+    var(--theme-surface)
+  );
 
-	--theme-green-border-70: color-mix(in oklab, var(--theme-green) 70%, var(--theme-border));
-	--theme-green-alpha-18: color-mix(in oklab, var(--theme-green) 18%, transparent);
-	--theme-warning-border-58: color-mix(in oklab, var(--theme-warning) 58%, var(--theme-border));
-	--theme-warning-border-70: color-mix(in oklab, var(--theme-warning) 70%, var(--theme-border));
-	--theme-warning-alpha-10: color-mix(in oklab, var(--theme-warning) 10%, transparent);
-	--theme-warning-alpha-18: color-mix(in oklab, var(--theme-warning) 18%, transparent);
+  --theme-green-border-70: color-mix(
+    in oklab,
+    var(--theme-green) 70%,
+    var(--theme-border)
+  );
+  --theme-green-alpha-18: color-mix(
+    in oklab,
+    var(--theme-green) 18%,
+    transparent
+  );
+  --theme-warning-border-58: color-mix(
+    in oklab,
+    var(--theme-warning) 58%,
+    var(--theme-border)
+  );
+  --theme-warning-border-70: color-mix(
+    in oklab,
+    var(--theme-warning) 70%,
+    var(--theme-border)
+  );
+  --theme-warning-alpha-10: color-mix(
+    in oklab,
+    var(--theme-warning) 10%,
+    transparent
+  );
+  --theme-warning-alpha-18: color-mix(
+    in oklab,
+    var(--theme-warning) 18%,
+    transparent
+  );
 
-	--theme-text-alpha-6: color-mix(in oklab, var(--theme-text) 6%, transparent);
-	--theme-text-alpha-10: color-mix(in oklab, var(--theme-text) 10%, transparent);
-	--theme-text-alpha-20: color-mix(in oklab, var(--theme-text) 20%, transparent);
-	--theme-text-alpha-28: color-mix(in oklab, var(--theme-text) 28%, transparent);
-	--theme-text-alpha-42: color-mix(in oklab, var(--theme-text) 42%, transparent);
-	--theme-text-alpha-50: color-mix(in oklab, var(--theme-text) 50%, transparent);
-	--theme-text-alpha-70: color-mix(in oklab, var(--theme-text) 70%, transparent);
-	--theme-text-muted-alpha-50: color-mix(in oklab, var(--theme-text-muted) 50%, transparent);
+  --theme-text-alpha-6: color-mix(in oklab, var(--theme-text) 6%, transparent);
+  --theme-text-alpha-10: color-mix(
+    in oklab,
+    var(--theme-text) 10%,
+    transparent
+  );
+  --theme-text-alpha-20: color-mix(
+    in oklab,
+    var(--theme-text) 20%,
+    transparent
+  );
+  --theme-text-alpha-28: color-mix(
+    in oklab,
+    var(--theme-text) 28%,
+    transparent
+  );
+  --theme-text-alpha-42: color-mix(
+    in oklab,
+    var(--theme-text) 42%,
+    transparent
+  );
+  --theme-text-alpha-50: color-mix(
+    in oklab,
+    var(--theme-text) 50%,
+    transparent
+  );
+  --theme-text-alpha-70: color-mix(
+    in oklab,
+    var(--theme-text) 70%,
+    transparent
+  );
+  --theme-text-muted-alpha-50: color-mix(
+    in oklab,
+    var(--theme-text-muted) 50%,
+    transparent
+  );
 
-	--theme-ui-pill-runtime-bg: color-mix(in oklab, var(--ui-pill-color, var(--theme-surface)) 20%, transparent);
-	--theme-ui-pill-runtime-border: color-mix(in oklab, var(--ui-pill-color, var(--theme-surface)) 50%, var(--theme-border));
-	--theme-ui-pill-runtime-border-strong: color-mix(in oklab, var(--ui-pill-color, var(--theme-surface)) 70%, var(--theme-border));
-	--theme-ui-pill-swatch-runtime-border: color-mix(in oklab, var(--ui-pill-swatch-bg, transparent) 70%, var(--theme-border));
-	--theme-ui-pill-swatch-no-tint-bg: repeating-conic-gradient(var(--theme-border) 0% 25%, transparent 0% 50%) 50% / 10px 10px;
+  --theme-ui-pill-runtime-bg: color-mix(
+    in oklab,
+    var(--ui-pill-color, var(--theme-surface)) 20%,
+    transparent
+  );
+  --theme-ui-pill-runtime-border: color-mix(
+    in oklab,
+    var(--ui-pill-color, var(--theme-surface)) 50%,
+    var(--theme-border)
+  );
+  --theme-ui-pill-runtime-border-strong: color-mix(
+    in oklab,
+    var(--ui-pill-color, var(--theme-surface)) 70%,
+    var(--theme-border)
+  );
+  --theme-ui-pill-swatch-runtime-border: color-mix(
+    in oklab,
+    var(--ui-pill-swatch-bg, transparent) 70%,
+    var(--theme-border)
+  );
+  --theme-ui-pill-swatch-no-tint-bg: repeating-conic-gradient(
+      var(--theme-border) 0% 25%,
+      transparent 0% 50%
+    )
+    50% / 10px 10px;
 
-	/* Shadow color roles. */
-	--theme-shadow-soft: color-mix(in oklab, var(--theme-ink) 12%, transparent);
-	--theme-shadow-card: color-mix(in oklab, var(--theme-ink) 16%, transparent);
-	--theme-shadow-panel: color-mix(in oklab, var(--theme-ink) 48%, transparent);
-	--theme-shadow-map-marker: color-mix(in oklab, var(--theme-ink) 60%, transparent);
-	--theme-shadow-editor-control: color-mix(in oklab, var(--theme-ink) 35%, transparent);
-	--theme-shadow-editor-control-active: color-mix(in oklab, var(--theme-ink) 40%, transparent);
-	--theme-shadow-editor-button: color-mix(in oklab, var(--theme-ink) 25%, transparent);
-	--theme-shadow-editor-drop-preview: color-mix(in oklab, var(--theme-ink) 18%, transparent);
+  /* Shadow color roles. */
+  --theme-shadow-soft: color-mix(in oklab, var(--theme-ink) 12%, transparent);
+  --theme-shadow-card: color-mix(in oklab, var(--theme-ink) 16%, transparent);
+  --theme-shadow-panel: color-mix(in oklab, var(--theme-ink) 48%, transparent);
+  --theme-shadow-map-marker: color-mix(
+    in oklab,
+    var(--theme-ink) 60%,
+    transparent
+  );
+  --theme-shadow-editor-control: color-mix(
+    in oklab,
+    var(--theme-ink) 35%,
+    transparent
+  );
+  --theme-shadow-editor-control-active: color-mix(
+    in oklab,
+    var(--theme-ink) 40%,
+    transparent
+  );
+  --theme-shadow-editor-button: color-mix(
+    in oklab,
+    var(--theme-ink) 25%,
+    transparent
+  );
+  --theme-shadow-editor-drop-preview: color-mix(
+    in oklab,
+    var(--theme-ink) 18%,
+    transparent
+  );
 
-	/* Renderer debug theme roles. */
-	--theme-render-debug-rose-border: color-mix(in oklab, var(--render-debug-rose-border-base) 70%, transparent);
-	--theme-render-debug-rose-bg: color-mix(in oklab, var(--render-debug-rose-bg-base) 5%, transparent);
-	--theme-render-debug-rose-badge-border: var(--render-debug-rose-badge-border);
-	--theme-render-debug-rose-badge-bg: color-mix(in oklab, var(--render-debug-rose-badge-bg-base) 90%, transparent);
-	--theme-render-debug-rose-badge-text: var(--render-debug-rose-badge-text);
+  /* Renderer debug theme roles. */
+  --theme-render-debug-rose-border: color-mix(
+    in oklab,
+    var(--render-debug-rose-border-base) 70%,
+    transparent
+  );
+  --theme-render-debug-rose-bg: color-mix(
+    in oklab,
+    var(--render-debug-rose-bg-base) 5%,
+    transparent
+  );
+  --theme-render-debug-rose-badge-border: var(--render-debug-rose-badge-border);
+  --theme-render-debug-rose-badge-bg: color-mix(
+    in oklab,
+    var(--render-debug-rose-badge-bg-base) 90%,
+    transparent
+  );
+  --theme-render-debug-rose-badge-text: var(--render-debug-rose-badge-text);
 
-	--theme-render-debug-amber-border: color-mix(in oklab, var(--render-debug-amber-border-base) 75%, transparent);
-	--theme-render-debug-amber-bg: color-mix(in oklab, var(--render-debug-amber-bg-base) 5%, transparent);
-	--theme-render-debug-amber-badge-border: var(--render-debug-amber-badge-border);
-	--theme-render-debug-amber-badge-bg: color-mix(in oklab, var(--render-debug-amber-badge-bg-base) 90%, transparent);
-	--theme-render-debug-amber-badge-text: var(--render-debug-amber-badge-text);
+  --theme-render-debug-amber-border: color-mix(
+    in oklab,
+    var(--render-debug-amber-border-base) 75%,
+    transparent
+  );
+  --theme-render-debug-amber-bg: color-mix(
+    in oklab,
+    var(--render-debug-amber-bg-base) 5%,
+    transparent
+  );
+  --theme-render-debug-amber-badge-border: var(
+    --render-debug-amber-badge-border
+  );
+  --theme-render-debug-amber-badge-bg: color-mix(
+    in oklab,
+    var(--render-debug-amber-badge-bg-base) 90%,
+    transparent
+  );
+  --theme-render-debug-amber-badge-text: var(--render-debug-amber-badge-text);
 
-	--theme-render-debug-violet-border: color-mix(in oklab, var(--render-debug-violet-border-base) 75%, transparent);
-	--theme-render-debug-violet-bg: color-mix(in oklab, var(--render-debug-violet-bg-base) 5%, transparent);
-	--theme-render-debug-violet-badge-border: var(--render-debug-violet-badge-border);
-	--theme-render-debug-violet-badge-bg: color-mix(in oklab, var(--render-debug-violet-badge-bg-base) 90%, transparent);
-	--theme-render-debug-violet-badge-text: var(--render-debug-violet-badge-text);
+  --theme-render-debug-violet-border: color-mix(
+    in oklab,
+    var(--render-debug-violet-border-base) 75%,
+    transparent
+  );
+  --theme-render-debug-violet-bg: color-mix(
+    in oklab,
+    var(--render-debug-violet-bg-base) 5%,
+    transparent
+  );
+  --theme-render-debug-violet-badge-border: var(
+    --render-debug-violet-badge-border
+  );
+  --theme-render-debug-violet-badge-bg: color-mix(
+    in oklab,
+    var(--render-debug-violet-badge-bg-base) 90%,
+    transparent
+  );
+  --theme-render-debug-violet-badge-text: var(--render-debug-violet-badge-text);
 
-	--theme-render-debug-emerald-border: color-mix(in oklab, var(--render-debug-emerald-border-base) 75%, transparent);
-	--theme-render-debug-emerald-bg: color-mix(in oklab, var(--render-debug-emerald-bg-base) 5%, transparent);
-	--theme-render-debug-emerald-badge-border: var(--render-debug-emerald-badge-border);
-	--theme-render-debug-emerald-badge-bg: color-mix(in oklab, var(--render-debug-emerald-badge-bg-base) 90%, transparent);
-	--theme-render-debug-emerald-badge-text: var(--render-debug-emerald-badge-text);
+  --theme-render-debug-emerald-border: color-mix(
+    in oklab,
+    var(--render-debug-emerald-border-base) 75%,
+    transparent
+  );
+  --theme-render-debug-emerald-bg: color-mix(
+    in oklab,
+    var(--render-debug-emerald-bg-base) 5%,
+    transparent
+  );
+  --theme-render-debug-emerald-badge-border: var(
+    --render-debug-emerald-badge-border
+  );
+  --theme-render-debug-emerald-badge-bg: color-mix(
+    in oklab,
+    var(--render-debug-emerald-badge-bg-base) 90%,
+    transparent
+  );
+  --theme-render-debug-emerald-badge-text: var(
+    --render-debug-emerald-badge-text
+  );
 
-	--theme-render-debug-cyan-border: color-mix(in oklab, var(--render-debug-cyan-border-base) 75%, transparent);
-	--theme-render-debug-cyan-bg: color-mix(in oklab, var(--render-debug-cyan-bg-base) 5%, transparent);
-	--theme-render-debug-cyan-badge-border: var(--render-debug-cyan-badge-border);
-	--theme-render-debug-cyan-badge-bg: color-mix(in oklab, var(--render-debug-cyan-badge-bg-base) 90%, transparent);
-	--theme-render-debug-cyan-badge-text: var(--render-debug-cyan-badge-text);
+  --theme-render-debug-cyan-border: color-mix(
+    in oklab,
+    var(--render-debug-cyan-border-base) 75%,
+    transparent
+  );
+  --theme-render-debug-cyan-bg: color-mix(
+    in oklab,
+    var(--render-debug-cyan-bg-base) 5%,
+    transparent
+  );
+  --theme-render-debug-cyan-badge-border: var(--render-debug-cyan-badge-border);
+  --theme-render-debug-cyan-badge-bg: color-mix(
+    in oklab,
+    var(--render-debug-cyan-badge-bg-base) 90%,
+    transparent
+  );
+  --theme-render-debug-cyan-badge-text: var(--render-debug-cyan-badge-text);
 
-	--theme-render-debug-danger-border: color-mix(in oklab, var(--theme-danger) 75%, transparent);
-	--theme-render-debug-danger-bg: color-mix(in oklab, var(--theme-danger) 5%, transparent);
-	--theme-render-debug-danger-badge-border: color-mix(in oklab, var(--theme-danger) 70%, var(--theme-contrast));
-	--theme-render-debug-danger-badge-bg: color-mix(in oklab, var(--theme-danger-strong) 90%, transparent);
-	--theme-render-debug-danger-badge-text: var(--theme-danger-text);
+  --theme-render-debug-danger-border: color-mix(
+    in oklab,
+    var(--theme-danger) 75%,
+    transparent
+  );
+  --theme-render-debug-danger-bg: color-mix(
+    in oklab,
+    var(--theme-danger) 5%,
+    transparent
+  );
+  --theme-render-debug-danger-badge-border: color-mix(
+    in oklab,
+    var(--theme-danger) 70%,
+    var(--theme-contrast)
+  );
+  --theme-render-debug-danger-badge-bg: color-mix(
+    in oklab,
+    var(--theme-danger-strong) 90%,
+    transparent
+  );
+  --theme-render-debug-danger-badge-text: var(--theme-danger-text);
 
-	--theme-render-debug-pink-border: color-mix(in oklab, var(--render-debug-pink-border-base) 75%, transparent);
-	--theme-render-debug-pink-bg: color-mix(in oklab, var(--render-debug-pink-bg-base) 5%, transparent);
-	--theme-render-debug-pink-badge-border: var(--render-debug-pink-badge-border);
-	--theme-render-debug-pink-badge-bg: color-mix(in oklab, var(--render-debug-pink-badge-bg-base) 90%, transparent);
-	--theme-render-debug-pink-badge-text: var(--render-debug-pink-badge-text);
+  --theme-render-debug-pink-border: color-mix(
+    in oklab,
+    var(--render-debug-pink-border-base) 75%,
+    transparent
+  );
+  --theme-render-debug-pink-bg: color-mix(
+    in oklab,
+    var(--render-debug-pink-bg-base) 5%,
+    transparent
+  );
+  --theme-render-debug-pink-badge-border: var(--render-debug-pink-badge-border);
+  --theme-render-debug-pink-badge-bg: color-mix(
+    in oklab,
+    var(--render-debug-pink-badge-bg-base) 90%,
+    transparent
+  );
+  --theme-render-debug-pink-badge-text: var(--render-debug-pink-badge-text);
 
-	--theme-render-debug-yellow-border: color-mix(in oklab, var(--render-debug-yellow-border-base) 75%, transparent);
-	--theme-render-debug-yellow-bg: color-mix(in oklab, var(--render-debug-yellow-bg-base) 5%, transparent);
-	--theme-render-debug-yellow-badge-border: var(--render-debug-yellow-badge-border);
-	--theme-render-debug-yellow-badge-bg: color-mix(in oklab, var(--render-debug-yellow-badge-bg-base) 90%, transparent);
-	--theme-render-debug-yellow-badge-text: var(--render-debug-yellow-badge-text);
+  --theme-render-debug-yellow-border: color-mix(
+    in oklab,
+    var(--render-debug-yellow-border-base) 75%,
+    transparent
+  );
+  --theme-render-debug-yellow-bg: color-mix(
+    in oklab,
+    var(--render-debug-yellow-bg-base) 5%,
+    transparent
+  );
+  --theme-render-debug-yellow-badge-border: var(
+    --render-debug-yellow-badge-border
+  );
+  --theme-render-debug-yellow-badge-bg: color-mix(
+    in oklab,
+    var(--render-debug-yellow-badge-bg-base) 90%,
+    transparent
+  );
+  --theme-render-debug-yellow-badge-text: var(--render-debug-yellow-badge-text);
 
-	--theme-render-debug-indigo-border: color-mix(in oklab, var(--render-debug-indigo-border-base) 75%, transparent);
-	--theme-render-debug-indigo-bg: color-mix(in oklab, var(--render-debug-indigo-bg-base) 5%, transparent);
-	--theme-render-debug-indigo-badge-border: var(--render-debug-indigo-badge-border);
-	--theme-render-debug-indigo-badge-bg: color-mix(in oklab, var(--render-debug-indigo-badge-bg-base) 90%, transparent);
-	--theme-render-debug-indigo-badge-text: var(--render-debug-indigo-badge-text);
+  --theme-render-debug-indigo-border: color-mix(
+    in oklab,
+    var(--render-debug-indigo-border-base) 75%,
+    transparent
+  );
+  --theme-render-debug-indigo-bg: color-mix(
+    in oklab,
+    var(--render-debug-indigo-bg-base) 5%,
+    transparent
+  );
+  --theme-render-debug-indigo-badge-border: var(
+    --render-debug-indigo-badge-border
+  );
+  --theme-render-debug-indigo-badge-bg: color-mix(
+    in oklab,
+    var(--render-debug-indigo-badge-bg-base) 90%,
+    transparent
+  );
+  --theme-render-debug-indigo-badge-text: var(--render-debug-indigo-badge-text);
 
-	--theme-render-debug-slate-border: color-mix(in oklab, var(--render-debug-slate-border-base) 75%, transparent);
-	--theme-render-debug-slate-bg: color-mix(in oklab, var(--render-debug-slate-bg-base) 5%, transparent);
-	--theme-render-debug-slate-badge-border: var(--render-debug-slate-badge-border);
-	--theme-render-debug-slate-badge-bg: color-mix(in oklab, var(--render-debug-slate-badge-bg-base) 90%, transparent);
-	--theme-render-debug-slate-badge-text: var(--render-debug-slate-badge-text);
-
+  --theme-render-debug-slate-border: color-mix(
+    in oklab,
+    var(--render-debug-slate-border-base) 75%,
+    transparent
+  );
+  --theme-render-debug-slate-bg: color-mix(
+    in oklab,
+    var(--render-debug-slate-bg-base) 5%,
+    transparent
+  );
+  --theme-render-debug-slate-badge-border: var(
+    --render-debug-slate-badge-border
+  );
+  --theme-render-debug-slate-badge-bg: color-mix(
+    in oklab,
+    var(--render-debug-slate-badge-bg-base) 90%,
+    transparent
+  );
+  --theme-render-debug-slate-badge-text: var(--render-debug-slate-badge-text);
 }
 
 .cm-light:root,
 .cm-light {
-	/* Core theme roles. */
-	--theme-bg: var(--base-gray-100);
-	--theme-surface: color-mix(in oklab, var(--brand-white) 82%, var(--base-gold-50));
-	--theme-surface-muted: color-mix(in oklab, var(--theme-surface) 70%, var(--base-gray-200));
-	--theme-card: var(--theme-surface);
-	--theme-muted-bg: var(--theme-surface-muted);
-	--theme-text: var(--base-ink-900);
-	--theme-text-muted: var(--base-gray-600);
-	--theme-border: color-mix(in oklab, var(--base-gray-300) 78%, var(--brand-gold));
-	--theme-border-strong: color-mix(in oklab, var(--theme-border) 58%, var(--theme-text));
-	--theme-overlay: color-mix(in oklab, var(--base-ink-900) 28%, transparent);
-	--theme-ink: var(--base-ink-900);
-	--theme-contrast: var(--brand-white);
+  /* Core theme roles. */
+  --theme-bg: var(--base-gray-100);
+  --theme-surface: color-mix(
+    in oklab,
+    var(--brand-white) 82%,
+    var(--base-gold-50)
+  );
+  --theme-surface-muted: color-mix(
+    in oklab,
+    var(--theme-surface) 70%,
+    var(--base-gray-200)
+  );
+  --theme-card: var(--theme-surface);
+  --theme-muted-bg: var(--theme-surface-muted);
+  --theme-text: var(--base-ink-900);
+  --theme-text-muted: var(--base-gray-600);
+  --theme-border: color-mix(
+    in oklab,
+    var(--base-gray-300) 78%,
+    var(--brand-gold)
+  );
+  --theme-border-strong: color-mix(
+    in oklab,
+    var(--theme-border) 58%,
+    var(--theme-text)
+  );
+  --theme-overlay: color-mix(in oklab, var(--base-ink-900) 28%, transparent);
+  --theme-ink: var(--base-ink-900);
+  --theme-contrast: var(--brand-white);
 
-	/* Brand and action roles. */
-	--theme-accent: var(--brand-red);
-	--theme-accent-strong: var(--brand-red-strong);
-	--theme-accent-muted: color-mix(in oklab, var(--theme-accent) 72%, var(--base-gold-50));
-	--theme-accent-soft: color-mix(in oklab, var(--theme-accent) 10%, var(--theme-surface));
-	--theme-accent-faint: color-mix(in oklab, var(--theme-accent) 6%, var(--theme-surface));
-	--theme-accent-border: color-mix(in oklab, var(--theme-accent) 48%, var(--theme-border));
-	--theme-accent-contrast: var(--brand-white);
-	--theme-focus: var(--brand-red);
-	--theme-green: var(--brand-green);
-	--theme-green-soft: color-mix(in oklab, var(--theme-green) 8%, var(--theme-surface));
-	--theme-green-border: color-mix(in oklab, var(--theme-green) 38%, var(--theme-border));
+  /* Brand and action roles. */
+  --theme-accent: var(--brand-red);
+  --theme-accent-strong: var(--brand-red-strong);
+  --theme-accent-muted: color-mix(
+    in oklab,
+    var(--theme-accent) 72%,
+    var(--base-gold-50)
+  );
+  --theme-accent-soft: color-mix(
+    in oklab,
+    var(--theme-accent) 10%,
+    var(--theme-surface)
+  );
+  --theme-accent-faint: color-mix(
+    in oklab,
+    var(--theme-accent) 6%,
+    var(--theme-surface)
+  );
+  --theme-accent-border: color-mix(
+    in oklab,
+    var(--theme-accent) 48%,
+    var(--theme-border)
+  );
+  --theme-accent-contrast: var(--brand-white);
+  --theme-focus: var(--brand-red);
+  --theme-green: var(--brand-green);
+  --theme-green-soft: color-mix(
+    in oklab,
+    var(--theme-green) 8%,
+    var(--theme-surface)
+  );
+  --theme-green-border: color-mix(
+    in oklab,
+    var(--theme-green) 38%,
+    var(--theme-border)
+  );
 
-	/* Semantic status roles. */
-	--theme-danger: var(--base-red-600);
-	--theme-danger-text: var(--base-red-900);
-	--theme-danger-strong: var(--base-red-700);
-	--theme-danger-soft: color-mix(in oklab, var(--theme-danger) 10%, var(--theme-surface));
-	--theme-danger-border: color-mix(in oklab, var(--theme-danger) 42%, var(--theme-border));
+  /* Semantic status roles. */
+  --theme-danger: var(--base-red-600);
+  --theme-danger-text: var(--base-red-900);
+  --theme-danger-strong: var(--base-red-700);
+  --theme-danger-soft: color-mix(
+    in oklab,
+    var(--theme-danger) 10%,
+    var(--theme-surface)
+  );
+  --theme-danger-border: color-mix(
+    in oklab,
+    var(--theme-danger) 42%,
+    var(--theme-border)
+  );
 
-	--theme-success: var(--base-green-700);
-	--theme-success-text: var(--base-green-900);
-	--theme-success-strong: var(--base-green-800);
-	--theme-success-soft: color-mix(in oklab, var(--theme-success) 9%, var(--theme-surface));
-	--theme-success-border: color-mix(in oklab, var(--theme-success) 38%, var(--theme-border));
+  --theme-success: var(--base-green-700);
+  --theme-success-text: var(--base-green-900);
+  --theme-success-strong: var(--base-green-800);
+  --theme-success-soft: color-mix(
+    in oklab,
+    var(--theme-success) 9%,
+    var(--theme-surface)
+  );
+  --theme-success-border: color-mix(
+    in oklab,
+    var(--theme-success) 38%,
+    var(--theme-border)
+  );
 
-	--theme-warning: var(--base-gold-700);
-	--theme-warning-soft: color-mix(in oklab, var(--theme-warning) 12%, var(--theme-surface));
-	--theme-warning-border: color-mix(in oklab, var(--theme-warning) 48%, var(--theme-border));
+  --theme-warning: var(--base-gold-700);
+  --theme-warning-soft: color-mix(
+    in oklab,
+    var(--theme-warning) 12%,
+    var(--theme-surface)
+  );
+  --theme-warning-border: color-mix(
+    in oklab,
+    var(--theme-warning) 48%,
+    var(--theme-border)
+  );
 
-	--theme-info: var(--base-blue-700);
-	--theme-info-text: var(--base-blue-900);
-	--theme-info-strong: var(--base-blue-900);
-	--theme-info-soft: color-mix(in oklab, var(--theme-info) 9%, var(--theme-surface));
-	--theme-info-border: color-mix(in oklab, var(--theme-info) 38%, var(--theme-border));
+  --theme-info: var(--base-blue-700);
+  --theme-info-text: var(--base-blue-900);
+  --theme-info-strong: var(--base-blue-900);
+  --theme-info-soft: color-mix(
+    in oklab,
+    var(--theme-info) 9%,
+    var(--theme-surface)
+  );
+  --theme-info-border: color-mix(
+    in oklab,
+    var(--theme-info) 38%,
+    var(--theme-border)
+  );
 
-	/* Surface roles. */
-	--theme-surface-transparent: rgb(from var(--theme-surface) r g b / 0%);
-	--theme-surface-glass-98: rgb(from var(--theme-bg) r g b / 98%);
-	--theme-surface-card: var(--theme-surface);
-	--theme-surface-card-muted: color-mix(in oklab, var(--theme-surface) 66%, transparent);
-	--theme-surface-icon-bg: color-mix(in oklab, var(--brand-gold) 14%, var(--theme-surface));
-	--theme-surface-overlay-soft: color-mix(in oklab, var(--theme-ink) 16%, transparent);
-	--theme-surface-overlay-picker: color-mix(in oklab, var(--theme-ink) 12%, transparent);
-	--theme-surface-overlay-strong: color-mix(in oklab, var(--theme-ink) 32%, transparent);
-	--theme-surface-muted-soft: color-mix(in oklab, var(--theme-surface) 56%, transparent);
-	--theme-surface-muted-card: color-mix(in oklab, var(--theme-surface) 82%, transparent);
-	--theme-surface-ink-soft: color-mix(in oklab, var(--theme-ink) 10%, transparent);
-	--theme-surface-ink-muted: color-mix(in oklab, var(--theme-ink) 6%, transparent);
+  /* Surface roles. */
+  --theme-surface-transparent: rgb(from var(--theme-surface) r g b / 0%);
+  --theme-surface-glass-98: rgb(from var(--theme-bg) r g b / 98%);
+  --theme-surface-card: var(--theme-surface);
+  --theme-surface-card-muted: color-mix(
+    in oklab,
+    var(--theme-surface) 66%,
+    transparent
+  );
+  --theme-surface-icon-bg: color-mix(
+    in oklab,
+    var(--brand-gold) 14%,
+    var(--theme-surface)
+  );
+  --theme-surface-overlay-soft: color-mix(
+    in oklab,
+    var(--theme-ink) 16%,
+    transparent
+  );
+  --theme-surface-overlay-picker: color-mix(
+    in oklab,
+    var(--theme-ink) 12%,
+    transparent
+  );
+  --theme-surface-overlay-strong: color-mix(
+    in oklab,
+    var(--theme-ink) 32%,
+    transparent
+  );
+  --theme-surface-muted-soft: color-mix(
+    in oklab,
+    var(--theme-surface) 56%,
+    transparent
+  );
+  --theme-surface-muted-card: color-mix(
+    in oklab,
+    var(--theme-surface) 82%,
+    transparent
+  );
+  --theme-surface-ink-soft: color-mix(
+    in oklab,
+    var(--theme-ink) 10%,
+    transparent
+  );
+  --theme-surface-ink-muted: color-mix(
+    in oklab,
+    var(--theme-ink) 6%,
+    transparent
+  );
 
-	/* Feature color roles. */
-	--theme-map-bg: color-mix(in oklab, var(--base-gold-50) 72%, var(--base-gray-100));
-	--theme-map-marker-border: var(--brand-white);
-	--theme-richtext-code-bg: color-mix(in oklab, var(--base-gray-300) 32%, transparent);
-	--theme-editor-picker-surface-bg: rgb(from var(--theme-bg) r g b / 98%);
+  /* Feature color roles. */
+  --theme-map-bg: color-mix(
+    in oklab,
+    var(--base-gold-50) 72%,
+    var(--base-gray-100)
+  );
+  --theme-map-marker-border: var(--brand-white);
+  --theme-richtext-code-bg: color-mix(
+    in oklab,
+    var(--base-gray-300) 32%,
+    transparent
+  );
+  --theme-editor-picker-surface-bg: rgb(from var(--theme-bg) r g b / 98%);
 
-	/* Shadow color roles. */
-	--theme-shadow-soft: color-mix(in oklab, var(--theme-ink) 8%, transparent);
-	--theme-shadow-card: color-mix(in oklab, var(--theme-ink) 10%, transparent);
-	--theme-shadow-panel: color-mix(in oklab, var(--theme-ink) 24%, transparent);
-	--theme-shadow-map-marker: color-mix(in oklab, var(--theme-ink) 32%, transparent);
-	--theme-shadow-editor-control: color-mix(in oklab, var(--theme-ink) 14%, transparent);
-	--theme-shadow-editor-control-active: color-mix(in oklab, var(--theme-ink) 18%, transparent);
-	--theme-shadow-editor-button: color-mix(in oklab, var(--theme-ink) 12%, transparent);
-	--theme-shadow-editor-drop-preview: color-mix(in oklab, var(--theme-ink) 12%, transparent);
+  /* Shadow color roles. */
+  --theme-shadow-soft: color-mix(in oklab, var(--theme-ink) 8%, transparent);
+  --theme-shadow-card: color-mix(in oklab, var(--theme-ink) 10%, transparent);
+  --theme-shadow-panel: color-mix(in oklab, var(--theme-ink) 24%, transparent);
+  --theme-shadow-map-marker: color-mix(
+    in oklab,
+    var(--theme-ink) 32%,
+    transparent
+  );
+  --theme-shadow-editor-control: color-mix(
+    in oklab,
+    var(--theme-ink) 14%,
+    transparent
+  );
+  --theme-shadow-editor-control-active: color-mix(
+    in oklab,
+    var(--theme-ink) 18%,
+    transparent
+  );
+  --theme-shadow-editor-button: color-mix(
+    in oklab,
+    var(--theme-ink) 12%,
+    transparent
+  );
+  --theme-shadow-editor-drop-preview: color-mix(
+    in oklab,
+    var(--theme-ink) 12%,
+    transparent
+  );
 }
 
 .cm-vintage:root,
 .cm-vintage {
-	/* Core theme roles. */
-	--theme-bg: color-mix(in oklab, var(--base-ink-950) 86%, var(--base-gold-900));
-	--theme-surface: color-mix(in oklab, var(--base-ink-850) 78%, var(--base-gold-900));
-	--theme-surface-muted: color-mix(in oklab, var(--theme-surface) 72%, transparent);
-	--theme-card: color-mix(in oklab, var(--theme-surface) 88%, var(--base-gold-900));
-	--theme-muted-bg: var(--theme-surface-muted);
-	--theme-text: color-mix(in oklab, var(--base-gold-50) 82%, var(--base-gray-50));
-	--theme-text-muted: color-mix(in oklab, var(--brand-gold) 58%, var(--base-gray-300));
-	--theme-border: color-mix(in oklab, var(--brand-gold) 28%, var(--base-ink-650));
-	--theme-border-strong: color-mix(in oklab, var(--brand-gold) 52%, var(--theme-border));
-	--theme-overlay: color-mix(in oklab, var(--base-black) 50%, transparent);
-	--theme-ink: var(--brand-black);
-	--theme-contrast: var(--brand-white);
+  /* Core theme roles. */
+  --theme-bg: color-mix(
+    in oklab,
+    var(--base-ink-950) 86%,
+    var(--base-gold-900)
+  );
+  --theme-surface: color-mix(
+    in oklab,
+    var(--base-ink-850) 78%,
+    var(--base-gold-900)
+  );
+  --theme-surface-muted: color-mix(
+    in oklab,
+    var(--theme-surface) 72%,
+    transparent
+  );
+  --theme-card: color-mix(
+    in oklab,
+    var(--theme-surface) 88%,
+    var(--base-gold-900)
+  );
+  --theme-muted-bg: var(--theme-surface-muted);
+  --theme-text: color-mix(
+    in oklab,
+    var(--base-gold-50) 82%,
+    var(--base-gray-50)
+  );
+  --theme-text-muted: color-mix(
+    in oklab,
+    var(--brand-gold) 58%,
+    var(--base-gray-300)
+  );
+  --theme-border: color-mix(
+    in oklab,
+    var(--brand-gold) 28%,
+    var(--base-ink-650)
+  );
+  --theme-border-strong: color-mix(
+    in oklab,
+    var(--brand-gold) 52%,
+    var(--theme-border)
+  );
+  --theme-overlay: color-mix(in oklab, var(--base-black) 50%, transparent);
+  --theme-ink: var(--brand-black);
+  --theme-contrast: var(--brand-white);
 
-	/* Brand and action roles. */
-	--theme-accent: var(--brand-red);
-	--theme-accent-strong: var(--brand-red-strong);
-	--theme-accent-muted: color-mix(in oklab, var(--theme-accent) 64%, var(--base-gold-900));
-	--theme-accent-soft: color-mix(in oklab, var(--theme-accent) 14%, transparent);
-	--theme-accent-faint: color-mix(in oklab, var(--theme-accent) 7%, transparent);
-	--theme-accent-border: color-mix(in oklab, var(--theme-accent) 50%, var(--theme-border));
-	--theme-accent-contrast: var(--brand-white);
-	--theme-focus: var(--brand-gold);
-	--theme-green: color-mix(in oklab, var(--brand-green) 76%, var(--brand-gold));
-	--theme-green-soft: color-mix(in oklab, var(--theme-green) 12%, var(--theme-surface));
-	--theme-green-border: color-mix(in oklab, var(--theme-green) 42%, var(--theme-border));
+  /* Brand and action roles. */
+  --theme-accent: var(--brand-red);
+  --theme-accent-strong: var(--brand-red-strong);
+  --theme-accent-muted: color-mix(
+    in oklab,
+    var(--theme-accent) 64%,
+    var(--base-gold-900)
+  );
+  --theme-accent-soft: color-mix(
+    in oklab,
+    var(--theme-accent) 14%,
+    transparent
+  );
+  --theme-accent-faint: color-mix(
+    in oklab,
+    var(--theme-accent) 7%,
+    transparent
+  );
+  --theme-accent-border: color-mix(
+    in oklab,
+    var(--theme-accent) 50%,
+    var(--theme-border)
+  );
+  --theme-accent-contrast: var(--brand-white);
+  --theme-focus: var(--brand-gold);
+  --theme-green: color-mix(in oklab, var(--brand-green) 76%, var(--brand-gold));
+  --theme-green-soft: color-mix(
+    in oklab,
+    var(--theme-green) 12%,
+    var(--theme-surface)
+  );
+  --theme-green-border: color-mix(
+    in oklab,
+    var(--theme-green) 42%,
+    var(--theme-border)
+  );
 
-	/* Semantic status roles. */
-	--theme-danger: var(--base-red-300);
-	--theme-danger-text: var(--base-red-50);
-	--theme-danger-strong: var(--base-red-800);
-	--theme-danger-soft: color-mix(in oklab, var(--theme-danger) 12%, transparent);
-	--theme-danger-border: color-mix(in oklab, var(--theme-danger) 48%, var(--theme-border));
+  /* Semantic status roles. */
+  --theme-danger: var(--base-red-300);
+  --theme-danger-text: var(--base-red-50);
+  --theme-danger-strong: var(--base-red-800);
+  --theme-danger-soft: color-mix(
+    in oklab,
+    var(--theme-danger) 12%,
+    transparent
+  );
+  --theme-danger-border: color-mix(
+    in oklab,
+    var(--theme-danger) 48%,
+    var(--theme-border)
+  );
 
-	--theme-success: var(--base-green-300);
-	--theme-success-text: var(--base-green-50);
-	--theme-success-strong: var(--base-green-900);
-	--theme-success-soft: color-mix(in oklab, var(--theme-success) 12%, transparent);
-	--theme-success-border: color-mix(in oklab, var(--theme-success) 48%, var(--theme-border));
+  --theme-success: var(--base-green-300);
+  --theme-success-text: var(--base-green-50);
+  --theme-success-strong: var(--base-green-900);
+  --theme-success-soft: color-mix(
+    in oklab,
+    var(--theme-success) 12%,
+    transparent
+  );
+  --theme-success-border: color-mix(
+    in oklab,
+    var(--theme-success) 48%,
+    var(--theme-border)
+  );
 
-	--theme-warning: var(--brand-gold);
-	--theme-warning-soft: color-mix(in oklab, var(--theme-warning) 12%, transparent);
-	--theme-warning-border: color-mix(in oklab, var(--theme-warning) 55%, var(--theme-border));
+  --theme-warning: var(--brand-gold);
+  --theme-warning-soft: color-mix(
+    in oklab,
+    var(--theme-warning) 12%,
+    transparent
+  );
+  --theme-warning-border: color-mix(
+    in oklab,
+    var(--theme-warning) 55%,
+    var(--theme-border)
+  );
 
-	--theme-info: color-mix(in oklab, var(--base-blue-400) 68%, var(--brand-gold));
-	--theme-info-text: var(--base-blue-50);
-	--theme-info-strong: var(--base-blue-900);
-	--theme-info-soft: color-mix(in oklab, var(--theme-info) 12%, transparent);
-	--theme-info-border: color-mix(in oklab, var(--theme-info) 48%, var(--theme-border));
+  --theme-info: color-mix(
+    in oklab,
+    var(--base-blue-400) 68%,
+    var(--brand-gold)
+  );
+  --theme-info-text: var(--base-blue-50);
+  --theme-info-strong: var(--base-blue-900);
+  --theme-info-soft: color-mix(in oklab, var(--theme-info) 12%, transparent);
+  --theme-info-border: color-mix(
+    in oklab,
+    var(--theme-info) 48%,
+    var(--theme-border)
+  );
 
-	/* Surface roles. */
-	--theme-surface-transparent: rgb(from var(--theme-surface) r g b / 0%);
-	--theme-surface-glass-98: rgb(from var(--theme-bg) r g b / 98%);
-	--theme-surface-card: var(--theme-card);
-	--theme-surface-card-muted: color-mix(in oklab, var(--theme-surface) 58%, transparent);
-	--theme-surface-icon-bg: color-mix(in oklab, var(--brand-gold) 16%, transparent);
-	--theme-surface-overlay-soft: color-mix(in oklab, var(--theme-ink) 40%, transparent);
-	--theme-surface-overlay-picker: color-mix(in oklab, var(--theme-ink) 30%, transparent);
-	--theme-surface-overlay-strong: color-mix(in oklab, var(--theme-ink) 60%, transparent);
-	--theme-surface-muted-soft: color-mix(in oklab, var(--theme-surface) 42%, transparent);
-	--theme-surface-muted-card: color-mix(in oklab, var(--theme-surface) 74%, transparent);
-	--theme-surface-ink-soft: color-mix(in oklab, var(--theme-ink) 20%, transparent);
-	--theme-surface-ink-muted: color-mix(in oklab, var(--theme-ink) 10%, transparent);
+  /* Surface roles. */
+  --theme-surface-transparent: rgb(from var(--theme-surface) r g b / 0%);
+  --theme-surface-glass-98: rgb(from var(--theme-bg) r g b / 98%);
+  --theme-surface-card: var(--theme-card);
+  --theme-surface-card-muted: color-mix(
+    in oklab,
+    var(--theme-surface) 58%,
+    transparent
+  );
+  --theme-surface-icon-bg: color-mix(
+    in oklab,
+    var(--brand-gold) 16%,
+    transparent
+  );
+  --theme-surface-overlay-soft: color-mix(
+    in oklab,
+    var(--theme-ink) 40%,
+    transparent
+  );
+  --theme-surface-overlay-picker: color-mix(
+    in oklab,
+    var(--theme-ink) 30%,
+    transparent
+  );
+  --theme-surface-overlay-strong: color-mix(
+    in oklab,
+    var(--theme-ink) 60%,
+    transparent
+  );
+  --theme-surface-muted-soft: color-mix(
+    in oklab,
+    var(--theme-surface) 42%,
+    transparent
+  );
+  --theme-surface-muted-card: color-mix(
+    in oklab,
+    var(--theme-surface) 74%,
+    transparent
+  );
+  --theme-surface-ink-soft: color-mix(
+    in oklab,
+    var(--theme-ink) 20%,
+    transparent
+  );
+  --theme-surface-ink-muted: color-mix(
+    in oklab,
+    var(--theme-ink) 10%,
+    transparent
+  );
 
-	/* Feature color roles. */
-	--theme-map-bg: color-mix(in oklab, var(--base-ink-910) 76%, var(--base-gold-900));
-	--theme-map-marker-border: color-mix(in oklab, var(--brand-white) 82%, var(--brand-gold));
-	--theme-richtext-code-bg: color-mix(in oklab, var(--brand-gold) 12%, transparent);
-	--theme-editor-picker-surface-bg: rgb(from var(--theme-bg) r g b / 98%);
+  /* Feature color roles. */
+  --theme-map-bg: color-mix(
+    in oklab,
+    var(--base-ink-910) 76%,
+    var(--base-gold-900)
+  );
+  --theme-map-marker-border: color-mix(
+    in oklab,
+    var(--brand-white) 82%,
+    var(--brand-gold)
+  );
+  --theme-richtext-code-bg: color-mix(
+    in oklab,
+    var(--brand-gold) 12%,
+    transparent
+  );
+  --theme-editor-picker-surface-bg: rgb(from var(--theme-bg) r g b / 98%);
 
-	/* Shadow color roles. */
-	--theme-shadow-soft: color-mix(in oklab, var(--theme-ink) 14%, transparent);
-	--theme-shadow-card: color-mix(in oklab, var(--theme-ink) 18%, transparent);
-	--theme-shadow-panel: color-mix(in oklab, var(--theme-ink) 50%, transparent);
-	--theme-shadow-map-marker: color-mix(in oklab, var(--theme-ink) 62%, transparent);
-	--theme-shadow-editor-control: color-mix(in oklab, var(--theme-ink) 36%, transparent);
-	--theme-shadow-editor-control-active: color-mix(in oklab, var(--theme-ink) 42%, transparent);
-	--theme-shadow-editor-button: color-mix(in oklab, var(--theme-ink) 26%, transparent);
-	--theme-shadow-editor-drop-preview: color-mix(in oklab, var(--theme-ink) 20%, transparent);
+  /* Shadow color roles. */
+  --theme-shadow-soft: color-mix(in oklab, var(--theme-ink) 14%, transparent);
+  --theme-shadow-card: color-mix(in oklab, var(--theme-ink) 18%, transparent);
+  --theme-shadow-panel: color-mix(in oklab, var(--theme-ink) 50%, transparent);
+  --theme-shadow-map-marker: color-mix(
+    in oklab,
+    var(--theme-ink) 62%,
+    transparent
+  );
+  --theme-shadow-editor-control: color-mix(
+    in oklab,
+    var(--theme-ink) 36%,
+    transparent
+  );
+  --theme-shadow-editor-control-active: color-mix(
+    in oklab,
+    var(--theme-ink) 42%,
+    transparent
+  );
+  --theme-shadow-editor-button: color-mix(
+    in oklab,
+    var(--theme-ink) 26%,
+    transparent
+  );
+  --theme-shadow-editor-drop-preview: color-mix(
+    in oklab,
+    var(--theme-ink) 20%,
+    transparent
+  );
 }
 
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */

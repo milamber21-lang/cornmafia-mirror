@@ -4,6 +4,8 @@
 //// Grouped admin page for DB-first templates                                                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { JSX } from "react";
 import Link from "next/link";
 
@@ -21,7 +23,9 @@ export default async function TemplatesAdminPage(): Promise<JSX.Element> {
 			return (
 				<div className="admin-guard-shell">
 					<h1 className="admin-guard-title">Templates</h1>
-					<p className="admin-guard-message">You need to sign in to access the admin area.</p>
+					<p className="admin-guard-message">
+						You need to sign in to access the admin area.
+					</p>
 					<Link href="/login" className="admin-guard-link">
 						Go to login
 					</Link>
@@ -33,7 +37,7 @@ export default async function TemplatesAdminPage(): Promise<JSX.Element> {
 			<div className="admin-guard-shell">
 				<h1 className="admin-guard-title">Templates</h1>
 				<p className="admin-guard-message">Admin access is required.</p>
-				<ButtonLink href="/admin" variant="neutral">
+				<ButtonLink href="/admin" variant="secondary">
 					Go back
 				</ButtonLink>
 			</div>
@@ -48,7 +52,7 @@ export default async function TemplatesAdminPage(): Promise<JSX.Element> {
 				<h1 className="admin-page-card-title">Templates</h1>
 
 				<div className="admin-page-card-actions">
-					<ButtonLink href="/admin" variant="neutral">
+					<ButtonLink href="/admin" variant="secondary">
 						Go back
 					</ButtonLink>
 				</div>
@@ -58,3 +62,5 @@ export default async function TemplatesAdminPage(): Promise<JSX.Element> {
 		</section>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

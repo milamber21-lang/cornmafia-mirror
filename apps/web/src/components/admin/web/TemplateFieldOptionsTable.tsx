@@ -4,6 +4,8 @@
 //// Small-list admin table for template field options                                                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -276,7 +278,6 @@ export default function TemplateFieldOptionsTable({
 		[busyId, refreshFromServer],
 	);
 
-
 	const handleSortChange = useCallback(
 		(nextSortKey: SortKey): void => {
 			setSortDirection((currentDirection) =>
@@ -312,7 +313,7 @@ export default function TemplateFieldOptionsTable({
 					</div>
 
 					<div className="admin-table-toolbar-action admin-table-toolbar-action--end">
-						<Button onClick={openCreate} variant="green">
+						<Button onClick={openCreate} variant="primary">
 							New Field Option
 						</Button>
 					</div>
@@ -333,10 +334,34 @@ export default function TemplateFieldOptionsTable({
 						</colgroup>
 						<THead>
 							<TR>
-								<AdminSortableTH label="Order" sortKey="order" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Field" sortKey="field" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Option Key" sortKey="optionKey" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Label" sortKey="label" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
+								<AdminSortableTH
+									label="Order"
+									sortKey="order"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Field"
+									sortKey="field"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Option Key"
+									sortKey="optionKey"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Label"
+									sortKey="label"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
 								<TH className="admin-table-cell--center">Status</TH>
 								<TH className="admin-table-cell--center">Delete</TH>
 								<TH className="admin-table-cell--center">Action</TH>
@@ -357,11 +382,13 @@ export default function TemplateFieldOptionsTable({
 										<TR key={row.id}>
 											<TD className="admin-table-cell--center">{row.displayOrder}</TD>
 											<TD className="admin-table-cell--center">{row.fieldListLabel}</TD>
-											<TD className="admin-table-cell--center admin-table-cell--strong">{row.optionKey}</TD>
+											<TD className="admin-table-cell--center admin-table-cell--strong">
+												{row.optionKey}
+											</TD>
 											<TD className="admin-table-cell--center">{row.label}</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant={row.enabled ? "green" : "neutral"}
+													variant={row.enabled ? "success" : "secondary"}
 													disabled={disabled}
 													onClick={() => void toggleEnabled(row)}
 													aria-label={row.enabled ? "Enabled" : "Disabled"}
@@ -372,7 +399,7 @@ export default function TemplateFieldOptionsTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => void deleteFieldOption(row)}
-													variant="accent"
+													variant="danger"
 													disabled={disabled}
 												>
 													Delete
@@ -381,7 +408,7 @@ export default function TemplateFieldOptionsTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => openEdit(row)}
-													variant="neutral"
+													variant="secondary"
 													disabled={disabled}
 												>
 													Edit
@@ -420,3 +447,5 @@ export default function TemplateFieldOptionsTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

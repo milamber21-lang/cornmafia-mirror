@@ -1,9 +1,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/me/MePanel.tsx                                                                ////
 //// Language: TSX                                                                                               ////
-//// DB-first member profile popup with shared UI form primitives and CSS theme style selection.                  ////
+//// DB-first member profile editor using the shared panel chrome and member-specific save contract.             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -15,6 +17,7 @@ import {
 	FieldError,
 	Input,
 	Label,
+	Panel,
 	Textarea,
 } from "@/components/ui";
 
@@ -142,7 +145,8 @@ function readOptions(payload: unknown): ThemeOption[] {
 		options.push({
 			value: themeStyleCode,
 			label,
-			className: typeof className === "string" ? className : `cm-${themeStyleCode}`,
+			className:
+				typeof className === "string" ? className : `cm-${themeStyleCode}`,
 		});
 	}
 
@@ -172,12 +176,6 @@ function applyThemeStyleCode(themeStyleCode: ThemeStyleCode): void {
 	document.documentElement.classList.add(`cm-${themeStyleCode}`);
 }
 
-function stopEscapeAtSource(event: KeyboardEvent): void {
-	event.preventDefault();
-	event.stopPropagation();
-	event.stopImmediatePropagation();
-}
-
 export default function MePanel({
 	open,
 	onClose,
@@ -185,6 +183,7 @@ export default function MePanel({
 	onSaved,
 }: MePanelProps) {
 	const formId = React.useId();
+	const titleId = `${formId}-title`;
 	const [gameUsername, setGameUsername] = React.useState("");
 	const [alias, setAlias] = React.useState("");
 	const [themeStyleCode, setThemeStyleCode] = React.useState<ThemeStyleCode>(
@@ -245,9 +244,7 @@ export default function MePanel({
 			.catch((loadError: unknown) => {
 				if (!cancelled) {
 					setMetaError(
-						loadError instanceof Error
-							? loadError.message
-							: "Failed to load themes.",
+						loadError instanceof Error ? loadError.message : "Failed to load themes.",
 					);
 				}
 			})
@@ -261,26 +258,6 @@ export default function MePanel({
 			cancelled = true;
 		};
 	}, [open]);
-
-	React.useEffect(() => {
-		if (!open) {
-			return;
-		}
-
-		const onKeyDown = (event: KeyboardEvent) => {
-			if (event.key !== "Escape") {
-				return;
-			}
-
-			stopEscapeAtSource(event);
-			if (!submitting) {
-				onClose();
-			}
-		};
-
-		document.addEventListener("keydown", onKeyDown, true);
-		return () => document.removeEventListener("keydown", onKeyDown, true);
-	}, [onClose, open, submitting]);
 
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -322,124 +299,99 @@ export default function MePanel({
 		}
 	}
 
-	if (!open) {
-		return null;
-	}
-
 	return (
-		<div
-			className="member-profile-popup"
-			role="presentation"
-			onMouseDown={(event) => {
-				if (event.target === event.currentTarget && !submitting) {
-					onClose();
-				}
-			}}
-		>
-			<section
-				className="member-profile-popup__surface"
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby={`${formId}-title`}
-				onMouseDown={(event) => event.stopPropagation()}
-			>
-				<header className="member-profile-popup__header">
-					<h2 id={`${formId}-title`} className="member-profile-popup__title">
-						Edit profile
-					</h2>
-				</header>
-
-				<form
-					id={formId}
-					onSubmit={handleSubmit}
-					className="member-profile-popup__form"
+		<Panel
+			open={open}
+			onClose={onClose}
+			width="50%"
+			loading={submitting}
+			title="Edit profile"
+			labelledById={titleId}
+			contentMaxWidthPx={760}
+			renderSave={() => (
+				<Button
+					type="submit"
+					form={formId}
+					variant="primary"
+					disabled={submitting}
+					loading={submitting}
 				>
-					<div className="member-profile-popup__body">
-						{topError ? (
-							<AlertBanner tone="error" autoHideMs={0}>
-								{topError}
-							</AlertBanner>
-						) : null}
+					{submitting ? "Saving..." : "Save changes"}
+				</Button>
+			)}
+		>
+			<form
+				id={formId}
+				onSubmit={handleSubmit}
+				className="member-profile-panel-form"
+			>
+				<p className="member-profile-panel-form__intro">
+					Update the member-facing fields and display preferences attached to your
+					account.
+				</p>
 
-						<div className="member-profile-popup__field-grid">
-							<div className="member-profile-popup__field">
-								<Label htmlFor={`${formId}-game-username`}>Game username</Label>
-								<Input
-									id={`${formId}-game-username`}
-									value={gameUsername}
-									onChange={(event) => setGameUsername(event.target.value)}
-									disabled={submitting}
-									autoComplete="off"
-								/>
-							</div>
+				{topError ? (
+					<AlertBanner tone="error" autoHideMs={0}>
+						{topError}
+					</AlertBanner>
+				) : null}
 
-							<div className="member-profile-popup__field">
-								<Label htmlFor={`${formId}-alias`}>Alias</Label>
-								<Input
-									id={`${formId}-alias`}
-									value={alias}
-									onChange={(event) => setAlias(event.target.value)}
-									disabled={submitting}
-									autoComplete="nickname"
-								/>
-							</div>
-
-							<div className="member-profile-popup__field member-profile-popup__field--full">
-								<Label>Site theme</Label>
-								<DropdownMenuSingle
-									options={themeOptions}
-									value={themeStyleCode}
-									onChange={(value) =>
-										setThemeStyleCode(normalizeThemeStyleCode(value))
-									}
-									placeholder={metaLoading ? "Loading themes..." : "Select theme"}
-									disabled={
-										submitting || (metaLoading && themeOptions.length === 0)
-									}
-									ariaLabel="Site theme"
-									className="member-control-full"
-								/>
-								{metaLoading ? (
-									<span className="member-profile-popup__help">
-										Loading theme choices...
-									</span>
-								) : null}
-								<FieldError message={metaError} />
-							</div>
-
-							<div className="member-profile-popup__field member-profile-popup__field--full">
-								<Label htmlFor={`${formId}-notes`}>Notes</Label>
-								<Textarea
-									id={`${formId}-notes`}
-									value={notes}
-									onChange={(event) => setNotes(event.target.value)}
-									disabled={submitting}
-									rows={5}
-								/>
-							</div>
-						</div>
+				<div className="member-profile-panel-form__grid">
+					<div className="member-profile-panel-form__field">
+						<Label htmlFor={`${formId}-game-username`}>Game username</Label>
+						<Input
+							id={`${formId}-game-username`}
+							value={gameUsername}
+							onChange={(event) => setGameUsername(event.target.value)}
+							disabled={submitting}
+							autoComplete="off"
+						/>
 					</div>
 
-					<footer className="member-profile-popup__footer">
-						<Button
-							type="button"
-							variant="neutral"
-							onClick={onClose}
+					<div className="member-profile-panel-form__field">
+						<Label htmlFor={`${formId}-alias`}>Alias</Label>
+						<Input
+							id={`${formId}-alias`}
+							value={alias}
+							onChange={(event) => setAlias(event.target.value)}
 							disabled={submitting}
-						>
-							Close
-						</Button>
-						<Button
-							type="submit"
-							variant="green"
+							autoComplete="nickname"
+						/>
+					</div>
+
+					<div className="member-profile-panel-form__field member-profile-panel-form__field--full">
+						<Label>Site theme</Label>
+						<DropdownMenuSingle
+							options={themeOptions}
+							value={themeStyleCode}
+							onChange={(value) => setThemeStyleCode(normalizeThemeStyleCode(value))}
+							placeholder={metaLoading ? "Loading themes..." : "Select theme"}
+							disabled={submitting || (metaLoading && themeOptions.length === 0)}
+							ariaLabel="Site theme"
+							className="member-control-full"
+						/>
+						{metaLoading ? (
+							<span className="member-profile-panel-form__help">
+								Loading theme choices...
+							</span>
+						) : null}
+						<FieldError message={metaError} />
+					</div>
+
+					<div className="member-profile-panel-form__field member-profile-panel-form__field--full">
+						<Label htmlFor={`${formId}-notes`}>Notes</Label>
+						<Textarea
+							id={`${formId}-notes`}
+							value={notes}
+							onChange={(event) => setNotes(event.target.value)}
 							disabled={submitting}
-							loading={submitting}
-						>
-							{submitting ? "Saving..." : "Save changes"}
-						</Button>
-					</footer>
-				</form>
-			</section>
-		</div>
+							rows={6}
+						/>
+					</div>
+				</div>
+			</form>
+		</Panel>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

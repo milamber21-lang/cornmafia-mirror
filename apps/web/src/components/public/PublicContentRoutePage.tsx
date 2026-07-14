@@ -4,6 +4,7 @@
 //// Shared route component that resolves public DB content or falls through to the unavailable public page      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { notFound, redirect } from "next/navigation";
 
@@ -79,3 +80,5 @@ export default async function PublicContentRoutePage({
 
 	return <PublicContentRenderer content={content} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

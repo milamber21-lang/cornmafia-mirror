@@ -4,6 +4,7 @@
 //// Dispatches public info wiki reads between Riseopedia and Mafiosopedia read-model families.                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -24,6 +25,11 @@ import {
 } from "@/lib/data/mafiosopedia-entities";
 import { findMafiosopediaEntityDetailByEntitySlug } from "@/lib/data/mafiosopedia-entity-detail";
 import { getMafiosopediaHubData } from "@/lib/data/mafiosopedia-hub";
+import {
+	mafiosopediaReleaseFiltersForView,
+	mafiosopediaReleaseViewFromFilters,
+	type MafiosopediaReleaseFilterCode,
+} from "@/lib/data/mafiosopedia-release";
 import {
 	findMafiosopediaSectionBySlug,
 	listMafiosopediaSections,
@@ -54,6 +60,7 @@ import {
 } from "@/lib/data/riseopedia-sections";
 
 export type OpediaWikiCode = "riseopedia" | "mafiosopedia";
+export type OpediaReleaseFilters = MafiosopediaReleaseFilterCode[];
 
 export type OpediaWikiConfig = {
 	code: OpediaWikiCode;
@@ -73,8 +80,10 @@ const WIKI_CONFIGS: Record<OpediaWikiCode, OpediaWikiConfig> = {
 	riseopedia: {
 		code: "riseopedia",
 		title: "Riseopedia",
-		description: "Browse public game knowledge by section, class, and category. Search to jump directly into matching entries.",
-		browserDescription: "Matching public Riseopedia entries across sections, classes, categories, and subcategories.",
+		description:
+			"Browse public game knowledge by section, class, and category. Search to jump directly into matching entries.",
+		browserDescription:
+			"Matching public Riseopedia entries across sections, classes, categories, and subcategories.",
 		emptyPublicLabel: "public Riseopedia",
 		basePath: "/info/riseopedia",
 		browsePath: "/info/riseopedia/browse",
@@ -86,8 +95,10 @@ const WIKI_CONFIGS: Record<OpediaWikiCode, OpediaWikiConfig> = {
 	mafiosopedia: {
 		code: "mafiosopedia",
 		title: "Mafiosopedia",
-		description: "Browse latest-known game knowledge by section, class, and category. Search to jump directly into matching entries.",
-		browserDescription: "Matching Mafiosopedia entries across sections, classes, categories, and subcategories.",
+		description:
+			"Browse latest-known game knowledge by section, class, and category. Search to jump directly into matching entries.",
+		browserDescription:
+			"Matching Mafiosopedia entries across sections, classes, categories, and subcategories.",
 		emptyPublicLabel: "Mafiosopedia",
 		basePath: "/info/mafiosopedia",
 		browsePath: "/info/mafiosopedia/browse",
@@ -98,7 +109,20 @@ const WIKI_CONFIGS: Record<OpediaWikiCode, OpediaWikiConfig> = {
 	},
 };
 
-export function getOpediaWikiConfig(categorySlug: string): OpediaWikiConfig | null {
+function effectiveReleaseFilters(
+	wiki: OpediaWikiConfig,
+	filters: readonly MafiosopediaReleaseFilterCode[] | undefined,
+): MafiosopediaReleaseFilterCode[] {
+	return wiki.code === "mafiosopedia"
+		? mafiosopediaReleaseFiltersForView(
+				mafiosopediaReleaseViewFromFilters(filters),
+			)
+		: ["public"];
+}
+
+export function getOpediaWikiConfig(
+	categorySlug: string,
+): OpediaWikiConfig | null {
 	return categorySlug === "riseopedia" || categorySlug === "mafiosopedia"
 		? WIKI_CONFIGS[categorySlug]
 		: null;
@@ -108,117 +132,196 @@ export function opediaHomeBreadcrumb(wiki: OpediaWikiConfig) {
 	return { label: wiki.title, href: wiki.browsePath };
 }
 
-export async function getOpediaHubData(wiki: OpediaWikiConfig) {
-	return wiki.code === "mafiosopedia" ? getMafiosopediaHubData() : getRiseopediaHubData();
+export async function getOpediaHubData(
+	wiki: OpediaWikiConfig,
+	releaseFilters: readonly MafiosopediaReleaseFilterCode[] = mafiosopediaReleaseFiltersForView(
+		"all",
+	),
+) {
+	return wiki.code === "mafiosopedia"
+		? getMafiosopediaHubData(effectiveReleaseFilters(wiki, releaseFilters))
+		: getRiseopediaHubData();
 }
 
 export async function listOpediaSections(wiki: OpediaWikiConfig) {
-	return wiki.code === "mafiosopedia" ? listMafiosopediaSections() : listRiseopediaSections();
+	return wiki.code === "mafiosopedia"
+		? listMafiosopediaSections()
+		: listRiseopediaSections();
 }
 
-export async function findOpediaSectionBySlug(wiki: OpediaWikiConfig, sectionSlug: string) {
+export async function findOpediaSectionBySlug(
+	wiki: OpediaWikiConfig,
+	sectionSlug: string,
+) {
 	return wiki.code === "mafiosopedia"
 		? findMafiosopediaSectionBySlug(sectionSlug)
 		: findRiseopediaSectionBySlug(sectionSlug);
 }
 
-export async function listOpediaSectionDirectoryCards(wiki: OpediaWikiConfig) {
+export async function listOpediaSectionDirectoryCards(
+	wiki: OpediaWikiConfig,
+	releaseFilters: readonly MafiosopediaReleaseFilterCode[] = mafiosopediaReleaseFiltersForView(
+		"all",
+	),
+) {
 	return wiki.code === "mafiosopedia"
-		? listMafiosopediaSectionDirectoryCards()
+		? listMafiosopediaSectionDirectoryCards(
+				effectiveReleaseFilters(wiki, releaseFilters),
+			)
 		: listRiseopediaSectionDirectoryCards();
 }
 
 export async function listOpediaClassDirectoryCards(
 	wiki: OpediaWikiConfig,
-	filters: Pick<RiseopediaClassificationDirectoryFilters, "section">,
+	filters: Pick<RiseopediaClassificationDirectoryFilters, "section"> & {
+		releaseFilters?: MafiosopediaReleaseFilterCode[];
+	},
 ) {
+	const releaseFilters = effectiveReleaseFilters(wiki, filters.releaseFilters);
 	return wiki.code === "mafiosopedia"
-		? listMafiosopediaClassDirectoryCards(filters)
+		? listMafiosopediaClassDirectoryCards({
+				section: filters.section,
+				releaseFilters,
+			})
 		: listRiseopediaClassDirectoryCards(filters);
 }
 
 export async function listOpediaCategoryDirectoryCards(
 	wiki: OpediaWikiConfig,
-	filters: Pick<RiseopediaClassificationDirectoryFilters, "section" | "entityClassCode">,
+	filters: Pick<
+		RiseopediaClassificationDirectoryFilters,
+		"section" | "entityClassCode"
+	> & { releaseFilters?: MafiosopediaReleaseFilterCode[] },
 ) {
+	const releaseFilters = effectiveReleaseFilters(wiki, filters.releaseFilters);
 	return wiki.code === "mafiosopedia"
-		? listMafiosopediaCategoryDirectoryCards(filters)
+		? listMafiosopediaCategoryDirectoryCards({
+				section: filters.section,
+				entityClassCode: filters.entityClassCode,
+				releaseFilters,
+			})
 		: listRiseopediaCategoryDirectoryCards(filters);
 }
 
 export async function listOpediaSubcategoryDirectoryCards(
 	wiki: OpediaWikiConfig,
-	filters: RiseopediaClassificationDirectoryFilters = {
+	filters: RiseopediaClassificationDirectoryFilters & {
+		releaseFilters?: MafiosopediaReleaseFilterCode[];
+	} = {
 		section: null,
 		entityClassCode: null,
 		categorySlug: null,
 	},
 ) {
+	const releaseFilters = effectiveReleaseFilters(wiki, filters.releaseFilters);
 	return wiki.code === "mafiosopedia"
-		? listMafiosopediaSubcategoryDirectoryCards(filters)
+		? listMafiosopediaSubcategoryDirectoryCards({ ...filters, releaseFilters })
 		: listRiseopediaSubcategoryDirectoryCards(filters);
 }
 
 export async function listOpediaClassFilterOptions(
 	wiki: OpediaWikiConfig,
-	filters: Pick<RiseopediaClassificationDirectoryFilters, "section">,
+	filters: Pick<RiseopediaClassificationDirectoryFilters, "section"> & {
+		releaseFilters?: MafiosopediaReleaseFilterCode[];
+	},
 ) {
+	const releaseFilters = effectiveReleaseFilters(wiki, filters.releaseFilters);
 	return wiki.code === "mafiosopedia"
-		? listMafiosopediaClassFilterOptions(filters)
+		? listMafiosopediaClassFilterOptions({
+				section: filters.section,
+				releaseFilters,
+			})
 		: listRiseopediaClassFilterOptions(filters);
 }
 
 export async function listOpediaCategoryFilterOptions(
 	wiki: OpediaWikiConfig,
-	filters: Pick<RiseopediaClassificationDirectoryFilters, "section" | "entityClassCode">,
+	filters: Pick<
+		RiseopediaClassificationDirectoryFilters,
+		"section" | "entityClassCode"
+	> & { releaseFilters?: MafiosopediaReleaseFilterCode[] },
 ) {
+	const releaseFilters = effectiveReleaseFilters(wiki, filters.releaseFilters);
 	return wiki.code === "mafiosopedia"
-		? listMafiosopediaCategoryFilterOptions(filters)
+		? listMafiosopediaCategoryFilterOptions({
+				section: filters.section,
+				entityClassCode: filters.entityClassCode,
+				releaseFilters,
+			})
 		: listRiseopediaCategoryFilterOptions(filters);
 }
 
 export async function listOpediaSubcategoryFilterOptions(
 	wiki: OpediaWikiConfig,
-	filters: RiseopediaClassificationDirectoryFilters,
+	filters: RiseopediaClassificationDirectoryFilters & {
+		releaseFilters?: MafiosopediaReleaseFilterCode[];
+	},
 ) {
+	const releaseFilters = effectiveReleaseFilters(wiki, filters.releaseFilters);
 	return wiki.code === "mafiosopedia"
-		? listMafiosopediaSubcategoryFilterOptions(filters)
+		? listMafiosopediaSubcategoryFilterOptions({ ...filters, releaseFilters })
 		: listRiseopediaSubcategoryFilterOptions(filters);
 }
 
 export async function listOpediaEntities(
 	wiki: OpediaWikiConfig,
-	filters: RiseopediaEntityListFilters,
+	filters: RiseopediaEntityListFilters & {
+		releaseFilters?: MafiosopediaReleaseFilterCode[];
+	},
 ) {
+	const releaseFilters = effectiveReleaseFilters(wiki, filters.releaseFilters);
 	return wiki.code === "mafiosopedia"
-		? listMafiosopediaEntities(filters)
+		? listMafiosopediaEntities({ ...filters, releaseFilters })
 		: listRiseopediaEntities(filters);
 }
 
 export async function listOpediaEntityClassFilterOptions(
 	wiki: OpediaWikiConfig,
-	filters: Pick<RiseopediaEntityFilterOptionFilters, "section">,
+	filters: Pick<RiseopediaEntityFilterOptionFilters, "section"> & {
+		releaseFilters?: MafiosopediaReleaseFilterCode[];
+	},
 ) {
+	const releaseFilters = effectiveReleaseFilters(wiki, filters.releaseFilters);
 	return wiki.code === "mafiosopedia"
-		? listMafiosopediaEntityClassFilterOptions(filters)
+		? listMafiosopediaEntityClassFilterOptions({
+				section: filters.section,
+				releaseFilters,
+			})
 		: listRiseopediaEntityClassFilterOptions(filters);
 }
 
 export async function listOpediaEntityCategoryFilterOptions(
 	wiki: OpediaWikiConfig,
-	filters: Pick<RiseopediaEntityFilterOptionFilters, "section" | "entityClassCode">,
+	filters: Pick<
+		RiseopediaEntityFilterOptionFilters,
+		"section" | "entityClassCode"
+	> & { releaseFilters?: MafiosopediaReleaseFilterCode[] },
 ) {
+	const releaseFilters = effectiveReleaseFilters(wiki, filters.releaseFilters);
 	return wiki.code === "mafiosopedia"
-		? listMafiosopediaEntityCategoryFilterOptions(filters)
+		? listMafiosopediaEntityCategoryFilterOptions({
+				section: filters.section,
+				entityClassCode: filters.entityClassCode,
+				releaseFilters,
+			})
 		: listRiseopediaEntityCategoryFilterOptions(filters);
 }
 
 export async function listOpediaEntitySubcategoryFilterOptions(
 	wiki: OpediaWikiConfig,
-	filters: Pick<RiseopediaEntityFilterOptionFilters, "section" | "entityClassCode" | "categorySlug">,
+	filters: Pick<
+		RiseopediaEntityFilterOptionFilters,
+		"section" | "entityClassCode" | "categorySlug"
+	> & { releaseFilters?: MafiosopediaReleaseFilterCode[] },
 ) {
+	const releaseFilters = effectiveReleaseFilters(wiki, filters.releaseFilters);
 	return wiki.code === "mafiosopedia"
-		? listMafiosopediaEntitySubcategoryFilterOptions(filters)
+		? listMafiosopediaEntitySubcategoryFilterOptions({
+				section: filters.section,
+				entityClassCode: filters.entityClassCode,
+				categorySlug: filters.categorySlug,
+				releaseFilters,
+			})
 		: listRiseopediaEntitySubcategoryFilterOptions(filters);
 }
 
@@ -230,3 +333,5 @@ export async function findOpediaEntityDetailByEntitySlug(
 		? findMafiosopediaEntityDetailByEntitySlug(entitySlug)
 		: findRiseopediaEntityDetailByEntitySlug(entitySlug);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

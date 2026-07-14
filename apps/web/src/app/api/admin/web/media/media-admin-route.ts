@@ -4,6 +4,8 @@
 //// Shared admin media mutation helpers for normalized route contracts and compatibility wrappers                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { NextResponse } from "next/server";
 
 import {
@@ -81,7 +83,9 @@ function readMutationData(body: MutationBody): JsonRecord {
 	return isObject(body.data) ? body.data : (body as JsonRecord);
 }
 
-async function readJsonBody(request: Request): Promise<MutationBody | NextResponse> {
+async function readJsonBody(
+	request: Request,
+): Promise<MutationBody | NextResponse> {
 	try {
 		return (await request.json()) as MutationBody;
 	} catch {
@@ -93,7 +97,7 @@ export async function handleMediaUploadForActor(
 	request: Request,
 	actorDiscordId: string,
 ): Promise<NextResponse> {
-	const rateLimitResponse = checkRateLimit({
+	const rateLimitResponse = await checkRateLimit({
 		request,
 		bucket: "admin:media:upload",
 		identity: actorDiscordId,
@@ -242,7 +246,9 @@ export async function handleMediaUploadForActor(
 	}
 }
 
-export async function handleMediaUpload(request: Request): Promise<NextResponse> {
+export async function handleMediaUpload(
+	request: Request,
+): Promise<NextResponse> {
 	const actorDiscordIdOrResponse = await requireActorDiscordId();
 	if (typeof actorDiscordIdOrResponse !== "string") {
 		return actorDiscordIdOrResponse;
@@ -403,13 +409,15 @@ async function handleMediaDeleteBody(
 	}
 }
 
-export async function handleMediaUpdate(request: Request): Promise<NextResponse> {
+export async function handleMediaUpdate(
+	request: Request,
+): Promise<NextResponse> {
 	const actorDiscordIdOrResponse = await requireActorDiscordId();
 	if (typeof actorDiscordIdOrResponse !== "string") {
 		return actorDiscordIdOrResponse;
 	}
 
-	const rateLimitResponse = checkRateLimit({
+	const rateLimitResponse = await checkRateLimit({
 		request,
 		bucket: "admin:media:update",
 		identity: actorDiscordIdOrResponse,
@@ -428,13 +436,15 @@ export async function handleMediaUpdate(request: Request): Promise<NextResponse>
 	return handleMediaUpdateBody(actorDiscordIdOrResponse, bodyResult);
 }
 
-export async function handleMediaDelete(request: Request): Promise<NextResponse> {
+export async function handleMediaDelete(
+	request: Request,
+): Promise<NextResponse> {
 	const actorDiscordIdOrResponse = await requireActorDiscordId();
 	if (typeof actorDiscordIdOrResponse !== "string") {
 		return actorDiscordIdOrResponse;
 	}
 
-	const rateLimitResponse = checkRateLimit({
+	const rateLimitResponse = await checkRateLimit({
 		request,
 		bucket: "admin:media:delete",
 		identity: actorDiscordIdOrResponse,
@@ -453,7 +463,9 @@ export async function handleMediaDelete(request: Request): Promise<NextResponse>
 	return handleMediaDeleteBody(actorDiscordIdOrResponse, bodyResult);
 }
 
-export async function handleMediaMutation(request: Request): Promise<NextResponse> {
+export async function handleMediaMutation(
+	request: Request,
+): Promise<NextResponse> {
 	const contentType = (request.headers.get("content-type") ?? "").toLowerCase();
 	if (contentType.includes("multipart/form-data")) {
 		return handleMediaUpload(request);
@@ -471,7 +483,7 @@ export async function handleMediaMutation(request: Request): Promise<NextRespons
 			return actorDiscordIdOrResponse;
 		}
 
-		const rateLimitResponse = checkRateLimit({
+		const rateLimitResponse = await checkRateLimit({
 			request,
 			bucket: "admin:media:update",
 			identity: actorDiscordIdOrResponse,
@@ -491,7 +503,7 @@ export async function handleMediaMutation(request: Request): Promise<NextRespons
 			return actorDiscordIdOrResponse;
 		}
 
-		const rateLimitResponse = checkRateLimit({
+		const rateLimitResponse = await checkRateLimit({
 			request,
 			bucket: "admin:media:delete",
 			identity: actorDiscordIdOrResponse,
@@ -511,3 +523,5 @@ export async function handleMediaMutation(request: Request): Promise<NextRespons
 		400,
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

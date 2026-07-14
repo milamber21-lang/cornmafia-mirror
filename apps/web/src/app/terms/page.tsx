@@ -4,6 +4,7 @@
 //// Public terms route rendered from DB-backed internal page content.                                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { Metadata } from "next";
 
@@ -18,3 +19,5 @@ export const metadata: Metadata = {
 export default function TermsPage() {
 	return <PublicInternalContentPageRoute pageSlug="terms" />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

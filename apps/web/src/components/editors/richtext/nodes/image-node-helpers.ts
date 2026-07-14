@@ -4,11 +4,13 @@
 //// Pure helpers for rich-text image sizing, moving, preview, and writable-node narrowing.                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { CSSProperties } from "react";
 import type { LexicalNode } from "lexical";
 import type {
 	ImageAlign,
+	ImageFrameStyle,
 	ImageMoveDropPreview,
 	ImageMoveMode,
 	ImageSize,
@@ -16,11 +18,12 @@ import type {
 } from "./image-node-types";
 
 export const IMAGE_MIN_WIDTH = 80;
-export const IMAGE_MAX_WIDTH = 960;
+export const IMAGE_FALLBACK_MAX_WIDTH = 1236;
 
 export type ImageNodeWritable = LexicalNode & {
 	setAlign: (align: ImageAlign) => void;
 	setWrap: (wrap: ImageWrap) => void;
+	setFrameStyle: (frameStyle: ImageFrameStyle) => void;
 	setSize: (width: number, height?: number) => void;
 };
 
@@ -31,6 +34,7 @@ export function isImageNodeWritable(
 		Boolean(node) &&
 		typeof (node as { setAlign?: unknown }).setAlign === "function" &&
 		typeof (node as { setWrap?: unknown }).setWrap === "function" &&
+		typeof (node as { setFrameStyle?: unknown }).setFrameStyle === "function" &&
 		typeof (node as { setSize?: unknown }).setSize === "function"
 	);
 }
@@ -50,7 +54,10 @@ export function normalizeImageSize(width: unknown, height: unknown): ImageSize {
 	};
 }
 
-export function readDisplayWidth(host: HTMLElement | null, fallback: number | undefined): number {
+export function readDisplayWidth(
+	host: HTMLElement | null,
+	fallback: number | undefined,
+): number {
 	if (host) {
 		const image = host.querySelector("img");
 		const measured = image?.getBoundingClientRect().width ?? 0;
@@ -65,26 +72,36 @@ export function readDisplayWidth(host: HTMLElement | null, fallback: number | un
 
 export function resolveMaxResizeWidth(host: HTMLElement | null): number {
 	if (!host) {
-		return IMAGE_MAX_WIDTH;
+		return IMAGE_FALLBACK_MAX_WIDTH;
+	}
+
+	const editorCanvas = host.closest(".richtext-editor-canvas");
+	const editorCanvasWidth = editorCanvas?.getBoundingClientRect().width ?? 0;
+
+	if (editorCanvasWidth > 0) {
+		return Math.max(IMAGE_MIN_WIDTH, Math.floor(editorCanvasWidth));
 	}
 
 	const richTextHost = host.closest(".richtext");
 	const richTextWidth = richTextHost?.getBoundingClientRect().width ?? 0;
 
 	if (richTextWidth > 0) {
-		return Math.max(IMAGE_MIN_WIDTH, Math.floor(Math.min(richTextWidth, IMAGE_MAX_WIDTH)));
+		return Math.max(IMAGE_MIN_WIDTH, Math.floor(richTextWidth));
 	}
 
 	const parentWidth = host.parentElement?.getBoundingClientRect().width ?? 0;
 
 	if (parentWidth > 0) {
-		return Math.max(IMAGE_MIN_WIDTH, Math.floor(Math.min(parentWidth, IMAGE_MAX_WIDTH)));
+		return Math.max(IMAGE_MIN_WIDTH, Math.floor(parentWidth));
 	}
 
-	return IMAGE_MAX_WIDTH;
+	return IMAGE_FALLBACK_MAX_WIDTH;
 }
 
-export function calculateHeight(width: number, aspectRatio: number | undefined): number | undefined {
+export function calculateHeight(
+	width: number,
+	aspectRatio: number | undefined,
+): number | undefined {
 	if (!isPositiveFiniteNumber(aspectRatio)) {
 		return undefined;
 	}
@@ -92,7 +109,10 @@ export function calculateHeight(width: number, aspectRatio: number | undefined):
 	return Math.max(1, Math.round(width * aspectRatio));
 }
 
-export function resolveMoveMode(rootRect: DOMRect, clientX: number): ImageMoveMode {
+export function resolveMoveMode(
+	rootRect: DOMRect,
+	clientX: number,
+): ImageMoveMode {
 	const safeWidth = Math.max(1, rootRect.width);
 	const ratio = (clientX - rootRect.left) / safeWidth;
 
@@ -146,7 +166,8 @@ export function resolveMoveDropPreview(
 		}
 	}
 
-	const lastRect = childElements[childElements.length - 1].getBoundingClientRect();
+	const lastRect =
+		childElements[childElements.length - 1].getBoundingClientRect();
 	return {
 		mode,
 		dropIndex: childElements.length,
@@ -156,7 +177,10 @@ export function resolveMoveDropPreview(
 	};
 }
 
-export function applyMoveMode(node: ImageNodeWritable, mode: ImageMoveMode): void {
+export function applyMoveMode(
+	node: ImageNodeWritable,
+	mode: ImageMoveMode,
+): void {
 	if (mode === "center-block") {
 		node.setAlign("center");
 		node.setWrap("no-wrap");
@@ -216,15 +240,25 @@ export function resolveMovePreviewBoxStyle(
 	imageSize: { width: number; height: number },
 ): CSSProperties {
 	const outerPadding = 16;
-	const availableWidth = Math.max(IMAGE_MIN_WIDTH, Math.floor(preview.rootWidth - outerPadding * 2));
-	const width = Math.max(IMAGE_MIN_WIDTH, Math.min(imageSize.width, availableWidth));
+	const availableWidth = Math.max(
+		IMAGE_MIN_WIDTH,
+		Math.floor(preview.rootWidth - outerPadding * 2),
+	);
+	const width = Math.max(
+		IMAGE_MIN_WIDTH,
+		Math.min(imageSize.width, availableWidth),
+	);
 	const height = Math.max(40, imageSize.height);
 	let left = preview.rootLeft + outerPadding;
 
 	if (preview.mode === "center-block") {
-		left = preview.rootLeft + Math.max(outerPadding, Math.floor((preview.rootWidth - width) / 2));
+		left =
+			preview.rootLeft +
+			Math.max(outerPadding, Math.floor((preview.rootWidth - width) / 2));
 	} else if (preview.mode === "right-wrap") {
-		left = preview.rootLeft + Math.max(outerPadding, Math.floor(preview.rootWidth - width - outerPadding));
+		left =
+			preview.rootLeft +
+			Math.max(outerPadding, Math.floor(preview.rootWidth - width - outerPadding));
 	}
 
 	return {
@@ -234,3 +268,5 @@ export function resolveMovePreviewBoxStyle(
 		height,
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

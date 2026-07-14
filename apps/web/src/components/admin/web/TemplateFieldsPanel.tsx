@@ -4,6 +4,8 @@
 //// Panel form for per-template field placements and renderer label behavior.                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -125,14 +127,21 @@ function getLabelPositionCode(values: Values): TemplateFieldLabelPositionCode {
 
 function getLabelStyleCode(values: Values): TemplateFieldLabelStyleCode {
 	const value = values.labelStyleCode;
-	if (value === "title" || value === "text" || value === "muted" || value === "label") {
+	if (
+		value === "title" ||
+		value === "text" ||
+		value === "muted" ||
+		value === "label"
+	) {
 		return value;
 	}
 
 	return "label";
 }
 
-function getLabelSeparatorCode(values: Values): TemplateFieldLabelSeparatorCode {
+function getLabelSeparatorCode(
+	values: Values,
+): TemplateFieldLabelSeparatorCode {
 	const value = values.labelSeparatorCode;
 	if (value === "none" || value === "colon" || value === "dash") {
 		return value;
@@ -164,11 +173,17 @@ function normalizeSubmitLabelSeparator(args: {
 	labelPositionCode: TemplateFieldLabelPositionCode;
 	labelSeparatorCode: string;
 }): TemplateFieldLabelSeparatorCode {
-	if (args.labelSeparatorCode === "none" || args.labelSeparatorCode === "colon") {
+	if (
+		args.labelSeparatorCode === "none" ||
+		args.labelSeparatorCode === "colon"
+	) {
 		return args.labelSeparatorCode;
 	}
 
-	if (args.labelSeparatorCode === "dash" && args.labelPositionCode === "inline") {
+	if (
+		args.labelSeparatorCode === "dash" &&
+		args.labelPositionCode === "inline"
+	) {
 		return "dash";
 	}
 
@@ -247,7 +262,8 @@ export default function TemplateFieldsPanel({
 	}, [mode, open, row?.fieldListId, templateId]);
 
 	const defaultValues = useMemo<Values>(() => {
-		const labelPositionCode = row?.labelPositionCode === "inline" ? "inline" : "above";
+		const labelPositionCode =
+			row?.labelPositionCode === "inline" ? "inline" : "above";
 		const labelStyleCode =
 			labelPositionCode === "inline" && row?.labelStyleCode === "title"
 				? "label"
@@ -360,7 +376,8 @@ export default function TemplateFieldsPanel({
 				name: "layoutWidthCode",
 				label: "Layout Width",
 				options: layoutWidthOptions,
-				helpText: "Controls how much horizontal room this field gets inside its destination.",
+				helpText:
+					"Controls how much horizontal room this field gets inside its destination.",
 			},
 			{
 				type: "select-single",
@@ -416,7 +433,8 @@ export default function TemplateFieldsPanel({
 				label: "Inline Separator",
 				options: labelSeparatorOptions,
 				visible: isLabelVisible,
-				helpText: "Top labels allow none or colon. Same-row labels also allow dash.",
+				helpText:
+					"Top labels allow none or colon. Same-row labels also allow dash.",
 			},
 			{
 				type: "select-single",
@@ -581,3 +599,5 @@ export default function TemplateFieldsPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

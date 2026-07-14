@@ -4,6 +4,8 @@
 //// Category editor with rank-safe policy submission and dynamic effective summaries                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -245,9 +247,7 @@ export default function CategoriesPanel({
 				name: "title",
 				label: "Title",
 				validate: (value) =>
-					String(value ?? "").trim().length > 0
-						? undefined
-						: "Title is required.",
+					String(value ?? "").trim().length > 0 ? undefined : "Title is required.",
 			},
 			{
 				type: "text",
@@ -345,9 +345,7 @@ export default function CategoriesPanel({
 				label: "Icon",
 				options: iconOptions,
 				validate: (value) =>
-					String(value ?? "").trim().length > 0
-						? undefined
-						: "Icon is required.",
+					String(value ?? "").trim().length > 0 ? undefined : "Icon is required.",
 			},
 			{
 				type: "select-single",
@@ -374,9 +372,7 @@ export default function CategoriesPanel({
 
 					return (
 						<div className="media-icon-preview-row">
-							<div
-								className="media-icon-preview-frame"
-							>
+							<div className="media-icon-preview-frame">
 								{selectedIcon && selectedColor ? (
 									<IconRender
 										iconKey={selectedIcon}
@@ -463,9 +459,7 @@ export default function CategoriesPanel({
 						navHidden: values.navMode === "explicit_hidden",
 						readPolicy,
 						readMinRank:
-							readPolicy === "public"
-								? null
-								: findRankByRoleId(roles, readRoleId),
+							readPolicy === "public" ? null : findRankByRoleId(roles, readRoleId),
 						writePolicy,
 						writeMinRank: findRankByRoleId(roles, writeRoleId),
 						iconKeyId: String(values.iconKeyId ?? "").trim(),
@@ -530,3 +524,5 @@ export default function CategoriesPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// Admin API route for Riseopedia patch publication channels.                                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -71,7 +72,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const channelCode = getRequiredCode(data, "channelCode");
 			const channelName = getRequiredString(data, "channelName");
 			if (!channelCode || !channelName) {
-				return jsonError("VALIDATION_REQUIRED", "Channel code and name are required.", 400);
+				return jsonError(
+					"VALIDATION_REQUIRED",
+					"Channel code and name are required.",
+					400,
+				);
 			}
 
 			const id = await upsertRiseopediaPatchPublicationChannelAdmin({
@@ -94,7 +99,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
 			}
 
-			await deleteRiseopediaPatchPublicationChannelAdmin({ actorDiscordId: actorOrResponse, patchPublicationChannelId });
+			await deleteRiseopediaPatchPublicationChannelAdmin({
+				actorDiscordId: actorOrResponse,
+				patchPublicationChannelId,
+			});
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 
@@ -104,3 +112,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Exports the shared field error primitive                                                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { ReactNode } from "react";
 
 import { cn } from "../../../lib/cn";
@@ -23,3 +25,5 @@ export default function FieldError({ children, className, message }: Props) {
 
 	return <div className={cn("ui-field-error", className)}>{content}</div>;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

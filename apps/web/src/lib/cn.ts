@@ -4,6 +4,8 @@
 //// Simple className combiner with strict typing                                                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 export function cn(...args: unknown[]): string {
 	const out: string[] = [];
 
@@ -35,3 +37,5 @@ export function cn(...args: unknown[]): string {
 
 	return out.join(" ");
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

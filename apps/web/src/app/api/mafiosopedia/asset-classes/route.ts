@@ -4,6 +4,7 @@
 //// Public Mafiosopedia asset class list API backed by web_view Mafiosopedia read contracts.                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse } from "next/server";
 
@@ -16,7 +17,12 @@ export async function GET(): Promise<Response> {
 		const rows = await listMafiosopediaAssetClasses();
 		return NextResponse.json({ rows }, { status: 200 });
 	} catch (error: unknown) {
-		const message = error instanceof Error ? error.message : "Failed to load Mafiosopedia asset classes.";
+		const message =
+			error instanceof Error
+				? error.message
+				: "Failed to load Mafiosopedia asset classes.";
 		return NextResponse.json({ ok: false, message }, { status: 500 });
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

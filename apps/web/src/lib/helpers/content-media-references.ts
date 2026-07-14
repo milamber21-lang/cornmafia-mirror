@@ -4,6 +4,7 @@
 //// Extracts structured media references from admin content field payloads and rich text JSON                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { extractRichTextMediaReferences } from "@/lib/editors/richtext/rich-text-json";
 import { extractStorageRelPathFromMediaUrl } from "@/lib/helpers/media-url";
@@ -94,5 +95,9 @@ export function extractContentMediaReferences(
 		byKey.set(reference.key, reference);
 	}
 
-	return Array.from(byKey.values()).map(({ key: _key, ...reference }) => reference);
+	return Array.from(byKey.values()).map(
+		({ key: _key, ...reference }) => reference,
+	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

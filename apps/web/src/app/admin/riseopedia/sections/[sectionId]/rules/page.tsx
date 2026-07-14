@@ -4,6 +4,7 @@
 //// Scoped admin page for managing automatic Riseopedia rules for one section.                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -51,7 +52,7 @@ export default async function RiseopediaSectionRulesScopedPage({
 				<h1 className="admin-page-card-title">Section not found</h1>
 				<p className="admin-state-message">The section id in the URL is invalid.</p>
 				<div>
-					<ButtonLink href="/admin/riseopedia/sections" variant="neutral">
+					<ButtonLink href="/admin/riseopedia/sections" variant="secondary">
 						Sections
 					</ButtonLink>
 				</div>
@@ -63,14 +64,19 @@ export default async function RiseopediaSectionRulesScopedPage({
 		listRiseopediaAdminMeta(),
 		listRiseopediaAdminSections(),
 	]);
-	const section = rows.sections.find((row) => String(row.section_id ?? "") === String(sectionId)) ?? null;
+	const section =
+		rows.sections.find(
+			(row) => String(row.section_id ?? "") === String(sectionId),
+		) ?? null;
 	if (!section) {
 		return (
 			<section className="card admin-state-card">
 				<h1 className="admin-page-card-title">Section not found</h1>
-				<p className="admin-state-message">No Riseopedia section exists for id {sectionId}.</p>
+				<p className="admin-state-message">
+					No Riseopedia section exists for id {sectionId}.
+				</p>
 				<div>
-					<ButtonLink href="/admin/riseopedia/sections" variant="neutral">
+					<ButtonLink href="/admin/riseopedia/sections" variant="secondary">
 						Sections
 					</ButtonLink>
 				</div>
@@ -78,7 +84,10 @@ export default async function RiseopediaSectionRulesScopedPage({
 		);
 	}
 
-	const scopedRules = rows.classificationRules.filter((row: { [key: string]: unknown }) => String(row.section_id ?? "") === String(sectionId));
+	const scopedRules = rows.classificationRules.filter(
+		(row: { [key: string]: unknown }) =>
+			String(row.section_id ?? "") === String(sectionId),
+	);
 
 	return (
 		<RiseopediaAdminPageChrome
@@ -95,3 +104,5 @@ export default async function RiseopediaSectionRulesScopedPage({
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

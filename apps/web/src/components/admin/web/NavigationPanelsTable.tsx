@@ -4,6 +4,7 @@
 //// Small-list admin table for DB-first navigation panel definitions                                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -275,7 +276,6 @@ export default function NavigationPanelsTable({
 		[busyId, refreshFromServer],
 	);
 
-
 	const handleSortChange = useCallback(
 		(nextSortKey: SortKey): void => {
 			setSortDirection((currentDirection) =>
@@ -318,7 +318,7 @@ export default function NavigationPanelsTable({
 					</div>
 
 					<div className="admin-table-toolbar-action">
-						<Button variant="green" onClick={openCreate}>
+						<Button variant="primary" onClick={openCreate}>
 							Create Panel
 						</Button>
 					</div>
@@ -406,7 +406,7 @@ export default function NavigationPanelsTable({
 										<TD className="admin-table-cell--center">{formatLimits(row)}</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant={row.enabled ? "green" : "neutral"}
+												variant={row.enabled ? "success" : "secondary"}
 												disabled={disabled}
 												loading={disabled}
 												onClick={() => void toggleEnabled(row)}
@@ -417,7 +417,7 @@ export default function NavigationPanelsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="accent"
+												variant="danger"
 												disabled={disabled}
 												loading={disabled}
 												onClick={() => void deletePanel(row)}
@@ -427,7 +427,7 @@ export default function NavigationPanelsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<ButtonLink
-												variant="neutral"
+												variant="secondary"
 												href={`/admin/web/navigation/${encodeURIComponent(row.panelKey)}`}
 											>
 												Manage
@@ -435,7 +435,7 @@ export default function NavigationPanelsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="neutral"
+												variant="secondary"
 												disabled={disabled}
 												onClick={() => openEdit(row)}
 											>
@@ -483,3 +483,5 @@ export default function NavigationPanelsTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

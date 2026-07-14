@@ -4,6 +4,8 @@
 //// DB-first admin media read helpers and taxonomy option loaders                                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 import { query } from "@/lib/data/pg";
@@ -133,8 +135,9 @@ export type MediaListResult = {
 	sourceOptions: MediaSourceOption[];
 };
 
-
-function normalizeSortDir(sortDir: MediaAdminSortDir | undefined): MediaAdminSortDir {
+function normalizeSortDir(
+	sortDir: MediaAdminSortDir | undefined,
+): MediaAdminSortDir {
 	return sortDir === "desc" ? "desc" : "asc";
 }
 
@@ -161,7 +164,9 @@ function buildMediaAdminOrderBy(
 }
 
 function toIsoString(value: Date | string): string {
-	return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+	return value instanceof Date
+		? value.toISOString()
+		: new Date(value).toISOString();
 }
 
 function toNullableString(value: string | number | null): string | null {
@@ -280,7 +285,10 @@ export async function getMediaPlacementLookup(args: {
 			throw new Error(`Subcategory ${args.subcategoryId} was not found.`);
 		}
 
-		if (args.categoryId && String(subcategoryRow.category_id) !== args.categoryId) {
+		if (
+			args.categoryId &&
+			String(subcategoryRow.category_id) !== args.categoryId
+		) {
 			throw new Error(
 				`Subcategory ${args.subcategoryId} does not belong to category ${args.categoryId}.`,
 			);
@@ -298,7 +306,9 @@ export async function getMediaPlacementLookup(args: {
 	};
 }
 
-export async function findMediaAdminItemById(mediaId: string): Promise<MediaAdminItem | null> {
+export async function findMediaAdminItemById(
+	mediaId: string,
+): Promise<MediaAdminItem | null> {
 	const result = await query<MediaAdminRow>(
 		[
 			`SELECT`,
@@ -423,7 +433,9 @@ function addMediaSourceFilter(args: {
 		const ownerUsername = source.slice("user:".length).trim();
 		if (ownerUsername.length > 0) {
 			args.values.push(ownerUsername);
-			args.whereParts.push(`is_shared = FALSE AND owner_username = $${args.values.length}`);
+			args.whereParts.push(
+				`is_shared = FALSE AND owner_username = $${args.values.length}`,
+			);
 		}
 	}
 }
@@ -448,7 +460,8 @@ async function listMediaSourceOptionsAdmin(params: {
 		kind: params.kind,
 	});
 
-	const whereClause = whereParts.length > 0 ? `WHERE ${whereParts.join(" AND ")}` : "";
+	const whereClause =
+		whereParts.length > 0 ? `WHERE ${whereParts.join(" AND ")}` : "";
 
 	const result = await query<{ source_value: string; source_label: string }>(
 		[
@@ -481,8 +494,11 @@ async function listMediaSourceOptionsAdmin(params: {
 	}));
 }
 
-export async function listMediaAdmin(params: MediaListParams): Promise<MediaListResult> {
-	const requestedPage = Number.isFinite(params.page) && params.page > 0 ? params.page : 1;
+export async function listMediaAdmin(
+	params: MediaListParams,
+): Promise<MediaListResult> {
+	const requestedPage =
+		Number.isFinite(params.page) && params.page > 0 ? params.page : 1;
 	const pageSize = Number.isFinite(params.pageSize)
 		? Math.min(Math.max(params.pageSize, 1), 100)
 		: 20;
@@ -520,7 +536,8 @@ export async function listMediaAdmin(params: MediaListParams): Promise<MediaList
 		kind: params.kind,
 	});
 
-	const whereClause = whereParts.length > 0 ? `WHERE ${whereParts.join(" AND ")}` : "";
+	const whereClause =
+		whereParts.length > 0 ? `WHERE ${whereParts.join(" AND ")}` : "";
 
 	const totalResult = await query<{ total_docs: string | number }>(
 		`SELECT COUNT(*) AS total_docs FROM web_view.web_media_admin ${whereClause}`,
@@ -577,3 +594,5 @@ export async function listMediaAdmin(params: MediaListParams): Promise<MediaList
 		sourceOptions,
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

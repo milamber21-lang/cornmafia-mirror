@@ -4,6 +4,7 @@
 //// Homepage route rendered from DB-backed internal page content with a setup-safe fallback.                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { Metadata } from "next";
 
@@ -16,5 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-	return <PublicInternalContentPageRoute pageSlug="home"/>;
+	return <PublicInternalContentPageRoute pageSlug="home" />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

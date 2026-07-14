@@ -4,6 +4,7 @@
 //// Shared parser helpers for Riseopedia URL search params.                                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 export type RiseopediaSearchParamValue = string | string[] | undefined;
 
@@ -11,13 +12,18 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 24;
 const PAGE_SIZE_OPTIONS = [24, 48, 96] as const;
 
-export function firstSearchParam(value: RiseopediaSearchParamValue): string | null {
+export function firstSearchParam(
+	value: RiseopediaSearchParamValue,
+): string | null {
 	const raw = Array.isArray(value) ? value[0] : value;
 	const normalized = raw?.trim();
 	return normalized && normalized.length > 0 ? normalized : null;
 }
 
-export function parsePositiveInt(value: string | null, fallback: number): number {
+export function parsePositiveInt(
+	value: string | null,
+	fallback: number,
+): number {
 	if (!value || !/^\d+$/.test(value)) {
 		return fallback;
 	}
@@ -36,3 +42,5 @@ export function parsePageSize(value: string | null): number {
 export function parsePage(value: string | null): number {
 	return parsePositiveInt(value, DEFAULT_PAGE);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

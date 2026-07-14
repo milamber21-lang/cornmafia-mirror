@@ -4,6 +4,7 @@
 //// Serves transitional map tile manifests and sample overlay features.                                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse } from "next/server";
 import fs from "node:fs/promises";
@@ -81,7 +82,11 @@ function getTilesRoot(): string {
 		return runtimeJoin(explicitPublicRoot, DEFAULT_TILES_DIR_NAME);
 	}
 
-	return runtimeJoin(process.cwd(), DEFAULT_PUBLIC_DIR_NAME, DEFAULT_TILES_DIR_NAME);
+	return runtimeJoin(
+		process.cwd(),
+		DEFAULT_PUBLIC_DIR_NAME,
+		DEFAULT_TILES_DIR_NAME,
+	);
 }
 
 function normalizePathEnv(value: string | null): string | null {
@@ -107,13 +112,15 @@ function isNumericDir(name: string): boolean {
 }
 
 async function pathIsDirectory(dirPath: string): Promise<boolean> {
-	return fs.stat(dirPath)
+	return fs
+		.stat(dirPath)
 		.then((stats) => stats.isDirectory())
 		.catch(() => false);
 }
 
 async function pathIsFile(filePath: string): Promise<boolean> {
-	return fs.stat(filePath)
+	return fs
+		.stat(filePath)
 		.then((stats) => stats.isFile())
 		.catch(() => false);
 }
@@ -145,14 +152,7 @@ async function readPngWidth(filePath: string): Promise<number | null> {
 		}
 
 		const pngSignature = Buffer.from([
-			0x89,
-			0x50,
-			0x4e,
-			0x47,
-			0x0d,
-			0x0a,
-			0x1a,
-			0x0a,
+			0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
 		]);
 
 		for (let index = 0; index < pngSignature.length; index += 1) {
@@ -190,7 +190,10 @@ async function detectTileSize(sampleTilePath: string | null): Promise<number> {
 	return pngWidth && pngWidth > 0 ? pngWidth : 256;
 }
 
-async function findSampleTile(mapDir: string, zoomLevels: number[]): Promise<string | null> {
+async function findSampleTile(
+	mapDir: string,
+	zoomLevels: number[],
+): Promise<string | null> {
 	const preferredSample = runtimeJoin(mapDir, "0", "0", "0.png");
 	if (await pathIsFile(preferredSample)) {
 		return preferredSample;
@@ -249,15 +252,15 @@ async function detectPyramid(mapKey: string): Promise<MapManifest | null> {
 	};
 }
 
-export async function GET(_request: Request, context: RouteContext): Promise<NextResponse> {
+export async function GET(
+	_request: Request,
+	context: RouteContext,
+): Promise<NextResponse> {
 	const params = await context.params;
 	const mapKey = normalizeMapKey(params.map);
 
 	if (!mapKey) {
-		return NextResponse.json(
-			{ error: "Invalid map key." },
-			{ status: 400 },
-		);
+		return NextResponse.json({ error: "Invalid map key." }, { status: 400 });
 	}
 
 	const manifest = await detectPyramid(mapKey);
@@ -277,3 +280,5 @@ export async function GET(_request: Request, context: RouteContext): Promise<Nex
 		headers: { "Cache-Control": "no-store" },
 	});
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Client-safe dynamic loader for the RichText editor surface.                                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import * as React from "react";
 
 export type LoadedDeps = {
@@ -159,9 +161,8 @@ export async function loadLexicalDeps(): Promise<LoadedDeps> {
 		? pickAnyComponent(listPluginMod, "ListPlugin")
 		: null;
 
-	const checkListMod = await import(
-		"@lexical/react/LexicalCheckListPlugin"
-	).catch(() => null);
+	const checkListMod =
+		await import("@lexical/react/LexicalCheckListPlugin").catch(() => null);
 	const CheckListPlugin = checkListMod
 		? pickAnyComponent(checkListMod, "CheckListPlugin")
 		: null;
@@ -234,3 +235,5 @@ export async function loadLexicalDeps(): Promise<LoadedDeps> {
 		HorizontalRuleCreator,
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

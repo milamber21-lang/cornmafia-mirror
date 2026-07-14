@@ -4,6 +4,7 @@
 //// Read-only admin page for canonical game properties available to Riseopedia.                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -23,18 +24,25 @@ export const dynamic = "force-dynamic";
 export default async function PropertiesAdminPage(): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Canonical Properties" reason={guard.reason} />;
+		return (
+			<RiseopediaAdminGuard title="Canonical Properties" reason={guard.reason} />
+		);
 	}
 
-	const [meta, rows] = await Promise.all([listRiseopediaAdminMeta(), listRiseopediaAdminProperties()]);
+	const [meta, rows] = await Promise.all([
+		listRiseopediaAdminMeta(),
+		listRiseopediaAdminProperties(),
+	]);
 
 	return (
 		<RiseopediaAdminPageChrome
 			title="Canonical Properties"
 			description="Inspect canonical game properties available to display profiles and card rules."
 		>
-			<RiseopediaAdminNav active="profile-properties" />
+			<RiseopediaAdminNav active="properties" />
 			<RiseopediaPropertiesTable initialRows={rows.catalog} meta={meta} />
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

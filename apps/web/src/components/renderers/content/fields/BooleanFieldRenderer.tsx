@@ -4,6 +4,7 @@
 //// Renders boolean content fields as compact yes/no badges.                                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -27,10 +28,14 @@ export default function BooleanFieldRenderer({
 	const enabled = field.value === true;
 
 	return (
-		<ContentFieldFrame field={field} showLabel={showLabel} valueTextClassName="content-field-value--compact">
-			<span className="content-field-pill">
-				{enabled ? "Yes" : "No"}
-			</span>
+		<ContentFieldFrame
+			field={field}
+			showLabel={showLabel}
+			valueTextClassName="content-field-value--compact"
+		>
+			<span className="content-field-pill">{enabled ? "Yes" : "No"}</span>
 		</ContentFieldFrame>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

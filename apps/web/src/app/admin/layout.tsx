@@ -4,6 +4,8 @@
 //// Shared admin layout guard for admin and editor route entry                                                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { JSX, ReactNode } from "react";
 import { notFound } from "next/navigation";
 
@@ -22,3 +24,5 @@ export default async function AdminLayout({
 
 	return <>{children}</>;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

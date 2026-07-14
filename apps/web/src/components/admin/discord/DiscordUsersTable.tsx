@@ -4,6 +4,8 @@
 //// Admin Discord users table with server-driven search, sorting, and pagination                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -49,7 +51,13 @@ type JsonRecord = Record<string, unknown>;
 type SearchParamsReader = {
 	get(name: string): string | null;
 };
-type SortKey = "discordId" | "username" | "globalName" | "member" | "roleSync" | "notes";
+type SortKey =
+	| "discordId"
+	| "username"
+	| "globalName"
+	| "member"
+	| "roleSync"
+	| "notes";
 
 type UsersResponse = {
 	rows?: unknown[];
@@ -113,7 +121,9 @@ function readSortKeyParam(searchParams: SearchParamsReader): SortKey {
 		: "username";
 }
 
-function readSortDirectionParam(searchParams: SearchParamsReader): SortDirection {
+function readSortDirectionParam(
+	searchParams: SearchParamsReader,
+): SortDirection {
 	return searchParams.get("sortDir") === "desc" ? "desc" : "asc";
 }
 
@@ -197,7 +207,9 @@ export default function DiscordUsersTable(): JSX.Element {
 	const [pageSize, setPageSize] = useState<number>(
 		readPageSizeParam(searchParams),
 	);
-	const [sortKey, setSortKey] = useState<SortKey>(readSortKeyParam(searchParams));
+	const [sortKey, setSortKey] = useState<SortKey>(
+		readSortKeyParam(searchParams),
+	);
 	const [sortDirection, setSortDirection] = useState<SortDirection>(
 		readSortDirectionParam(searchParams),
 	);
@@ -468,21 +480,28 @@ export default function DiscordUsersTable(): JSX.Element {
 							) : (
 								rows.map((row) => (
 									<TR key={row.id}>
-										<TD className="admin-table-cell--center admin-table-cell--mono">{row.discordId}</TD>
+										<TD className="admin-table-cell--center admin-table-cell--mono">
+											{row.discordId}
+										</TD>
 										<TD className="admin-table-cell--center">{row.username}</TD>
 										<TD className="admin-table-cell--center">{row.globalName ?? "—"}</TD>
-										<TD className="admin-table-cell--center">{row.isMember ? "Yes" : "No"}</TD>
+										<TD className="admin-table-cell--center">
+											{row.isMember ? "Yes" : "No"}
+										</TD>
 										<TD className="admin-table-cell--center">
 											{row.rolesSyncedDt ? daysAgoLabel(row.rolesSyncedDt) : "never"}
 											{row.isRoleRefreshDue ? " (stale)" : ""}
 										</TD>
-										<TD className="admin-table-cell--center" title={row.notes ?? undefined}>
+										<TD
+											className="admin-table-cell--center"
+											title={row.notes ?? undefined}
+										>
 											{notesPreview(row.notes)}
 										</TD>
 										<TD className="admin-table-cell--center">
 											<div className="admin-table-row-actions">
 												<Button
-													variant="neutral"
+													variant="secondary"
 													onClick={() => openEdit(row)}
 													aria-label={`Edit ${row.username}`}
 												>
@@ -536,3 +555,5 @@ export default function DiscordUsersTable(): JSX.Element {
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// Shared type definitions for the admin navigation panel designer.                                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type {
 	NavigationCategoryLookupItem,
@@ -19,12 +20,18 @@ export type DesignerTreeTarget = NavigationTreeTarget & {
 	editorId: string;
 };
 
-export type DesignerTreeSubcategory = Omit<NavigationTreeSubcategory, "content"> & {
+export type DesignerTreeSubcategory = Omit<
+	NavigationTreeSubcategory,
+	"content"
+> & {
 	editorId: string;
 	content: DesignerTreeTarget[];
 };
 
-export type DesignerTreeCategory = Omit<NavigationTreeCategory, "subcategories"> & {
+export type DesignerTreeCategory = Omit<
+	NavigationTreeCategory,
+	"subcategories"
+> & {
 	editorId: string;
 	subcategories: DesignerTreeSubcategory[];
 };
@@ -86,3 +93,5 @@ export interface NavigationPanelDesignerProps {
 	initialSubcategories: NavigationSubcategoryLookupItem[];
 	initialContent: NavigationContentLookupItem[];
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

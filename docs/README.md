@@ -1,58 +1,110 @@
 <!-- FILE: docs/README.md -->
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->
+
 # Corn Mafia Documentation
 
-Corn Mafia is a DB-first Next.js 16 / React 19 / PostgreSQL guild platform with Discord-backed identity, role-aware access, admin tooling, member authoring, public content surfaces, and Riseopedia/game-data workflows.
+> [!IMPORTANT]
+> **Publicly viewable proprietary source**
+>
+> The Corn Mafia repository is public for inspection and transparency only.
+> It is not open-source software.
+>
+> Use, execution, building, testing, deployment, hosting, modification,
+> redistribution, mirroring, or commercial exploitation requires prior express
+> written permission from WoodenElf.
+>
+> See [`docs/LICENSE.md`](LICENSE.md) for the documentation copy and the
+> repository-root [`LICENSE.md`](../LICENSE.md) for the authoritative terms.
 
-Durable project truth lives in `docs/`. Current repo files, current SQL dump, and current SQL runner output override older prompts or historical notes.
+Corn Mafia is a DB-first Next.js 16 / React 19 / PostgreSQL guild platform with Discord-backed identity, role-aware access, admin tooling, member authoring, public content surfaces, and Riseopedia/Mafiosopedia game knowledge.
+
+Durable project truth lives in `docs/`. Current repository files, the current SQL dump, and current SQL runner output override historical prompts and generated snapshots.
 
 ## Start here
 
-- `docs/project_definition.md` - architecture, schema boundaries, runtime roles, and non-negotiable constraints.
-- `docs/codebase_rules.md` - code, SQL, route, helper, artifact, and implementation rules.
-- `docs/style_system.md` - CSS, tokens, component styling, brand rules, and inline-style exceptions.
-- `docs/auth_access_model.md` - Discord login, role sync, fresh actor, menu/content access, and fail-closed behavior.
-- `docs/riseopedia.md` - unified Riseopedia/Mafiosopedia purpose, architecture, transform model, source-data handling, sync pipeline, patch runbook, admin, app, read-model, channel, and operations reference.
-- `docs/roadmap.md` - active roadmap and sequencing.
+- `docs/LICENSE.md` — documentation-local summary and copy of the proprietary source terms; root `LICENSE.md` remains authoritative.
+- `docs/project_definition.md` — current architecture, schema boundaries, active product surfaces, roles, and non-negotiable constraints.
+- `docs/codebase_rules.md` — code, SQL, route, helper, artifact, audit, and implementation rules.
+- `docs/style_system.md` — CSS ownership, tokens, component styling, visual primitives, and inline-style exceptions.
+- `docs/auth_access_model.md` — Discord login, role freshness, fresh-actor behavior, and fail-closed access.
+- `docs/content_templates.md` — current template, optional-series, system-field, Hero, Top, and member-authoring model.
+- `docs/riseopedia.md` — current Riseopedia/Mafiosopedia architecture, canonical game model, source transforms, sync, publication, read models, admin, routes, and runbook.
+- `docs/Risopedia_Icon_System.md` — production rules for Riseopedia-family icon assets.
+- `docs/roadmap.md` — current priorities after the schema split and read-model stabilization.
 
-## Current project state
-
-Corn Mafia is in V1 delivery and feature-expansion mode.
-
-The canonical game-data cleanup pass is complete at the `web_priv` layer. The current model is entity-first, variant-aware, property-ready, and read-model-ready:
+## Current architecture
 
 ```text
-game_data imports/rules -> web_priv canonical truth -> web_view app read contracts -> apps/web
+game_data
+    raw imports, patch/source metadata, discovery evidence, game_transform_* rules
+
+web_game
+    canonical transformed game truth, histories, relationships, media, properties,
+    release evidence/decisions, and canonical sync functions
+
+web_riseopedia
+    Riseopedia/Mafiosopedia publication policy, sections, display profiles,
+    overview-card rules, semantic display rules, and read-model refresh helpers
+
+web_priv
+    auth, Discord, CMS content, member data, navigation, web media,
+    templates, themes, rate limits, and platform-private helpers
+
+web_api
+    stable guarded app-callable actions and writes
+
+web_view
+    stable app-facing public/member/admin read contracts
+
+web_analytics
+    owner/operator QA and diagnostics
 ```
 
-The current game-data foundation is rebuilt by:
+Application runtime uses `cm_client`; migrations and owner operations use `cm`.
+
+The app reads through `web_view` and writes/calls actions through `web_api`. Production app source must not directly reference `game_data`, `web_game`, `web_riseopedia`, `web_priv`, or `web_analytics`.
+
+## Current game-data baseline
+
+The schema split and legacy cleanup are complete. Canonical game truth is entity-first and currently supports:
+
+```text
+asset
+recipe
+location
+mechanic
+perk
+poi
+quest
+```
+
+There are no separate current-state `game_assets` or `game_recipes` tables. Cross-domain identity is `web_game.game_entities.entity_id`; domain detail is represented through taxonomy, variants, source mappings, properties, media, relationships, recipe tables, quest tables, progression tables, coordinates, routes, spawn areas, loot, and placement facts.
+
+The full canonical sync entry point is:
 
 ```sql
-SELECT web_priv.game_sync_patch('0.4.0');
+SELECT web_game.game_sync_patch('0.4.2H');
 ```
 
-Current completed cleanup decisions:
+Use a real patch code from `game_data.patches`. Refresh both wiki channels after canonical changes with:
 
-```text
-asset aliases               -> entity variant aliases
-asset source maps           -> entity variant source mappings
-asset brands                -> entity brands
-asset rarities              -> entity variant rarity values
-recipe generic reqs         -> recipe generic groups/connections
-recipe catalysts            -> recipe catalysts
-game_variant_*              -> game_entity_variant_*
-crafting_bench entity type  -> removed; benches remain asset entities
-recipe class                -> resolved from recipe outputs
-recipe category             -> resolved from required bench family
-recipe subcategory          -> resolved from minimum required tier / no_tier_required
-vehicle subcategory         -> raw brand value, no class prefix
-property expectations table -> retired; mapping rules define expected coverage
-property catalog            -> `game_entity_properties_c` metadata, no destructive wipe
-property values             -> variant/source-linked materialized values
+```sql
+SELECT web_riseopedia.game_sync_01_view_refresh();
 ```
 
-Current canonical state is suitable for Riseopedia/Mafiosopedia web app reconnection. `docs/riseopedia.md` is the single durable Riseopedia-family overview and should be read before changing Riseopedia/Mafiosopedia routes, admin screens, app-facing views, display profiles, transform rules, release rules, source-data handling, sync functions, patch runbooks, or materialized read models.
+## Current app baseline
 
-Generated docs are convenience snapshots only:
+The active app includes:
+
+- DB-backed homepage, terms, privacy, category, collection, content, series, and prefixed content routes;
+- public Riseopedia and Mafiosopedia hubs, directories, browse pages, entity details, previews, and media APIs;
+- admin Discord, web/CMS, template, navigation, and Riseopedia configuration surfaces;
+- member profile, content, media, series, authoring, preview, and rich-text link-picker workflows;
+- a transitional filesystem-tile map viewer with sample overlays, not yet a DB-backed app domain.
+
+## Generated files
+
+Ignore generated documentation when determining durable truth:
 
 ```text
 docs/_files.md
@@ -60,17 +112,13 @@ docs/_snapshot.md
 docs/_db.md
 ```
 
-If these generated docs disagree with durable docs, current repo files, or the current SQL dump, regenerate them before using them as evidence.
+Regenerate them after durable docs and schema dumps are updated.
 
-## Source-of-truth rule
+## Known repository follow-ups
 
-When a task touches DB contracts, game data, routes, or read models, read these first:
+The current snapshot is internally consistent at the app/DB contract level, but two repository-hardening items remain:
 
-1. `docs/project_definition.md`
-2. `docs/codebase_rules.md`
-3. `docs/riseopedia.md` when Riseopedia, Mafiosopedia, game source data, transform model, sync pipeline, patch runbook, game read models, `/info` wiki routes, display profiles, release rules, or wiki media are involved
-4. `docs/auth_access_model.md` when auth, role cache, menus, content access, or actor helpers are involved
-5. the current SQL dump or live schema
-6. actual app route/helper usage
+- runtime/static private-schema tests must include `web_game` and `web_riseopedia` alongside `web_priv`, `game_data`, and `web_analytics`;
+- deploy/bootstrap scripts and Compose reference `infra/bootstrap` and `infra/postgres-init`, but those directories are absent from this snapshot and must be restored or deliberately removed before bootstrap is considered self-contained.
 
-Never assume table, function, route, view, or config contents from old prompts. Use the current repo snapshot, current schema dump, current SQL runner outputs, and actual source files.
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->

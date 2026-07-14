@@ -4,6 +4,8 @@
 //// Admin panel for viewing Discord user details and editing notes                                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -273,24 +275,27 @@ export default function DiscordUsersPanel({
 		[detailError, detailLoading],
 	);
 
-	const rows = useMemo<RowDef[]>(() => [
-		[
-			{ field: "discordId", span: 6 },
-			{ field: "username", span: 6 },
+	const rows = useMemo<RowDef[]>(
+		() => [
+			[
+				{ field: "discordId", span: 6 },
+				{ field: "username", span: 6 },
+			],
+			[
+				{ field: "globalName", span: 6 },
+				{ field: "isMember", span: 6 },
+			],
+			[
+				{ field: "joinedDt", span: 4 },
+				{ field: "rolesSyncedDt", span: 4 },
+				{ field: "lastLoginAt", span: 4 },
+			],
+			[{ field: "isRoleRefreshDue", span: 12 }],
+			[{ field: "notes" }],
+			[{ field: "rolesText" }],
 		],
-		[
-			{ field: "globalName", span: 6 },
-			{ field: "isMember", span: 6 },
-		],
-		[
-			{ field: "joinedDt", span: 4 },
-			{ field: "rolesSyncedDt", span: 4 },
-			{ field: "lastLoginAt", span: 4 },
-		],
-		[{ field: "isRoleRefreshDue", span: 12 }],
-		[{ field: "notes" }],
-		[{ field: "rolesText" }],
-	], []);
+		[],
+	);
 
 	const handleSubmit = useCallback(
 		async (values: Values) => {
@@ -368,3 +373,5 @@ export default function DiscordUsersPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

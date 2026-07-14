@@ -4,6 +4,7 @@
 //// DB-first admin YouTube channel allowlist API                                                               ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -100,9 +101,12 @@ function normalizeChannelUrl(value: unknown): string | null {
 	}
 }
 
-function parseMutationData(data: CreateBody | UpdateBody, options: {
-	requireExternalId: boolean;
-}): MutationParseResult {
+function parseMutationData(
+	data: CreateBody | UpdateBody,
+	options: {
+		requireExternalId: boolean;
+	},
+): MutationParseResult {
 	const channelExternalId = options.requireExternalId
 		? normalizeNonEmptyString((data as CreateBody).channelExternalId)
 		: null;
@@ -127,7 +131,8 @@ function parseMutationData(data: CreateBody | UpdateBody, options: {
 	if (channelHandle && !CHANNEL_HANDLE_PATTERN.test(channelHandle)) {
 		return {
 			ok: false,
-			message: "Handle must use @ plus 3-64 letters, numbers, dots, dashes, or underscores.",
+			message:
+				"Handle must use @ plus 3-64 letters, numbers, dots, dashes, or underscores.",
 		};
 	}
 
@@ -299,3 +304,5 @@ export async function POST(req: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

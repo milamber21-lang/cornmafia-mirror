@@ -4,6 +4,7 @@
 //// Admin page for Riseopedia patch publication channels.                                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -13,9 +14,7 @@ import RiseopediaAdminPageChrome, {
 import RiseopediaAdminNav from "@/components/admin/riseopedia/RiseopediaAdminNav";
 import { requireAdmin } from "@/lib/auth/authz";
 import RiseopediaPatchChannelsTable from "@/components/admin/riseopedia/RiseopediaPatchChannelsTable";
-import {
-	listRiseopediaPatchAdmin,
-} from "@/lib/data/riseopedia-admin";
+import { listRiseopediaPatchAdmin } from "@/lib/data/riseopedia-admin";
 
 export const dynamic = "force-dynamic";
 
@@ -37,3 +36,5 @@ export default async function PatchChannelsAdminPage(): Promise<JSX.Element> {
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

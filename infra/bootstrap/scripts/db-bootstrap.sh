@@ -5,6 +5,7 @@
 # //// Creates an absent Corn Mafia database from the repo env taxonomy and verifies preserved-ID bootstrap.      ////
 # //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 set -Eeuo pipefail
 
@@ -377,3 +378,5 @@ function main() {
 }
 
 main "$@"
+
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

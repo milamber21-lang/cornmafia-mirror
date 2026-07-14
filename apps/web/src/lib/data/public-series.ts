@@ -4,12 +4,16 @@
 //// DB-first public series landing resolver and strict mapper for /series routes.                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
 import { query } from "@/lib/data/pg";
 import { buildAppMediaFileUrl } from "@/lib/helpers/media-url";
-import type { PublicRendererCode, PublicRoutePrefix } from "@/lib/data/public-content";
+import type {
+	PublicRendererCode,
+	PublicRoutePrefix,
+} from "@/lib/data/public-content";
 
 type PublicSeriesDbRow = {
 	doc: unknown;
@@ -93,7 +97,10 @@ function getString(value: Record<string, unknown>, key: string): string | null {
 		: null;
 }
 
-function getNullableString(value: Record<string, unknown>, key: string): string | null {
+function getNullableString(
+	value: Record<string, unknown>,
+	key: string,
+): string | null {
 	const fieldValue = value[key];
 	return typeof fieldValue === "string" ? fieldValue : null;
 }
@@ -213,7 +220,15 @@ function mapSeriesDoc(value: unknown): PublicSeriesDoc | null {
 	const categorySlug = getString(value, "categorySlug");
 	const href = getString(value, "href");
 
-	if (!id || !title || !slug || !categoryId || !categoryTitle || !categorySlug || !href) {
+	if (
+		!id ||
+		!title ||
+		!slug ||
+		!categoryId ||
+		!categoryTitle ||
+		!categorySlug ||
+		!href
+	) {
 		return null;
 	}
 
@@ -334,3 +349,5 @@ export async function findPublicSeriesBySlug(args: {
 
 	return mapPublicSeriesResult(result.rows[0]?.doc ?? null);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,14 +4,12 @@
 //// Admin API route for series list and mutation operations                                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
 import { findSeriesAdminById, listSeriesAdminPage } from "@/lib/data/series";
-import type {
-	SeriesAdminSortBy,
-	SeriesAdminSortDir,
-} from "@/lib/data/series";
+import type { SeriesAdminSortBy, SeriesAdminSortDir } from "@/lib/data/series";
 import {
 	createSeriesAdmin,
 	deleteSeriesAdmin,
@@ -78,7 +76,9 @@ function normalizeReadPolicy(
 	return "public";
 }
 
-function normalizeWritePolicy(value: unknown): "inherit" | "min_rank" | "equal_rank" {
+function normalizeWritePolicy(
+	value: unknown,
+): "inherit" | "min_rank" | "equal_rank" {
 	if (value === "inherit") {
 		return "inherit";
 	}
@@ -111,12 +111,18 @@ export async function GET(request: NextRequest): Promise<Response> {
 			minPageSize: 1,
 		},
 	);
-	const categoryId = parsePositiveInt(request.nextUrl.searchParams.get("categoryId"));
+	const categoryId = parsePositiveInt(
+		request.nextUrl.searchParams.get("categoryId"),
+	);
 	const subcategoryId = parsePositiveInt(
 		request.nextUrl.searchParams.get("subcategoryId"),
 	);
-	const sortBy = normalizeSeriesSortBy(request.nextUrl.searchParams.get("sortBy"));
-	const sortDir = normalizeSeriesSortDir(request.nextUrl.searchParams.get("sortDir"));
+	const sortBy = normalizeSeriesSortBy(
+		request.nextUrl.searchParams.get("sortBy"),
+	);
+	const sortDir = normalizeSeriesSortDir(
+		request.nextUrl.searchParams.get("sortDir"),
+	);
 
 	try {
 		const result = await listSeriesAdminPage({
@@ -295,3 +301,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

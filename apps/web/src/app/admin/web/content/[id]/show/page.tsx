@@ -4,6 +4,7 @@
 //// Admin content preview page using the shared content renderer with preview analytics below.                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { CSSProperties, JSX } from "react";
 import Link from "next/link";
@@ -151,7 +152,8 @@ function countByLabel(fields: ContentRenderField[]): CountEntry[] {
 	const counts = new Map<string, CountEntry>();
 
 	for (const field of fields) {
-		const label = field.fieldTypeCode.trim().length > 0 ? field.fieldTypeCode : "unknown";
+		const label =
+			field.fieldTypeCode.trim().length > 0 ? field.fieldTypeCode : "unknown";
 		const current = counts.get(label);
 		if (current) {
 			current.count += 1;
@@ -173,13 +175,17 @@ function countByLabel(fields: ContentRenderField[]): CountEntry[] {
 	});
 }
 
-function getRequiredMissingFields(preview: ContentAdminPreview): ContentAdminPreviewField[] {
+function getRequiredMissingFields(
+	preview: ContentAdminPreview,
+): ContentAdminPreviewField[] {
 	return preview.fields.filter(
 		(field) => field.isRequired && !hasRenderableValue(field.value),
 	);
 }
 
-function getMediaMissingFields(preview: ContentAdminPreview): ContentAdminPreviewField[] {
+function getMediaMissingFields(
+	preview: ContentAdminPreview,
+): ContentAdminPreviewField[] {
 	return preview.fields.filter(
 		(field) =>
 			field.valueColumnName === "value_media_id" &&
@@ -215,7 +221,8 @@ function buildPreviewWarnings(args: {
 			id: "summary",
 			tone: "warning",
 			label: "Missing summary",
-			description: "A summary helps cards, previews, and public content pages scan better.",
+			description:
+				"A summary helps cards, previews, and public content pages scan better.",
 		});
 	}
 
@@ -224,7 +231,8 @@ function buildPreviewWarnings(args: {
 			id: "icon",
 			tone: "neutral",
 			label: "No explicit icon",
-			description: "The content may still inherit a template icon, but no explicit icon is set on this row.",
+			description:
+				"The content may still inherit a template icon, but no explicit icon is set on this row.",
 		});
 	}
 
@@ -233,7 +241,8 @@ function buildPreviewWarnings(args: {
 			id: "subcategory",
 			tone: "warning",
 			label: "No subcategory route part",
-			description: "Public content routes normally need category, subcategory, and content slugs.",
+			description:
+				"Public content routes normally need category, subcategory, and content slugs.",
 		});
 	}
 
@@ -251,7 +260,8 @@ function buildPreviewWarnings(args: {
 			id: "navigation",
 			tone: "neutral",
 			label: "Hidden from navigation",
-			description: "The content can still be addressable, but it should not appear in normal navigation lists.",
+			description:
+				"The content can still be addressable, but it should not appear in normal navigation lists.",
 		});
 	}
 
@@ -260,7 +270,8 @@ function buildPreviewWarnings(args: {
 			id: "main-fields",
 			tone: "warning",
 			label: "No main fields filled",
-			description: "The main content area has no filled fields, so the rendered page may look sparse.",
+			description:
+				"The main content area has no filled fields, so the rendered page may look sparse.",
 		});
 	}
 
@@ -296,8 +307,8 @@ function PreviewDebugLegend(): JSX.Element {
 			<SurfaceCard className="admin-preview-debug-card">
 				<p className="admin-preview-debug-card__title">Debug borders are enabled</p>
 				<p className="admin-preview-debug-card__description">
-					Different border colors show the preview page, renderer shell, destinations,
-					analytics blocks, and individual rendered fields.
+					Different border colors show the preview page, renderer shell,
+					destinations, analytics blocks, and individual rendered fields.
 				</p>
 			</SurfaceCard>
 		</RenderDebugFrame>
@@ -327,9 +338,15 @@ function MetricCard({
 	);
 }
 
-function DistributionBar({ label, count, total }: DistributionBarProps): JSX.Element {
+function DistributionBar({
+	label,
+	count,
+	total,
+}: DistributionBarProps): JSX.Element {
 	const percent = getPercent(count, total);
-	const progressStyle: CSSProperties & { "--admin-preview-progress-value": string } = {
+	const progressStyle: CSSProperties & {
+		"--admin-preview-progress-value": string;
+	} = {
 		"--admin-preview-progress-value": `${percent}%`,
 	};
 
@@ -356,7 +373,9 @@ function getSearchParamValue(value: SearchParamValue): string | null {
 	return value ?? null;
 }
 
-function getPreviewDebugEnabled(searchParams: Record<string, SearchParamValue>): boolean {
+function getPreviewDebugEnabled(
+	searchParams: Record<string, SearchParamValue>,
+): boolean {
 	const value = getSearchParamValue(searchParams.debug);
 	if (!value) {
 		return PREVIEW_DEBUG_DEFAULT;
@@ -375,9 +394,19 @@ function PreviewSeparator(): JSX.Element {
 	return <div className="admin-preview-separator" />;
 }
 
-function MetadataBox({ label, value }: { label: string; value: string }): JSX.Element {
+function MetadataBox({
+	label,
+	value,
+}: {
+	label: string;
+	value: string;
+}): JSX.Element {
 	return (
-		<SurfaceCard tone="subtle" density="compact" className="admin-preview-metadata-box">
+		<SurfaceCard
+			tone="subtle"
+			density="compact"
+			className="admin-preview-metadata-box"
+		>
 			<div className="admin-preview-metadata-box__label">{label}</div>
 			<div className="admin-preview-metadata-box__value">{value}</div>
 		</SurfaceCard>
@@ -407,10 +436,13 @@ function PreviewHero({
 					<h1 className="admin-page-card-title">{doc.title}</h1>
 
 					<div className="admin-preview-hero__actions">
-						<ButtonLink href="/admin/web/content" variant="neutral">
+						<ButtonLink href="/admin/web/content" variant="secondary">
 							Back to content
 						</ButtonLink>
-						<ButtonLink href={getPreviewDebugHref(doc.id, debugEnabled)} variant="neutral">
+						<ButtonLink
+							href={getPreviewDebugHref(doc.id, debugEnabled)}
+							variant="secondary"
+						>
 							{debugEnabled ? "Hide debug lines" : "Show debug lines"}
 						</ButtonLink>
 					</div>
@@ -511,7 +543,9 @@ function PreviewWarnings({
 									</StatusPill>
 									<p className="admin-preview-warning-card__title">{warning.label}</p>
 								</div>
-								<p className="admin-preview-warning-card__description">{warning.description}</p>
+								<p className="admin-preview-warning-card__description">
+									{warning.description}
+								</p>
 							</SurfaceCard>
 						))}
 					</div>
@@ -538,7 +572,9 @@ function DestinationAnalytics({
 			variant="distribution"
 		>
 			<SurfaceCard className="admin-preview-analytics-card">
-				<h3 className="admin-preview-analytics-card__title">Fields by destination</h3>
+				<h3 className="admin-preview-analytics-card__title">
+					Fields by destination
+				</h3>
 				<div className="admin-preview-analytics-list">
 					{DESTINATION_ORDER.map((destination) => (
 						<DistributionBar
@@ -615,7 +651,9 @@ function RouteAccessDetails({
 				<dl className="admin-preview-route-grid">
 					<div>
 						<dt className="admin-preview-route-term">Direct content path</dt>
-						<dd className="admin-preview-route-value admin-preview-route-value--break">{model.doc.publicHref ?? "Not available"}</dd>
+						<dd className="admin-preview-route-value admin-preview-route-value--break">
+							{model.doc.publicHref ?? "Not available"}
+						</dd>
 					</div>
 					<div>
 						<dt className="admin-preview-route-term">Category</dt>
@@ -623,7 +661,9 @@ function RouteAccessDetails({
 					</div>
 					<div>
 						<dt className="admin-preview-route-term">Subcategory</dt>
-						<dd className="admin-preview-route-value">{doc.subcategoryTitle ?? "Not set"}</dd>
+						<dd className="admin-preview-route-value">
+							{doc.subcategoryTitle ?? "Not set"}
+						</dd>
 					</div>
 					<div>
 						<dt className="admin-preview-route-term">Read access</dt>
@@ -639,7 +679,9 @@ function RouteAccessDetails({
 					</div>
 					<div>
 						<dt className="admin-preview-route-term">Navigation hidden</dt>
-						<dd className="admin-preview-route-value">{formatBoolean(doc.navHiddenEffective)}</dd>
+						<dd className="admin-preview-route-value">
+							{formatBoolean(doc.navHiddenEffective)}
+						</dd>
 					</div>
 				</dl>
 			</SurfaceCard>
@@ -662,7 +704,9 @@ function FieldInventory({
 			variant="inventory"
 		>
 			<details className="admin-preview-field-inventory surface-card surface-card--default surface-card--comfortable">
-				<summary className="admin-preview-field-inventory__summary">Technical field inventory</summary>
+				<summary className="admin-preview-field-inventory__summary">
+					Technical field inventory
+				</summary>
 				<div className="admin-preview-field-inventory__table-wrap">
 					<table className="admin-preview-field-inventory__table">
 						<thead>
@@ -677,7 +721,9 @@ function FieldInventory({
 						<tbody>
 							{model.fields.map((field) => (
 								<tr key={field.id} className="admin-preview-field-inventory__body-row">
-									<td className="admin-preview-field-inventory__field-label">{field.label}</td>
+									<td className="admin-preview-field-inventory__field-label">
+										{field.label}
+									</td>
 									<td>{field.fieldTypeCode}</td>
 									<td>{DESTINATION_LABELS[field.renderDestinationCode]}</td>
 									<td>{hasRenderableValue(field.value) ? "Yes" : "No"}</td>
@@ -692,7 +738,6 @@ function FieldInventory({
 	);
 }
 
-
 function PreviewAnalytics({
 	preview,
 	model,
@@ -703,7 +748,9 @@ function PreviewAnalytics({
 	debugEnabled: boolean;
 }): JSX.Element {
 	const totalFields = model.fields.length;
-	const filledFields = model.fields.filter((field) => hasRenderableValue(field.value)).length;
+	const filledFields = model.fields.filter((field) =>
+		hasRenderableValue(field.value),
+	).length;
 	const requiredMissingFields = getRequiredMissingFields(preview).length;
 	const mediaMissingFields = getMediaMissingFields(preview).length;
 	const warnings = buildPreviewWarnings({ preview, model });
@@ -719,13 +766,14 @@ function PreviewAnalytics({
 			<section className="card admin-preview-health">
 				<div className="admin-preview-health__header">
 					<div>
-						<p className="admin-preview-health__eyebrow">
-							Preview Analytics
-						</p>
-						<h2 className="admin-preview-section-title">Content health and structure</h2>
+						<p className="admin-preview-health__eyebrow">Preview Analytics</p>
+						<h2 className="admin-preview-section-title">
+							Content health and structure
+						</h2>
 					</div>
 					<p className="admin-preview-health__description">
-						These checks are admin-only diagnostics. They do not replace DB access checks or public route resolution.
+						These checks are admin-only diagnostics. They do not replace DB access
+						checks or public route resolution.
 					</p>
 				</div>
 
@@ -734,7 +782,9 @@ function PreviewAnalytics({
 						label="Field coverage"
 						value={`${fieldCoverage}%`}
 						description={`${filledFields} of ${totalFields} fields filled`}
-						tone={fieldCoverage >= 70 ? "good" : fieldCoverage >= 35 ? "warning" : "danger"}
+						tone={
+							fieldCoverage >= 70 ? "good" : fieldCoverage >= 35 ? "warning" : "danger"
+						}
 						debugEnabled={debugEnabled}
 					/>
 					<MetricCard
@@ -768,7 +818,11 @@ function PreviewAnalytics({
 						variant="page-analytics"
 					>
 						<div className="admin-preview-analytics-stack">
-							<RouteAccessDetails preview={preview} model={model} debugEnabled={debugEnabled} />
+							<RouteAccessDetails
+								preview={preview}
+								model={model}
+								debugEnabled={debugEnabled}
+							/>
 							<div className="admin-preview-distribution-grid">
 								<DestinationAnalytics model={model} debugEnabled={debugEnabled} />
 								<FieldTypeAnalytics model={model} debugEnabled={debugEnabled} />
@@ -815,7 +869,11 @@ function ContentShowLoaded({
 				<PreviewSeparator />
 				<RenderedPreview model={model} debugEnabled={debugEnabled} />
 				<PreviewSeparator />
-				<PreviewAnalytics preview={preview} model={model} debugEnabled={debugEnabled} />
+				<PreviewAnalytics
+					preview={preview}
+					model={model}
+					debugEnabled={debugEnabled}
+				/>
 			</div>
 		</RenderDebugFrame>
 	);
@@ -831,7 +889,9 @@ export default async function ContentShowPage({
 			return (
 				<div className="admin-guard-shell">
 					<h1 className="admin-guard-title">Content Preview</h1>
-					<p className="admin-guard-message">You need to sign in to access the admin area.</p>
+					<p className="admin-guard-message">
+						You need to sign in to access the admin area.
+					</p>
 					<Link href="/login" className="admin-guard-link">
 						Go to login
 					</Link>
@@ -843,7 +903,7 @@ export default async function ContentShowPage({
 			<div className="admin-guard-shell">
 				<h1 className="admin-guard-title">Content Preview</h1>
 				<p className="admin-guard-message">Admin or editor access is required.</p>
-				<ButtonLink href="/admin" variant="neutral">
+				<ButtonLink href="/admin" variant="secondary">
 					Go back
 				</ButtonLink>
 			</div>
@@ -864,7 +924,7 @@ export default async function ContentShowPage({
 					The content id in the URL is invalid.
 				</p>
 				<div>
-					<ButtonLink href="/admin/web/content" variant="neutral">
+					<ButtonLink href="/admin/web/content" variant="secondary">
 						Back to content
 					</ButtonLink>
 				</div>
@@ -881,7 +941,7 @@ export default async function ContentShowPage({
 					No content exists for id {contentId}.
 				</p>
 				<div>
-					<ButtonLink href="/admin/web/content" variant="neutral">
+					<ButtonLink href="/admin/web/content" variant="secondary">
 						Back to content
 					</ButtonLink>
 				</div>
@@ -891,3 +951,5 @@ export default async function ContentShowPage({
 
 	return <ContentShowLoaded preview={preview} debugEnabled={debugEnabled} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

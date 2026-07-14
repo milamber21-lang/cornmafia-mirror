@@ -4,6 +4,8 @@
 //// Exports shared table primitives                                                                               ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type {
 	HTMLAttributes,
 	TableHTMLAttributes,
@@ -54,3 +56,5 @@ export function TD({
 }: TdHTMLAttributes<HTMLTableCellElement>) {
 	return <td className={cn("ui-table-cell", className)} {...rest} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

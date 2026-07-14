@@ -4,11 +4,15 @@
 //// Returns DB-resolved role labels and access summary for the signed-in member profile surface.                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse } from "next/server";
 
 import type { DiscordRoleDoc } from "@/lib/access/roles-index";
-import { resolveAccessForUser, type ResolvedAccess } from "@/lib/access/resolve";
+import {
+	resolveAccessForUser,
+	type ResolvedAccess,
+} from "@/lib/access/resolve";
 import { getAuthSession, verifyDiscordRolesIfDue } from "@/lib/auth/auth";
 
 export const dynamic = "force-dynamic";
@@ -56,7 +60,9 @@ function toRoleResponse(role: DiscordRoleDoc): RoleResponse {
 	};
 }
 
-async function resolveFreshAccess(user: SessionUserShape): Promise<ResolvedAccess> {
+async function resolveFreshAccess(
+	user: SessionUserShape,
+): Promise<ResolvedAccess> {
 	let access = await resolveAccessForUser(user.discordId);
 
 	if (access.isRoleRefreshDue && user.id && user.discordId) {
@@ -106,3 +112,5 @@ export async function GET(): Promise<NextResponse> {
 		return NextResponse.json({ ok: false, error: message }, { status: 500 });
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

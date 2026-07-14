@@ -1,9 +1,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/renderers/content/ContentFieldRenderer.tsx                                     ////
 //// Language: TSX                                                                                                ////
-//// Dispatches a shared content render field to the correct field renderer.                                      ////
+//// Dispatches one safely selected shared content field to the correct field renderer.                           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -37,18 +38,30 @@ export default async function ContentFieldRenderer({
 	let rendered: JSX.Element;
 
 	if (field.fieldTypeCode === "rich_text") {
-		rendered = <RichTextFieldRenderer field={field} model={model} showLabel={showLabel} />;
+		rendered = (
+			<RichTextFieldRenderer field={field} model={model} showLabel={showLabel} />
+		);
 	} else if (field.fieldTypeCode === "youtube_url") {
-		rendered = <YoutubeFieldRenderer field={field} model={model} showLabel={showLabel} />;
+		rendered = (
+			<YoutubeFieldRenderer field={field} model={model} showLabel={showLabel} />
+		);
 	} else if (field.fieldTypeCode === "media_id") {
-		rendered = <MediaFieldRenderer field={field} showLabel={showLabel} />;
+		rendered = (
+			<MediaFieldRenderer field={field} model={model} showLabel={showLabel} />
+		);
 	} else if (field.fieldTypeCode === "content_id") {
 		rendered = <ContentLinkFieldRenderer field={field} showLabel={showLabel} />;
 	} else if (field.fieldTypeCode === "option") {
 		rendered = <OptionFieldRenderer field={field} showLabel={showLabel} />;
-	} else if (field.fieldTypeCode === "date" || field.fieldTypeCode === "timestamp") {
+	} else if (
+		field.fieldTypeCode === "date" ||
+		field.fieldTypeCode === "timestamp"
+	) {
 		rendered = <DateFieldRenderer field={field} showLabel={showLabel} />;
-	} else if (field.fieldTypeCode === "integer" || field.fieldTypeCode === "numeric") {
+	} else if (
+		field.fieldTypeCode === "integer" ||
+		field.fieldTypeCode === "numeric"
+	) {
 		rendered = <NumberFieldRenderer field={field} showLabel={showLabel} />;
 	} else if (field.fieldTypeCode === "boolean") {
 		rendered = <BooleanFieldRenderer field={field} showLabel={showLabel} />;
@@ -69,3 +82,5 @@ export default async function ContentFieldRenderer({
 		</RenderDebugFrame>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -1,209 +1,148 @@
 <!-- FILE: docs/chatgpt_project_instructions.md -->
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->
+
 # ChatGPT Project Instructions For Corn Mafia
 
-Use this text as the durable ChatGPT project behavior baseline.
+Use this file as the durable AI-working baseline for Corn Mafia.
 
 ## Source of truth
 
-The current repository and current SQL are the source of truth.
+Use, in order:
 
-When a repository snapshot is provided, inspect these docs first:
+1. current repository files;
+2. current SQL dump/live schema;
+3. current SQL runner or test output;
+4. durable docs under `docs/`;
+5. older prompts only when still consistent.
 
-```text
-docs/project_definition.md
-docs/codebase_rules.md
-docs/riseopedia.md
-docs/auth_access_model.md
-docs/style_system.md
-docs/roadmap.md
-docs/README.md
-```
+Ignore generated documentation files beginning with `_` until regenerated.
 
-The documentation is expected to live under `docs/`. Do not report documentation as missing only because it is not in the repository root.
-
-If those docs conflict with older prompt memory, old uploaded files, or old external snapshot links, trust the current repository docs and current code.
-
-Do not use old external snapshot URLs as source of truth.
-
-If a required file, route, component, SQL object, script, or config is missing from the provided context, ask for it instead of assuming its contents.
+Do not use old external snapshots as source of truth unless explicitly requested. If a required file/object is absent, say so rather than inventing it.
 
 ## Current project state
 
-Corn Mafia is in V1 delivery and feature-expansion mode.
+Corn Mafia is a DB-first Next.js 16 / React 19 / PostgreSQL V1 platform with Discord identity, role-aware navigation/content, admin CMS, member content/media/series authoring, template-driven rendering, and Riseopedia/Mafiosopedia.
 
-It is a DB-first Next.js 16 / React 19 / PostgreSQL app with Docker runtime, Discord identity, role-aware access, admin surfaces, public content/navigation surfaces, member profile/media/series/content authoring, DB bootstrap, and operator/security scripts.
+The private schema split and legacy cleanup are complete:
 
-Member authoring is V1 active.
+```text
+game_data       source imports and game_transform_* rules
+web_game        canonical game truth and canonical sync
+web_riseopedia  wiki publication/display policy and read-model refresh
+web_priv        platform/auth/Discord/CMS/member private truth
+web_api         guarded app-callable actions and writes
+web_view        app-facing read contracts
+web_analytics   owner/operator QA
+```
 
-YouTube channel allowlist/admin management is an active web-domain admin family.
+Current canonical entity types:
 
-Riseopedia/Mafiosopedia game-data work is DB-first and uses the current transform model, game-data schema, sync pipeline, and read-model standard. `docs/riseopedia.md` is the durable unified Riseopedia-family overview when a task touches `/info` wiki routes, admin Riseopedia surfaces, display profiles, release rules, media, or read models.
+```text
+asset, recipe, location, mechanic, perk, poi, quest
+```
 
 ## Architecture rules
 
-- App reads come from `web_view` or approved DB read functions.
-- App writes go through `web_api`.
-- App code must not directly CRUD `web_priv`.
-- App code must not directly CRUD `game_data` import or transform tables.
-- Runtime app role is `cm_client`.
-- Owner/migration role is `cm`.
+- App reads use `web_view` or an explicitly approved read function.
+- App writes/actions use `web_api`.
+- Production app source must not directly reference `game_data`, `web_game`, `web_riseopedia`, `web_priv`, or `web_analytics`.
+- `cm_client` is runtime; `cm` is owner/migration/operator.
+- `web_game` must not depend upward on `web_riseopedia` or `web_view`.
+- `web_riseopedia` may consume canonical `web_game` truth but must not duplicate canonical identity.
 - Admin, member, and public workflows remain separate when behavior differs.
-- Discord login must fail closed if login-time guild/member/role sync cannot complete.
-- Actor-sensitive public menus/content should use a fresh server-side actor helper before granting gated access.
-- Do not move business-rule ownership into route handlers.
-- Do not restart the architecture from scratch.
+- Discord login and role-refresh behavior fail closed.
+- Route handlers validate and guard; database functions own migrated business rules.
 
-Approved schema responsibilities:
+## Game-data rules
+
+- Reuse existing `game_data.game_transform_*` rule families, value maps, source links, relationship connections, and rule parts.
+- Do not create a new transform-rule family without an explicit audit and approval.
+- Canonical current/history tables and sync functions live in `web_game`.
+- Riseopedia/Mafiosopedia publication, sections, display profiles, body blocks, cards, and semantic display rules live in `web_riseopedia`.
+- Source mappings and aliases are evidence, not durable public identity.
+- `entity_id` and `entity_variant_id` are durable canonical IDs.
+- Sync generated rows with update-existing, insert-missing, delete/deactivate-stale behavior; avoid delete/reinsert churn.
+- Crafting benches are assets; rarity is a variant value; brands are entity-level.
+- Do not recreate `domain_entity_id`, asset alias/source/rarity families, or retired recipe requirement names.
+
+Before generating SQL, audit the current dump and state:
+
+1. existing universal objects to reuse;
+2. new objects explicitly allowed;
+3. new objects forbidden;
+4. existing functions requiring changes.
+
+## Code generation
+
+- Generate full files unless the user explicitly requests a patch/snippet.
+- Put the file path inside every generated code/config file.
+- Keep UTF-8 safe.
+- Preserve working behavior unless change is required.
+- Do not delete or rename active behavior without checking imports/routes/contracts.
+- Fix route/client/DB contracts together.
+- Prefer root-clean `.tar.gz` or `.zip` archives for multi-file output.
+
+TypeScript:
 
 ```text
-game_data
-	raw game imports
-	patch/source metadata
-	game_transform_* rules
-
-web_priv
-	canonical current truth
-	private business/rebuild/revalidation functions
-
-web_api
-	guarded app-callable actions, writes, and sensitive admin wrappers
-
-web_view
-	public/member/admin read contracts
-
-web_analytics
-	QA/audit/admin analytics views
+never any / any[] / Record<string, any>
+prefer unknown and narrow
+use concrete event/callback types
+handle catch values as unknown
+keep server-only imports out of client components
 ```
 
-Game-domain decisions:
+SQL:
 
-- `game_*` is an approved first-class domain prefix.
-- Crafting benches are assets.
-- Brands belong under `game_entity_brand*`; brand assignment is entity-only.
-- Rarities belong under entity variant values: `game_entity_variant_groups_c`, `game_entity_variant_value_codes_c`, and `game_entity_variant_values_r`.
-- Release states, entity types, and cross-entity relationships belong under `game_entity_*`.
-- Relationship results use `game_entity_relationships_r`.
-- Recipe generic resources use `game_recipe_generic_group_types_c`, `game_recipe_generic_groups_c`, and `game_recipe_generic_connections_r`, not asset grouping.
-- Source payloads, entity variant source mappings, and aliases are evidence/resolution data, not normal public asset properties or canonical links.
-- Media paths belong under `game_media*` / `game_asset_media*`, not normal asset properties.
+- use uppercase keywords, lowercase objects, tabs, schema-qualified references;
+- mirror current header, delimiter, owner, grant, and fixed-search-path patterns;
+- generate full object definitions;
+- keep runtime grants narrow;
+- put canonical game facts/functions in `web_game`;
+- put wiki product policy/functions in `web_riseopedia`;
+- put platform private truth in `web_priv`;
+- put app façades in `web_api`/`web_view`;
+- put QA in `web_analytics`.
 
-## Code generation rules
+## App conventions
 
-When generating code, output full files as separate code blocks or downloadable files.
-
-Every generated code file must include a file path header inside the file itself.
-
-For TypeScript and TSX:
-
-- use strict TypeScript
-- never use `any`
-- never use `any[]`
-- never use `Record<string, any>`
-- prefer `unknown` and narrow with type guards
-- preserve existing working logic unless the requested change requires a local change
-- do not simplify existing code unless necessary for the task
-- do not invent unknown file contents
-- do not output patches or diffs unless explicitly requested
-
-For SQL:
-
-- inspect current SQL definitions when available
-- generate full object definitions when requested
-- use project SQL style from `docs/codebase_rules.md`
-- schema-qualify references
-- use fixed `search_path` in `SECURITY DEFINER` functions
-- keep app reads/writes inside the approved DB layer model
-- place transform rules in `game_data.game_transform_*`
-- place canonical current truth in `web_priv.game_*`
-- place QA/audit views in `web_analytics`
-
-## Styling rules
-
-Use `docs/style_system.md`.
-
-- TS/TSX owns structure, state, data, and composition.
-- CSS owns visual styling.
-- Reusable styled UI belongs in `components/ui`.
-- Inline style is forbidden except for documented computed-value exceptions.
-- Current CSS color architecture is approved:
-  - `base-colors.css` owns raw brand/base palette values
-  - `themes.css` owns theme role mapping
-  - `tokens.css` owns non-color design tokens
+- list responses use `rows`;
+- single-row responses use `doc`;
+- mutations return `ok: true`, and `doc` only when needed;
+- APIs guard themselves;
+- panels separate `topError`, `metaError`, `submitting`, and `metaLoading`;
+- failed saves do not close or call `onSaved`;
+- no static visual tokens in TS/TSX;
+- CSS owns visuals except documented runtime/computed exceptions.
 
 ## Audit behavior
 
-When the user asks for audit or analysis only:
+For analysis-only requests:
 
-- generate no code unless explicitly requested after findings are reviewed
-- do not rewrite files
-- do not redesign architecture
-- do not suggest generic abstractions
-- be mechanical and project-specific
-- check actual real files and SQL contracts where relevant
+- generate no code;
+- inspect real files, imports, routes, SQL contracts, grants, and tests;
+- classify findings by P0/P1/P2/P3 where useful;
+- distinguish source truth from inference;
+- do not report generated `_*.md` files as durable documentation.
 
 ## Artifact behavior
 
-The user usually prefers downloadable files for generated project files.
-
-When generating an archive, build it so extraction happens directly into the repository root. Do not include an extra wrapper folder.
-
-Correct archive shape:
+Archives must extract directly into the repository root:
 
 ```text
-docs/README.md
-docs/project_definition.md
-docs/codebase_rules.md
-docs/riseopedia.md
-docs/auth_access_model.md
-docs/style_system.md
-docs/roadmap.md
+docs/...
 apps/...
-infra/...
 scripts/...
+infra/...
 ```
 
-Incorrect archive shape:
+Never add an unnecessary wrapper directory.
 
-```text
-cornmafia-update/docs/README.md
-cornmafia-update/docs/...
-```
+## Current known repository gaps
 
-## ChatGPT project file setup
+- private-schema static/live tests still need `web_game` and `web_riseopedia` added to their forbidden schema set;
+- `infra/bootstrap` and `infra/postgres-init` are referenced but absent from the current snapshot;
+- the map viewer remains transitional and has hardcoded sample overlays;
+- Riseopedia admin sub-navigation and generic content-reference rendering still contain explicit placeholders.
 
-For best future behavior, keep the real docs committed in the repository and also upload the current consolidated docs as ChatGPT project files when the project UI supports persistent project files.
-
-The repo docs remain authoritative when a snapshot is provided. Uploaded project files are only a convenience for conversations where no current snapshot is attached.
-
-
-## Current game-data cleanup state
-
-Do not recreate retired game tables/functions unless explicitly requested for rollback:
-
-```text
-web_priv.game_asset_aliases
-web_priv.game_asset_source_mappings_r
-web_priv.game_asset_brands_c
-web_priv.game_asset_brand_links_r
-web_priv.game_asset_rarities_c
-web_priv.game_variant_groups_c
-web_priv.game_variant_values_c
-web_priv.game_recipe_generic_requirement_* tables
-web_priv.game_recipe_catalyst_requirements_* tables
-web_priv.game_sync_patch_asset_brand_links(text)
-web_priv.game_sync_recipe_requirement_group_connections(text)
-```
-
-Current replacements:
-
-```text
-web_priv.game_entity_variant_aliases
-web_priv.game_entity_variant_source_mappings_r
-web_priv.game_entity_brands_c
-web_priv.game_entity_brand_links_r
-web_priv.game_entity_variant_groups_c
-web_priv.game_entity_variant_value_codes_c
-web_priv.game_recipe_generic_* tables
-web_priv.game_recipe_catalysts_r
-web_priv.game_sync_recipe_generic_connections(text)
-```
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->

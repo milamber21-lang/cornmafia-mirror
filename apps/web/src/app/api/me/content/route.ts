@@ -4,6 +4,8 @@
 //// Member API route for loading actor-owned manageable content and authorable collections.                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { NextResponse } from "next/server";
 
 import { listMemberAuthorableCollections } from "@/lib/data/member-authoring";
@@ -25,7 +27,10 @@ export async function GET(): Promise<Response> {
 		]);
 		return NextResponse.json({ rows, collections });
 	} catch (error: unknown) {
-		const message = error instanceof Error ? error.message : "Failed to load member content.";
+		const message =
+			error instanceof Error ? error.message : "Failed to load member content.";
 		return NextResponse.json({ message }, { status: 500 });
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
