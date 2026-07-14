@@ -1,0 +1,10 @@
+# FILE: .prettierignore
+# Language: Gitignore
+# Prettier exclusions for generated docs and compiler/build artifacts.
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
+docs/_*.md
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

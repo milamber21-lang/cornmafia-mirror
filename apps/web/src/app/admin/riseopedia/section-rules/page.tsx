@@ -4,6 +4,7 @@
 //// Admin page for rebuilt Riseopedia section classification rules.                                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -26,7 +27,10 @@ export default async function SectionRulesAdminPage(): Promise<JSX.Element> {
 		return <RiseopediaAdminGuard title="Section Rules" reason={guard.reason} />;
 	}
 
-	const [meta, rows] = await Promise.all([listRiseopediaAdminMeta(), listRiseopediaAdminSections()]);
+	const [meta, rows] = await Promise.all([
+		listRiseopediaAdminMeta(),
+		listRiseopediaAdminSections(),
+	]);
 
 	return (
 		<RiseopediaAdminPageChrome
@@ -34,7 +38,13 @@ export default async function SectionRulesAdminPage(): Promise<JSX.Element> {
 			description="Map canonical game classifications into Riseopedia sections."
 		>
 			<RiseopediaAdminNav active="section-rules" />
-			<RiseopediaSectionRulesTable initialRows={rows.classificationRules} sections={rows.sections} meta={meta} />
+			<RiseopediaSectionRulesTable
+				initialRows={rows.classificationRules}
+				sections={rows.sections}
+				meta={meta}
+			/>
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

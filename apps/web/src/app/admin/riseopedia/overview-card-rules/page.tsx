@@ -4,6 +4,7 @@
 //// Admin page for rebuilt Riseopedia overview-card rule sets.                                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -23,15 +24,25 @@ export const dynamic = "force-dynamic";
 export default async function OverviewCardRulesAdminPage(): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Overview Card Rules" reason={guard.reason} />;
+		return (
+			<RiseopediaAdminGuard title="Overview Card Rules" reason={guard.reason} />
+		);
 	}
 
-	const [meta, overviewRows] = await Promise.all([listRiseopediaAdminMeta(), listRiseopediaOverviewCardAdmin()]);
+	const [meta, overviewRows] = await Promise.all([
+		listRiseopediaAdminMeta(),
+		listRiseopediaOverviewCardAdmin(),
+	]);
 
 	return (
 		<RiseopediaAdminPageChrome title="Overview Card Rules">
 			<RiseopediaAdminNav active="overview-card-rules" />
-			<RiseopediaOverviewCardRuleSetsTable initialRows={overviewRows.ruleSets} meta={meta} />
+			<RiseopediaOverviewCardRuleSetsTable
+				initialRows={overviewRows.ruleSets}
+				meta={meta}
+			/>
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

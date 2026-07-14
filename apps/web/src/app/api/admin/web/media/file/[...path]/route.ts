@@ -4,6 +4,7 @@
 //// Admin file-serving route for stored media previews                                                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { readFile } from "fs/promises";
 import path from "path";
@@ -86,3 +87,5 @@ export async function GET(
 			: jsonError("NOT_FOUND", "Not found.", status === 404 ? 404 : 500);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Grouped admin page for DB-first template field options                                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { JSX } from "react";
 import Link from "next/link";
 
@@ -41,7 +43,9 @@ export default async function TemplateFieldOptionsAdminPage({
 			return (
 				<div className="admin-guard-shell">
 					<h1 className="admin-guard-title">Field Options</h1>
-					<p className="admin-guard-message">You need to sign in to access the admin area.</p>
+					<p className="admin-guard-message">
+						You need to sign in to access the admin area.
+					</p>
 					<Link href="/login" className="admin-guard-link">
 						Go to login
 					</Link>
@@ -53,7 +57,7 @@ export default async function TemplateFieldOptionsAdminPage({
 			<div className="admin-guard-shell">
 				<h1 className="admin-guard-title">Field Options</h1>
 				<p className="admin-guard-message">Admin access is required.</p>
-				<ButtonLink href="/admin" variant="neutral">
+				<ButtonLink href="/admin" variant="secondary">
 					Go back
 				</ButtonLink>
 			</div>
@@ -69,7 +73,7 @@ export default async function TemplateFieldOptionsAdminPage({
 				<h1 className="admin-page-card-title">Field Options</h1>
 
 				<div className="admin-page-card-actions">
-					<ButtonLink href="/admin/web/templates/field-list" variant="neutral">
+					<ButtonLink href="/admin/web/templates/field-list" variant="secondary">
 						Field list
 					</ButtonLink>
 				</div>
@@ -91,13 +95,16 @@ async function ResolvedFieldOptions({
 
 	if (!fieldList) {
 		return (
-			<p className="admin-state-message">
-				The selected field list was not found.
-			</p>
+			<p className="admin-state-message">The selected field list was not found.</p>
 		);
 	}
 
-	const fieldOptions = await listTemplateFieldOptionsAdminByFieldListId(fieldListId);
+	const fieldOptions =
+		await listTemplateFieldOptionsAdminByFieldListId(fieldListId);
 
-	return <TemplateFieldOptionsTable initialRows={fieldOptions} fieldList={fieldList} />;
+	return (
+		<TemplateFieldOptionsTable initialRows={fieldOptions} fieldList={fieldList} />
+	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// Shared server helper for resolving a fresh current actor identity from the auth session and DB role cache.  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -88,3 +89,5 @@ export async function getCurrentActorDiscordId(): Promise<string | null> {
 		discordUserId: readDiscordIdFromSession(session),
 	});
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

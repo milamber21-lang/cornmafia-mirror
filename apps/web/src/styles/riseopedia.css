@@ -1,6 +1,7 @@
 /* FILE: apps/web/src/styles/riseopedia.css
    Riseopedia-family public, Mafiosopedia-shared, and Riseopedia admin table styles.
 */
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */
 
 /*
 Riseopedia-family visual rules live here instead of public.css or tables.css.
@@ -47,13 +48,12 @@ opedia surfaces intentionally match.
   overflow: visible;
   border: 0;
   border-radius: var(--radius-hero, 1.5rem);
-  background:
-    radial-gradient(
-      ellipse 25% 95% at left bottom,
-      var(--riseopedia-detail-hero-gradient) 0%,
-      var(--riseopedia-detail-hero-gradient) 42%,
-      transparent 100%
-    );
+  background: radial-gradient(
+    ellipse 25% 95% at left bottom,
+    var(--riseopedia-detail-hero-gradient) 0%,
+    var(--riseopedia-detail-hero-gradient) 42%,
+    transparent 100%
+  );
   background-color: transparent;
   box-shadow: none;
 }
@@ -315,42 +315,38 @@ opedia surfaces intentionally match.
 .riseopedia-detail-layout {
   display: grid;
   grid-template-areas: "body";
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-6, 1.5rem);
   align-items: start;
   box-sizing: border-box;
 }
 
-.riseopedia-detail-layout--with-overview {
+.riseopedia-detail-layout--with-aside {
   grid-template-areas:
-    "overview"
+    "aside"
     "body";
 }
 
 @media (min-width: 1024px) {
-  .riseopedia-detail-layout--with-overview {
-    grid-template-areas: "body overview";
+  .riseopedia-detail-layout--with-aside {
+    grid-template-areas: "body aside";
     grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
     gap: var(--space-8, 2rem);
   }
 }
 
 @media (min-width: 1280px) {
-  .riseopedia-detail-layout--with-overview {
+  .riseopedia-detail-layout--with-aside {
     grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
   }
-}
-
-.riseopedia-detail-overview {
-  display: grid;
-  grid-area: overview;
-  gap: var(--space-4, 1rem);
-  align-content: start;
-  min-width: 0;
 }
 
 .riseopedia-detail-body {
   display: grid;
   grid-area: body;
+  grid-auto-rows: max-content;
+  align-content: start;
+  align-self: start;
   gap: var(--space-5, 1.25rem);
   min-width: 0;
 }
@@ -367,40 +363,79 @@ opedia surfaces intentionally match.
   gap: var(--space-5, 1.25rem);
 }
 
+.riseopedia-entity-visual,
 .riseopedia-media-frame {
-  display: flex;
+  position: relative;
+  display: grid;
   align-items: center;
-  justify-content: center;
+  justify-items: center;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-card, 1rem);
+  background: var(--theme-surface-ink-soft);
+  isolation: isolate;
+}
+
+.riseopedia-entity-visual--inline {
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
+  border-radius: var(--radius-sm, 0.5rem);
+}
+
+.riseopedia-entity-visual--picker {
+  width: 4rem;
+  height: 4rem;
+  flex: 0 0 4rem;
+  border-radius: var(--radius-md, 0.75rem);
+}
+
+.riseopedia-entity-visual--card {
+  width: 6rem;
+  height: 6rem;
+  flex: 0 0 6rem;
+}
+
+.riseopedia-entity-visual--hero,
+.riseopedia-media-frame {
   width: 100%;
   aspect-ratio: 4 / 3;
   max-height: 15rem;
   min-height: 10rem;
   margin: 0;
-  overflow: hidden;
-  border: 1px solid var(--theme-border);
-  border-radius: var(--radius-card, 1rem);
-  background: var(--theme-surface-ink-soft);
 }
 
-.riseopedia-media-frame--empty {
+.riseopedia-entity-visual--empty {
   border-style: dashed;
 }
 
-.riseopedia-media-frame__image {
-  display: block;
-  width: 100%;
-  height: 100%;
+.riseopedia-entity-visual__image {
   object-fit: contain;
 }
 
-.riseopedia-media-frame__placeholder {
-  padding: var(--space-5, 1.25rem);
+.riseopedia-entity-visual--cover .riseopedia-entity-visual__image {
+  object-fit: cover;
+}
+
+.riseopedia-entity-visual__placeholder {
+  display: grid;
+  min-width: 0;
+  max-width: 100%;
+  place-items: center;
+  padding: var(--space-3, 0.75rem);
   color: var(--theme-text-muted);
   font-size: 0.75rem;
   font-weight: 700;
+  line-height: 1.25;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.14em;
+}
+
+.riseopedia-entity-visual--inline .riseopedia-entity-visual__placeholder {
+  padding: var(--space-1, 0.25rem);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
 }
 
 .riseopedia-section-title {
@@ -431,6 +466,8 @@ opedia surfaces intentionally match.
 }
 
 .riseopedia-overview-table {
+  align-content: start;
+  height: 100%;
   gap: var(--space-3, 0.75rem);
   padding: var(--space-4, 1rem);
 }
@@ -534,6 +571,8 @@ opedia surfaces intentionally match.
   color: var(--theme-text);
   font-size: 1rem;
   line-height: 1.75;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
 }
 
 .riseopedia-prose-section + .riseopedia-body-section,
@@ -738,7 +777,7 @@ opedia surfaces intentionally match.
   justify-content: flex-end;
   justify-self: end;
   min-width: 3rem;
-  color: var(--theme-accent);
+  color: var(--theme-text);
   font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.25rem;
@@ -814,7 +853,6 @@ opedia surfaces intentionally match.
   font-weight: 700;
   line-height: 1.35;
 }
-
 
 /* ===== Riseopedia public overview surfaces ===== */
 .riseopedia-page {
@@ -1043,52 +1081,52 @@ opedia surfaces intentionally match.
   line-height: 1.55;
 }
 
-
 /* ===== Riseopedia overview v7 dynamic controls and rectangular media normalization ===== */
 .riseopedia-search-bar {
-	align-items: center;
+  align-items: center;
 }
 
 .riseopedia-search-bar__actions {
-	display: flex;
-	justify-content: flex-end;
+  display: flex;
+  justify-content: flex-end;
 }
 
 @media (min-width: 1024px) {
-	.riseopedia-search-bar {
-		grid-template-columns: minmax(0, 1fr) auto;
-	}
+  .riseopedia-search-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
 }
 
 .riseopedia-filter-bar__actions {
-	justify-content: flex-start;
+  justify-content: flex-start;
 }
 
 @media (min-width: 1024px) {
-	.riseopedia-filter-bar--assets {
-		grid-template-columns: 190px 190px minmax(0, 1fr) auto;
-	}
+  .riseopedia-filter-bar--assets {
+    grid-template-columns: 190px 190px minmax(0, 1fr) auto;
+  }
 
-	.riseopedia-filter-bar--recipes {
-		grid-template-columns: 190px minmax(0, 1fr) auto;
-	}
+  .riseopedia-filter-bar--recipes {
+    grid-template-columns: 190px minmax(0, 1fr) auto;
+  }
 }
 
 .surface-icon-well.riseopedia-card-media {
-	border-radius: var(--radius-lg, 0.75rem);
-	background: var(--theme-surface-ink-soft);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-surface-ink-soft);
 }
 
 .riseopedia-card-media .admin-control-icon,
 .riseopedia-card-media__image {
-	max-width: 100%;
-	max-height: 100%;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 /* Riseopedia rarity state controls. Common stays neutral; uncommon and higher use rarity accents. */
 .riseopedia-detail-page,
 .riseopedia-detail-hero,
 .riseopedia-media-frame,
+.riseopedia-entity-visual,
 .riseopedia-overview-table,
 .riseopedia-state-toggle {
   --riseopedia-rarity-color: var(--theme-border-strong);
@@ -1101,49 +1139,117 @@ opedia surfaces intentionally match.
 .riseopedia-detail-page[data-rarity="uncommon"],
 .riseopedia-detail-hero[data-rarity="uncommon"],
 .riseopedia-media-frame[data-rarity="uncommon"],
+.riseopedia-entity-visual[data-rarity="uncommon"],
 .riseopedia-overview-table[data-rarity="uncommon"],
 .riseopedia-state-toggle[data-rarity="uncommon"] {
   --riseopedia-rarity-color: var(--theme-rarity-uncommon);
-  --riseopedia-rarity-soft: color-mix(in oklab, var(--riseopedia-rarity-color) 14%, transparent);
-  --riseopedia-rarity-border: color-mix(in oklab, var(--riseopedia-rarity-color) 62%, var(--theme-border));
-  --riseopedia-rarity-glow: color-mix(in oklab, var(--riseopedia-rarity-color) 28%, transparent);
-  --riseopedia-detail-hero-gradient: color-mix(in oklab, var(--riseopedia-rarity-color) 24%, transparent);
+  --riseopedia-rarity-soft: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 14%,
+    transparent
+  );
+  --riseopedia-rarity-border: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 62%,
+    var(--theme-border)
+  );
+  --riseopedia-rarity-glow: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 28%,
+    transparent
+  );
+  --riseopedia-detail-hero-gradient: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 24%,
+    transparent
+  );
 }
 
 .riseopedia-detail-page[data-rarity="rare"],
 .riseopedia-detail-hero[data-rarity="rare"],
 .riseopedia-media-frame[data-rarity="rare"],
+.riseopedia-entity-visual[data-rarity="rare"],
 .riseopedia-overview-table[data-rarity="rare"],
 .riseopedia-state-toggle[data-rarity="rare"] {
   --riseopedia-rarity-color: var(--theme-rarity-rare);
-  --riseopedia-rarity-soft: color-mix(in oklab, var(--riseopedia-rarity-color) 14%, transparent);
-  --riseopedia-rarity-border: color-mix(in oklab, var(--riseopedia-rarity-color) 62%, var(--theme-border));
-  --riseopedia-rarity-glow: color-mix(in oklab, var(--riseopedia-rarity-color) 28%, transparent);
-  --riseopedia-detail-hero-gradient: color-mix(in oklab, var(--riseopedia-rarity-color) 24%, transparent);
+  --riseopedia-rarity-soft: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 14%,
+    transparent
+  );
+  --riseopedia-rarity-border: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 62%,
+    var(--theme-border)
+  );
+  --riseopedia-rarity-glow: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 28%,
+    transparent
+  );
+  --riseopedia-detail-hero-gradient: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 24%,
+    transparent
+  );
 }
 
 .riseopedia-detail-page[data-rarity="legendary"],
 .riseopedia-detail-hero[data-rarity="legendary"],
 .riseopedia-media-frame[data-rarity="legendary"],
+.riseopedia-entity-visual[data-rarity="legendary"],
 .riseopedia-overview-table[data-rarity="legendary"],
 .riseopedia-state-toggle[data-rarity="legendary"] {
   --riseopedia-rarity-color: var(--theme-rarity-legendary);
-  --riseopedia-rarity-soft: color-mix(in oklab, var(--riseopedia-rarity-color) 14%, transparent);
-  --riseopedia-rarity-border: color-mix(in oklab, var(--riseopedia-rarity-color) 62%, var(--theme-border));
-  --riseopedia-rarity-glow: color-mix(in oklab, var(--riseopedia-rarity-color) 28%, transparent);
-  --riseopedia-detail-hero-gradient: color-mix(in oklab, var(--riseopedia-rarity-color) 24%, transparent);
+  --riseopedia-rarity-soft: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 14%,
+    transparent
+  );
+  --riseopedia-rarity-border: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 62%,
+    var(--theme-border)
+  );
+  --riseopedia-rarity-glow: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 28%,
+    transparent
+  );
+  --riseopedia-detail-hero-gradient: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 24%,
+    transparent
+  );
 }
 
 .riseopedia-detail-page[data-rarity="mythic"],
 .riseopedia-detail-hero[data-rarity="mythic"],
 .riseopedia-media-frame[data-rarity="mythic"],
+.riseopedia-entity-visual[data-rarity="mythic"],
 .riseopedia-overview-table[data-rarity="mythic"],
 .riseopedia-state-toggle[data-rarity="mythic"] {
   --riseopedia-rarity-color: var(--theme-rarity-mythic);
-  --riseopedia-rarity-soft: color-mix(in oklab, var(--riseopedia-rarity-color) 14%, transparent);
-  --riseopedia-rarity-border: color-mix(in oklab, var(--riseopedia-rarity-color) 62%, var(--theme-border));
-  --riseopedia-rarity-glow: color-mix(in oklab, var(--riseopedia-rarity-color) 28%, transparent);
-  --riseopedia-detail-hero-gradient: color-mix(in oklab, var(--riseopedia-rarity-color) 24%, transparent);
+  --riseopedia-rarity-soft: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 14%,
+    transparent
+  );
+  --riseopedia-rarity-border: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 62%,
+    var(--theme-border)
+  );
+  --riseopedia-rarity-glow: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 28%,
+    transparent
+  );
+  --riseopedia-detail-hero-gradient: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 24%,
+    transparent
+  );
 }
 
 .riseopedia-detail-hero__selectors {
@@ -1179,7 +1285,12 @@ opedia surfaces intentionally match.
   line-height: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  transition: border-color var(--transition-fast, 140ms ease), background var(--transition-fast, 140ms ease), color var(--transition-fast, 140ms ease), transform var(--transition-fast, 140ms ease), box-shadow var(--transition-fast, 140ms ease);
+  transition:
+    border-color var(--transition-fast, 140ms ease),
+    background var(--transition-fast, 140ms ease),
+    color var(--transition-fast, 140ms ease),
+    transform var(--transition-fast, 140ms ease),
+    box-shadow var(--transition-fast, 140ms ease);
 }
 
 .riseopedia-state-toggle--rarity {
@@ -1191,7 +1302,11 @@ opedia surfaces intentionally match.
 .riseopedia-state-toggle--rarity[data-rarity="legendary"],
 .riseopedia-state-toggle--rarity[data-rarity="mythic"] {
   border-color: var(--riseopedia-rarity-border);
-  color: color-mix(in oklab, var(--riseopedia-rarity-color) 84%, var(--theme-text));
+  color: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 84%,
+    var(--theme-text)
+  );
 }
 
 .riseopedia-state-toggle:hover,
@@ -1217,15 +1332,25 @@ opedia surfaces intentionally match.
   border-color: var(--riseopedia-rarity-color);
   background: var(--riseopedia-rarity-soft);
   color: var(--theme-text);
-  box-shadow: 0 0 0 1px var(--riseopedia-rarity-border), 0 0 1.25rem var(--riseopedia-rarity-glow);
+  box-shadow:
+    0 0 0 1px var(--riseopedia-rarity-border),
+    0 0 1.25rem var(--riseopedia-rarity-glow);
 }
 
 .riseopedia-media-frame[data-rarity="uncommon"],
 .riseopedia-media-frame[data-rarity="rare"],
 .riseopedia-media-frame[data-rarity="legendary"],
-.riseopedia-media-frame[data-rarity="mythic"] {
+.riseopedia-media-frame[data-rarity="mythic"],
+.riseopedia-entity-visual[data-rarity="uncommon"],
+.riseopedia-entity-visual[data-rarity="rare"],
+.riseopedia-entity-visual[data-rarity="legendary"],
+.riseopedia-entity-visual[data-rarity="mythic"] {
   border-color: var(--riseopedia-rarity-border);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--riseopedia-rarity-color) 18%, transparent), 0 0 1.5rem color-mix(in oklab, var(--riseopedia-rarity-color) 18%, transparent);
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(in oklab, var(--riseopedia-rarity-color) 18%, transparent),
+    0 0 1.5rem
+      color-mix(in oklab, var(--riseopedia-rarity-color) 18%, transparent);
 }
 
 .riseopedia-overview-table[data-rarity="uncommon"],
@@ -1240,13 +1365,17 @@ opedia surfaces intentionally match.
 .riseopedia-overview-table[data-rarity="rare"] .riseopedia-section-title,
 .riseopedia-overview-table[data-rarity="legendary"] .riseopedia-section-title,
 .riseopedia-overview-table[data-rarity="mythic"] .riseopedia-section-title {
-  color: color-mix(in oklab, var(--riseopedia-rarity-color) 72%, var(--theme-text));
+  color: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 72%,
+    var(--theme-text)
+  );
 }
 
 /* ===== Riseopedia dependency footer explorer ===== */
 .riseopedia-dependency-footer {
   display: grid;
-  gap: var(--space-4, 1rem);
+  gap: var(--space-3, 0.75rem);
   box-sizing: border-box;
   margin-top: 0;
 }
@@ -1260,9 +1389,11 @@ opedia surfaces intentionally match.
 
 .riseopedia-dependency-panel {
   display: grid;
-  gap: var(--space-4, 1rem);
+  gap: 0;
   min-width: 0;
-  padding: var(--space-4, 1rem);
+  position: relative;
+  overflow: visible;
+  padding: 0;
   border: 1px solid var(--theme-border);
   border-radius: var(--radius-card, 1rem);
   background: var(--theme-surface-card);
@@ -1275,14 +1406,22 @@ opedia surfaces intentionally match.
   justify-content: space-between;
   gap: var(--space-2, 0.5rem);
   min-width: 0;
+  padding: var(--space-4, 1rem) var(--space-4, 1rem) var(--space-3, 0.75rem);
+  border-bottom: 1px solid var(--theme-border);
+}
+
+.riseopedia-dependency-panel__header .riseopedia-section-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
 }
 
 .riseopedia-dependency-panel__summary {
   margin: 0;
   color: var(--theme-text-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -1293,11 +1432,23 @@ opedia surfaces intentionally match.
   gap: var(--space-2, 0.5rem);
   align-items: center;
   min-width: 0;
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border-bottom: 1px solid var(--theme-border);
+  background: color-mix(
+    in oklab,
+    var(--theme-surface-ink-soft) 42%,
+    transparent
+  );
 }
 
 @media (min-width: 780px) {
   .riseopedia-dependency-filterbar {
-    grid-template-columns: repeat(4, minmax(7.5rem, 1fr)) minmax(10rem, 1.5fr) auto;
+    grid-template-columns: repeat(4, minmax(7.5rem, 1fr)) minmax(11rem, 1.45fr);
+  }
+
+  .riseopedia-dependency-filterbar--patch-notes {
+    grid-template-columns: repeat(2, minmax(9rem, 1fr));
+    justify-content: start;
   }
 }
 
@@ -1317,16 +1468,131 @@ opedia surfaces intentionally match.
 }
 
 .riseopedia-dependency-table-wrap {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
   min-width: 0;
+  padding: var(--space-3, 0.75rem);
   overflow-x: auto;
-  border: 1px solid var(--theme-border);
-  border-radius: var(--radius-lg, 0.75rem);
   background: var(--theme-bg-alpha-62);
+}
+
+.riseopedia-dependency-group {
+  --dependency-group-color: var(--theme-text-muted);
+  --dependency-group-border: color-mix(
+    in oklab,
+    var(--theme-text-muted) 48%,
+    var(--theme-border)
+  );
+  --dependency-group-bg: color-mix(
+    in oklab,
+    var(--theme-text-muted) 7%,
+    var(--theme-surface-ink-soft)
+  );
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid var(--dependency-group-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-surface-card);
+}
+
+.riseopedia-dependency-group[data-tone="crafting"] {
+  --dependency-group-color: var(--theme-warning);
+  --dependency-group-border: var(--theme-warning-border);
+  --dependency-group-bg: var(--theme-warning-soft);
+}
+
+.riseopedia-dependency-group[data-tone="vendor"] {
+  --dependency-group-color: var(--theme-success);
+  --dependency-group-border: var(--theme-success-border);
+  --dependency-group-bg: var(--theme-success-soft);
+}
+
+.riseopedia-dependency-group[data-tone="quest"] {
+  --dependency-group-color: var(--theme-info);
+  --dependency-group-border: var(--theme-info-border);
+  --dependency-group-bg: var(--theme-info-soft);
+}
+
+.riseopedia-dependency-group[data-tone="combat"] {
+  --dependency-group-color: color-mix(
+    in oklab,
+    var(--theme-text) 76%,
+    var(--theme-text-muted)
+  );
+  --dependency-group-border: color-mix(
+    in oklab,
+    var(--theme-text-muted) 52%,
+    var(--theme-border)
+  );
+  --dependency-group-bg: color-mix(
+    in oklab,
+    var(--theme-text-muted) 8%,
+    var(--theme-surface-ink-soft)
+  );
+}
+
+.riseopedia-patch-note-group {
+  --dependency-group-color: var(--theme-accent);
+  --dependency-group-border: var(--theme-accent-border-40);
+  --dependency-group-bg: var(--theme-accent-soft);
+}
+
+.riseopedia-dependency-group__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+  padding: 0.5rem var(--space-3, 0.75rem);
+  border-bottom: 1px solid var(--dependency-group-border);
+  background: var(--dependency-group-bg);
+}
+
+.riseopedia-dependency-group__title {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.5rem;
+}
+
+.riseopedia-dependency-group__title h3 {
+  margin: 0;
+  color: var(--dependency-group-color);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  line-height: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.riseopedia-dependency-group__marker {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-pill, 999px);
+  background: var(--dependency-group-color);
+}
+
+.riseopedia-dependency-group__count {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.25rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--dependency-group-border);
+  border-radius: var(--radius-pill, 999px);
+  color: var(--dependency-group-color);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .riseopedia-dependency-table {
   width: 100%;
-  min-width: 46rem;
+  min-width: 34rem;
   border-collapse: collapse;
   color: var(--theme-text);
   font-size: 0.8125rem;
@@ -1335,60 +1601,209 @@ opedia surfaces intentionally match.
 
 .riseopedia-dependency-table th,
 .riseopedia-dependency-table td {
-  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
-  border-top: 1px solid var(--riseopedia-rarity-border);
+  padding: 0.5rem var(--space-3, 0.75rem);
+  border-top: 1px solid var(--theme-border);
   text-align: left;
   vertical-align: middle;
 }
 
-.riseopedia-dependency-table thead th {
+.riseopedia-dependency-group .riseopedia-dependency-table thead th {
   border-top: 0;
-  color: var(--theme-text-muted);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  line-height: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
 }
 
-.riseopedia-dependency-table tbody tr:hover {
+.riseopedia-dependency-table thead th {
+  color: var(--theme-text-muted);
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   background: var(--theme-surface-ink-soft);
 }
 
-.riseopedia-dependency-table__number {
-  width: 3rem;
-  color: var(--theme-text-muted);
-  font-variant-numeric: tabular-nums;
+.riseopedia-dependency-table thead th + th,
+.riseopedia-dependency-table tbody td + td {
+  border-left: 1px solid
+    color-mix(in oklab, var(--theme-border) 82%, transparent);
+}
+
+.riseopedia-dependency-table
+  tbody
+  tr:not(.riseopedia-dependency-table__empty-row):hover {
+  background: var(--theme-surface-ink-soft);
+}
+
+.riseopedia-dependency-table__icon-column,
+.riseopedia-dependency-table__icon-cell {
+  width: 3.25rem;
+  padding-right: var(--space-2, 0.5rem);
+  padding-left: var(--space-2, 0.5rem);
+  text-align: center;
 }
 
 .riseopedia-dependency-table__name {
-  min-width: 12rem;
+  min-width: 17rem;
   font-weight: 700;
 }
 
-.riseopedia-dependency-table__name a {
-  color: var(--theme-text);
-  text-decoration: none;
-}
-
-.riseopedia-dependency-table__name a:hover,
-.riseopedia-dependency-table__name a:focus-visible {
-  color: var(--theme-accent);
-  text-decoration: none;
-}
-
-.riseopedia-dependency-table__note {
+.riseopedia-dependency-table__name-meta {
   display: block;
-  margin-top: var(--space-1, 0.25rem);
+  margin-top: 0.125rem;
   color: var(--theme-text-muted);
   font-size: 0.6875rem;
   font-weight: 500;
   line-height: 1rem;
 }
 
-.riseopedia-dependency-table__icon-cell {
-  width: 3.5rem;
-  text-align: right;
+.riseopedia-dependency-table__details {
+  width: 34%;
+  min-width: 13rem;
+}
+
+.riseopedia-dependency-table__details[data-empty="true"] {
+  background: color-mix(
+    in oklab,
+    var(--theme-surface-ink-soft) 34%,
+    transparent
+  );
+}
+
+.riseopedia-patch-note-table__change-column {
+  width: 9.5rem;
+}
+
+.riseopedia-patch-note-table__change-cell {
+  white-space: nowrap;
+}
+
+.riseopedia-patch-note-table__change {
+  --patch-note-change-color: var(--theme-text-muted);
+  --patch-note-change-border: color-mix(
+    in oklab,
+    var(--theme-text-muted) 48%,
+    var(--theme-border)
+  );
+  --patch-note-change-bg: color-mix(
+    in oklab,
+    var(--theme-text-muted) 9%,
+    transparent
+  );
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--patch-note-change-border);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--patch-note-change-bg);
+  color: var(--patch-note-change-color);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  line-height: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.riseopedia-patch-note-table__change[data-tone="introduced"] {
+  --patch-note-change-color: var(--theme-warning);
+  --patch-note-change-border: var(--theme-warning-border);
+  --patch-note-change-bg: var(--theme-warning-soft);
+}
+
+.riseopedia-patch-note-table__change[data-tone="added"] {
+  --patch-note-change-color: var(--theme-success);
+  --patch-note-change-border: var(--theme-success-border);
+  --patch-note-change-bg: var(--theme-success-soft);
+}
+
+.riseopedia-patch-note-table__change[data-tone="changed"] {
+  --patch-note-change-color: var(--theme-info);
+  --patch-note-change-border: var(--theme-info-border);
+  --patch-note-change-bg: var(--theme-info-soft);
+}
+
+.riseopedia-patch-note-table__change[data-tone="removed"] {
+  --patch-note-change-color: var(--theme-danger);
+  --patch-note-change-border: var(--theme-danger-border);
+  --patch-note-change-bg: var(--theme-danger-soft);
+}
+
+.riseopedia-patch-note-table__field {
+  min-width: 13rem;
+  color: var(--theme-text);
+  font-weight: 700;
+}
+
+.riseopedia-patch-note-table__details {
+  width: 42%;
+  min-width: 15rem;
+}
+
+.riseopedia-dependency-table__detail-list {
+  display: grid;
+  gap: 0.1875rem;
+}
+
+.riseopedia-dependency-table__detail-item {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, auto) minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.riseopedia-dependency-table__detail-label {
+  color: var(--theme-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1rem;
+}
+
+.riseopedia-dependency-table__detail-value {
+  min-width: 0;
+  color: var(--theme-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.riseopedia-dependency-table__name a {
+  color: var(--theme-accent);
+  text-decoration: none;
+}
+
+.riseopedia-dependency-table__name a:hover,
+.riseopedia-dependency-table__name a:focus-visible {
+  color: var(--theme-link-hover, var(--theme-accent));
+  text-decoration: underline;
+}
+
+.riseopedia-dependency-table__sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+}
+
+.riseopedia-dependency-table__sort-button:hover,
+.riseopedia-dependency-table__sort-button:focus-visible {
+  color: var(--theme-accent);
+}
+
+.riseopedia-dependency-table__sort-marker {
+  display: inline-flex;
+  justify-content: center;
+  min-width: 0.75rem;
+  color: var(--theme-accent);
+  font-size: 0.5625rem;
 }
 
 .riseopedia-dependency-table__icon {
@@ -1416,13 +1831,22 @@ opedia surfaces intentionally match.
   width: 0.65rem;
   height: 0.65rem;
   border-radius: var(--radius-pill, 999px);
-  background: var(--theme-accent);
+  background: var(--theme-text-muted);
   opacity: 0.65;
+}
+
+.riseopedia-dependency-table__empty-row td {
+  padding: 0;
+  border-left: 0;
 }
 
 .riseopedia-dependency-pagination {
   --dependency-pagination-scale: 0.875;
-  padding-top: var(--space-1, 0.25rem);
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border-top: 1px solid var(--theme-border);
   font-size: 0.8125rem;
 }
 
@@ -1432,8 +1856,99 @@ opedia surfaces intentionally match.
   transform-origin: center;
 }
 
-.riseopedia-dependency-empty-state {
-  padding: var(--space-3, 0.75rem);
+.riseopedia-dependency-pagination .ui-pagination__page-size-select {
+  position: relative;
+  z-index: 3;
+}
+
+.riseopedia-dependency-pagination .ui-dropdown__menu {
+  top: calc(100% + var(--space-1, 0.25rem));
+  right: auto;
+  bottom: auto;
+  left: 0;
+  min-width: 100%;
+  margin-top: 0;
+}
+
+.riseopedia-dependency-table__empty-row .riseopedia-dependency-empty-state {
+  display: grid;
+  width: 100%;
+  min-height: 8.5rem;
+  padding: var(--space-5, 1.25rem) var(--space-4, 1rem);
+  justify-items: center;
+  align-content: center;
+  gap: var(--space-2, 0.5rem);
+  background: color-mix(
+    in oklab,
+    var(--theme-surface-ink-soft) 54%,
+    transparent
+  );
+  text-align: center;
+}
+
+.riseopedia-dependency-empty-state__icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--theme-accent);
+}
+
+.riseopedia-dependency-empty-state__copy {
+  display: grid;
+  justify-items: center;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.riseopedia-dependency-empty-state .riseopedia-empty-state__title,
+.riseopedia-dependency-empty-state .riseopedia-empty-state__message {
+  margin: 0;
+}
+
+.riseopedia-dependency-empty-state .riseopedia-empty-state__title {
+  color: var(--theme-text);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.riseopedia-dependency-empty-state .riseopedia-empty-state__message {
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
+
+@media (max-width: 559px) {
+  .riseopedia-dependency-panel__header,
+  .riseopedia-dependency-filterbar,
+  .riseopedia-dependency-pagination {
+    padding-right: var(--space-3, 0.75rem);
+    padding-left: var(--space-3, 0.75rem);
+  }
+
+  .riseopedia-dependency-table-wrap {
+    padding: var(--space-2, 0.5rem);
+  }
+
+  .riseopedia-dependency-group__header {
+    padding-right: var(--space-2, 0.5rem);
+    padding-left: var(--space-2, 0.5rem);
+  }
+
+  .riseopedia-dependency-table {
+    min-width: 31rem;
+  }
+
+  .riseopedia-dependency-table__name {
+    min-width: 14rem;
+  }
+
+  .riseopedia-dependency-table__details {
+    min-width: 11rem;
+  }
+
+  .riseopedia-dependency-empty-state {
+    min-height: 7rem;
+    padding: var(--space-4, 1rem) var(--space-3, 0.75rem);
+  }
 }
 
 .riseopedia-recipe-tree__asset-meta {
@@ -1472,7 +1987,7 @@ opedia surfaces intentionally match.
 }
 
 .riseopedia-dependency-table__variant {
-	white-space: nowrap;
+  white-space: nowrap;
 }
 
 .riseopedia-entity-card,
@@ -1605,7 +2120,6 @@ opedia surfaces intentionally match.
   font-weight: 700;
 }
 
-
 /* Riseopedia classification overview cards */
 .riseopedia-classification-section {
   display: grid;
@@ -1698,9 +2212,11 @@ opedia surfaces intentionally match.
 .main a.riseopedia-classification-card:hover,
 .main a.riseopedia-classification-card:focus-visible,
 .riseopedia-classification-card:hover .riseopedia-classification-card__title,
-.riseopedia-classification-card:focus-visible .riseopedia-classification-card__title,
+.riseopedia-classification-card:focus-visible
+  .riseopedia-classification-card__title,
 .riseopedia-classification-card:hover .riseopedia-classification-card__summary,
-.riseopedia-classification-card:focus-visible .riseopedia-classification-card__summary {
+.riseopedia-classification-card:focus-visible
+  .riseopedia-classification-card__summary {
   text-decoration: none;
   text-decoration-line: none;
 }
@@ -1781,7 +2297,8 @@ opedia surfaces intentionally match.
 }
 
 .riseopedia-classification-card:hover .riseopedia-classification-card__arrow,
-.riseopedia-classification-card:focus-visible .riseopedia-classification-card__arrow {
+.riseopedia-classification-card:focus-visible
+  .riseopedia-classification-card__arrow {
   color: var(--theme-accent);
   transform: translateX(0.25rem);
 }
@@ -1922,7 +2439,8 @@ opedia surfaces intentionally match.
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   gap: var(--space-3, 0.75rem);
   padding: 0.4rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--theme-border) 62%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--theme-border) 62%, transparent);
   font-size: 0.8125rem;
   line-height: 1.25rem;
 }
@@ -1957,13 +2475,12 @@ opedia surfaces intentionally match.
   padding: var(--space-6, 1.5rem);
   border: 1px solid var(--theme-border);
   border-radius: var(--radius-hero, 1.5rem);
-  background:
-    radial-gradient(
-      ellipse 25% 95% at left bottom,
-      var(--theme-accent-soft) 0%,
-      var(--theme-accent-soft) 42%,
-      transparent 100%
-    );
+  background: radial-gradient(
+    ellipse 25% 95% at left bottom,
+    var(--theme-accent-soft) 0%,
+    var(--theme-accent-soft) 42%,
+    transparent 100%
+  );
   background-color: transparent;
   box-shadow: var(--shadow-card);
 }
@@ -2114,62 +2631,4962 @@ opedia surfaces intentionally match.
 
 /* ===== Riseopedia admin table controls ===== */
 .admin-table-toolbar-filter--riseopedia {
-	flex-wrap: wrap;
-	min-width: 0;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .admin-table-filter-control--flexible {
-	width: fit-content;
-	min-width: 180px;
-	max-width: min(100%, 420px);
+  width: fit-content;
+  min-width: 180px;
+  max-width: min(100%, 420px);
 }
 
 .admin-table-filter-control--flexible .ui-dropdown__button {
-	width: 100%;
+  width: 100%;
 }
 
 .admin-table-filter-control--flexible .ui-dropdown__menu {
-	min-width: 100%;
+  min-width: 100%;
 }
 
 @media (max-width: 900px) {
-	.admin-table-toolbar-filter--riseopedia,
-	.admin-table-filter-control--flexible,
-	.admin-table-filter-control--flexible .ui-dropdown__button {
-		width: 100%;
-		max-width: none;
-	}
+  .admin-table-toolbar-filter--riseopedia,
+  .admin-table-filter-control--flexible,
+  .admin-table-filter-control--flexible .ui-dropdown__button {
+    width: 100%;
+    max-width: none;
+  }
 }
 
 .admin-table-toolbar--secondary-left {
-	grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
 }
 
 .admin-table-toolbar--secondary-left .admin-table-toolbar-nav {
-	min-width: 0;
+  min-width: 0;
 }
 
 .admin-table-toolbar--secondary-left .admin-table-toolbar-filter--riseopedia {
-	width: 100%;
-	flex-wrap: nowrap;
+  width: 100%;
+  flex-wrap: nowrap;
 }
 
 .admin-table-toolbar--secondary-left .admin-table-filter-control--flexible {
-	width: auto;
-	min-width: 132px;
-	max-width: 220px;
-	flex: 1 1 132px;
+  width: auto;
+  min-width: 132px;
+  max-width: 220px;
+  flex: 1 1 132px;
 }
 
 @media (max-width: 900px) {
-	.admin-table-toolbar--secondary-left {
-		grid-template-columns: 1fr;
-	}
+  .admin-table-toolbar--secondary-left {
+    grid-template-columns: 1fr;
+  }
 
-	.admin-table-toolbar--secondary-left .admin-table-filter-control--flexible,
-	.admin-table-toolbar--secondary-left .admin-table-filter-control--flexible .ui-dropdown__button {
-		width: 100%;
-		max-width: none;
-	}
+  .admin-table-toolbar--secondary-left .admin-table-filter-control--flexible,
+  .admin-table-toolbar--secondary-left
+    .admin-table-filter-control--flexible
+    .ui-dropdown__button {
+    width: 100%;
+    max-width: none;
+  }
 }
 
+/* ===== Riseopedia Locations and perk tree ===== */
+.riseopedia-location-tree,
+.riseopedia-location-pois,
+.riseopedia-perk-tree,
+.riseopedia-location-pois__groups,
+.riseopedia-location-pois__group,
+.riseopedia-perk-tree__grid,
+.riseopedia-perk-tree__group {
+  display: grid;
+  gap: var(--space-4, 1rem);
+}
+
+.riseopedia-location-tree__list,
+.riseopedia-location-pois__list,
+.riseopedia-perk-tree__list {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.riseopedia-location-tree__list--nested {
+  gap: var(--space-2, 0.5rem);
+  padding-top: var(--space-2, 0.5rem);
+  padding-left: var(--space-5, 1.25rem);
+  margin-top: var(--space-2, 0.5rem);
+  border-left: 1px solid var(--theme-border);
+}
+
+.riseopedia-location-tree__node {
+  display: grid;
+  gap: var(--space-1, 0.25rem);
+}
+
+.riseopedia-location-tree__row,
+.riseopedia-location-pois__row,
+.riseopedia-perk-tree__row {
+  display: grid;
+  gap: var(--space-1, 0.25rem);
+  padding: var(--space-3, 0.75rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-bg-alpha-62);
+}
+
+.riseopedia-location-tree__link,
+.riseopedia-location-tree__name,
+.riseopedia-location-pois__link,
+.riseopedia-location-pois__name,
+.riseopedia-perk-tree__link,
+.riseopedia-perk-tree__name {
+  color: var(--theme-text);
+  font-weight: 700;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.riseopedia-location-tree__link:hover,
+.riseopedia-location-tree__link:focus-visible,
+.riseopedia-location-pois__link:hover,
+.riseopedia-location-pois__link:focus-visible,
+.riseopedia-location-pois__location-link:hover,
+.riseopedia-location-pois__location-link:focus-visible,
+.riseopedia-perk-tree__link:hover,
+.riseopedia-perk-tree__link:focus-visible {
+  color: var(--theme-accent);
+  text-decoration: none;
+}
+
+.riseopedia-location-tree__meta,
+.riseopedia-location-pois__meta,
+.riseopedia-perk-tree__meta {
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.riseopedia-location-pois__copy,
+.riseopedia-perk-tree__copy {
+  display: grid;
+  gap: var(--space-1, 0.25rem);
+  min-width: 0;
+}
+
+.riseopedia-location-pois__location-link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.riseopedia-location-pois__group {
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-location-pois__group + .riseopedia-location-pois__group {
+  padding-top: var(--space-4, 1rem);
+  border-top: 1px solid var(--riseopedia-rarity-border);
+}
+
+.riseopedia-location-pois__group-title,
+.riseopedia-perk-tree__group-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3, 0.75rem);
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+}
+
+.riseopedia-location-pois__count {
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1rem;
+}
+
+@media (min-width: 900px) {
+  .riseopedia-perk-tree__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-8, 2rem);
+  }
+
+  .riseopedia-perk-tree__group + .riseopedia-perk-tree__group {
+    padding-left: var(--space-8, 2rem);
+    border-left: 1px solid var(--theme-border);
+  }
+}
+
+/* ===== Perk gating tree ===== */
+/*
+The current perk is the fixed center node. Direct prerequisites and unlocked perks
+stay equal-weight side branches, with media-safe entity icons and link-only accent text.
+*/
+.riseopedia-perk-tree {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+.riseopedia-perk-tree__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5, 1.25rem);
+  min-width: 0;
+}
+
+.riseopedia-perk-tree__group {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+}
+
+.riseopedia-perk-tree__group-title {
+  margin: 0;
+  color: var(--theme-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  line-height: 1rem;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.riseopedia-perk-tree__list {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.riseopedia-perk-tree__row {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+  padding: var(--space-3, 0.75rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.75rem);
+  background: var(--theme-bg-alpha-62);
+}
+
+.riseopedia-perk-tree__icon,
+.riseopedia-perk-tree__current-icon {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+}
+
+.riseopedia-perk-tree__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md, 0.75rem);
+}
+
+.riseopedia-perk-tree__icon-image,
+.riseopedia-perk-tree__current-icon-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.riseopedia-perk-tree__icon-fallback,
+.riseopedia-perk-tree__current-icon-fallback {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--theme-text-muted);
+  stroke-width: 1.75;
+}
+
+.riseopedia-perk-tree__copy {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.riseopedia-perk-tree__link,
+.riseopedia-perk-tree__name {
+  overflow-wrap: anywhere;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+}
+
+.riseopedia-perk-tree__link {
+  color: var(--theme-accent);
+  text-decoration: none;
+}
+
+.riseopedia-perk-tree__name {
+  color: var(--theme-text);
+}
+
+.riseopedia-perk-tree__link:hover,
+.riseopedia-perk-tree__link:focus-visible {
+  color: var(--theme-link-hover, var(--theme-accent));
+  text-decoration: underline;
+}
+
+.riseopedia-perk-tree__meta {
+  color: var(--theme-text-muted);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+.riseopedia-perk-tree__current {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+  min-height: 11.5rem;
+  padding: var(--space-4, 1rem);
+  overflow: hidden;
+  border: 1px solid var(--theme-accent);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-surface-ink-soft);
+  box-shadow: 0 0 0 1px
+    color-mix(in oklab, var(--theme-accent) 25%, transparent);
+  text-align: center;
+}
+
+.riseopedia-perk-tree__current::before,
+.riseopedia-perk-tree__current::after {
+  position: absolute;
+  inset-inline: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid var(--theme-accent);
+  background: var(--theme-surface);
+  content: "";
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.riseopedia-perk-tree__current::before {
+  inset-block-start: calc(-0.25rem - 1px);
+}
+
+.riseopedia-perk-tree__current::after {
+  inset-block-end: calc(-0.25rem - 1px);
+}
+
+.riseopedia-perk-tree__current-label {
+  margin: 0;
+  color: var(--theme-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  line-height: 1rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.riseopedia-perk-tree__current-icon {
+  width: 3.75rem;
+  height: 3.75rem;
+  border-color: var(--theme-accent);
+  border-radius: 50%;
+}
+
+.riseopedia-perk-tree__current-icon-fallback {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--theme-accent);
+}
+
+.riseopedia-perk-tree__current-name {
+  color: var(--theme-text);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+.riseopedia-perk-tree__current-meta {
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.riseopedia-perk-tree .riseopedia-empty-state {
+  min-height: 0;
+  padding: var(--space-3, 0.75rem);
+  border-radius: var(--radius-md, 0.75rem);
+}
+
+.riseopedia-perk-tree .riseopedia-empty-state__title,
+.riseopedia-perk-tree .riseopedia-empty-state__message {
+  font-size: 0.75rem;
+}
+
+@media (min-width: 860px) {
+  .riseopedia-perk-tree__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.8fr) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-7, 1.75rem);
+  }
+
+  .riseopedia-perk-tree__group--requirements::after,
+  .riseopedia-perk-tree__group--unlocks::before {
+    position: absolute;
+    top: 50%;
+    width: var(--space-7, 1.75rem);
+    height: 1px;
+    background: var(--theme-border);
+    content: "";
+  }
+
+  .riseopedia-perk-tree__group--requirements::after {
+    left: calc(100% + var(--space-4, 1rem));
+  }
+
+  .riseopedia-perk-tree__group--unlocks::before {
+    right: calc(100% + var(--space-4, 1rem));
+  }
+
+  .riseopedia-perk-tree__group--requirements::before,
+  .riseopedia-perk-tree__group--unlocks::after {
+    position: absolute;
+    top: calc(50% - 0.25rem);
+    width: 0.5rem;
+    height: 0.5rem;
+    border: 1px solid var(--theme-accent);
+    border-radius: 50%;
+    background: var(--theme-surface);
+    content: "";
+  }
+
+  .riseopedia-perk-tree__group--requirements::before {
+    right: calc(-1 * var(--space-7, 1.75rem));
+  }
+
+  .riseopedia-perk-tree__group--unlocks::after {
+    left: calc(-1 * var(--space-7, 1.75rem));
+  }
+}
+
+/* Stage 2: Effects and Needs */
+.riseopedia-effect-modifiers,
+.riseopedia-need-effects {
+  display: grid;
+  gap: var(--space-4, 1rem);
+}
+
+.riseopedia-effect-modifiers__groups,
+.riseopedia-effect-modifiers__list,
+.riseopedia-need-effects__groups {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.riseopedia-effect-modifiers__groups,
+.riseopedia-need-effects__groups {
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-effect-modifiers__group {
+  display: grid;
+  grid-template-columns: minmax(10.5rem, 0.8fr) minmax(0, 2.2fr);
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.75rem);
+  background: var(--theme-surface-raised);
+}
+
+.riseopedia-effect-modifiers__need {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border-right: 1px solid var(--theme-border);
+  background: color-mix(
+    in oklab,
+    var(--theme-surface-ink-soft) 55%,
+    transparent
+  );
+}
+
+.riseopedia-effect-modifiers__need-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--theme-surface);
+}
+
+.riseopedia-effect-modifiers__need-icon-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.riseopedia-effect-modifiers__need-icon-fallback {
+  width: 1rem;
+  height: 1rem;
+  color: var(--theme-accent);
+}
+
+.riseopedia-effect-modifiers__need-copy {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.riseopedia-effect-modifiers__need-copy--single-modifier {
+  min-width: 0;
+}
+
+.riseopedia-effect-modifiers__need-inline {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+}
+
+.riseopedia-effect-modifiers__need-inline
+  .riseopedia-effect-modifiers__need-link,
+.riseopedia-effect-modifiers__need-inline
+  .riseopedia-effect-modifiers__need-name {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.riseopedia-effect-modifiers__need-inline-meta {
+  flex: 0 0 auto;
+  color: var(--theme-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+.riseopedia-effect-modifiers__need-link,
+.riseopedia-effect-modifiers__need-name {
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.riseopedia-effect-modifiers__need-link {
+  color: var(--theme-accent);
+  text-decoration: none;
+}
+
+.riseopedia-effect-modifiers__need-name {
+  color: var(--theme-text);
+}
+
+.riseopedia-effect-modifiers__need-link:hover,
+.riseopedia-effect-modifiers__need-link:focus-visible {
+  color: var(--theme-link-hover, var(--theme-accent));
+  text-decoration: underline;
+}
+
+.riseopedia-effect-modifiers__need-meta,
+.riseopedia-need-effects__meta {
+  color: var(--theme-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1rem;
+}
+
+.riseopedia-effect-modifiers__list {
+  min-width: 0;
+}
+
+.riseopedia-effect-modifiers__modifier {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-width: 0;
+  border-top: 1px solid var(--theme-border);
+  background: var(--theme-surface);
+}
+
+.riseopedia-effect-modifiers__modifier:first-child {
+  border-top: 0;
+}
+
+.riseopedia-effect-modifiers__modifier-summary {
+  min-width: 0;
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+}
+
+.riseopedia-effect-modifiers__effect {
+  color: var(--theme-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+}
+
+.riseopedia-effect-modifiers__effect-mode {
+  margin-left: var(--space-2, 0.5rem);
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: inherit;
+  white-space: nowrap;
+}
+
+.riseopedia-effect-modifiers__metrics {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid var(--theme-border);
+}
+
+.riseopedia-effect-modifiers__metric {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.125rem;
+  min-width: 3.75rem;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  border-left: 1px solid
+    color-mix(in oklab, var(--theme-border) 82%, transparent);
+  text-align: center;
+}
+
+.riseopedia-effect-modifiers__metric:first-child {
+  border-left: 0;
+}
+
+.riseopedia-effect-modifiers__metric dt {
+  color: var(--theme-text-muted);
+  font-size: 0.5625rem;
+  font-weight: 800;
+  line-height: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.riseopedia-effect-modifiers__metric dd {
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.riseopedia-need-effects__group {
+  display: grid;
+  grid-template-columns: minmax(10.5rem, 0.8fr) minmax(0, 2.2fr);
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.75rem);
+  background: var(--theme-surface-raised);
+}
+
+.riseopedia-need-effects__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border-right: 1px solid var(--theme-border);
+  background: color-mix(
+    in oklab,
+    var(--theme-surface-ink-soft) 55%,
+    transparent
+  );
+}
+
+.riseopedia-need-effects__effect-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--theme-surface);
+}
+
+.riseopedia-need-effects__effect-icon-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.riseopedia-need-effects__effect-icon-fallback {
+  width: 1rem;
+  height: 1rem;
+  color: var(--theme-accent);
+}
+
+.riseopedia-need-effects__identity-copy {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.riseopedia-need-effects__link,
+.riseopedia-need-effects__name {
+  overflow: hidden;
+  color: var(--theme-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+  text-overflow: ellipsis;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.riseopedia-need-effects__link {
+  color: var(--theme-accent);
+}
+
+.riseopedia-need-effects__link:hover,
+.riseopedia-need-effects__link:focus-visible {
+  color: var(--theme-link-hover, var(--theme-accent));
+  text-decoration: underline;
+}
+
+@media (max-width: 980px) {
+  .riseopedia-effect-modifiers__group,
+  .riseopedia-need-effects__group {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .riseopedia-effect-modifiers__need,
+  .riseopedia-need-effects__identity {
+    border-right: 0;
+    border-bottom: 1px solid var(--theme-border);
+  }
+}
+
+@media (max-width: 700px) {
+  .riseopedia-effect-modifiers__modifier {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .riseopedia-effect-modifiers__metrics {
+    border-top: 1px solid var(--theme-border);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .riseopedia-effect-modifiers__need,
+  .riseopedia-need-effects__identity {
+    padding: var(--space-3, 0.75rem);
+  }
+
+  .riseopedia-effect-modifiers__modifier-summary {
+    padding: var(--space-3, 0.75rem);
+  }
+
+  .riseopedia-effect-modifiers__metrics {
+    flex-wrap: wrap;
+  }
+
+  .riseopedia-effect-modifiers__metric {
+    flex: 1 1 4rem;
+  }
+}
+
+/* ===== Riseopedia Quest detail body blocks ===== */
+.riseopedia-quest-objectives,
+.riseopedia-quest-requirements,
+.riseopedia-quest-rewards,
+.riseopedia-quest-flow {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-quest-objectives__groups,
+.riseopedia-quest-objectives__group {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+}
+
+.riseopedia-quest-objectives__list,
+.riseopedia-quest-requirements__list,
+.riseopedia-quest-rewards__list,
+.riseopedia-quest-flow__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.riseopedia-quest-objectives__list,
+.riseopedia-quest-requirements__list,
+.riseopedia-quest-rewards__list,
+.riseopedia-quest-flow__table {
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-bg-alpha-62);
+}
+
+.riseopedia-quest-objectives__group-title,
+.riseopedia-quest-flow__group-title {
+  color: var(--theme-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.riseopedia-quest-objectives__group-title {
+  margin: 0;
+}
+
+.riseopedia-quest-objectives__row,
+.riseopedia-quest-requirements__row,
+.riseopedia-quest-rewards__row {
+  min-width: 0;
+  border-top: 1px solid var(--theme-border);
+}
+
+.riseopedia-quest-objectives__row:first-child,
+.riseopedia-quest-requirements__row:first-child,
+.riseopedia-quest-rewards__row:first-child {
+  border-top: 0;
+}
+
+.riseopedia-quest-objectives__row {
+  display: grid;
+  grid-template-columns: 2.25rem 2.5rem minmax(0, 1fr) 4rem 5.5rem;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  min-height: 3.75rem;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+}
+
+.riseopedia-quest-objectives__number,
+.riseopedia-quest-requirements__number,
+.riseopedia-quest-rewards__number {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  min-height: 2rem;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.5rem);
+  color: var(--theme-text-strong);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.riseopedia-quest-objectives__icon,
+.riseopedia-quest-requirements__icon,
+.riseopedia-quest-rewards__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--theme-surface-card);
+}
+
+.riseopedia-quest-objectives__icon-image,
+.riseopedia-quest-requirements__icon-image,
+.riseopedia-quest-rewards__icon-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.riseopedia-quest-objectives__icon-fallback,
+.riseopedia-quest-requirements__icon-fallback,
+.riseopedia-quest-rewards__icon-fallback {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--theme-text-muted);
+}
+
+.riseopedia-quest-objectives__target-copy,
+.riseopedia-quest-requirements__copy,
+.riseopedia-quest-rewards__target-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.125rem;
+}
+
+.riseopedia-quest-objectives__target-link,
+.riseopedia-quest-requirements__link,
+.riseopedia-quest-rewards__link,
+.riseopedia-quest-flow__link {
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+.riseopedia-quest-objectives__target-link,
+.riseopedia-quest-objectives__target-name,
+.riseopedia-quest-requirements__link,
+.riseopedia-quest-requirements__name,
+.riseopedia-quest-rewards__link,
+.riseopedia-quest-rewards__name,
+.riseopedia-quest-flow__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--theme-text-strong);
+  font-weight: 700;
+}
+
+.riseopedia-quest-objectives__target-link,
+.riseopedia-quest-requirements__link,
+.riseopedia-quest-rewards__link {
+  color: var(--color-link);
+}
+
+.riseopedia-quest-objectives__target-link:hover,
+.riseopedia-quest-objectives__target-link:focus-visible,
+.riseopedia-quest-requirements__link:hover,
+.riseopedia-quest-requirements__link:focus-visible,
+.riseopedia-quest-rewards__link:hover,
+.riseopedia-quest-rewards__link:focus-visible,
+.riseopedia-quest-flow__link:hover,
+.riseopedia-quest-flow__link:focus-visible {
+  text-decoration: underline;
+}
+
+.riseopedia-quest-objectives__target-status,
+.riseopedia-quest-rewards__status,
+.riseopedia-quest-rewards__choose,
+.riseopedia-quest-flow__empty {
+  color: var(--theme-text-muted);
+  font-size: var(--font-size-sm, 0.875rem);
+}
+
+.riseopedia-quest-objectives__quantity,
+.riseopedia-quest-requirements__level,
+.riseopedia-quest-rewards__quantity {
+  justify-self: end;
+  min-width: 0;
+  color: var(--theme-text-strong);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.riseopedia-quest-objectives__quantity[data-empty="true"],
+.riseopedia-quest-requirements__level[data-empty="true"],
+.riseopedia-quest-rewards__quantity[data-empty="true"] {
+  visibility: hidden;
+}
+
+.riseopedia-quest-objectives__action {
+  justify-self: end;
+  padding: 0.3125rem 0.625rem;
+  border: 1px solid var(--theme-accent-border, var(--theme-border));
+  border-radius: 999px;
+  color: var(--theme-accent-text, var(--theme-text));
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.riseopedia-quest-requirements__type {
+  justify-self: end;
+  padding: 0.3125rem 0.625rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 999px;
+  color: var(--theme-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.riseopedia-quest-requirements__row {
+  display: grid;
+  grid-template-columns: 2rem 2.25rem minmax(0, 1fr) 4rem 5rem;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  min-height: 3.5rem;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+}
+
+.riseopedia-quest-rewards__row {
+  display: grid;
+  grid-template-columns: 2rem 2.25rem minmax(0, 1fr) 5.5rem;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  min-height: 3.5rem;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+}
+
+/* Quest Flow hierarchy layout is owned by riseopedia-detail-visual-system.css. */
+
+@media (max-width: 700px) {
+  .riseopedia-quest-objectives__row,
+  .riseopedia-quest-requirements__row {
+    grid-template-columns: 2.25rem 2.25rem minmax(0, 1fr) 4.5rem;
+  }
+
+  .riseopedia-quest-objectives__icon,
+  .riseopedia-quest-requirements__icon,
+  .riseopedia-quest-rewards__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .riseopedia-quest-objectives__action,
+  .riseopedia-quest-requirements__type {
+    grid-column: 3 / -1;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 460px) {
+  .riseopedia-quest-objectives__row {
+    grid-template-columns: 2rem 2.25rem minmax(0, 1fr);
+    gap: var(--space-2, 0.5rem);
+  }
+
+  .riseopedia-quest-objectives__quantity {
+    grid-column: 3 / 4;
+    justify-self: start;
+  }
+
+  .riseopedia-quest-objectives__action {
+    grid-column: 3 / 4;
+  }
+
+  .riseopedia-quest-requirements__row {
+    grid-template-columns: 2rem 2.25rem minmax(0, 1fr);
+    gap: var(--space-2, 0.5rem);
+  }
+
+  .riseopedia-quest-requirements__level,
+  .riseopedia-quest-requirements__type {
+    grid-column: 3 / 4;
+    justify-self: start;
+    text-align: left;
+  }
+
+  .riseopedia-quest-rewards__row {
+    grid-template-columns: 2rem 2.25rem minmax(0, 1fr);
+    gap: var(--space-2, 0.5rem);
+  }
+
+  .riseopedia-quest-rewards__quantity {
+    grid-column: 3 / 4;
+    justify-self: start;
+    text-align: left;
+  }
+}
+
+/* POI vendor-stock catalog-table body-block presentation */
+.riseopedia-poi-vendor-stock {
+  display: grid;
+  min-width: 0;
+}
+
+.riseopedia-poi-vendor-stock__list {
+  display: grid;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-bg-alpha-62);
+  overflow: hidden;
+}
+
+.riseopedia-poi-vendor-stock__row {
+  position: relative;
+  min-width: 0;
+  border-top: 1px solid var(--theme-border);
+}
+
+.riseopedia-poi-vendor-stock__icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--theme-surface-card);
+}
+
+.riseopedia-poi-vendor-stock__icon-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.riseopedia-poi-vendor-stock__icon-fallback {
+  width: 1rem;
+  height: 1rem;
+  color: var(--theme-accent);
+}
+
+.riseopedia-poi-vendor-stock__copy {
+  display: grid;
+  gap: var(--space-1, 0.25rem);
+  min-width: 0;
+}
+
+.riseopedia-poi-vendor-stock__link,
+.riseopedia-poi-vendor-stock__name {
+  color: var(--theme-text);
+  font-weight: 700;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.riseopedia-poi-vendor-stock__link:hover,
+.riseopedia-poi-vendor-stock__link:focus-visible {
+  color: var(--theme-accent);
+  text-decoration: none;
+}
+
+.riseopedia-poi-vendor-stock__meta,
+.riseopedia-poi-vendor-stock__availability,
+.riseopedia-poi-vendor-stock__status {
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.riseopedia-poi-vendor-stock__list {
+  --riseopedia-vendor-price-column: minmax(6.25rem, 8rem);
+  --riseopedia-vendor-stock-column: minmax(4.5rem, 5.75rem);
+}
+
+.riseopedia-poi-vendor-stock__header,
+.riseopedia-poi-vendor-stock__row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    var(--riseopedia-vendor-price-column)
+    var(--riseopedia-vendor-stock-column);
+  min-width: 0;
+}
+
+.riseopedia-poi-vendor-stock__header {
+  align-items: center;
+  min-height: 2rem;
+  color: var(--theme-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  background: var(--theme-surface-ink-soft);
+}
+
+.riseopedia-poi-vendor-stock__header-item {
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+}
+
+.riseopedia-poi-vendor-stock__header-price,
+.riseopedia-poi-vendor-stock__header-stock,
+.riseopedia-poi-vendor-stock__price,
+.riseopedia-poi-vendor-stock__facts {
+  border-inline-start: 1px solid var(--theme-border);
+}
+
+.riseopedia-poi-vendor-stock__header-price,
+.riseopedia-poi-vendor-stock__header-stock {
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  text-align: right;
+}
+
+.riseopedia-poi-vendor-stock__row {
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+}
+
+.riseopedia-poi-vendor-stock__item {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+}
+
+.riseopedia-poi-vendor-stock__price,
+.riseopedia-poi-vendor-stock__facts {
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  min-width: 0;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.riseopedia-poi-vendor-stock__price {
+  color: var(--theme-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.riseopedia-poi-vendor-stock__price[data-missing-price="true"] {
+  color: var(--theme-text-muted);
+  font-weight: 500;
+}
+
+.riseopedia-poi-vendor-stock__facts {
+  gap: var(--space-1, 0.25rem);
+}
+
+.riseopedia-poi-vendor-stock__quantity {
+  color: var(--theme-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.riseopedia-poi-vendor-stock__availability,
+.riseopedia-poi-vendor-stock__status {
+  max-width: 12rem;
+}
+
+.riseopedia-poi-vendor-stock__row[data-resolution-status]:not(
+    [data-resolution-status="resolved"]
+  ) {
+  background: color-mix(in oklab, var(--theme-accent-soft) 42%, transparent);
+}
+
+@media (max-width: 559px) {
+  .riseopedia-poi-vendor-stock__header {
+    display: none;
+  }
+
+  .riseopedia-poi-vendor-stock__row {
+    grid-template-columns: minmax(0, 1fr) minmax(4.75rem, auto);
+    gap: 0;
+  }
+
+  .riseopedia-poi-vendor-stock__item {
+    grid-row: 1 / span 2;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: var(--space-2, 0.5rem);
+    padding: var(--space-2, 0.5rem);
+  }
+
+  .riseopedia-poi-vendor-stock__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .riseopedia-poi-vendor-stock__price,
+  .riseopedia-poi-vendor-stock__facts {
+    min-width: 0;
+    padding-inline: var(--space-2, 0.5rem);
+  }
+
+  .riseopedia-poi-vendor-stock__price::before,
+  .riseopedia-poi-vendor-stock__facts::before {
+    color: var(--theme-text-muted);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .riseopedia-poi-vendor-stock__price::before {
+    content: "Price";
+  }
+
+  .riseopedia-poi-vendor-stock__facts::before {
+    content: "Stock";
+  }
+
+  .riseopedia-poi-vendor-stock__availability,
+  .riseopedia-poi-vendor-stock__status {
+    display: none;
+  }
+}
+
+/* Stage 6: POI Activity and Landmark intentional availability notices */
+.riseopedia-poi-placeholder {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-4, 1rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-bg-alpha-62);
+}
+
+.riseopedia-poi-placeholder .riseopedia-empty-state {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* Stage 7: Experience level thresholds */
+.riseopedia-experience-level-table {
+  min-width: 0;
+}
+
+.riseopedia-experience-level-table__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-surface-ink-soft);
+}
+
+.riseopedia-experience-level-table__table {
+  width: 100%;
+  min-width: 38rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--theme-text);
+}
+
+.riseopedia-experience-level-table__table th,
+.riseopedia-experience-level-table__table td {
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border-bottom: 1px solid var(--theme-border);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.riseopedia-experience-level-table__table thead th {
+  background: var(--theme-bg-alpha-62);
+  color: var(--theme-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.riseopedia-experience-level-table__table th:first-child,
+.riseopedia-experience-level-table__table td:first-child {
+  width: 5.5rem;
+  text-align: left;
+}
+
+.riseopedia-experience-level-table__table thead th:not(:first-child),
+.riseopedia-experience-level-table__table tbody td {
+  border-inline-start: 1px solid var(--theme-border);
+}
+
+.riseopedia-experience-level-table__table tbody th {
+  color: var(--theme-text);
+  font-weight: 700;
+}
+
+.riseopedia-experience-level-table__level-badge,
+.riseopedia-experience-level-unlocks__level-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding-inline: 0.375rem;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.5rem);
+  color: var(--theme-text-strong);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.riseopedia-experience-level-table__table tbody td {
+  color: var(--theme-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.riseopedia-experience-level-table__table tbody tr:last-child th,
+.riseopedia-experience-level-table__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Start and maximum levels remain data-marked, but use the same text treatment as normal rows. */
+.riseopedia-experience-level-table__table tbody tr[data-level-role="start"],
+.riseopedia-experience-level-table__table tbody tr[data-level-role="maximum"] {
+  background: transparent;
+}
+
+@media (max-width: 640px) {
+  .riseopedia-experience-level-table__table {
+    min-width: 32rem;
+  }
+
+  .riseopedia-experience-level-table__table th,
+  .riseopedia-experience-level-table__table td {
+    padding: var(--space-3, 0.75rem);
+  }
+}
+
+/* Experience hierarchy geometry is owned by riseopedia-detail-visual-system.css. */
+
+.riseopedia-release-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  margin-top: var(--space-3, 0.75rem);
+}
+
+.riseopedia-release-status__value {
+  max-width: 100%;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.riseopedia-release-status-panel {
+  display: grid;
+  gap: var(--space-5, 1.25rem);
+}
+
+.riseopedia-release-status-panel__summary {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-4, 1rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-card, 1rem);
+  background: var(--theme-surface-card);
+}
+
+.riseopedia-release-status-panel__title,
+.riseopedia-release-status-panel__detail,
+.riseopedia-release-status-panel__meta,
+.riseopedia-release-status-panel__description,
+.riseopedia-release-status-panel__reason-description {
+  margin: 0;
+}
+
+.riseopedia-release-status-panel__title {
+  color: var(--theme-text);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.riseopedia-release-status-panel__detail,
+.riseopedia-release-status-panel__description,
+.riseopedia-release-status-panel__reason-description {
+  color: var(--theme-text-muted);
+  line-height: 1.5;
+}
+
+.riseopedia-release-status-panel__meta {
+  color: var(--theme-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.riseopedia-release-status-panel__mode-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem);
+}
+
+.riseopedia-release-status-panel__field {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+}
+
+.riseopedia-release-status-panel__field-label {
+  color: var(--theme-text);
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+
+/* ===== Mafiosopedia release-visibility correction pass ===== */
+.riseopedia-overview-search-panel {
+  display: block;
+}
+
+.riseopedia-filter-bar {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3, 0.75rem);
+  align-items: center;
+}
+
+.riseopedia-filter-bar__control,
+.riseopedia-filter-bar__search {
+  min-width: 0;
+  margin-left: 0;
+}
+
+.riseopedia-filter-bar__control {
+  width: 100%;
+}
+
+.riseopedia-filter-bar__control--release {
+  min-width: 0;
+}
+
+.riseopedia-filter-bar__search {
+  width: 100%;
+}
+
+.riseopedia-filter-bar .ui-dropdown__button {
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .riseopedia-filter-bar {
+    grid-template-columns:
+      repeat(5, minmax(0, 1fr))
+      minmax(14rem, 1.6fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .riseopedia-filter-bar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.riseopedia-detail-hero__controls {
+  display: grid;
+  grid-template-rows: minmax(2rem, auto) 2rem;
+  gap: var(--space-2, 0.5rem);
+  align-items: start;
+}
+
+.riseopedia-detail-hero__status-row,
+.riseopedia-detail-hero__variant-row {
+  display: flex;
+  min-height: 2rem;
+  align-items: flex-start;
+}
+
+.riseopedia-detail-hero__variant-row .riseopedia-detail-hero__selectors {
+  align-self: start;
+}
+
+.riseopedia-release-status {
+  margin-top: 0;
+}
+
+.riseopedia-release-status__action {
+  appearance: none;
+}
+
+/* ===== Mafiosopedia release-status and filter-width correction pass ===== */
+.riseopedia-filter-bar {
+  display: grid;
+  width: 100%;
+  gap: var(--space-3, 0.75rem);
+  align-items: center;
+}
+
+.riseopedia-filter-bar__control,
+.riseopedia-filter-bar__search {
+  min-width: 0;
+  width: 100%;
+  margin-left: 0;
+}
+
+.riseopedia-filter-bar .ui-dropdown__button,
+.riseopedia-filter-bar__search .ui-input {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .riseopedia-filter-bar--without-release {
+    grid-template-columns:
+      repeat(4, minmax(9.5rem, 11rem))
+      minmax(14rem, 1fr);
+  }
+
+  .riseopedia-filter-bar--with-release {
+    grid-template-columns:
+      repeat(5, minmax(8.75rem, 10rem))
+      minmax(14rem, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .riseopedia-filter-bar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.riseopedia-state-toggle[data-variant="uncommon"] {
+  --riseopedia-rarity-color: var(--theme-rarity-uncommon);
+  --riseopedia-rarity-soft: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 14%,
+    transparent
+  );
+  --riseopedia-rarity-border: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 62%,
+    var(--theme-border)
+  );
+  --riseopedia-rarity-glow: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 28%,
+    transparent
+  );
+}
+
+.riseopedia-state-toggle[data-variant="mythic"] {
+  --riseopedia-rarity-color: var(--theme-rarity-mythic);
+  --riseopedia-rarity-soft: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 14%,
+    transparent
+  );
+  --riseopedia-rarity-border: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 62%,
+    var(--theme-border)
+  );
+  --riseopedia-rarity-glow: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 28%,
+    transparent
+  );
+}
+
+.riseopedia-state-toggle[data-variant="accent"] {
+  --riseopedia-rarity-color: var(--theme-accent);
+  --riseopedia-rarity-soft: var(--theme-accent-soft);
+  --riseopedia-rarity-border: color-mix(
+    in oklab,
+    var(--theme-accent) 62%,
+    var(--theme-border)
+  );
+  --riseopedia-rarity-glow: color-mix(
+    in oklab,
+    var(--theme-accent) 28%,
+    transparent
+  );
+}
+
+.riseopedia-state-toggle--rarity[data-variant="uncommon"],
+.riseopedia-state-toggle--rarity[data-variant="mythic"],
+.riseopedia-state-toggle--rarity[data-variant="accent"] {
+  border-color: var(--riseopedia-rarity-border);
+  color: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 84%,
+    var(--theme-text)
+  );
+}
+
+.riseopedia-release-status__value {
+  pointer-events: none;
+  cursor: default;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.riseopedia-release-status__value:hover {
+  transform: none;
+  background: var(--theme-surface-ink-soft);
+  color: color-mix(
+    in oklab,
+    var(--riseopedia-rarity-color) 84%,
+    var(--theme-text)
+  );
+}
+
+/* ===== Unified configured entity body block system ===== */
+/* Shared shell owns the 16px outer geometry for configured blocks in both body and aside placements. */
+.riseopedia-body-block {
+  --riseopedia-body-block-padding: var(--space-4, 1rem);
+
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+  overflow: hidden;
+  padding: var(--riseopedia-body-block-padding);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-card, 1rem);
+  background: var(--theme-surface-card);
+}
+
+.riseopedia-body-block__header {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.riseopedia-body-block__title {
+  min-width: 0;
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.riseopedia-body-block__content {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+}
+
+/* Legacy renderers no longer own a competing outer surface when displayed in the shared shell. */
+.riseopedia-body-block__content > .riseopedia-body-section,
+.riseopedia-body-block__content > .riseopedia-recipe-tree {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.riseopedia-body-block__content
+  > .riseopedia-body-section
+  > .riseopedia-section-title {
+  display: none;
+}
+
+.riseopedia-body-block__content
+  > .riseopedia-recipe-tree
+  > .riseopedia-recipe-tree__header {
+  display: none;
+}
+
+.riseopedia-profile-prose,
+.riseopedia-profile-prose .riseopedia-prose-section {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+}
+
+/* ===== Riseopedia Table Family Design Lab ===== */
+/* Isolated fixture styling for evaluating table-family variants before production renderer rollout. */
+.riseopedia-table-lab {
+  display: grid;
+  gap: var(--space-6, 1.5rem);
+  min-width: 0;
+}
+
+.riseopedia-table-lab__intro,
+.riseopedia-table-lab__controls,
+.riseopedia-table-lab__selection-summary,
+.riseopedia-table-lab__comparison-heading {
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-card, 1rem);
+  background: var(--theme-surface-card);
+}
+
+.riseopedia-table-lab__intro {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-5, 1.25rem);
+  padding: var(--space-6, 1.5rem);
+}
+
+.riseopedia-table-lab__intro h1 {
+  margin: 0;
+  color: var(--theme-text);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.riseopedia-table-lab__intro p:not(.riseopedia-table-lab__eyebrow) {
+  max-width: 50rem;
+  margin: var(--space-3, 0.75rem) 0 0;
+  color: var(--theme-text-muted);
+  line-height: 1.6;
+}
+
+.riseopedia-table-lab__eyebrow {
+  margin: 0 0 var(--space-2, 0.5rem);
+  color: var(--theme-accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.riseopedia-table-lab__hint {
+  display: flex;
+  flex: 0 1 18rem;
+  align-items: start;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-3, 0.75rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.75rem);
+  background: var(--theme-surface-ink-soft);
+  color: var(--theme-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.riseopedia-table-lab__hint svg {
+  flex: 0 0 auto;
+  color: var(--theme-accent);
+}
+
+.riseopedia-table-lab__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5, 1.25rem);
+  padding: var(--space-4, 1rem);
+}
+
+.riseopedia-table-lab__control-group {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+}
+
+.riseopedia-table-lab__control-label {
+  color: var(--theme-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.riseopedia-table-lab__button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem);
+}
+
+.riseopedia-table-lab__control-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-control, 0.625rem);
+  background: var(--theme-surface);
+  color: var(--theme-text-secondary, var(--theme-text));
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.riseopedia-table-lab__control-button:hover,
+.riseopedia-table-lab__control-button:focus-visible {
+  border-color: var(--theme-accent-border);
+  background: var(--theme-accent-faint);
+  color: var(--theme-text);
+  outline: none;
+}
+
+.riseopedia-table-lab__control-button:focus-visible {
+  box-shadow: 0 0 0 3px var(--theme-focus-soft);
+}
+
+.riseopedia-table-lab__control-button.is-active {
+  border-color: var(--theme-accent-border);
+  background: var(--theme-accent-soft);
+  color: var(--theme-text);
+}
+
+.riseopedia-table-lab__selection-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  color: var(--theme-text-secondary, var(--theme-text));
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.riseopedia-table-lab__selection-summary svg {
+  flex: 0 0 auto;
+  color: var(--theme-accent);
+}
+
+.riseopedia-table-lab__selection-variant {
+  margin-left: auto;
+  color: var(--theme-text-muted);
+  font-size: 0.8125rem;
+}
+
+.riseopedia-table-lab__fixture {
+  min-width: 0;
+}
+
+.riseopedia-table-lab__fixture .riseopedia-detail-shell {
+  width: 100%;
+}
+
+.riseopedia-table-lab__fixture .riseopedia-detail-page {
+  box-shadow: 0 1.5rem 3rem var(--theme-shadow-panel);
+}
+
+.riseopedia-table-lab__hero-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+}
+
+.riseopedia-table-lab__channel-label {
+  color: var(--theme-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.riseopedia-table-lab__hero-media {
+  position: relative;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      var(--theme-accent-alpha-18),
+      transparent 58%
+    ),
+    var(--theme-surface-ink-soft);
+  color: var(--theme-accent);
+}
+
+.riseopedia-table-lab__hero-media span {
+  color: var(--theme-text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.riseopedia-table-lab__overview
+  .riseopedia-overview-table__value[data-tone="accent"] {
+  color: var(--theme-accent);
+}
+
+.riseopedia-table-lab__overview
+  .riseopedia-overview-table__value[data-tone="success"] {
+  color: var(--theme-success);
+}
+
+.riseopedia-table-lab__body {
+  display: grid;
+  gap: var(--space-5, 1.25rem);
+}
+
+.riseopedia-table-lab__prose {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+  color: var(--theme-text-secondary, var(--theme-text));
+  line-height: 1.65;
+}
+
+.riseopedia-table-lab__prose p {
+  margin: 0;
+}
+
+.riseopedia-table-lab__table {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+}
+
+.riseopedia-table-lab__table-lead {
+  margin: 0;
+  color: var(--theme-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.riseopedia-table-lab__definition-table,
+.riseopedia-table-lab__grid-table,
+.riseopedia-table-lab__metrics {
+  min-width: 0;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-surface);
+  overflow: hidden;
+}
+
+.riseopedia-table-lab__definition-table {
+  display: grid;
+}
+
+.riseopedia-table-lab__definition-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.85fr) minmax(0, 1.15fr);
+  min-width: 0;
+  border-top: 1px solid var(--theme-border);
+}
+
+.riseopedia-table-lab__definition-row:first-child {
+  border-top: 0;
+}
+
+.riseopedia-table-lab__definition-row[data-selected="true"],
+.riseopedia-table-lab__grid-row[data-selected="true"],
+.riseopedia-table-lab__metric-row[data-selected="true"] {
+  background: var(--theme-accent-faint);
+}
+
+.riseopedia-table-lab__definition-row dt,
+.riseopedia-table-lab__definition-row dd {
+  min-width: 0;
+  margin: 0;
+  padding: 0.72rem 0.85rem;
+}
+
+.riseopedia-table-lab__definition-row dt {
+  color: var(--theme-text-muted);
+  font-size: 0.8125rem;
+}
+
+.riseopedia-table-lab__definition-row dd {
+  border-left: 1px solid var(--theme-border);
+  color: var(--theme-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.riseopedia-table-lab__definition-row dd[data-tone="accent"] {
+  color: var(--theme-accent);
+}
+
+.riseopedia-table-lab__definition-row dd[data-tone="success"] {
+  color: var(--theme-success);
+}
+
+.riseopedia-table-lab__definition-row dd[data-tone="muted"] {
+  color: var(--theme-text-muted);
+}
+
+.riseopedia-table-lab__value-button,
+.riseopedia-table-lab__text-link,
+.riseopedia-table-lab__entity-cell,
+.riseopedia-table-lab__metric-row {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: inherit;
+}
+
+.riseopedia-table-lab__value-button {
+  padding: 0;
+  color: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+}
+
+.riseopedia-table-lab__text-link {
+  padding: 0;
+  color: var(--theme-info);
+  font-weight: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.riseopedia-table-lab__text-link:hover,
+.riseopedia-table-lab__text-link:focus-visible {
+  color: var(--theme-link-hover);
+  text-decoration: underline;
+  outline: none;
+}
+
+.riseopedia-table-lab__grid-table {
+  display: grid;
+}
+
+.riseopedia-table-lab__grid-head,
+.riseopedia-table-lab__grid-row {
+  display: grid;
+  min-width: 0;
+}
+
+.riseopedia-table-lab__grid-head {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--theme-border);
+  background: var(--theme-surface-ink-soft);
+  color: var(--theme-text-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.riseopedia-table-lab__grid-row {
+  border-top: 1px solid var(--theme-border);
+  transition: background 160ms ease;
+}
+
+.riseopedia-table-lab__grid-body .riseopedia-table-lab__grid-row:first-child {
+  border-top: 0;
+}
+
+.riseopedia-table-lab__grid-cell {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0.65rem 0.85rem;
+}
+
+.riseopedia-table-lab__grid-table--catalog .riseopedia-table-lab__grid-head,
+.riseopedia-table-lab__grid-table--catalog .riseopedia-table-lab__grid-row {
+  grid-template-columns: minmax(0, 1fr) minmax(5.5rem, 0.2fr) minmax(
+      10rem,
+      0.34fr
+    );
+}
+
+.riseopedia-table-lab__grid-table--requirements
+  .riseopedia-table-lab__grid-head,
+.riseopedia-table-lab__grid-table--requirements
+  .riseopedia-table-lab__grid-row {
+  grid-template-columns: minmax(8rem, 0.34fr) minmax(0, 0.86fr) minmax(
+      7rem,
+      0.28fr
+    );
+}
+
+.riseopedia-table-lab__grid-table--rewards .riseopedia-table-lab__grid-head,
+.riseopedia-table-lab__grid-table--rewards .riseopedia-table-lab__grid-row {
+  grid-template-columns: minmax(0, 0.8fr) minmax(5.5rem, 0.2fr) minmax(
+      12rem,
+      0.5fr
+    );
+}
+
+.riseopedia-table-lab__grid-row
+  > .riseopedia-table-lab__grid-cell
+  + .riseopedia-table-lab__grid-cell,
+.riseopedia-table-lab__grid-head > span + span {
+  border-left: 1px solid var(--theme-border);
+}
+
+.riseopedia-table-lab__entity-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.riseopedia-table-lab__entity-cell:hover .riseopedia-table-lab__entity-title,
+.riseopedia-table-lab__entity-cell:focus-visible
+  .riseopedia-table-lab__entity-title {
+  color: var(--theme-accent);
+}
+
+.riseopedia-table-lab__entity-cell:focus-visible {
+  outline: none;
+}
+
+.riseopedia-table-lab__item-icon {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-sm, 0.5rem);
+  background: var(--theme-surface-ink-soft);
+  color: var(--theme-text-muted);
+}
+
+.riseopedia-table-lab__item-icon[data-icon="coin"],
+.riseopedia-table-lab__item-icon[data-icon="gift"] {
+  color: var(--theme-warning);
+}
+
+.riseopedia-table-lab__item-icon[data-icon="heart"] {
+  color: var(--theme-danger);
+}
+
+.riseopedia-table-lab__item-icon[data-icon="seed"] {
+  color: var(--theme-success);
+}
+
+.riseopedia-table-lab__item-icon[data-icon="vial"] {
+  color: var(--theme-info);
+}
+
+.riseopedia-table-lab__entity-copy {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.riseopedia-table-lab__entity-title {
+  overflow: hidden;
+  color: var(--theme-text);
+  font-size: 0.875rem;
+  font-weight: 750;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 160ms ease;
+}
+
+.riseopedia-table-lab__entity-meta,
+.riseopedia-table-lab__cell-note {
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.riseopedia-table-lab__value {
+  color: var(--theme-text);
+  font-family: var(--font-family-mono);
+  font-size: 0.875rem;
+  font-weight: 750;
+}
+
+.riseopedia-table-lab__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.26rem 0.45rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 999px;
+  background: var(--theme-surface-ink-soft);
+  color: var(--theme-text-muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.riseopedia-table-lab__status[data-tone="success"] {
+  border-color: var(--theme-success-border);
+  background: var(--theme-success-soft);
+  color: var(--theme-success);
+}
+
+.riseopedia-table-lab__status[data-tone="warning"] {
+  border-color: var(--theme-warning-border);
+  background: var(--theme-warning-soft);
+  color: var(--theme-warning);
+}
+
+.riseopedia-table-lab__status[data-tone="danger"] {
+  border-color: var(--theme-danger-border);
+  background: var(--theme-danger-soft);
+  color: var(--theme-danger);
+}
+
+.riseopedia-table-lab__status[data-tone="info"] {
+  border-color: var(--theme-info-border);
+  background: var(--theme-info-soft);
+  color: var(--theme-info);
+}
+
+.riseopedia-table-lab__grid-cell[data-column="status"],
+.riseopedia-table-lab__grid-cell[data-column="notes"] {
+  align-items: start;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.riseopedia-table-lab__requirement-lead {
+  color: var(--theme-text-secondary, var(--theme-text));
+  font-size: 0.8125rem;
+  font-weight: 750;
+}
+
+.riseopedia-table-lab__metrics {
+  display: grid;
+  gap: 0;
+}
+
+.riseopedia-table-lab__grid-head--metrics,
+.riseopedia-table-lab__metric-row {
+  grid-template-columns:
+    minmax(7rem, 0.32fr) minmax(9rem, 0.38fr) minmax(7rem, 0.28fr)
+    minmax(8rem, 0.3fr);
+}
+
+.riseopedia-table-lab__metric-group {
+  border-top: 1px solid var(--theme-border);
+}
+
+.riseopedia-table-lab__metric-group-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  padding: 0.55rem 0.75rem;
+  background: var(--theme-surface-ink-soft);
+}
+
+.riseopedia-table-lab__metric-group-head h3 {
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+.riseopedia-table-lab__metric-group-head .riseopedia-table-lab__item-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  background: transparent;
+}
+
+.riseopedia-table-lab__metric-group-head[data-tone="danger"] h3,
+.riseopedia-table-lab__metric-group-head[data-tone="danger"]
+  .riseopedia-table-lab__item-icon {
+  color: var(--theme-danger);
+}
+
+.riseopedia-table-lab__metric-group-head[data-tone="info"] h3,
+.riseopedia-table-lab__metric-group-head[data-tone="info"]
+  .riseopedia-table-lab__item-icon {
+  color: var(--theme-info);
+}
+
+.riseopedia-table-lab__metric-rows {
+  display: grid;
+}
+
+.riseopedia-table-lab__metric-row {
+  display: grid;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  padding: 0;
+  color: var(--theme-text-secondary, var(--theme-text));
+  cursor: pointer;
+}
+
+.riseopedia-table-lab__metric-row > span,
+.riseopedia-table-lab__metric-row > strong {
+  min-width: 0;
+  padding: 0.58rem 0.75rem;
+  border-left: 1px solid var(--theme-border);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.riseopedia-table-lab__metric-row > span:first-child {
+  border-left: 0;
+}
+
+.riseopedia-table-lab__metric-row > strong {
+  color: var(--theme-text);
+  font-family: var(--font-family-mono);
+  font-weight: 750;
+}
+
+.riseopedia-table-lab__metric-row:hover,
+.riseopedia-table-lab__metric-row:focus-visible {
+  background: var(--theme-accent-faint);
+  outline: none;
+}
+
+.riseopedia-table-lab__footer-note {
+  display: flex;
+  align-items: start;
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-table-lab__footer-note > svg {
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
+  color: var(--theme-accent);
+}
+
+.riseopedia-table-lab__footer-note h2,
+.riseopedia-table-lab__footer-note p {
+  margin: 0;
+}
+
+.riseopedia-table-lab__footer-note p {
+  margin-top: var(--space-2, 0.5rem);
+  color: var(--theme-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.riseopedia-table-lab__interaction-note strong {
+  color: var(--theme-text);
+}
+
+.riseopedia-table-lab__comparison {
+  display: grid;
+  gap: var(--space-8, 2rem);
+}
+
+.riseopedia-table-lab__comparison-item {
+  display: grid;
+  gap: var(--space-4, 1rem);
+}
+
+.riseopedia-table-lab__comparison-heading {
+  display: grid;
+  gap: var(--space-1, 0.25rem);
+  padding: var(--space-4, 1rem);
+}
+
+.riseopedia-table-lab__comparison-heading strong {
+  color: var(--theme-text);
+}
+
+.riseopedia-table-lab__comparison-heading span {
+  color: var(--theme-text-muted);
+  font-size: 0.8125rem;
+}
+
+/* A: traditional stronger-grid table treatment. */
+.riseopedia-table-lab__fixture[data-table-variant="structured"]
+  .riseopedia-table-lab__definition-table,
+.riseopedia-table-lab__fixture[data-table-variant="structured"]
+  .riseopedia-table-lab__grid-table,
+.riseopedia-table-lab__fixture[data-table-variant="structured"]
+  .riseopedia-table-lab__metrics {
+  border-color: var(--theme-border-strong);
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="structured"]
+  .riseopedia-table-lab__grid-head {
+  background: var(--theme-surface-muted-card);
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="structured"]
+  .riseopedia-table-lab__grid-row
+  > .riseopedia-table-lab__grid-cell
+  + .riseopedia-table-lab__grid-cell,
+.riseopedia-table-lab__fixture[data-table-variant="structured"]
+  .riseopedia-table-lab__grid-head
+  > span
+  + span,
+.riseopedia-table-lab__fixture[data-table-variant="structured"]
+  .riseopedia-table-lab__definition-row
+  dd {
+  border-left-color: var(--theme-border-strong);
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="structured"]
+  .riseopedia-table-lab__grid-row:hover {
+  background: var(--theme-surface-ink-soft);
+}
+
+/* B: preferred hybrid table-list treatment. */
+.riseopedia-table-lab__fixture[data-table-variant="hybrid"]
+  .riseopedia-body-block__content {
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="hybrid"]
+  .riseopedia-table-lab__grid-row {
+  border-top-color: var(--theme-text-alpha-10);
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="hybrid"]
+  .riseopedia-table-lab__grid-row
+  > .riseopedia-table-lab__grid-cell
+  + .riseopedia-table-lab__grid-cell,
+.riseopedia-table-lab__fixture[data-table-variant="hybrid"]
+  .riseopedia-table-lab__grid-head
+  > span
+  + span {
+  border-left-color: var(--theme-text-alpha-10);
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="hybrid"]
+  .riseopedia-table-lab__item-icon {
+  box-shadow: inset 0 1px 0 var(--theme-text-alpha-10);
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="hybrid"]
+  .riseopedia-table-lab__metric-group {
+  margin: var(--space-2, 0.5rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.75rem);
+  overflow: hidden;
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="hybrid"]
+  .riseopedia-table-lab__metric-group:first-of-type {
+  margin-top: 0;
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="hybrid"]
+  .riseopedia-table-lab__metric-group:last-child {
+  margin-bottom: 0;
+}
+
+/* C: premium compact panel treatment. */
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-body-block__header {
+  padding-bottom: var(--space-2, 0.5rem);
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-body-block__title {
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__table {
+  gap: var(--space-2, 0.5rem);
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__definition-row
+  dt,
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__definition-row
+  dd,
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__grid-cell {
+  padding: 0.52rem 0.65rem;
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__grid-head {
+  padding: 0.5rem 0.65rem;
+  background: var(--theme-surface);
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__item-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.4rem;
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__entity-cell {
+  gap: 0.5rem;
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__entity-meta,
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__cell-note {
+  font-size: 0.7rem;
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__status {
+  padding: 0.18rem 0.36rem;
+  font-size: 0.67rem;
+}
+
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__metric-row
+  > span,
+.riseopedia-table-lab__fixture[data-table-variant="dense"]
+  .riseopedia-table-lab__metric-row
+  > strong {
+  padding: 0.45rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 760px) {
+  .riseopedia-table-lab__intro {
+    flex-direction: column;
+  }
+
+  .riseopedia-table-lab__hint {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .riseopedia-table-lab__selection-summary {
+    align-items: start;
+    flex-wrap: wrap;
+  }
+
+  .riseopedia-table-lab__selection-variant {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .riseopedia-table-lab__grid-head {
+    display: none;
+  }
+
+  .riseopedia-table-lab__grid-table--catalog .riseopedia-table-lab__grid-row,
+  .riseopedia-table-lab__grid-table--requirements
+    .riseopedia-table-lab__grid-row,
+  .riseopedia-table-lab__grid-table--rewards .riseopedia-table-lab__grid-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "primary value"
+      "status status";
+  }
+
+  .riseopedia-table-lab__grid-table--catalog
+    .riseopedia-table-lab__grid-cell[data-column="item"],
+  .riseopedia-table-lab__grid-table--requirements
+    .riseopedia-table-lab__grid-cell[data-column="target"],
+  .riseopedia-table-lab__grid-table--rewards
+    .riseopedia-table-lab__grid-cell[data-column="reward"] {
+    grid-area: primary;
+  }
+
+  .riseopedia-table-lab__grid-table--catalog
+    .riseopedia-table-lab__grid-cell[data-column="stock"],
+  .riseopedia-table-lab__grid-table--rewards
+    .riseopedia-table-lab__grid-cell[data-column="amount"] {
+    grid-area: value;
+    justify-content: end;
+  }
+
+  .riseopedia-table-lab__grid-table--requirements
+    .riseopedia-table-lab__grid-cell[data-column="requirement"] {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    padding-bottom: 0;
+  }
+
+  .riseopedia-table-lab__grid-table--requirements
+    .riseopedia-table-lab__grid-cell[data-column="target"] {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .riseopedia-table-lab__grid-cell[data-column="status"],
+  .riseopedia-table-lab__grid-cell[data-column="notes"] {
+    grid-area: status;
+    border-top: 1px solid var(--theme-border);
+    border-left: 0;
+  }
+
+  .riseopedia-table-lab__grid-row
+    > .riseopedia-table-lab__grid-cell
+    + .riseopedia-table-lab__grid-cell {
+    border-left: 0;
+  }
+
+  .riseopedia-table-lab__grid-cell[data-column="stock"],
+  .riseopedia-table-lab__grid-cell[data-column="amount"] {
+    border-left: 1px solid var(--theme-border);
+  }
+
+  .riseopedia-table-lab__definition-row {
+    grid-template-columns: minmax(7.5rem, 0.75fr) minmax(0, 1fr);
+  }
+
+  .riseopedia-table-lab__grid-head--metrics {
+    display: none;
+  }
+
+  .riseopedia-table-lab__metric-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .riseopedia-table-lab__metric-row > span,
+  .riseopedia-table-lab__metric-row > strong {
+    border-left: 0;
+  }
+
+  .riseopedia-table-lab__metric-row > span:nth-child(3),
+  .riseopedia-table-lab__metric-row > span:nth-child(4) {
+    color: var(--theme-text-muted);
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 460px) {
+  .riseopedia-table-lab__controls {
+    gap: var(--space-4, 1rem);
+  }
+
+  .riseopedia-table-lab__control-button {
+    min-height: 2.125rem;
+    padding-inline: 0.6rem;
+  }
+
+  .riseopedia-table-lab__definition-row {
+    grid-template-columns: 1fr;
+  }
+
+  .riseopedia-table-lab__definition-row dt {
+    padding-bottom: 0.15rem;
+  }
+
+  .riseopedia-table-lab__definition-row dd {
+    padding-top: 0.15rem;
+    border-top: 0;
+    border-left: 0;
+  }
+}
+
+/* ===== Configured detail aside and Location directory ===== */
+.riseopedia-detail-aside {
+  display: grid;
+  grid-area: aside;
+  grid-auto-rows: auto;
+  align-content: start;
+  align-self: stretch;
+  gap: var(--space-5, 1.25rem);
+  min-width: 0;
+}
+
+.riseopedia-detail-overview,
+.riseopedia-detail-aside__blocks {
+  display: grid;
+  gap: var(--space-4, 1rem);
+  min-width: 0;
+}
+
+.riseopedia-detail-aside__blocks .riseopedia-body-content {
+  gap: var(--space-4, 1rem);
+}
+
+.riseopedia-detail-aside__blocks .riseopedia-body-block__header {
+  margin-bottom: 0;
+}
+
+.riseopedia-detail-aside__blocks .riseopedia-body-block__title {
+  font-size: 0.9375rem;
+}
+
+.riseopedia-location-tree {
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-location-tree__list {
+  display: grid;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.riseopedia-location-tree__list--nested {
+  position: relative;
+  gap: 0;
+  padding: var(--space-1, 0.25rem) 0 var(--space-1, 0.25rem)
+    var(--space-4, 1rem);
+  margin: 0;
+  border-left: 1px solid var(--riseopedia-rarity-border);
+}
+
+.riseopedia-location-tree__node {
+  position: relative;
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+.riseopedia-location-tree__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 0.75rem 1.85rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+  padding: var(--space-2, 0.5rem) 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.riseopedia-location-tree__list--nested
+  > .riseopedia-location-tree__node
+  > .riseopedia-location-tree__row::before {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--space-4, 1rem) * -1);
+  width: var(--space-4, 1rem);
+  height: 1px;
+  background: var(--riseopedia-rarity-border);
+  content: "";
+}
+
+.riseopedia-location-tree__row-node {
+  position: relative;
+  display: block;
+  align-self: stretch;
+  min-height: 1.85rem;
+}
+
+.riseopedia-location-tree__row-node::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  box-sizing: border-box;
+  border: 1px solid var(--riseopedia-rarity-border);
+  border-radius: 50%;
+  background: var(--theme-bg-alpha-62);
+  transform: translate(-50%, -50%);
+  content: "";
+}
+
+.riseopedia-location-tree__node[data-location-tree-current="true"]
+  > .riseopedia-location-tree__row {
+  padding: var(--space-2, 0.5rem);
+  border: 1px solid var(--theme-accent);
+  border-left-width: 3px;
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--theme-bg-alpha-62);
+  box-shadow: inset 0 0 0 1px var(--theme-bg-alpha-62);
+}
+
+.riseopedia-location-tree__node[data-location-tree-current="true"]
+  > .riseopedia-location-tree__row
+  > .riseopedia-location-tree__row-node::before {
+  border-color: var(--theme-accent);
+  background: var(--theme-accent);
+}
+
+.riseopedia-location-tree__node[data-location-tree-current="true"]
+  > .riseopedia-location-tree__row
+  .riseopedia-location-tree__icon {
+  border-color: var(--theme-accent);
+}
+
+.riseopedia-location-tree__node[data-location-tree-current="true"]
+  > .riseopedia-location-tree__row
+  .riseopedia-location-tree__name {
+  color: var(--theme-accent);
+}
+
+.riseopedia-location-tree__icon,
+.riseopedia-location-pois__icon {
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-sm, 0.375rem);
+  background: var(--theme-bg-alpha-62);
+}
+
+.riseopedia-location-tree__icon-image,
+.riseopedia-location-pois__icon-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.riseopedia-location-tree__icon-fallback,
+.riseopedia-location-pois__icon-fallback {
+  width: 1rem;
+  height: 1rem;
+  color: var(--theme-text-muted);
+}
+
+.riseopedia-location-tree__copy,
+.riseopedia-location-pois__copy {
+  display: grid;
+  gap: 0.0625rem;
+  min-width: 0;
+}
+
+.riseopedia-location-tree__link,
+.riseopedia-location-pois__link,
+.riseopedia-location-pois__location-link {
+  color: var(--theme-accent);
+}
+
+.riseopedia-location-tree__name,
+.riseopedia-location-pois__name {
+  color: var(--theme-text);
+}
+
+.riseopedia-location-tree__link:hover,
+.riseopedia-location-tree__link:focus-visible,
+.riseopedia-location-pois__link:hover,
+.riseopedia-location-pois__link:focus-visible,
+.riseopedia-location-pois__location-link:hover,
+.riseopedia-location-pois__location-link:focus-visible {
+  color: var(--theme-text);
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+.riseopedia-location-tree__meta {
+  font-size: 0.6875rem;
+}
+
+.riseopedia-location-pois {
+  gap: var(--space-4, 1rem);
+}
+
+.riseopedia-location-pois__groups {
+  gap: var(--space-4, 1rem);
+}
+
+.riseopedia-location-pois__group {
+  gap: var(--space-2, 0.5rem);
+}
+
+.riseopedia-location-pois__group + .riseopedia-location-pois__group {
+  padding-top: var(--space-4, 1rem);
+}
+
+.riseopedia-location-pois__group-title {
+  align-items: center;
+  min-height: 2rem;
+  padding-bottom: var(--space-1, 0.25rem);
+  border-bottom: 1px solid var(--riseopedia-rarity-border);
+}
+
+.riseopedia-location-pois__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.75rem;
+  min-height: 1.35rem;
+  padding: 0 var(--space-2, 0.5rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--theme-bg-alpha-62);
+  color: var(--theme-text-muted);
+}
+
+.riseopedia-location-pois__list {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.5rem);
+}
+
+.riseopedia-location-pois__row {
+  grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-2, 0.5rem);
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--theme-border);
+  background: transparent;
+}
+
+.riseopedia-location-pois__row:last-child {
+  border-bottom: 0;
+}
+
+.riseopedia-location-pois__icon {
+  width: 2rem;
+  height: 2rem;
+}
+
+.riseopedia-location-pois__type {
+  padding: var(--space-1, 0.25rem) var(--space-2, 0.5rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-pill, 999px);
+  color: var(--theme-text-muted);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.riseopedia-location-pois__show-more {
+  justify-self: center;
+  min-width: min(100%, 16rem);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.5rem);
+  background: transparent;
+  color: var(--theme-text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.riseopedia-location-pois__show-more:hover,
+.riseopedia-location-pois__show-more:focus-visible {
+  border-color: var(--theme-accent);
+  color: var(--theme-accent);
+}
+
+@media (max-width: 640px) {
+  .riseopedia-location-pois__row {
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+  }
+
+  .riseopedia-location-pois__type {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+/* ===== Recipe transformation tree ===== */
+/*
+One stable desktop grammar for every recipe:
+inputs -> process -> outputs.
+Catalysts remain normal input rows with a semantic badge; they never create a separate column or branch.
+*/
+.riseopedia-recipe-tree {
+  gap: var(--space-4, 1rem);
+}
+
+.riseopedia-recipe-tree__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "inputs"
+    "connector-in"
+    "process"
+    "connector-out"
+    "outputs";
+  gap: 0;
+  min-width: 0;
+}
+
+.riseopedia-recipe-tree__grid::before {
+  display: none;
+}
+
+.riseopedia-recipe-tree__group {
+  display: grid;
+  align-self: center;
+  align-content: start;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+}
+
+.riseopedia-recipe-tree__group--inputs {
+  grid-area: inputs;
+}
+
+.riseopedia-recipe-tree__group--outputs {
+  grid-area: outputs;
+}
+
+.riseopedia-recipe-tree__group-title,
+.riseopedia-recipe-tree__process-title {
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.125rem;
+  text-align: center;
+}
+
+.riseopedia-recipe-tree__list {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.riseopedia-recipe-tree__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--space-2, 0.5rem);
+  align-items: center;
+  min-width: 0;
+  padding: var(--space-2, 0.5rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--theme-bg-alpha-62);
+}
+
+.riseopedia-recipe-tree__asset {
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: var(--space-2, 0.5rem);
+}
+
+.riseopedia-recipe-tree__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm, 0.375rem);
+}
+
+.riseopedia-recipe-tree__asset-copy {
+  gap: 0.125rem;
+}
+
+.riseopedia-recipe-tree__asset-title-line {
+  min-width: 0;
+}
+
+.riseopedia-recipe-tree__asset-link {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--theme-accent);
+}
+
+.riseopedia-recipe-tree__asset-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--theme-text);
+}
+
+.riseopedia-recipe-tree__asset-link:hover,
+.riseopedia-recipe-tree__asset-link:focus-visible,
+.riseopedia-recipe-tree__crafted-by-link:hover,
+.riseopedia-recipe-tree__crafted-by-link:focus-visible {
+  color: var(--theme-accent-strong, var(--theme-accent));
+  text-decoration: underline;
+}
+
+.riseopedia-recipe-tree__badge {
+  justify-self: end;
+  padding: 0.125rem var(--space-2, 0.5rem);
+  font-size: 0.625rem;
+  line-height: 0.875rem;
+  letter-spacing: 0.1em;
+}
+
+.riseopedia-recipe-tree__quantity {
+  min-width: 2rem;
+  color: var(--theme-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.125rem;
+  text-align: right;
+}
+
+.riseopedia-recipe-tree__asset-meta {
+  display: block;
+  min-height: 0.875rem;
+}
+
+.riseopedia-recipe-tree__asset-meta[aria-hidden="true"] {
+  visibility: hidden;
+}
+
+.riseopedia-recipe-tree__crafted-by-link {
+  color: var(--theme-accent);
+  font-size: 0.625rem;
+  line-height: 0.875rem;
+}
+
+.riseopedia-recipe-tree__crafted-by {
+  display: grid;
+  justify-items: start;
+  gap: 0.1875rem;
+}
+
+.riseopedia-recipe-tree__crafted-by-toggle {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--theme-accent);
+  font: inherit;
+  font-size: 0.625rem;
+  line-height: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.riseopedia-recipe-tree__crafted-by-toggle:hover,
+.riseopedia-recipe-tree__crafted-by-toggle:focus-visible {
+  color: var(--theme-accent-strong, var(--theme-accent));
+  text-decoration: underline;
+  text-underline-offset: 0.14em;
+}
+
+.riseopedia-recipe-tree__crafted-by-list {
+  display: grid;
+  gap: 0.125rem;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.riseopedia-recipe-tree__crafted-by-item {
+  position: relative;
+  min-width: 0;
+  padding-left: 0.625rem;
+}
+
+.riseopedia-recipe-tree__crafted-by-item::before {
+  position: absolute;
+  top: 0.375rem;
+  left: 0;
+  width: 0.25rem;
+  height: 1px;
+  background: var(--theme-border);
+  content: "";
+}
+
+.riseopedia-recipe-tree__crafted-by-link,
+.riseopedia-recipe-tree__crafted-by-name {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+.riseopedia-recipe-tree__crafted-by-name {
+  color: var(--theme-text-muted);
+}
+
+.riseopedia-recipe-tree__connector {
+  position: relative;
+  display: grid;
+  grid-area: connector-in;
+  place-items: center;
+  min-height: 2rem;
+}
+
+.riseopedia-recipe-tree__connector--out {
+  grid-area: connector-out;
+}
+
+.riseopedia-recipe-tree__connector::before {
+  position: absolute;
+  top: 0;
+  bottom: 0.5rem;
+  left: 50%;
+  width: 1px;
+  background: var(--theme-border);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.riseopedia-recipe-tree__connector-arrow {
+  position: relative;
+  align-self: end;
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--theme-surface-card);
+  color: var(--theme-text-muted);
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.riseopedia-recipe-tree__process {
+  display: grid;
+  grid-area: process;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+  padding: var(--space-4, 1rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-surface-ink-soft);
+}
+
+.riseopedia-recipe-tree__process-list {
+  display: grid;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.riseopedia-recipe-tree__process-row {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: var(--space-2, 0.5rem);
+  align-items: center;
+  min-width: 0;
+  padding-block: var(--space-2, 0.5rem);
+  border-top: 1px solid var(--theme-border);
+}
+
+.riseopedia-recipe-tree__process-row:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.riseopedia-recipe-tree__process-row:last-child {
+  padding-bottom: 0;
+}
+
+.riseopedia-recipe-tree__process-icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-sm, 0.375rem);
+  background: var(--theme-bg-alpha-62);
+}
+
+.riseopedia-recipe-tree__process-icon-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.riseopedia-recipe-tree__process-icon-fallback {
+  width: 1rem;
+  height: 1rem;
+  color: var(--theme-text-muted);
+  stroke-width: 1.75;
+}
+
+.riseopedia-recipe-tree__process-copy {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.riseopedia-recipe-tree__process-label {
+  color: var(--theme-text-muted);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.riseopedia-recipe-tree__process-value,
+.riseopedia-recipe-tree__process-link {
+  min-width: 0;
+  color: var(--theme-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.125rem;
+  overflow-wrap: anywhere;
+}
+
+.riseopedia-recipe-tree__process-link {
+  color: var(--theme-accent);
+  text-decoration: none;
+}
+
+.riseopedia-recipe-tree__process-link:hover,
+.riseopedia-recipe-tree__process-link:focus-visible {
+  color: var(--theme-accent-strong, var(--theme-accent));
+  text-decoration: underline;
+}
+
+.riseopedia-recipe-tree__process-empty {
+  margin: 0;
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.riseopedia-recipe-tree .riseopedia-empty-state {
+  min-height: 0;
+  padding: var(--space-3, 0.75rem);
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--theme-bg-alpha-62);
+}
+
+.riseopedia-recipe-tree .riseopedia-empty-state__title {
+  font-size: 0.75rem;
+}
+
+.riseopedia-recipe-tree .riseopedia-empty-state__message {
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+/* Reset legacy recipe-row placement before applying the stable tree layout. */
+.riseopedia-recipe-tree__badge,
+.riseopedia-recipe-tree__quantity {
+  grid-column: auto;
+  grid-row: auto;
+}
+
+@media (min-width: 860px) {
+  .riseopedia-recipe-tree__grid {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(1.5rem, 2rem)
+      minmax(12rem, 18rem)
+      minmax(1.5rem, 2rem)
+      minmax(0, 1fr);
+    grid-template-areas: "inputs connector-in process connector-out outputs";
+    align-items: center;
+  }
+
+  .riseopedia-recipe-tree__group {
+    align-self: center;
+  }
+
+  .riseopedia-recipe-tree__connector {
+    align-self: stretch;
+    min-height: 100%;
+  }
+
+  .riseopedia-recipe-tree__connector::before {
+    top: 50%;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    width: auto;
+    height: 1px;
+    transform: translateY(-50%);
+  }
+
+  .riseopedia-recipe-tree__connector-arrow {
+    align-self: center;
+    justify-self: center;
+    transform: none;
+  }
+}
+
+@media (max-width: 559px) {
+  .riseopedia-recipe-tree__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .riseopedia-recipe-tree__badge {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .riseopedia-recipe-tree__quantity {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+/* ===== Riseopedia entity visual embedded migration ===== */
+.riseopedia-entity-visual--embedded {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  box-shadow: none;
+}
+
+.riseopedia-entity-visual--embedded .riseopedia-entity-visual__placeholder {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+}
+
+/* ===== Riseopedia V1 icon size buckets and layout fixes ===== */
+.riseopedia-detail-page,
+.riseopedia-result-grid,
+.riseopedia-classification-section,
+.riseopedia-body-content {
+  --riseopedia-small-icon-size: 64px;
+  --riseopedia-small-icon-fallback-size: 1.75rem;
+  --riseopedia-side-icon-size: 45px;
+  --riseopedia-side-icon-fallback-size: 1.25rem;
+  --riseopedia-footer-icon-size: 45px;
+  --riseopedia-footer-icon-fallback-size: 1.25rem;
+}
+
+.riseopedia-detail-aside,
+.riseopedia-detail-aside__blocks,
+.riseopedia-detail-aside__blocks .riseopedia-body-content {
+  --riseopedia-small-icon-size: var(--riseopedia-side-icon-size);
+  --riseopedia-small-icon-fallback-size: var(
+    --riseopedia-side-icon-fallback-size
+  );
+}
+
+.riseopedia-detail-page .riseopedia-entity-visual--inline,
+.riseopedia-result-card__icon:not(.riseopedia-entity-card-full__icon),
+.riseopedia-classification-card__icon,
+.riseopedia-preview-row__icon,
+.riseopedia-recipe-tree__icon,
+.riseopedia-recipe-tree__process-icon,
+.riseopedia-perk-tree__icon,
+.riseopedia-perk-tree__current-icon,
+.riseopedia-effect-modifiers__need-icon,
+.riseopedia-need-effects__effect-icon,
+.riseopedia-quest-objectives__icon,
+.riseopedia-quest-requirements__icon,
+.riseopedia-quest-rewards__icon,
+.riseopedia-quest-flow__icon,
+.riseopedia-poi-vendor-stock__icon,
+.riseopedia-location-tree__icon,
+.riseopedia-location-pois__icon {
+  width: var(--riseopedia-small-icon-size);
+  height: var(--riseopedia-small-icon-size);
+  flex: 0 0 var(--riseopedia-small-icon-size);
+}
+
+.riseopedia-result-card__icon:not(.riseopedia-entity-card-full__icon)
+  .riseopedia-result-card__fallback-icon,
+.riseopedia-classification-card__fallback-icon,
+.riseopedia-recipe-tree__icon-placeholder,
+.riseopedia-recipe-tree__process-icon-fallback,
+.riseopedia-perk-tree__icon-fallback,
+.riseopedia-perk-tree__current-icon-fallback,
+.riseopedia-effect-modifiers__need-icon-fallback,
+.riseopedia-need-effects__effect-icon-fallback,
+.riseopedia-quest-objectives__icon-fallback,
+.riseopedia-quest-requirements__icon-fallback,
+.riseopedia-quest-rewards__icon-fallback,
+.riseopedia-quest-flow__icon-fallback,
+.riseopedia-poi-vendor-stock__icon-fallback,
+.riseopedia-location-tree__icon-fallback,
+.riseopedia-location-pois__icon-fallback {
+  width: var(--riseopedia-small-icon-fallback-size);
+  height: var(--riseopedia-small-icon-fallback-size);
+}
+
+.riseopedia-recipe-tree__asset,
+.riseopedia-poi-vendor-stock__item {
+  grid-template-columns: var(--riseopedia-small-icon-size) minmax(0, 1fr);
+}
+
+.riseopedia-recipe-tree__process-row {
+  grid-template-columns: var(--riseopedia-small-icon-size) minmax(0, 1fr);
+}
+
+.riseopedia-location-tree__row {
+  grid-template-columns: 0.75rem var(--riseopedia-small-icon-size) minmax(
+      0,
+      1fr
+    );
+}
+
+.riseopedia-location-pois__row {
+  grid-template-columns: var(--riseopedia-small-icon-size) minmax(0, 1fr) auto;
+}
+
+.riseopedia-perk-tree__row,
+.riseopedia-effect-modifiers__need,
+.riseopedia-need-effects__identity,
+.riseopedia-quest-objectives__identity,
+.riseopedia-quest-requirements__identity,
+.riseopedia-quest-rewards__identity,
+.riseopedia-quest-flow__identity {
+  min-width: 0;
+}
+
+.riseopedia-recipe-tree__asset-copy,
+.riseopedia-recipe-tree__process-copy,
+.riseopedia-location-pois__copy,
+.riseopedia-poi-vendor-stock__copy,
+.riseopedia-perk-tree__copy,
+.riseopedia-effect-modifiers__need-copy,
+.riseopedia-need-effects__identity-copy {
+  min-width: 0;
+}
+
+.riseopedia-recipe-tree__asset-link,
+.riseopedia-recipe-tree__asset-name,
+.riseopedia-recipe-tree__process-value,
+.riseopedia-recipe-tree__process-link,
+.riseopedia-location-pois__link,
+.riseopedia-location-pois__name,
+.riseopedia-poi-vendor-stock__link,
+.riseopedia-poi-vendor-stock__name,
+.riseopedia-perk-tree__link,
+.riseopedia-perk-tree__name,
+.riseopedia-effect-modifiers__effect,
+.riseopedia-need-effects__link,
+.riseopedia-need-effects__name {
+  overflow-wrap: anywhere;
+}
+
+.riseopedia-entity-card-full__property-row {
+  grid-template-columns: minmax(4.25rem, 0.55fr) minmax(0, 1.45fr);
+  align-items: baseline;
+}
+
+.riseopedia-entity-card-full__property-label,
+.riseopedia-entity-card-full__property-value {
+  min-width: 0;
+}
+
+.riseopedia-entity-card-full__property-value {
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.riseopedia-effect-modifiers__modifier {
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.riseopedia-effect-modifiers__metrics {
+  min-width: max-content;
+}
+
+.riseopedia-effect-modifiers__metric {
+  min-width: 3.25rem;
+  padding-inline: var(--space-2, 0.5rem);
+}
+
+.riseopedia-dependency-table__icon-column,
+.riseopedia-dependency-table__icon-cell {
+  width: calc(var(--riseopedia-footer-icon-size) + var(--space-3, 0.75rem));
+}
+
+.riseopedia-dependency-table__icon {
+  width: var(--riseopedia-footer-icon-size);
+  height: var(--riseopedia-footer-icon-size);
+}
+
+.riseopedia-dependency-table__icon-placeholder {
+  width: var(--riseopedia-footer-icon-fallback-size);
+  height: var(--riseopedia-footer-icon-fallback-size);
+}
+
+@media (max-width: 559px) {
+  .riseopedia-poi-vendor-stock__item {
+    grid-template-columns: var(--riseopedia-small-icon-size) minmax(0, 1fr);
+  }
+
+  .riseopedia-poi-vendor-stock__icon {
+    width: var(--riseopedia-small-icon-size);
+    height: var(--riseopedia-small-icon-size);
+  }
+}
+
+/* ===== Riseopedia V1 card/media alignment correction overrides ===== */
+.riseopedia-detail-page,
+.riseopedia-result-grid,
+.riseopedia-classification-section,
+.riseopedia-detail-bottom,
+.riseopedia-body-content,
+.riseopedia-bottom-blocks {
+  --riseopedia-small-icon-size: 64px;
+  --riseopedia-small-icon-fallback-size: 1.75rem;
+  --riseopedia-side-panel-icon-size: 45px;
+  --riseopedia-side-panel-icon-fallback-size: 1.25rem;
+  --riseopedia-footer-icon-size: 45px;
+  --riseopedia-footer-icon-fallback-size: 1.25rem;
+}
+
+.riseopedia-detail-aside,
+.riseopedia-detail-aside__blocks,
+.riseopedia-detail-aside .riseopedia-body-content,
+.riseopedia-detail-aside .riseopedia-hierarchy-tree {
+  --riseopedia-small-icon-size: var(--riseopedia-side-panel-icon-size);
+  --riseopedia-small-icon-fallback-size: var(
+    --riseopedia-side-panel-icon-fallback-size
+  );
+}
+
+.riseopedia-entity-card--compact {
+  display: grid;
+  grid-template-columns: var(--riseopedia-small-icon-size) minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.riseopedia-result-card__icon:not(.riseopedia-entity-card-full__icon),
+.riseopedia-classification-card__icon,
+.riseopedia-preview-row__icon,
+.riseopedia-recipe-tree__icon,
+.riseopedia-recipe-tree__process-icon,
+.riseopedia-perk-tree__icon,
+.riseopedia-perk-tree__current-icon,
+.riseopedia-effect-modifiers__need-icon,
+.riseopedia-need-effects__effect-icon,
+.riseopedia-quest-objectives__icon,
+.riseopedia-quest-requirements__icon,
+.riseopedia-quest-rewards__icon,
+.riseopedia-quest-flow__icon,
+.riseopedia-poi-vendor-stock__icon,
+.riseopedia-location-tree__icon,
+.riseopedia-location-pois__icon {
+  width: var(--riseopedia-small-icon-size);
+  min-width: var(--riseopedia-small-icon-size);
+  max-width: var(--riseopedia-small-icon-size);
+  height: var(--riseopedia-small-icon-size);
+  min-height: var(--riseopedia-small-icon-size);
+  max-height: var(--riseopedia-small-icon-size);
+  flex: 0 0 var(--riseopedia-small-icon-size);
+}
+
+.riseopedia-result-card__icon:not(.riseopedia-entity-card-full__icon)
+  .riseopedia-entity-visual,
+.riseopedia-classification-card__icon .riseopedia-entity-visual,
+.riseopedia-preview-row__icon .riseopedia-entity-visual,
+.riseopedia-recipe-tree__icon .riseopedia-entity-visual,
+.riseopedia-recipe-tree__process-icon .riseopedia-entity-visual,
+.riseopedia-perk-tree__icon .riseopedia-entity-visual,
+.riseopedia-perk-tree__current-icon .riseopedia-entity-visual,
+.riseopedia-effect-modifiers__need-icon .riseopedia-entity-visual,
+.riseopedia-need-effects__effect-icon .riseopedia-entity-visual,
+.riseopedia-quest-objectives__icon .riseopedia-entity-visual,
+.riseopedia-quest-requirements__icon .riseopedia-entity-visual,
+.riseopedia-quest-rewards__icon .riseopedia-entity-visual,
+.riseopedia-quest-flow__icon .riseopedia-entity-visual,
+.riseopedia-poi-vendor-stock__icon .riseopedia-entity-visual,
+.riseopedia-location-tree__icon .riseopedia-entity-visual,
+.riseopedia-location-pois__icon .riseopedia-entity-visual,
+.riseopedia-result-card__icon:not(.riseopedia-entity-card-full__icon)
+  .riseopedia-entity-visual--embedded,
+.riseopedia-recipe-tree__icon .riseopedia-entity-visual--embedded,
+.riseopedia-perk-tree__icon .riseopedia-entity-visual--embedded,
+.riseopedia-quest-objectives__icon .riseopedia-entity-visual--embedded,
+.riseopedia-quest-requirements__icon .riseopedia-entity-visual--embedded,
+.riseopedia-quest-rewards__icon .riseopedia-entity-visual--embedded,
+.riseopedia-location-pois__icon .riseopedia-entity-visual--embedded {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  flex: 0 0 100%;
+}
+
+.riseopedia-result-card__icon:not(.riseopedia-entity-card-full__icon)
+  .riseopedia-entity-visual__image,
+.riseopedia-classification-card__icon .riseopedia-entity-visual__image,
+.riseopedia-preview-row__icon .riseopedia-entity-visual__image,
+.riseopedia-recipe-tree__icon .riseopedia-entity-visual__image,
+.riseopedia-recipe-tree__process-icon .riseopedia-entity-visual__image,
+.riseopedia-perk-tree__icon .riseopedia-entity-visual__image,
+.riseopedia-perk-tree__current-icon .riseopedia-entity-visual__image,
+.riseopedia-effect-modifiers__need-icon .riseopedia-entity-visual__image,
+.riseopedia-need-effects__effect-icon .riseopedia-entity-visual__image,
+.riseopedia-quest-objectives__icon .riseopedia-entity-visual__image,
+.riseopedia-quest-requirements__icon .riseopedia-entity-visual__image,
+.riseopedia-quest-rewards__icon .riseopedia-entity-visual__image,
+.riseopedia-quest-flow__icon .riseopedia-entity-visual__image,
+.riseopedia-poi-vendor-stock__icon .riseopedia-entity-visual__image,
+.riseopedia-location-tree__icon .riseopedia-entity-visual__image,
+.riseopedia-location-pois__icon .riseopedia-entity-visual__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.riseopedia-entity-card-full__property-row {
+  grid-template-columns: minmax(6rem, 0.42fr) minmax(0, 1.58fr);
+  align-items: baseline;
+  column-gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-entity-card-full__property-label,
+.riseopedia-entity-card-full__property-value {
+  min-width: 0;
+}
+
+.riseopedia-entity-card-full__property-value {
+  justify-self: end;
+  overflow: visible;
+  text-align: right;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.riseopedia-recipe-tree__asset,
+.riseopedia-recipe-tree__process-row,
+.riseopedia-perk-tree__row,
+.riseopedia-poi-vendor-stock__item {
+  grid-template-columns: var(--riseopedia-small-icon-size) minmax(0, 1fr);
+}
+
+.riseopedia-location-tree__row {
+  grid-template-columns: 0.75rem var(--riseopedia-small-icon-size) minmax(
+      0,
+      1fr
+    );
+}
+
+.riseopedia-location-pois__row {
+  grid-template-columns: var(--riseopedia-small-icon-size) minmax(0, 1fr) auto;
+}
+
+.riseopedia-quest-objectives__row {
+  grid-template-columns:
+    2.25rem var(--riseopedia-small-icon-size) minmax(0, 1fr)
+    4rem 5.5rem;
+}
+
+.riseopedia-quest-requirements__row {
+  grid-template-columns:
+    2rem var(--riseopedia-small-icon-size) minmax(0, 1fr)
+    4rem 5rem;
+}
+
+.riseopedia-quest-rewards__row {
+  grid-template-columns:
+    2rem var(--riseopedia-small-icon-size) minmax(0, 1fr)
+    5.5rem;
+}
+
+.riseopedia-recipe-tree__asset-copy,
+.riseopedia-recipe-tree__asset-title-line,
+.riseopedia-recipe-tree__process-copy,
+.riseopedia-location-pois__copy,
+.riseopedia-location-pois__name,
+.riseopedia-location-pois__link,
+.riseopedia-poi-vendor-stock__copy,
+.riseopedia-poi-vendor-stock__name,
+.riseopedia-poi-vendor-stock__link,
+.riseopedia-perk-tree__copy,
+.riseopedia-perk-tree__link,
+.riseopedia-perk-tree__name,
+.riseopedia-quest-objectives__target-copy,
+.riseopedia-quest-requirements__copy,
+.riseopedia-quest-rewards__target-copy {
+  min-width: 0;
+}
+
+.riseopedia-effect-modifiers,
+.riseopedia-need-effects {
+  --riseopedia-mechanic-identity-icon-size: var(--riseopedia-small-icon-size);
+}
+
+.riseopedia-effect-modifiers__group,
+.riseopedia-need-effects__group {
+  grid-template-columns: minmax(10.5rem, 0.8fr) minmax(0, 2.2fr);
+}
+
+.riseopedia-effect-modifiers__need,
+.riseopedia-need-effects__identity {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border-right: 1px solid var(--theme-border);
+  border-bottom: 0;
+}
+
+.riseopedia-effect-modifiers__need-icon,
+.riseopedia-need-effects__effect-icon {
+  width: var(--riseopedia-small-icon-size);
+  height: var(--riseopedia-small-icon-size);
+  flex: 0 0 var(--riseopedia-small-icon-size);
+}
+
+.riseopedia-effect-modifiers__modifier {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.riseopedia-effect-modifiers__metrics {
+  min-width: 0;
+}
+
+.riseopedia-dependency-table__icon-column,
+.riseopedia-dependency-table__icon-cell {
+  width: calc(var(--riseopedia-footer-icon-size) + var(--space-3, 0.75rem));
+  padding-right: var(--space-2, 0.5rem);
+  padding-left: var(--space-2, 0.5rem);
+}
+
+.riseopedia-dependency-table__icon {
+  width: var(--riseopedia-footer-icon-size);
+  min-width: var(--riseopedia-footer-icon-size);
+  max-width: var(--riseopedia-footer-icon-size);
+  height: var(--riseopedia-footer-icon-size);
+  min-height: var(--riseopedia-footer-icon-size);
+  max-height: var(--riseopedia-footer-icon-size);
+  flex: 0 0 var(--riseopedia-footer-icon-size);
+}
+
+.riseopedia-detail-page
+  .riseopedia-dependency-table__icon
+  .riseopedia-entity-visual--inline,
+.riseopedia-dependency-table__icon .riseopedia-entity-visual,
+.riseopedia-dependency-table__icon .riseopedia-entity-visual--embedded,
+.riseopedia-dependency-table__visual {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  flex: 0 0 100%;
+}
+
+.riseopedia-dependency-table__icon .riseopedia-entity-visual__image,
+.riseopedia-dependency-table__icon .riseopedia-dependency-table__icon-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.riseopedia-dependency-table__icon-placeholder {
+  width: var(--riseopedia-footer-icon-fallback-size);
+  height: var(--riseopedia-footer-icon-fallback-size);
+}
+
+@media (max-width: 980px) {
+  .riseopedia-effect-modifiers__group,
+  .riseopedia-need-effects__group {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .riseopedia-effect-modifiers__need,
+  .riseopedia-need-effects__identity {
+    border-right: 0;
+    border-bottom: 1px solid var(--theme-border);
+  }
+}
+
+@media (max-width: 700px) {
+  .riseopedia-quest-objectives__row {
+    grid-template-columns: 2.25rem var(--riseopedia-small-icon-size) minmax(
+        0,
+        1fr
+      );
+  }
+
+  .riseopedia-quest-requirements__row,
+  .riseopedia-quest-rewards__row {
+    grid-template-columns: 2rem var(--riseopedia-small-icon-size) minmax(0, 1fr);
+  }
+
+  .riseopedia-quest-objectives__target,
+  .riseopedia-quest-objectives__reward,
+  .riseopedia-quest-requirements__quantity,
+  .riseopedia-quest-requirements__state,
+  .riseopedia-quest-rewards__quantity {
+    grid-column: 3 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .riseopedia-location-pois__row {
+    grid-template-columns: var(--riseopedia-small-icon-size) minmax(0, 1fr);
+  }
+}
+
+/* ===== Riseopedia V1 outfit/card/mechanic follow-up tweaks ===== */
+.riseopedia-entity-card--full {
+  align-content: start;
+  grid-auto-rows: max-content;
+}
+
+.riseopedia-entity-card-full__properties {
+  align-content: start;
+  grid-auto-rows: max-content;
+}
+
+.riseopedia-entity-card-full__property-row:not(
+  .riseopedia-entity-card-full__property-row--footer
+) {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-entity-card-full__property-row--empty {
+  display: none;
+}
+
+.riseopedia-entity-card-full__property-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.riseopedia-entity-card-full__property-value {
+  flex: 0 1 auto;
+  max-width: 58%;
+  margin-left: auto;
+  text-align: right;
+}
+
+.riseopedia-entity-card-full__property-row--footer {
+  display: block;
+  padding-top: var(--space-2, 0.5rem);
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.riseopedia-entity-card-full__property-row--footer
+  + .riseopedia-entity-card-full__property-row--footer {
+  padding-top: var(--space-1, 0.25rem);
+}
+
+.riseopedia-entity-card-full__property-label--hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.riseopedia-entity-card-full__property-value--footer {
+  display: block;
+  max-width: none;
+  margin: 0;
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.125rem;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.riseopedia-effect-modifiers__group,
+.riseopedia-need-effects__group {
+  grid-template-columns: minmax(15.75rem, 1.2fr) minmax(0, 1.8fr);
+}
+
+.riseopedia-effect-modifiers__group--single
+  .riseopedia-effect-modifiers__modifier,
+.riseopedia-need-effects__group--single .riseopedia-effect-modifiers__modifier {
+  min-height: 100%;
+  align-items: center;
+}
+
+.riseopedia-effect-modifiers__group--single
+  .riseopedia-effect-modifiers__modifier-summary,
+.riseopedia-need-effects__group--single
+  .riseopedia-effect-modifiers__modifier-summary {
+  align-self: center;
+}
+
+.riseopedia-effect-modifiers__group--single
+  .riseopedia-effect-modifiers__metrics,
+.riseopedia-need-effects__group--single .riseopedia-effect-modifiers__metrics {
+  align-self: stretch;
+}
+
+@media (max-width: 980px) {
+  .riseopedia-effect-modifiers__group,
+  .riseopedia-need-effects__group {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* POI final-touch numbered entity lists */
+.riseopedia-poi-numbered-list__rows {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-bg-alpha-62);
+  list-style: none;
+}
+
+.riseopedia-poi-numbered-list__row {
+  display: grid;
+  grid-template-columns: 2.25rem 2.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+  min-height: 3.75rem;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  border-top: 1px solid var(--theme-border);
+}
+
+.riseopedia-poi-numbered-list__row:first-child {
+  border-top: 0;
+}
+
+.riseopedia-poi-numbered-list__icon,
+.riseopedia-poi-linked-entity__icon,
+.riseopedia-poi-container-loot__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--theme-surface-card);
+  color: var(--theme-accent);
+}
+
+.riseopedia-poi-numbered-list__icon > svg,
+.riseopedia-poi-linked-entity__icon > svg,
+.riseopedia-poi-container-loot__icon > svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.riseopedia-poi-numbered-list__copy,
+.riseopedia-poi-container-loot__copy {
+  display: grid;
+  gap: var(--space-1, 0.25rem);
+  min-width: 0;
+}
+
+.riseopedia-poi-numbered-list__link,
+.riseopedia-poi-numbered-list__name,
+.riseopedia-poi-container-loot__link,
+.riseopedia-poi-container-loot__name,
+.riseopedia-poi-linked-entity__link {
+  color: var(--theme-text);
+  font-weight: 700;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.riseopedia-poi-numbered-list__link:hover,
+.riseopedia-poi-numbered-list__link:focus-visible,
+.riseopedia-poi-container-loot__link:hover,
+.riseopedia-poi-container-loot__link:focus-visible,
+.riseopedia-poi-linked-entity__link:hover,
+.riseopedia-poi-linked-entity__link:focus-visible {
+  color: var(--theme-accent);
+  text-decoration: none;
+}
+
+.riseopedia-poi-numbered-list__meta,
+.riseopedia-poi-container-loot__meta {
+  color: var(--theme-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.riseopedia-poi-numbered-list__row[data-resolution-status]:not(
+    [data-resolution-status="resolved"]
+  ) {
+  background: color-mix(in oklab, var(--theme-accent-soft) 42%, transparent);
+}
+
+/* POI public-bench linked asset aside */
+.riseopedia-poi-linked-entity {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2, 0.5rem);
+  min-width: 0;
+}
+
+.riseopedia-poi-linked-entity__icon {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+}
+
+.riseopedia-poi-linked-entity__link {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* POI container loot catalog */
+.riseopedia-poi-container-loot__list {
+  --riseopedia-container-chance-column: minmax(5.25rem, 7rem);
+  --riseopedia-container-rolls-column: minmax(8rem, 12rem);
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-bg-alpha-62);
+  list-style: none;
+}
+
+.riseopedia-poi-container-loot__header,
+.riseopedia-poi-container-loot__row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    var(--riseopedia-container-chance-column)
+    var(--riseopedia-container-rolls-column);
+  min-width: 0;
+}
+
+.riseopedia-poi-container-loot__header {
+  align-items: center;
+  min-height: 2rem;
+  color: var(--theme-text-muted);
+  background: var(--theme-surface-ink-soft);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+.riseopedia-poi-container-loot__header > span,
+.riseopedia-poi-container-loot__chance,
+.riseopedia-poi-container-loot__rolls {
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+}
+
+.riseopedia-poi-container-loot__header > span:not(:first-child),
+.riseopedia-poi-container-loot__chance,
+.riseopedia-poi-container-loot__rolls {
+  border-inline-start: 1px solid var(--theme-border);
+  text-align: right;
+}
+
+.riseopedia-poi-container-loot__row {
+  align-items: stretch;
+  border-top: 1px solid var(--theme-border);
+}
+
+.riseopedia-poi-container-loot__row:first-child {
+  border-top: 0;
+}
+
+.riseopedia-poi-container-loot__item {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+}
+
+.riseopedia-poi-container-loot__chance,
+.riseopedia-poi-container-loot__rolls {
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  min-width: 0;
+  color: var(--theme-text);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.riseopedia-poi-container-loot__rolls {
+  color: var(--theme-text-muted);
+  font-weight: 500;
+}
+
+.riseopedia-poi-container-loot__row[data-resolution-status]:not(
+    [data-resolution-status="resolved"]
+  ) {
+  background: color-mix(in oklab, var(--theme-accent-soft) 42%, transparent);
+}
+
+@media (max-width: 639px) {
+  .riseopedia-poi-numbered-list__row {
+    grid-template-columns: 2rem 2.25rem minmax(0, 1fr);
+    gap: var(--space-2, 0.5rem);
+    padding-inline: var(--space-2, 0.5rem);
+  }
+
+  .riseopedia-poi-numbered-list__icon,
+  .riseopedia-poi-container-loot__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .riseopedia-poi-container-loot__header {
+    display: none;
+  }
+
+  .riseopedia-poi-container-loot__row {
+    grid-template-columns: minmax(0, 1fr) minmax(5rem, auto);
+  }
+
+  .riseopedia-poi-container-loot__item {
+    grid-row: 1 / span 2;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: var(--space-2, 0.5rem);
+    padding: var(--space-2, 0.5rem);
+  }
+
+  .riseopedia-poi-container-loot__chance,
+  .riseopedia-poi-container-loot__rolls {
+    padding-inline: var(--space-2, 0.5rem);
+  }
+
+  .riseopedia-poi-container-loot__rolls {
+    font-size: 0.6875rem;
+  }
+}
+
+/* POI classification-grouped Quest and Recipe lists */
+.riseopedia-poi-grouped-list__groups {
+  display: grid;
+  gap: var(--space-4, 1rem);
+  min-width: 0;
+}
+
+.riseopedia-poi-grouped-list__group {
+  min-width: 0;
+}
+
+.riseopedia-poi-grouped-list__rows {
+  display: grid;
+  min-width: 0;
+  margin: var(--space-2, 0.5rem) 0 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-bg-alpha-62);
+  list-style: none;
+}
+
+.riseopedia-poi-grouped-list__row {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+  min-height: 3.75rem;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  border-top: 1px solid var(--theme-border);
+}
+
+.riseopedia-poi-grouped-list__row:first-child {
+  border-top: 0;
+}
+
+.riseopedia-poi-grouped-list__row[data-resolution-status]:not(
+    [data-resolution-status="resolved"]
+  ) {
+  background: color-mix(in oklab, var(--theme-accent-soft) 42%, transparent);
+}
+
+.riseopedia-poi-list-icon.media-icon-render {
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+  object-fit: contain;
+}
+
+@media (max-width: 639px) {
+  .riseopedia-poi-grouped-list__row {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: var(--space-2, 0.5rem);
+    padding-inline: var(--space-2, 0.5rem);
+  }
+}
+
+/* ===== Riseopedia GUI material refinement =====
+   Keeps the current palette and intentional hero geometry. Depth comes from existing
+   theme roles, gradients, borders, shadows, and restrained interaction movement. */
+
+.riseopedia-page-hero {
+  box-shadow: var(--shadow-riseopedia-structure);
+}
+
+/* Entity detail heroes intentionally remain open on the media side. */
+.riseopedia-detail-hero::before {
+  box-shadow: -10px 14px 24px -18px var(--theme-shadow-panel);
+}
+
+.riseopedia-detail-hero__media .riseopedia-media-frame {
+  box-shadow: var(--shadow-riseopedia-media);
+}
+
+.riseopedia-page .public-collection-panel,
+.riseopedia-detail-content-panel,
+.riseopedia-detail-footer-panel {
+  background: linear-gradient(
+    180deg,
+    var(--theme-surface-alpha-80),
+    var(--theme-bg-alpha-62)
+  );
+  box-shadow: var(--shadow-riseopedia-structure);
+}
+
+.riseopedia-overview-search-panel {
+  box-shadow: var(--shadow-riseopedia-inset);
+}
+
+.riseopedia-classification-section__header,
+.riseopedia-entity-results-panel__header,
+.riseopedia-section-header {
+  padding-bottom: var(--space-3, 0.75rem);
+  border-bottom: 1px solid var(--theme-border);
+}
+
+.riseopedia-classification-card,
+.riseopedia-entity-card--full,
+.riseopedia-entity-card--compact,
+.riseopedia-result-card,
+.riseopedia-preview-row,
+.riseopedia-section-card {
+  box-shadow: var(--shadow-riseopedia-interactive);
+  transform: translateY(0);
+  transition:
+    border-color var(--dur-1) var(--ease-standard),
+    background-color var(--dur-1) var(--ease-standard),
+    box-shadow var(--dur-2) var(--ease-standard),
+    transform var(--dur-2) var(--ease-emphasized);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .riseopedia-classification-card:hover,
+  .riseopedia-entity-card--full:hover,
+  .riseopedia-entity-card--compact:hover,
+  .riseopedia-result-card:hover,
+  .riseopedia-preview-row:hover,
+  .riseopedia-section-card:hover {
+    box-shadow: var(--shadow-riseopedia-interactive-hover);
+    transform: translateY(-1px);
+  }
+}
+
+.riseopedia-classification-card:focus-visible,
+.riseopedia-entity-card--full:focus-visible,
+.riseopedia-entity-card--compact:focus-visible,
+.riseopedia-result-card:focus-visible,
+.riseopedia-preview-row:focus-within,
+.riseopedia-section-card:focus-within {
+  box-shadow:
+    0 0 0 3px var(--theme-focus-soft),
+    var(--shadow-riseopedia-interactive-hover);
+}
+
+.riseopedia-classification-card:active,
+.riseopedia-entity-card--full:active,
+.riseopedia-entity-card--compact:active,
+.riseopedia-result-card:active {
+  box-shadow: var(--shadow-riseopedia-interactive);
+  transform: translateY(0);
+}
+
+.riseopedia-classification-card__icon,
+.riseopedia-entity-card-full__icon,
+.riseopedia-entity-card-compact__icon,
+.riseopedia-result-card__icon,
+.riseopedia-location-tree__icon,
+.riseopedia-location-pois__icon,
+.riseopedia-recipe-tree__icon,
+.riseopedia-recipe-tree__process-icon,
+.riseopedia-poi-numbered-list__icon,
+.riseopedia-poi-container-loot__icon,
+.riseopedia-poi-linked-entity__icon,
+.riseopedia-effect-modifiers__need-icon,
+.riseopedia-need-effects__effect-icon,
+.riseopedia-experience-progression__icon,
+.riseopedia-quest-flow__icon {
+  background: linear-gradient(
+    180deg,
+    var(--theme-surface-alpha-70),
+    var(--theme-surface-ink-soft)
+  );
+  box-shadow: var(--shadow-riseopedia-icon-well);
+}
+
+.riseopedia-body-block,
+.riseopedia-overview-table,
+.riseopedia-body-section,
+.riseopedia-recipe-tree,
+.riseopedia-bottom-block,
+.riseopedia-dependency-panel {
+  background: linear-gradient(
+    180deg,
+    var(--theme-surface-card),
+    var(--theme-bg-surface-86)
+  );
+  box-shadow: var(--shadow-riseopedia-module);
+}
+
+.riseopedia-body-block__header,
+.riseopedia-recipe-tree__header,
+.riseopedia-bottom-block__header {
+  padding-bottom: var(--space-3, 0.75rem);
+  border-bottom: 1px solid var(--riseopedia-rarity-border);
+}
+
+.riseopedia-overview-table__list,
+.riseopedia-spec-table,
+.riseopedia-poi-vendor-stock__list,
+.riseopedia-poi-container-loot__list,
+.riseopedia-poi-numbered-list__rows,
+.riseopedia-poi-grouped-list__rows,
+.riseopedia-experience-level-table__scroll,
+.riseopedia-quest-rewards__list,
+.riseopedia-quest-objectives__list,
+.riseopedia-quest-requirements__list {
+  box-shadow: var(--shadow-riseopedia-inset);
+}
+
+.riseopedia-overview-table__row,
+.riseopedia-spec-table__row,
+.riseopedia-poi-vendor-stock__row,
+.riseopedia-poi-container-loot__row,
+.riseopedia-poi-numbered-list__row,
+.riseopedia-poi-grouped-list__row,
+.riseopedia-location-pois__row,
+.riseopedia-recipe-tree__row,
+.riseopedia-recipe-tree__process-row {
+  transition:
+    background-color var(--dur-1) var(--ease-standard),
+    border-color var(--dur-1) var(--ease-standard),
+    box-shadow var(--dur-1) var(--ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .riseopedia-poi-vendor-stock__row:has(a):hover,
+  .riseopedia-poi-container-loot__row:has(a):hover,
+  .riseopedia-poi-numbered-list__row:has(a):hover,
+  .riseopedia-poi-grouped-list__row:has(a):hover,
+  .riseopedia-location-pois__row:has(a):hover,
+  .riseopedia-recipe-tree__row:has(a):hover,
+  .riseopedia-recipe-tree__process-row:has(a):hover {
+    background: var(--theme-surface-alpha-60);
+    box-shadow: inset 3px 0 0 var(--theme-accent-border);
+  }
+}
+
+.riseopedia-location-tree--poi-context {
+  --riseopedia-hierarchy-line-color: var(--theme-border-strong);
+  --riseopedia-hierarchy-marker-border: var(--theme-border-strong);
+}
+
+.riseopedia-location-tree--poi-context .riseopedia-location-tree__list {
+  padding: var(--space-2, 0.5rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-surface-ink-soft);
+  box-shadow: var(--shadow-riseopedia-inset);
+}
+
+.riseopedia-location-tree__row {
+  transition:
+    background-color var(--dur-1) var(--ease-standard),
+    border-color var(--dur-1) var(--ease-standard),
+    box-shadow var(--dur-1) var(--ease-standard);
+}
+
+.riseopedia-location-tree__node:not([data-location-tree-current="true"])
+  > .riseopedia-location-tree__row:has(a):hover,
+.riseopedia-location-tree__node:not([data-location-tree-current="true"])
+  > .riseopedia-location-tree__row:focus-within {
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--theme-surface-alpha-48);
+  box-shadow: inset 2px 0 0 var(--theme-border-strong);
+}
+
+.riseopedia-location-tree__node[data-location-tree-current="true"]
+  > .riseopedia-location-tree__row {
+  box-shadow:
+    inset 0 1px 0 var(--theme-surface-border-70),
+    0 5px 14px var(--theme-shadow-card);
+}
+
+.riseopedia-recipe-tree__row,
+.riseopedia-recipe-tree__process,
+.riseopedia-effect-modifiers__group,
+.riseopedia-need-effects__group,
+.riseopedia-perk-tree__current {
+  box-shadow: var(--shadow-riseopedia-interactive);
+}
+
+.riseopedia-filter-bar .ui-dropdown__button,
+.riseopedia-filter-bar__search .ui-input,
+.riseopedia-search-bar .ui-input {
+  box-shadow: inset 0 1px 0 var(--theme-border);
+  transition:
+    border-color var(--dur-1) var(--ease-standard),
+    box-shadow var(--dur-1) var(--ease-standard),
+    background-color var(--dur-1) var(--ease-standard);
+}
+
+.riseopedia-filter-bar .ui-dropdown__button:focus-visible,
+.riseopedia-filter-bar__search .ui-input:focus-visible,
+.riseopedia-search-bar .ui-input:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--theme-focus-soft),
+    inset 0 1px 0 var(--theme-border-strong);
+}
+
+@media (max-width: 767px) {
+  .riseopedia-page .public-collection-panel,
+  .riseopedia-detail-content-panel,
+  .riseopedia-detail-footer-panel,
+  .riseopedia-page-hero {
+    box-shadow:
+      inset 0 1px 0 var(--theme-surface-border-70),
+      0 8px 20px var(--theme-shadow-soft);
+  }
+
+  .riseopedia-detail-hero__media .riseopedia-media-frame {
+    box-shadow:
+      inset 0 1px 0 var(--theme-surface-border-70),
+      0 10px 24px var(--theme-shadow-panel);
+  }
+
+  .riseopedia-location-tree--poi-context .riseopedia-location-tree__list {
+    padding: var(--space-1, 0.25rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .riseopedia-page *,
+  .riseopedia-detail-page * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .riseopedia-classification-card,
+  .riseopedia-entity-card--full,
+  .riseopedia-entity-card--compact,
+  .riseopedia-result-card,
+  .riseopedia-preview-row,
+  .riseopedia-section-card,
+  .riseopedia-classification-card__arrow {
+    transform: none !important;
+  }
+}
+
+/* ==================================================================================================================
+   Entity-link preview
+   Reuses configured full-card content while the floating shell owns placement, elevation, and viewport collision.
+   ================================================================================================================== */
+
+.riseopedia-entity-preview-scope {
+  display: contents;
+}
+
+.riseopedia-entity-preview {
+  position: fixed;
+  z-index: 1400;
+  top: var(--riseopedia-entity-preview-top);
+  left: var(--riseopedia-entity-preview-left);
+  width: min(29rem, calc(100vw - 2rem));
+  max-height: min(70vh, 38rem);
+  overflow: auto;
+  padding: var(--space-3, 0.75rem);
+  border: 1px solid var(--theme-border-strong);
+  border-radius: var(--radius-xl, 1rem);
+  background: linear-gradient(
+    180deg,
+    var(--theme-surface-card),
+    var(--theme-bg-surface-86)
+  );
+  box-shadow:
+    inset 0 1px 0 var(--theme-surface-border-70),
+    0 22px 56px var(--theme-shadow-panel);
+  overscroll-behavior: contain;
+  animation: riseopedia-entity-preview-in var(--dur-2) var(--ease-emphasized);
+}
+
+.riseopedia-entity-preview::before {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 -18px 34px var(--theme-shadow-soft);
+  content: "";
+  pointer-events: none;
+}
+
+.riseopedia-entity-preview__eyebrow {
+  position: relative;
+  margin: 0 0 var(--space-2, 0.5rem);
+  color: var(--theme-muted);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.riseopedia-entity-preview__card {
+  position: relative;
+}
+
+.riseopedia-entity-preview__card .riseopedia-entity-card--full {
+  width: 100%;
+  min-height: 0;
+  border-color: var(--theme-border);
+  box-shadow: var(--shadow-riseopedia-inset);
+  transform: none;
+}
+
+.riseopedia-entity-preview__card .riseopedia-entity-card--full:hover,
+.riseopedia-entity-preview__card .riseopedia-entity-card--full:focus-visible,
+.riseopedia-entity-preview__card .riseopedia-entity-card--full:active {
+  box-shadow:
+    0 0 0 3px var(--theme-focus-soft),
+    var(--shadow-riseopedia-module);
+  transform: none;
+}
+
+.riseopedia-entity-preview__state {
+  position: relative;
+  display: grid;
+  min-height: 7rem;
+  place-items: center;
+  padding: var(--space-5, 1.25rem);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--theme-surface-ink-soft);
+  box-shadow: var(--shadow-riseopedia-inset);
+  color: var(--theme-muted);
+  text-align: center;
+}
+
+@keyframes riseopedia-entity-preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 767px), (hover: none), (pointer: coarse) {
+  .riseopedia-entity-preview {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .riseopedia-entity-preview {
+    animation: none;
+  }
+}
+
+/* ==================================================================================================================
+   Final filter-state, control-fit, and card-material refinement
+   Keeps one horizontal filter row and the existing palette. Wrapped filter labels grow inside their own control.
+   ================================================================================================================== */
+
+.riseopedia-filter-bar,
+.riseopedia-filter-bar--with-release,
+.riseopedia-filter-bar--without-release {
+  display: flex;
+  width: 100%;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: var(--space-3, 0.75rem);
+}
+
+.riseopedia-filter-bar__control {
+  display: flex;
+  width: auto;
+  min-width: 7.75rem;
+  flex: 0 1 11rem;
+}
+
+.riseopedia-filter-bar__control--release {
+  flex-basis: 9.75rem;
+}
+
+.riseopedia-filter-bar__control .ui-dropdown {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+}
+
+.riseopedia-filter-bar .ui-dropdown__button {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--btn-md-h);
+  height: 100%;
+  align-items: center;
+  padding-block: var(--space-2, 0.5rem);
+  line-height: 1.2;
+}
+
+.riseopedia-filter-bar .ui-dropdown__label {
+  min-width: 0;
+  flex: 1 1 auto;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.riseopedia-filter-bar .ui-dropdown__chevron {
+  align-self: center;
+  flex: 0 0 auto;
+}
+
+.riseopedia-filter-bar .ui-dropdown__menu {
+  min-width: 100%;
+}
+
+.riseopedia-filter-bar .ui-dropdown__option,
+.riseopedia-filter-bar .ui-dropdown__clear {
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.riseopedia-filter-bar__search {
+  display: flex;
+  width: auto;
+  min-width: 8rem;
+  flex: 1 2 16rem;
+  margin-left: 0;
+}
+
+.riseopedia-filter-bar__search .ui-input {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--btn-md-h);
+  height: 100%;
+}
+
+@media (max-width: 899px) {
+  .riseopedia-filter-bar__control {
+    min-width: 0;
+    flex-basis: 8.5rem;
+  }
+
+  .riseopedia-filter-bar__control--release {
+    flex-basis: 8rem;
+  }
+
+  .riseopedia-filter-bar__search {
+    min-width: 5.5rem;
+    flex-basis: 9rem;
+  }
+}
+
+/* Card shells use the existing surface roles with stronger internal separation rather than new colors. */
+.riseopedia-classification-card,
+.riseopedia-entity-card--compact,
+.riseopedia-result-card,
+.riseopedia-section-card {
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      var(--theme-surface-border-70),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      var(--theme-surface-alpha-80),
+      var(--theme-surface-card) 48%,
+      var(--theme-bg-surface-86)
+    );
+  box-shadow:
+    inset 0 1px 0 var(--theme-surface-border-70),
+    inset 0 -1px 0 var(--theme-shadow-card),
+    var(--shadow-riseopedia-interactive);
+}
+
+.riseopedia-entity-card--full {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      var(--theme-surface-border-70),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      var(--theme-surface-alpha-80),
+      var(--theme-surface-card) 48%,
+      var(--theme-bg-surface-86)
+    );
+  box-shadow:
+    inset 0 1px 0 var(--theme-surface-border-70),
+    inset 0 -1px 0 var(--theme-shadow-card),
+    var(--shadow-riseopedia-interactive);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .riseopedia-entity-card--full:hover {
+    background:
+      radial-gradient(
+        circle at 8% 0%,
+        var(--theme-accent-soft),
+        transparent 40%
+      ),
+      linear-gradient(
+        145deg,
+        var(--theme-surface-accent-12),
+        var(--theme-surface-card) 50%,
+        var(--theme-bg-surface-86)
+      );
+  }
+}
+
+.riseopedia-entity-card-full__header {
+  position: relative;
+  padding: var(--space-1, 0.25rem);
+}
+
+.riseopedia-entity-card-full__separator {
+  background: linear-gradient(
+    90deg,
+    var(--theme-border-strong),
+    var(--theme-border),
+    transparent
+  );
+}
+
+.riseopedia-entity-card-full__icon,
+.riseopedia-entity-card-compact__icon,
+.riseopedia-classification-card__icon,
+.riseopedia-result-card__icon {
+  border-color: var(--theme-border-strong);
+  box-shadow:
+    inset 0 1px 0 var(--theme-surface-border-70),
+    inset 0 -8px 16px var(--theme-shadow-card),
+    0 3px 8px var(--theme-shadow-card);
+}
+
+.riseopedia-entity-card-full__properties {
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  border: 1px solid color-mix(in srgb, var(--theme-border) 78%, transparent);
+  border-radius: calc(var(--radius-card, 1rem) - 0.35rem);
+  background: linear-gradient(
+    180deg,
+    var(--theme-bg-alpha-62),
+    var(--theme-surface-ink-soft)
+  );
+  box-shadow: var(--shadow-riseopedia-inset);
+}
+
+.riseopedia-entity-card-full__property-row:not(
+  .riseopedia-entity-card-full__property-row--footer
+) {
+  padding: 0.5rem var(--space-1, 0.25rem);
+}
+
+.riseopedia-entity-card-full__property-row--footer {
+  margin-inline: var(--space-1, 0.25rem);
+}
+
+.riseopedia-entity-card-full__title {
+  text-shadow: 0 1px 0 var(--theme-shadow-card);
+}
+
+.riseopedia-entity-preview__card .riseopedia-entity-card-full__properties {
+  box-shadow:
+    inset 0 1px 0 var(--theme-border),
+    inset 0 -8px 18px var(--theme-shadow-soft);
+}
+
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */

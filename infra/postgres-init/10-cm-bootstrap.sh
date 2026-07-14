@@ -1,6 +1,7 @@
 # FILE: infra/postgres-init/10-cm-bootstrap.sh
 # Language: Bash
 # Initializes the Corn Mafia database on first PostgreSQL container creation.
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 #!/usr/bin/env bash
 set -euo pipefail
@@ -83,3 +84,5 @@ psql \
 	--file "$VERIFY_SQL"
 
 echo "==> Corn Mafia DB bootstrap complete"
+
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

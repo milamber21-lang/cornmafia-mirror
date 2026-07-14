@@ -4,10 +4,11 @@
 //// Shared content render model types for admin preview, public pages, listings, and renderer dispatch.          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { MediaRouteScope } from "@/lib/helpers/media-url";
 
-export type ContentRenderSurfaceScope = "admin" | "public";
+export type ContentRenderSurfaceScope = "admin" | "member" | "public";
 
 export type ContentRendererCode =
 	| "page"
@@ -33,7 +34,11 @@ export type ContentRenderDestinationCode =
 
 export type ContentRenderLayoutWidthCode = "full" | "half" | "third";
 
-export type ContentRenderLayoutAlignCode = "left" | "center" | "right" | "stretch";
+export type ContentRenderLayoutAlignCode =
+	| "left"
+	| "center"
+	| "right"
+	| "stretch";
 
 export type ContentRenderLabelStyleCode = "title" | "label" | "text" | "muted";
 
@@ -98,7 +103,9 @@ export type ContentRenderDoc = {
 	templateLabel: string | null;
 	seriesTitle: string | null;
 	series: ContentRenderSeries | null;
+	authorUsername: string | null;
 	publishedAt: string | null;
+	updatedAt: string | null;
 	rendererCode: ContentRendererCode;
 	publicHref: string | null;
 	iconKey: ContentRenderIconKey | null;
@@ -115,6 +122,12 @@ export type ContentRenderMedia = {
 	sizeBytes: number | null;
 	width: number | null;
 	height: number | null;
+};
+
+export type ContentRenderContentLink = {
+	id: string;
+	title: string;
+	href: string;
 };
 
 export type ContentRenderField = {
@@ -135,6 +148,7 @@ export type ContentRenderField = {
 	value: unknown;
 	optionLabel: string | null;
 	media: ContentRenderMedia | null;
+	contentLink: ContentRenderContentLink | null;
 };
 
 export type ContentRenderFieldBuckets = Record<
@@ -163,3 +177,5 @@ export type ContentRenderCardModel = Pick<
 	| "iconKey"
 	| "iconColor"
 >;
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

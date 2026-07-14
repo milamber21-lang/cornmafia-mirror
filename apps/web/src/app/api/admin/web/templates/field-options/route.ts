@@ -4,6 +4,7 @@
 //// DB-first admin API route for template field options                                                           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -49,7 +50,9 @@ export async function GET(request: NextRequest): Promise<Response> {
 		return guardResponse;
 	}
 
-	const fieldListId = parsePositiveInt(request.nextUrl.searchParams.get("fieldListId"));
+	const fieldListId = parsePositiveInt(
+		request.nextUrl.searchParams.get("fieldListId"),
+	);
 	if (!fieldListId) {
 		return jsonError("VALIDATION_REQUIRED", "Field list is required.", 400);
 	}
@@ -201,3 +204,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

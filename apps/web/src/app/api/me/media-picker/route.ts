@@ -4,6 +4,8 @@
 //// Member-only media picker API for RichText editor image selection without admin/shared media exposure.        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { NextRequest, NextResponse } from "next/server";
 
 import { listMemberMedia } from "@/lib/data/member-media";
@@ -55,7 +57,10 @@ export async function GET(request: NextRequest): Promise<Response> {
 
 	const searchParams = request.nextUrl.searchParams;
 	const page = parsePositiveInt(searchParams.get("page"), 1);
-	const pageSize = Math.min(100, parsePositiveInt(searchParams.get("pageSize"), 20));
+	const pageSize = Math.min(
+		100,
+		parsePositiveInt(searchParams.get("pageSize"), 20),
+	);
 	const search = (searchParams.get("search") ?? "").trim();
 	const categoryId = (searchParams.get("categoryId") ?? "").trim();
 	const subcategoryId = (searchParams.get("subcategoryId") ?? "").trim();
@@ -111,7 +116,11 @@ export async function GET(request: NextRequest): Promise<Response> {
 		});
 	} catch (error: unknown) {
 		const message =
-			error instanceof Error ? error.message : "Failed to load member media picker.";
+			error instanceof Error
+				? error.message
+				: "Failed to load member media picker.";
 		return NextResponse.json({ message }, { status: 500 });
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

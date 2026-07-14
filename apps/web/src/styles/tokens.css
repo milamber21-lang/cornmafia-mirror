@@ -1,98 +1,203 @@
 /* FILE: apps/web/src/styles/tokens.css
    Non-color design tokens and global visual scales.
 */
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */
 
 /* ===== Variables ===== */
 :root {
-	--menu-border: 1px;
+  --menu-border: 1px;
 
-	/* Type scale */
-	--font-size-xs: 12px;
-	--font-size-sm: 14px;
-	--font-size-base: 16px;
-	--font-size-lg: 18px;
+  /* Typography */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  --font-size-3xl: clamp(2rem, 1.45rem + 2vw, 3rem);
+  --font-size-display: clamp(2.25rem, 1.4rem + 3vw, 4rem);
 
-	/* Spacing & radius */
-	--space-1: 4px;
-	--space-2: 8px;
-	--space-3: 12px;
-	--space-4: 16px;
-	--space-5: 20px;
-	--space-6: 24px;
-	--space-8: 32px;
+  --line-height-none: 1;
+  --line-height-tight: 1.15;
+  --line-height-heading: 1.25;
+  --line-height-body: 1.65;
+  --line-height-meta: 1.4;
 
-	--radius: 12px;
-	--radius-sm: 0.5rem;
-	--radius-md: 0.375rem;
-	--radius-lg: 0.75rem;
-	--radius-xl: 20px;
-	--radius-card: 1rem;
-	--radius-hero: 1.5rem;
-	--radius-pill: 999px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-heavy: 800;
 
-	/* Page padding settings*/
-	--container-px-base: 16px;
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-heading: -0.015em;
+  --letter-spacing-label: 0.1em;
 
-	--page-pt: 32px;
-	--page-pb: 32px;
-	--page-pl: 6px;
-	--page-pr: 6px;
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
 
-	/* Motion & z */
-	--dur-2: 200ms;
-	--ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
-	--z-header: 40;
-	--z-menu: 30;
-	--z-overlay: 20;
+  /* Semantic radius roles for new shared material surfaces. */
+  --radius-compact: 0.375rem;
+  --radius-control: 0.75rem;
+  --radius-module: 1rem;
+  --radius-structure: 1.5rem;
+  --radius-round: 999px;
 
-	/* Shadow */
-	--shadow-1: 0 8px 30px var(--theme-shadow-soft);
-	--shadow-card: 0 1px 2px var(--theme-shadow-card);
-	--shadow-panel: 0 24px 80px var(--theme-shadow-panel);
-	--shadow-map-marker: 0 0 2px var(--theme-shadow-map-marker);
-	--shadow-editor-control: 0 0 0 1px var(--theme-border), 0 4px 12px var(--theme-shadow-editor-control);
-	--shadow-editor-control-active: 0 0 0 2px var(--theme-focus), 0 6px 16px var(--theme-shadow-editor-control-active);
-	--shadow-editor-button: 0 2px 6px var(--theme-shadow-editor-button);
-	--shadow-editor-drop-preview: 0 0 0 1px var(--theme-border), 0 10px 24px var(--theme-shadow-editor-drop-preview);
+  /* Compatibility aliases retained until existing CSS is migrated mechanically. */
+  --radius: var(--radius-control);
+  --radius-sm: 0.5rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1.25rem;
+  --radius-card: var(--radius-module);
+  --radius-hero: var(--radius-structure);
+  --radius-pill: var(--radius-round);
 
-	/* ===== Header + Menu sizing (source of truth) ===== */
-	/* Row boxes */
-	--header-h: 80px;
-	--header-py: 0px;
-	--menu-h: 48px;
-	--menu-py: 0px;
-	--footer-h: 72px;
-	--chrome-offset: calc((var(--header-h) + var(--header-py)) + (var(--menu-h) + var(--menu-py) + var(--menu-border)));
-	--btn-xs-h: 28px;
-	--btn-sm-h: 32px;
-	--btn-md-h: 40px;
-	--btn-lg-h: 48px;
+  /* Readable measures */
+  --measure-compact: 48ch;
+  --measure-summary: 64ch;
+  --measure-readable: 72ch;
 
-	/* Header artwork */
-	--header-logo-h: 68px;
-	--header-wordmark-h: 68px;
+  /* Page padding settings */
+  --container-px-base: 1rem;
 
-	/* Log-in button uses md by default */
-	--login-btn-h: var(--btn-md-h);
-	--login-offset-top: calc(var(--avatar-inset-top) + (var(--avatar-size) - var(--login-btn-h)) / 2);
+  --page-pt: 2rem;
+  --page-pb: 2rem;
+  --page-pl: 0.375rem;
+  --page-pr: 0.375rem;
 
-	/* Menu typography block (visible text box) */
-	--menu-font-size: 16px;
-	--menu-lh: 1.2;
-	--menu-line-box: calc(var(--menu-font-size) * var(--menu-lh));
+  /* Motion & z */
+  --dur-1: 140ms;
+  --dur-2: 200ms;
+  --dur-3: 260ms;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --z-header: 40;
+  --z-menu: 30;
+  --z-overlay: 20;
 
-	/* Insets for avatar alignment (top of logo to bottom of visible text) */
-	--avatar-inset-top: calc((var(--header-py) / 2) + ((var(--header-h) - var(--header-logo-h)) / 2));
-	--menu-outer-gap: calc((var(--menu-h) - (var(--menu-line-box) + (2 * var(--menu-py)))) / 2);
-	--menu-leading-half: calc((var(--menu-line-box) - var(--menu-font-size)) / 2);
-	--avatar-inset-bottom: calc(var(--menu-outer-gap) + var(--menu-py) + var(--menu-leading-half));
+  /* General shadows */
+  --shadow-1: 0 8px 30px var(--theme-shadow-soft);
+  --shadow-card: 0 1px 2px var(--theme-shadow-card);
+  --shadow-panel: 0 24px 80px var(--theme-shadow-panel);
+  --shadow-map-marker: 0 0 2px var(--theme-shadow-map-marker);
+  --shadow-editor-control:
+    0 0 0 1px var(--theme-border), 0 4px 12px var(--theme-shadow-editor-control);
+  --shadow-editor-control-active:
+    0 0 0 2px var(--theme-focus),
+    0 6px 16px var(--theme-shadow-editor-control-active);
+  --shadow-editor-button: 0 2px 6px var(--theme-shadow-editor-button);
+  --shadow-editor-drop-preview:
+    0 0 0 1px var(--theme-border),
+    0 10px 24px var(--theme-shadow-editor-drop-preview);
 
-	/* Final avatar size spanning exactly from top of logo to bottom of menu text */
-	--avatar-size: calc(
-		(var(--header-h) + var(--header-py) + var(--menu-h) + var(--menu-py) + var(--menu-border)) -
-			(var(--avatar-inset-top) + var(--avatar-inset-bottom))
-	);
+  /* Shared material depth promoted from the proven Riseopedia visual language. */
+  --shadow-structure:
+    inset 0 1px 0 var(--theme-surface-border-70),
+    0 14px 34px var(--theme-shadow-soft);
+  --shadow-module:
+    inset 0 1px 0 var(--theme-surface-border-70),
+    0 7px 18px var(--theme-shadow-card);
+  --shadow-interactive:
+    inset 0 1px 0 var(--theme-surface-border-70),
+    0 2px 6px var(--theme-shadow-card);
+  --shadow-interactive-hover:
+    inset 0 1px 0 var(--theme-surface-border-70),
+    0 9px 20px var(--theme-shadow-soft);
+  --shadow-inset:
+    inset 0 1px 0 var(--theme-border),
+    inset 0 -10px 24px var(--theme-shadow-soft);
+  --shadow-icon-well:
+    inset 0 1px 0 var(--theme-border-strong),
+    inset 0 -6px 12px var(--theme-shadow-card),
+    0 2px 5px var(--theme-shadow-card);
+  --shadow-media-inset:
+    inset 0 1px 0 var(--theme-surface-border-70),
+    0 18px 38px var(--theme-shadow-panel);
 
-	/* total vertical padding used by page content */
-	--page-vpad: calc(var(--page-pt) + var(--page-pb));
+  /* Compatibility aliases for existing Riseopedia CSS. */
+  --shadow-riseopedia-structure: var(--shadow-structure);
+  --shadow-riseopedia-module: var(--shadow-module);
+  --shadow-riseopedia-interactive: var(--shadow-interactive);
+  --shadow-riseopedia-interactive-hover: var(--shadow-interactive-hover);
+  --shadow-riseopedia-inset: var(--shadow-inset);
+  --shadow-riseopedia-icon-well: var(--shadow-icon-well);
+  --shadow-riseopedia-media: var(--shadow-media-inset);
+
+  /* ===== Header + Menu sizing (source of truth) ===== */
+  /* Row boxes */
+  --header-h: 80px;
+  --header-py: 0px;
+  --menu-h: 48px;
+  --menu-py: 0px;
+  --footer-h: 72px;
+  --chrome-offset: calc(
+    (var(--header-h) + var(--header-py)) +
+      (var(--menu-h) + var(--menu-py) + var(--menu-border))
+  );
+  --btn-xs-h: 28px;
+  --btn-sm-h: 32px;
+  --btn-md-h: 40px;
+  --btn-lg-h: 48px;
+
+  /* Header artwork */
+  --header-logo-h: 68px;
+  --header-wordmark-h: 68px;
+
+  /* Log-in button uses md by default */
+  --login-btn-h: var(--btn-md-h);
+  --login-offset-top: calc(
+    var(--avatar-inset-top) + (var(--avatar-size) - var(--login-btn-h)) / 2
+  );
+
+  /* Menu typography block (visible text box) */
+  --menu-font-size: 16px;
+  --menu-lh: 1.2;
+  --menu-line-box: calc(var(--menu-font-size) * var(--menu-lh));
+
+  /* Insets for avatar alignment (top of logo to bottom of visible text) */
+  --avatar-inset-top: calc(
+    (var(--header-py) / 2) + ((var(--header-h) - var(--header-logo-h)) / 2)
+  );
+  --menu-outer-gap: calc(
+    (var(--menu-h) - (var(--menu-line-box) + (2 * var(--menu-py)))) / 2
+  );
+  --menu-leading-half: calc((var(--menu-line-box) - var(--menu-font-size)) / 2);
+  --avatar-inset-bottom: calc(
+    var(--menu-outer-gap) + var(--menu-py) + var(--menu-leading-half)
+  );
+
+  /* Final avatar size spanning exactly from top of logo to bottom of menu text */
+  --avatar-size: calc(
+    (
+        var(--header-h) + var(--header-py) + var(--menu-h) + var(--menu-py) +
+          var(--menu-border)
+      ) -
+      (var(--avatar-inset-top) + var(--avatar-inset-bottom))
+  );
+
+  /* Total vertical padding used by page content */
+  --page-vpad: calc(var(--page-pt) + var(--page-pb));
 }
+
+/* Shared content renderer/editor geometry. */
+:root {
+  --content-page-max-width: 1236px;
+  --content-destination-panel-padding: 24px;
+  --content-layout-gap: 24px;
+  --content-left-column-width: 240px;
+  --content-right-column-width: 280px;
+  --content-left-column-width-both: 224px;
+  --content-right-column-width-both: 256px;
+}
+
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */

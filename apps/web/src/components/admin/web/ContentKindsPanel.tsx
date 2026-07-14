@@ -4,6 +4,7 @@
 //// Admin panel for content kind route and renderer controls                                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -195,9 +196,7 @@ export default function ContentKindsPanel({
 								contentKindCode: String(values.contentKindCode ?? "").trim(),
 								label: String(values.label ?? "").trim(),
 								description: String(values.description ?? "").trim(),
-								publicRoutePrefix: String(
-									values.publicRoutePrefix ?? "",
-								).trim(),
+								publicRoutePrefix: String(values.publicRoutePrefix ?? "").trim(),
 								rendererCode: String(values.rendererCode ?? "page").trim(),
 								enabled: Boolean(values.enabled),
 							},
@@ -208,9 +207,7 @@ export default function ContentKindsPanel({
 							data: {
 								label: String(values.label ?? "").trim(),
 								description: String(values.description ?? "").trim(),
-								publicRoutePrefix: String(
-									values.publicRoutePrefix ?? "",
-								).trim(),
+								publicRoutePrefix: String(values.publicRoutePrefix ?? "").trim(),
 								rendererCode: String(values.rendererCode ?? "page").trim(),
 								enabled: Boolean(values.enabled),
 							},
@@ -263,3 +260,5 @@ export default function ContentKindsPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

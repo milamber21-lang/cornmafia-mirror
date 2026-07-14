@@ -4,6 +4,8 @@
 //// Dedicated Riseopedia relationship display rule panel.                                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -12,17 +14,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import PanelForm from "@/components/ui/PanelForm";
 import { readResponseMessage } from "@/lib/helpers/http-response";
 
-import {
-	buildInitialValues,
-	buildPayloadData,
-} from "./RiseopediaAdminHelpers";
+import { buildInitialValues, buildPayloadData } from "./RiseopediaAdminHelpers";
 import {
 	buildRiseopediaPanelFieldDef,
 	buildRiseopediaPanelRows,
 } from "./RiseopediaAdminPanelHelpers";
-import {
-	buildRiseopediaRelationshipDisplayRuleFields,
-} from "./RiseopediaAdminPanelFieldBuilders";
+import { buildRiseopediaRelationshipDisplayRuleFields } from "./RiseopediaAdminPanelFieldBuilders";
 import type {
 	RiseopediaAdminPanelMode,
 	RiseopediaAdminRow,
@@ -83,15 +80,18 @@ export default function RiseopediaRelationshipDisplayRulesPanel({
 			setTopError("");
 
 			try {
-				const response = await fetch("/api/admin/riseopedia/relationship-display-rules", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						op: "upsert",
-						id: mode === "edit" && row ? row["rule_key"] : null,
-						data: buildPayloadData(fields, values),
-					}),
-				});
+				const response = await fetch(
+					"/api/admin/riseopedia/relationship-display-rules",
+					{
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							op: "upsert",
+							id: mode === "edit" && row ? row["rule_key"] : null,
+							data: buildPayloadData(fields, values),
+						}),
+					},
+				);
 
 				if (!response.ok) {
 					throw new Error(
@@ -123,7 +123,11 @@ export default function RiseopediaRelationshipDisplayRulesPanel({
 				setTopError("");
 				onClose();
 			}}
-			title={mode === "create" ? "Create relationship display rule" : "Edit relationship display rule"}
+			title={
+				mode === "create"
+					? "Create relationship display rule"
+					: "Edit relationship display rule"
+			}
 			width="50%"
 			showSave={true}
 			mode={mode}
@@ -144,3 +148,5 @@ export default function RiseopediaRelationshipDisplayRulesPanel({
 }
 
 export { RiseopediaRelationshipDisplayRulesPanel };
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

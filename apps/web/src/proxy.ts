@@ -4,6 +4,7 @@
 //// Central API proxy guard that rejects explicit cross-site mutation attempts before route logic runs.          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -17,3 +18,5 @@ export function proxy(request: NextRequest): NextResponse {
 export const config = {
 	matcher: "/api/:path*",
 };
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

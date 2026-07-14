@@ -4,6 +4,8 @@
 //// Root application layout for the public shell and shared theme-aware page chrome.                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "./globals.css";
 import { cookies } from "next/headers";
 
@@ -67,3 +69,5 @@ export default async function RootLayout({
 		</html>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 --//// Verifies the DB-first bootstrap security boundary and imported current data shape.                         ////
 --//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 --//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 DO $$
 DECLARE
@@ -137,3 +138,5 @@ BEGIN
 	RAISE NOTICE 'Bootstrap verification passed.';
 END;
 $$;
+
+-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Shared pagination with centered pager, summary, and optional page-size selector                               ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -49,10 +51,7 @@ export function Pagination({
 
 	return (
 		<div
-			className={[
-				"ui-pagination",
-				className ?? "",
-			].join(" ")}
+			className={["ui-pagination", className ?? ""].join(" ")}
 			role="navigation"
 			aria-label="Pagination"
 		>
@@ -85,7 +84,7 @@ export function Pagination({
 				{showEdges ? (
 					<Button
 						size="sm"
-						variant="neutral"
+						variant="secondary"
 						onClick={() => goto(1)}
 						disabled={!canPrev}
 						aria-label="First page"
@@ -96,7 +95,7 @@ export function Pagination({
 
 				<Button
 					size="sm"
-					variant="neutral"
+					variant="secondary"
 					onClick={() => goto(current - 1)}
 					disabled={!canPrev}
 					aria-label="Previous page"
@@ -110,7 +109,7 @@ export function Pagination({
 
 				<Button
 					size="sm"
-					variant="neutral"
+					variant="secondary"
 					onClick={() => goto(current + 1)}
 					disabled={!canNext}
 					aria-label="Next page"
@@ -121,7 +120,7 @@ export function Pagination({
 				{showEdges ? (
 					<Button
 						size="sm"
-						variant="neutral"
+						variant="secondary"
 						onClick={() => goto(pageCount)}
 						disabled={!canNext}
 						aria-label="Last page"
@@ -137,3 +136,5 @@ export function Pagination({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

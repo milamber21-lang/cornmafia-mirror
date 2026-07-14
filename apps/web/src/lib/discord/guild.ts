@@ -4,6 +4,7 @@
 //// Discord guild API helpers for roles and members.                                                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -114,3 +115,5 @@ export function colorIntToHex(
 	}
 	return `#${Number(value).toString(16).padStart(6, "0")}`;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// Shared role-rank policy formatting and selection helpers for admin web panels and tables                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 export type PolicyRoleRef = {
 	id: string;
@@ -81,3 +82,5 @@ export function formatRankPolicySummary(
 		? `${label} (= ${normalizedRank})`
 		: `${label} (>= ${normalizedRank})`;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

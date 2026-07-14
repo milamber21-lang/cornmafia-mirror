@@ -4,6 +4,7 @@
 //// Shared modal shell for navigation designer picker dialogs.                                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -50,11 +51,7 @@ export default function NavigationDesignerPickerModal({
 	}
 
 	return (
-		<div
-			role="dialog"
-			aria-modal="true"
-			className="admin-picker-modal"
-		>
+		<div role="dialog" aria-modal="true" className="admin-picker-modal">
 			<button
 				type="button"
 				aria-label="Close picker"
@@ -67,7 +64,7 @@ export default function NavigationDesignerPickerModal({
 				</div>
 				<div className="admin-picker-modal__body">{children}</div>
 				<div className="admin-picker-modal__footer">
-					<Button variant="accent" size="sm" type="button" onClick={onClose}>
+					<Button variant="secondary" size="sm" type="button" onClick={onClose}>
 						Close
 					</Button>
 				</div>
@@ -75,3 +72,5 @@ export default function NavigationDesignerPickerModal({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

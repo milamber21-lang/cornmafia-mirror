@@ -4,6 +4,7 @@
 //// Read-only admin API route for Riseopedia entity release decisions and evidence.                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse } from "next/server";
 
@@ -21,9 +22,14 @@ export async function GET(): Promise<Response> {
 
 	try {
 		const rows = await listRiseopediaReleaseAdmin();
-		return NextResponse.json({ rows: rows.decisions, evidence: rows.evidence }, { status: 200 });
+		return NextResponse.json(
+			{ rows: rows.decisions, evidence: rows.evidence },
+			{ status: 200 },
+		);
 	} catch (error: unknown) {
 		const classified = classifyRiseopediaAdminError(error);
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

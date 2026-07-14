@@ -4,6 +4,8 @@
 //// Client map viewer wrapper that loads the Leaflet implementation.                                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -21,3 +23,5 @@ export type MapViewerProps = {
 export default function MapViewer(props: MapViewerProps) {
 	return <LeafletMap {...props} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// App content renderer shell for future app-focused layouts.                                                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { JSX } from "react";
 
 import ContentRenderShell from "../ContentRenderShell";
@@ -20,3 +22,5 @@ export default function AppContentRenderer({
 }: AppContentRendererProps): JSX.Element {
 	return <ContentRenderShell model={model} debug={debug} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

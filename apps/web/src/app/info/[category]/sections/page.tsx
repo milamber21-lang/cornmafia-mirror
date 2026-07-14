@@ -1,20 +1,22 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/app/info/[category]/sections/page.tsx                                                  ////
-//// Language: TSX                                                                                             ////
-//// DB-gated /info wiki sections index route.                                                                 ////
+//// Language: TSX                                                                                               ////
+//// DB-gated /info wiki sections index with release-aware non-empty directory output.                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Database } from "lucide-react";
 
-import RiseopediaClassificationBrowser from "@/components/riseopedia/RiseopediaClassificationBrowser";
+import RiseopediaClassificationBrowser from "@/components/riseopedia/browse/RiseopediaClassificationBrowser";
 import {
 	getOpediaWikiConfig,
 	listOpediaSectionDirectoryCards,
 } from "@/lib/data/opedia-wiki";
+import { parseMafiosopediaReleaseFilters } from "@/lib/data/mafiosopedia-release";
 import {
 	firstSearchParam,
 	type RiseopediaSearchParamValue,
@@ -36,6 +38,7 @@ type PageProps = {
 	}>;
 	searchParams: Promise<{
 		q?: RiseopediaSearchParamValue;
+		release?: RiseopediaSearchParamValue;
 	}>;
 };
 
@@ -61,7 +64,11 @@ export default async function InfoSectionsPage({
 	}
 
 	const resolvedSearchParams = await searchParams;
-	const cards = await listOpediaSectionDirectoryCards(wiki);
+	const releaseFilters =
+		wiki.code === "mafiosopedia"
+			? parseMafiosopediaReleaseFilters(resolvedSearchParams.release ?? null)
+			: parseMafiosopediaReleaseFilters(null);
+	const cards = await listOpediaSectionDirectoryCards(wiki, releaseFilters);
 
 	return (
 		<RiseopediaClassificationBrowser
@@ -76,9 +83,11 @@ export default async function InfoSectionsPage({
 				section: null,
 				entityClassCode: null,
 				categorySlug: null,
+				releaseFilters,
 			}}
 			heroEyebrow="Main collections"
 			placeholder="Search sections..."
+			showReleaseFilter={wiki.code === "mafiosopedia"}
 			title="Sections"
 			wikiName={wiki.title}
 			homeHref={wiki.browsePath}
@@ -86,3 +95,5 @@ export default async function InfoSectionsPage({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

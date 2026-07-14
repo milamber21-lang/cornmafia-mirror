@@ -4,10 +4,16 @@
 //// Shared PostgreSQL pool and query helper for the web app.                                                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
-import { Pool, type PoolConfig, type QueryResult, type QueryResultRow } from "pg";
+import {
+	Pool,
+	type PoolConfig,
+	type QueryResult,
+	type QueryResultRow,
+} from "pg";
 
 import {
 	assertWebRuntimeEnvReady,
@@ -65,3 +71,5 @@ export async function query<Row extends QueryResultRow>(
 ): Promise<QueryResult<Row>> {
 	return getPgPool().query<Row>(text, [...params]);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

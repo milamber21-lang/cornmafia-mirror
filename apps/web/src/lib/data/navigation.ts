@@ -4,6 +4,7 @@
 //// DB-first admin navigation panel read, mutation, tree, and lookup helpers                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -11,7 +12,10 @@ import { query } from "@/lib/data/pg";
 import type { IconShape } from "@/lib/helpers/icons";
 
 export type NavigationPanelTypeCode = "header" | "footer" | "mobile" | "custom";
-export type NavigationPanelReadPolicyCode = "public" | "min_rank" | "equal_rank";
+export type NavigationPanelReadPolicyCode =
+	| "public"
+	| "min_rank"
+	| "equal_rank";
 export type NavigationRendererCode =
 	| "page"
 	| "map"
@@ -56,7 +60,11 @@ export type NavigationPanelAdminItem = {
 
 export type NavigationPanelTreePanel = Omit<
 	NavigationPanelAdminItem,
-	"createdAt" | "updatedAt" | "categoryCount" | "subcategoryCount" | "targetCount"
+	| "createdAt"
+	| "updatedAt"
+	| "categoryCount"
+	| "subcategoryCount"
+	| "targetCount"
 >;
 
 export type NavigationTreeTarget = {
@@ -267,29 +275,43 @@ type NavigationPickerOptionDbRow = {
 };
 
 function toIsoString(value: string | Date): string {
-	return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+	return value instanceof Date
+		? value.toISOString()
+		: new Date(value).toISOString();
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function getStringField(row: Record<string, unknown>, key: string): string | null {
+function getStringField(
+	row: Record<string, unknown>,
+	key: string,
+): string | null {
 	const value = row[key];
 	return typeof value === "string" ? value : null;
 }
 
-function getBooleanField(row: Record<string, unknown>, key: string): boolean | null {
+function getBooleanField(
+	row: Record<string, unknown>,
+	key: string,
+): boolean | null {
 	const value = row[key];
 	return typeof value === "boolean" ? value : null;
 }
 
-function getNumberField(row: Record<string, unknown>, key: string): number | null {
+function getNumberField(
+	row: Record<string, unknown>,
+	key: string,
+): number | null {
 	const value = row[key];
 	return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-function getNullableNumberField(row: Record<string, unknown>, key: string): number | null {
+function getNullableNumberField(
+	row: Record<string, unknown>,
+	key: string,
+): number | null {
 	const value = row[key];
 	return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
@@ -319,7 +341,9 @@ function normalizePanelTypeCode(value: unknown): NavigationPanelTypeCode {
 		: "header";
 }
 
-function normalizeReadPolicyCode(value: unknown): NavigationPanelReadPolicyCode {
+function normalizeReadPolicyCode(
+	value: unknown,
+): NavigationPanelReadPolicyCode {
 	return value === "min_rank" || value === "equal_rank" ? value : "public";
 }
 
@@ -361,7 +385,15 @@ function mapTreeTarget(value: unknown): NavigationTreeTarget | null {
 	const contentKindCode = getStringField(value, "contentKindCode");
 	const contentKindLabel = getStringField(value, "contentKindLabel");
 
-	if (!id || !contentId || !title || !slug || !statusCode || !contentKindCode || !contentKindLabel) {
+	if (
+		!id ||
+		!contentId ||
+		!title ||
+		!slug ||
+		!statusCode ||
+		!contentKindCode ||
+		!contentKindLabel
+	) {
 		return null;
 	}
 
@@ -561,7 +593,11 @@ function mapSubcategoryLookupRow(
 function mapContentLookupRow(
 	row: NavigationContentLookupDbRow,
 ): NavigationContentLookupItem | null {
-	if (row.subcategory_id === null || row.subcategory_title === null || row.subcategory_slug === null) {
+	if (
+		row.subcategory_id === null ||
+		row.subcategory_title === null ||
+		row.subcategory_slug === null
+	) {
 		return null;
 	}
 
@@ -822,17 +858,18 @@ export async function listNavigationContentPickerAdmin(args: {
 		  AND NOT (content_id = ANY($3::bigint[]))
 	`;
 
-	const [countResult, rowsResult, contentKindsResult, statusesResult] = await Promise.all([
-		query<NavigationPickerCountDbRow>(
-			`
+	const [countResult, rowsResult, contentKindsResult, statusesResult] =
+		await Promise.all([
+			query<NavigationPickerCountDbRow>(
+				`
 				SELECT COUNT(*)::bigint AS total_count
 				FROM web_view.web_navigation_content_lookup
 				${pickerWhere}
 			`,
-			baseParams,
-		),
-		query<NavigationContentLookupDbRow>(
-			`
+				baseParams,
+			),
+			query<NavigationContentLookupDbRow>(
+				`
 				SELECT content_id,
 					   category_id,
 					   category_title,
@@ -865,10 +902,10 @@ export async function listNavigationContentPickerAdmin(args: {
 						 content_id ASC
 				LIMIT $7 OFFSET $8
 			`,
-			[...baseParams, pageSize, offset],
-		),
-		query<NavigationPickerOptionDbRow>(
-			`
+				[...baseParams, pageSize, offset],
+			),
+			query<NavigationPickerOptionDbRow>(
+				`
 				SELECT content_kind_code AS value,
 					   label AS label
 				FROM web_view.web_content_kind_lookup
@@ -876,9 +913,9 @@ export async function listNavigationContentPickerAdmin(args: {
 				ORDER BY label ASC,
 						 content_kind_code ASC
 			`,
-		),
-		query<NavigationPickerOptionDbRow>(
-			`
+			),
+			query<NavigationPickerOptionDbRow>(
+				`
 				SELECT status_code AS value,
 					   status_code AS label
 				FROM web_view.web_navigation_content_lookup
@@ -886,9 +923,9 @@ export async function listNavigationContentPickerAdmin(args: {
 				GROUP BY status_code
 				ORDER BY status_code ASC
 			`,
-			[args.categoryId, args.subcategoryId, excludedContentIds],
-		),
-	]);
+				[args.categoryId, args.subcategoryId, excludedContentIds],
+			),
+		]);
 
 	const totalDocs = Number(countResult.rows[0]?.total_count ?? 0);
 	const totalPages = totalDocs > 0 ? Math.ceil(totalDocs / pageSize) : 1;
@@ -984,3 +1021,5 @@ export async function deleteNavigationPanelAdmin(args: {
 		[args.actorDiscordId, args.panelKey],
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

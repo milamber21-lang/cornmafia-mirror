@@ -4,6 +4,8 @@
 //// DB-first member media list and mutation helpers for the /me workspace.                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 import { query } from "@/lib/data/pg";
@@ -60,7 +62,10 @@ function readNumber(record: Record<string, unknown>, key: string): number {
 	return 0;
 }
 
-function readNullableNumber(record: Record<string, unknown>, key: string): number | null {
+function readNullableNumber(
+	record: Record<string, unknown>,
+	key: string,
+): number | null {
 	const value = record[key];
 	if (value === null || value === undefined) {
 		return null;
@@ -97,7 +102,13 @@ function mapMedia(value: unknown): MemberMediaItem | null {
 	const originalFilename = readString(value, "originalFilename");
 	const mimeType = readString(value, "mimeType");
 
-	if (!id || !categoryId || !subcategoryId || !storageRelPath || !originalFilename) {
+	if (
+		!id ||
+		!categoryId ||
+		!subcategoryId ||
+		!storageRelPath ||
+		!originalFilename
+	) {
 		return null;
 	}
 
@@ -178,7 +189,9 @@ export async function insertMemberUploadedMedia(args: {
 		],
 	);
 	const value = result.rows[0]?.media_id;
-	return typeof value === "string" || typeof value === "number" ? String(value) : null;
+	return typeof value === "string" || typeof value === "number"
+		? String(value)
+		: null;
 }
 
 export async function updateMemberMediaMeta(args: {
@@ -204,3 +217,5 @@ export async function deleteMemberMedia(args: {
 	const value = result.rows[0]?.storage_rel_path;
 	return typeof value === "string" && value.trim().length > 0 ? value : null;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

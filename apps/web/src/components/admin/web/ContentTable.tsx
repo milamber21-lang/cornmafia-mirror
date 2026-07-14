@@ -4,6 +4,8 @@
 //// Server-driven admin content table with dependent filters, sorting, and parent-owned panel lifecycle           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -64,7 +66,7 @@ type QueryPatch = Partial<{
 	sortDir: ContentAdminSortDir;
 }>;
 
-type ButtonVariant = "neutral" | "accent" | "green";
+type ButtonVariant = "primary" | "secondary" | "danger" | "success";
 
 const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
 const CONTENT_SORT_KEYS: readonly ContentAdminSortBy[] = [
@@ -163,14 +165,14 @@ function getStatusLabel(statusCode: ContentStatusCode): string {
 
 function getStatusVariant(statusCode: ContentStatusCode): ButtonVariant {
 	if (statusCode === "published") {
-		return "green";
+		return "success";
 	}
 
 	if (statusCode === "archived") {
-		return "accent";
+		return "danger";
 	}
 
-	return "neutral";
+	return "secondary";
 }
 
 function getNextStatus(statusCode: ContentStatusCode): ContentStatusCode {
@@ -359,9 +361,7 @@ export default function ContentTable({
 			}
 		} catch (loadError: unknown) {
 			setError(
-				loadError instanceof Error
-					? loadError.message
-					: "Failed to load content.",
+				loadError instanceof Error ? loadError.message : "Failed to load content.",
 			);
 			setRows([]);
 			setTotalDocs(0);
@@ -433,10 +433,7 @@ export default function ContentTable({
 
 				if (!response.ok) {
 					throw new Error(
-						await readResponseMessage(
-							response,
-							"Failed to update content status.",
-						),
+						await readResponseMessage(response, "Failed to update content status."),
 					);
 				}
 
@@ -555,7 +552,7 @@ export default function ContentTable({
 
 					<div className="admin-table-toolbar-action">
 						<Button
-							variant="green"
+							variant="primary"
 							onClick={() => {
 								setPanelMode("create");
 								setSelectedId(null);
@@ -645,7 +642,10 @@ export default function ContentTable({
 						<TBody>
 							{loading && rows.length === 0 ? (
 								<TR>
-									<TD colSpan={10} className="admin-table-empty-cell admin-table-empty-cell--spacious">
+									<TD
+										colSpan={10}
+										className="admin-table-empty-cell admin-table-empty-cell--spacious"
+									>
 										Loading...
 									</TD>
 								</TR>
@@ -653,7 +653,10 @@ export default function ContentTable({
 
 							{!loading && rows.length === 0 ? (
 								<TR>
-									<TD colSpan={10} className="admin-table-empty-cell admin-table-empty-cell--spacious">
+									<TD
+										colSpan={10}
+										className="admin-table-empty-cell admin-table-empty-cell--spacious"
+									>
 										No content matches your filters.
 									</TD>
 								</TR>
@@ -668,7 +671,9 @@ export default function ContentTable({
 										<TD className="admin-table-cell--center">{row.slug}</TD>
 										<TD className="admin-table-cell--center">{row.contentKindLabel}</TD>
 										<TD className="admin-table-cell--center">{row.categoryTitle}</TD>
-										<TD className="admin-table-cell--center">{row.subcategoryTitle ?? "-"}</TD>
+										<TD className="admin-table-cell--center">
+											{row.subcategoryTitle ?? "-"}
+										</TD>
 										<TD className="admin-table-cell--center">{row.templateLabel}</TD>
 										<TD className="admin-table-cell--center">
 											<Button
@@ -682,7 +687,7 @@ export default function ContentTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="accent"
+												variant="danger"
 												disabled={mutationBusy}
 												loading={rowBusy}
 												onClick={() => void handleDelete(row)}
@@ -693,14 +698,14 @@ export default function ContentTable({
 										<TD className="admin-table-cell--center">
 											<ButtonLink
 												href={`/admin/web/content/${row.id}/show`}
-												variant="neutral"
+												variant="secondary"
 											>
 												Show
 											</ButtonLink>
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="neutral"
+												variant="secondary"
 												disabled={mutationBusy}
 												onClick={() => {
 													setPanelMode("edit");
@@ -743,3 +748,5 @@ export default function ContentTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

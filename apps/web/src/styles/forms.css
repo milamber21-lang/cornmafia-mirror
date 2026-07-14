@@ -1,6 +1,7 @@
 /* FILE: apps/web/src/styles/forms.css
    Form, field, panel-form, and validation classes reserved for upcoming style passes.
 */
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */
 
 /*
 Pass 1 intentionally creates this layer without moving TS/TSX-owned styles yet.
@@ -9,203 +10,215 @@ Future passes should move matching visual rules here according to docs/style_own
 
 /* ===== Static form primitive cleanup ===== */
 .money-input-currency {
-	min-width: 160px;
+  min-width: 160px;
 }
 
 .form-checkbox-input {
-	accent-color: var(--theme-focus);
+  accent-color: var(--theme-focus);
 }
 
 .form-checkbox-input--contrast {
-	accent-color: var(--theme-text);
+  accent-color: var(--theme-text);
 }
 
 .alert-banner-inner {
-	display: flex;
-	align-items: center;
-	gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 /* ===== Admin content dynamic field inputs ===== */
 .admin-content-fields-grid {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr);
-	gap: var(--space-4, 1rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4, 1rem);
 }
 
 @media (min-width: 48rem) {
-	.admin-content-fields-grid {
-		grid-template-columns: repeat(12, minmax(0, 1fr));
-	}
+  .admin-content-fields-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
 
-	.admin-content-field--span-default {
-		grid-column: span 6 / span 6;
-	}
+  .admin-content-field--span-default {
+    grid-column: span 6 / span 6;
+  }
 
-	.admin-content-field--span-wide {
-		grid-column: span 12 / span 12;
-	}
+  .admin-content-field--span-wide {
+    grid-column: span 12 / span 12;
+  }
 }
 
 .admin-content-fields-empty-message,
 .admin-content-field-unsupported {
-	border: 1px dashed var(--theme-border);
-	border-radius: var(--radius-lg, 0.75rem);
-	color: var(--theme-text-muted);
-	font-size: var(--font-size-sm, 0.875rem);
+  border: 1px dashed var(--theme-border);
+  border-radius: var(--radius-lg, 0.75rem);
+  color: var(--theme-text-muted);
+  font-size: var(--font-size-sm, 0.875rem);
 }
 
 .admin-content-fields-empty-message {
-	padding: var(--space-6, 1.5rem);
-	text-align: center;
+  padding: var(--space-6, 1.5rem);
+  text-align: center;
 }
 
 .admin-content-field-shell {
-	display: grid;
-	gap: var(--space-1, 0.25rem);
+  display: grid;
+  gap: var(--space-1, 0.25rem);
 }
 
 .admin-content-field-disabled-note {
-	margin-left: var(--space-1, 0.25rem);
-	color: var(--theme-text-muted);
-	font-size: var(--font-size-xs, 0.75rem);
+  margin-left: var(--space-1, 0.25rem);
+  color: var(--theme-text-muted);
+  font-size: var(--font-size-xs, 0.75rem);
 }
 
 .admin-content-field-select {
-	width: 100%;
+  width: 100%;
 }
 
 .admin-content-field-checkbox-shell {
-	display: grid;
-	gap: var(--space-1, 0.25rem);
-	padding-top: var(--space-6, 1.5rem);
+  display: grid;
+  gap: var(--space-1, 0.25rem);
+  padding-top: var(--space-6, 1.5rem);
 }
 
 .admin-content-field-unsupported {
-	padding: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem);
 }
 
 /* ===== Admin content template field section ===== */
 .admin-template-fields-section {
-	display: grid;
-	gap: var(--space-4);
-	padding-top: var(--space-4);
-	border-top: 1px solid var(--theme-border);
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--theme-border);
 }
 
 .admin-template-fields-title {
-	margin: 0;
-	font-size: var(--font-size-lg);
-	font-weight: 600;
-	line-height: 1.5rem;
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  line-height: 1.5rem;
 }
 
 /* ===== Form control typography variants ===== */
 .form-control--mono {
-	font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+  font-family: var(
+    --font-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "Courier New",
+    monospace
+  );
 }
 
 /* ===== Panel form renderer ===== */
 .panel-form-shell {
-	display: flex;
-	min-height: 0;
-	height: 100%;
-	flex-direction: column;
+  display: flex;
+  min-height: 0;
+  height: 100%;
+  flex-direction: column;
 }
 
 .panel-form-banner {
-	margin-bottom: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .panel-form-body {
-	min-height: 0;
-	flex: 1 1 0%;
+  min-height: 0;
+  flex: 1 1 0%;
 }
 
 .panel-form-rows {
-	display: grid;
-	gap: var(--space-4);
+  display: grid;
+  gap: var(--space-4);
 }
 
 .panel-form-row {
-	display: grid;
-	grid-template-columns: repeat(12, minmax(0, 1fr));
-	gap: var(--space-4);
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-4);
 }
 
 .panel-form-cell {
-	min-width: 0;
+  min-width: 0;
 }
 
 .panel-form-cell--span-1 {
-	grid-column: span 1 / span 1;
+  grid-column: span 1 / span 1;
 }
 
 .panel-form-cell--span-2 {
-	grid-column: span 2 / span 2;
+  grid-column: span 2 / span 2;
 }
 
 .panel-form-cell--span-3 {
-	grid-column: span 3 / span 3;
+  grid-column: span 3 / span 3;
 }
 
 .panel-form-cell--span-4 {
-	grid-column: span 4 / span 4;
+  grid-column: span 4 / span 4;
 }
 
 .panel-form-cell--span-5 {
-	grid-column: span 5 / span 5;
+  grid-column: span 5 / span 5;
 }
 
 .panel-form-cell--span-6 {
-	grid-column: span 6 / span 6;
+  grid-column: span 6 / span 6;
 }
 
 .panel-form-cell--span-7 {
-	grid-column: span 7 / span 7;
+  grid-column: span 7 / span 7;
 }
 
 .panel-form-cell--span-8 {
-	grid-column: span 8 / span 8;
+  grid-column: span 8 / span 8;
 }
 
 .panel-form-cell--span-9 {
-	grid-column: span 9 / span 9;
+  grid-column: span 9 / span 9;
 }
 
 .panel-form-cell--span-10 {
-	grid-column: span 10 / span 10;
+  grid-column: span 10 / span 10;
 }
 
 .panel-form-cell--span-11 {
-	grid-column: span 11 / span 11;
+  grid-column: span 11 / span 11;
 }
 
 .panel-form-cell--span-12 {
-	grid-column: span 12 / span 12;
+  grid-column: span 12 / span 12;
 }
 
 .panel-form-field {
-	display: grid;
-	gap: calc(var(--space-1) * 1.5);
+  display: grid;
+  gap: calc(var(--space-1) * 1.5);
 }
 
 .panel-form-field--checkbox {
-	display: flex;
-	height: 100%;
-	flex-direction: column;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
 }
 
 .panel-form-label-spacer {
-	opacity: 0;
-	pointer-events: none;
-	user-select: none;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
 }
 
 .panel-form-control-full {
-	width: 100%;
+  width: 100%;
 }
 
 .panel-form-async-search {
-	margin-top: var(--space-2);
+  margin-top: var(--space-2);
 }
+
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */

@@ -4,20 +4,20 @@
 //// Member route for owned/manageable series management.                                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-import { getAuthSession } from "@/lib/auth/auth";
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { listMemberAuthorableCollections } from "@/lib/data/member-authoring";
 import { listMemberSeries } from "@/lib/data/member-series";
-import { readDiscordIdFromSession } from "@/lib/server/current-actor";
+import { getCurrentActorDiscordId } from "@/lib/server/current-actor";
 import LoginClient from "@/components/login/LoginClient";
 import MemberSeriesDashboard from "@/components/me/MemberSeriesDashboard";
 
 export const dynamic = "force-dynamic";
 
 export default async function MySeriesPage() {
-	const session = await getAuthSession();
-	const actorDiscordId = readDiscordIdFromSession(session);
+	const actorDiscordId = await getCurrentActorDiscordId();
 
-	if (!session?.user || !actorDiscordId) {
+	if (!actorDiscordId) {
 		return (
 			<main className="card member-page-card">
 				<h1 className="member-page-title">My series</h1>
@@ -33,9 +33,8 @@ export default async function MySeriesPage() {
 	]);
 
 	return (
-		<MemberSeriesDashboard
-			initialRows={rows}
-			initialCollections={collections}
-		/>
+		<MemberSeriesDashboard initialRows={rows} initialCollections={collections} />
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

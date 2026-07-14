@@ -4,6 +4,8 @@
 //// Admin panel for creating and editing Discord role config with split meta and save error handling             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -100,13 +102,10 @@ async function fetchConfiguredRoleState(currentRole: RoleItem | null): Promise<{
 	publicDefaultRoleId: string | null;
 	authenticatedDefaultRoleId: string | null;
 }> {
-	const response = await fetch(
-		"/api/admin/discord/roles?page=1&pageSize=1000",
-		{
-			method: "GET",
-			cache: "no-store",
-		},
-	);
+	const response = await fetch("/api/admin/discord/roles?page=1&pageSize=1000", {
+		method: "GET",
+		cache: "no-store",
+	});
 	if (!response.ok) {
 		throw new Error(
 			await readResponseMessage(response, "Failed to load configured roles."),
@@ -115,9 +114,7 @@ async function fetchConfiguredRoleState(currentRole: RoleItem | null): Promise<{
 
 	const json = (await response.json()) as unknown;
 	const payload = (isObject(json) ? json : {}) as RolesResponse;
-	const rows = Array.isArray(payload.rows)
-		? payload.rows.filter(isRoleDoc)
-		: [];
+	const rows = Array.isArray(payload.rows) ? payload.rows.filter(isRoleDoc) : [];
 
 	const usedDiscordRoleIds = new Set<string>();
 	const usedVirtualRoleNames = new Set<string>();
@@ -515,7 +512,14 @@ export default function DiscordRolesPanel({
 				setSubmitting(false);
 			}
 		},
-		[editing, findGuildRole, metaError, metaLoading, role?.id, usedVirtualRoleNames],
+		[
+			editing,
+			findGuildRole,
+			metaError,
+			metaLoading,
+			role?.id,
+			usedVirtualRoleNames,
+		],
 	);
 
 	if (!open) {
@@ -553,3 +557,5 @@ export default function DiscordRolesPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// Info category root redirects supported wiki namespaces to their browse overview route.                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { notFound, redirect } from "next/navigation";
 
@@ -30,3 +31,5 @@ export default async function InfoCategoryPage({ params }: PageProps) {
 
 	redirect(`/info/${categorySlug}/browse`);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

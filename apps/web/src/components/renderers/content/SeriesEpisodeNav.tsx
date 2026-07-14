@@ -4,6 +4,7 @@
 //// Shared single-row public navigation for content rows that belong to a published series.                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import Link from "next/link";
 import type { JSX } from "react";
@@ -42,9 +43,7 @@ function SeriesEpisodeLink({
 					&larr;
 				</span>
 			) : null}
-			<span className="public-series-nav__episode-title">
-				{episode.title}
-			</span>
+			<span className="public-series-nav__episode-title">{episode.title}</span>
 			{direction === "next" ? (
 				<span className="public-series-nav__episode-arrow" aria-hidden="true">
 					&rarr;
@@ -68,10 +67,7 @@ export default function SeriesEpisodeNav({
 		<nav className="public-series-nav" aria-label="Series episode navigation">
 			<div className="public-series-nav__slot public-series-nav__slot--previous">
 				{series.previousEpisode ? (
-					<SeriesEpisodeLink
-						direction="previous"
-						episode={series.previousEpisode}
-					/>
+					<SeriesEpisodeLink direction="previous" episode={series.previousEpisode} />
 				) : null}
 			</div>
 
@@ -84,21 +80,18 @@ export default function SeriesEpisodeNav({
 						<span className="public-series-nav__separator" aria-hidden="true">
 							-
 						</span>
-						<span className="public-series-nav__part">
-							{currentPartLabel}
-						</span>
+						<span className="public-series-nav__part">{currentPartLabel}</span>
 					</>
 				) : null}
 			</div>
 
 			<div className="public-series-nav__slot public-series-nav__slot--next">
 				{series.nextEpisode ? (
-					<SeriesEpisodeLink
-						direction="next"
-						episode={series.nextEpisode}
-					/>
+					<SeriesEpisodeLink direction="next" episode={series.nextEpisode} />
 				) : null}
 			</div>
 		</nav>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

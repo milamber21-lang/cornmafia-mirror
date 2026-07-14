@@ -4,11 +4,14 @@
 //// Shared types for the rich-text image Lexical node and editor image view.                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { NodeKey, SerializedLexicalNode, Spread } from "lexical";
+import type { RichTextLinkTarget } from "@/lib/editors/richtext/rich-text-link-targets";
 
 export type ImageAlign = "left" | "center" | "right";
 export type ImageWrap = "wrap" | "no-wrap";
+export type ImageFrameStyle = "none" | "border";
 
 export type ImageNodeOptions = {
 	mediaId?: string;
@@ -17,12 +20,14 @@ export type ImageNodeOptions = {
 	height?: number;
 	align?: ImageAlign;
 	wrap?: ImageWrap;
+	frameStyle?: ImageFrameStyle;
+	linkTarget?: RichTextLinkTarget;
 };
 
 export type SerializedImageNode = Spread<
 	{
 		type: "resizable-image";
-		version: 1;
+		version: 3;
 		src: string;
 		mediaId?: string;
 		alt?: string;
@@ -30,6 +35,8 @@ export type SerializedImageNode = Spread<
 		height?: number;
 		align?: ImageAlign;
 		wrap?: ImageWrap;
+		frameStyle?: ImageFrameStyle;
+		linkTarget?: RichTextLinkTarget;
 	},
 	SerializedLexicalNode
 >;
@@ -64,3 +71,5 @@ export type ImageMoveDropPreview = {
 	rootWidth: number;
 	lineTop: number;
 };
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

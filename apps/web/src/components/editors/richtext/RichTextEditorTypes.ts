@@ -4,6 +4,9 @@
 //// Shared editor-side JSON types and small guards without React imports.                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
+import type { RichTextLinkTarget } from "@/lib/editors/richtext/rich-text-link-targets";
 
 export type UnknownRecord = Record<string, unknown>;
 export type MaybeModule = UnknownRecord | null;
@@ -11,8 +14,15 @@ export type MaybeModule = UnknownRecord | null;
 export type RichTextEditorCanvasLayoutMode =
 	| "full"
 	| "main-full"
+	| "main-with-left"
+	| "main-with-right"
+	| "main-with-both"
 	| "main-with-aside"
+	| "left-aside"
+	| "right-aside"
 	| "aside";
+
+export type RichTextEditorCanvasWidthCode = "full" | "half" | "third";
 
 export type LexicalNodeJSON = {
 	type: string;
@@ -21,10 +31,12 @@ export type LexicalNodeJSON = {
 	listType?: "bullet" | "number" | "check";
 	format?: number;
 	version?: number;
+	linkTarget?: RichTextLinkTarget;
 	fields?: {
 		url?: string;
 		mediaId?: string;
 		newTab?: boolean;
+		linkTarget?: RichTextLinkTarget;
 		alt?: string;
 		src?: string;
 		width?: number;
@@ -114,3 +126,5 @@ export const parseJSON = (value: string): unknown => {
 		return {};
 	}
 };
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

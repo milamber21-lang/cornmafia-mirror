@@ -4,12 +4,13 @@
 //// Member route for managing actor-owned content inside one authorable collection.                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { JSX } from "react";
 import { notFound } from "next/navigation";
 
-import { getAuthSession } from "@/lib/auth/auth";
 import { findMemberContentCollectionByPath } from "@/lib/data/member-content";
-import { readDiscordIdFromSession } from "@/lib/server/current-actor";
+import { getCurrentActorDiscordId } from "@/lib/server/current-actor";
 import LoginClient from "@/components/login/LoginClient";
 import MemberCollectionContentDashboard from "@/components/me/MemberCollectionContentDashboard";
 
@@ -25,10 +26,9 @@ type PageProps = {
 export default async function MyCollectionContentPage({
 	params,
 }: PageProps): Promise<JSX.Element> {
-	const session = await getAuthSession();
-	const actorDiscordId = readDiscordIdFromSession(session);
+	const actorDiscordId = await getCurrentActorDiscordId();
 
-	if (!session?.user || !actorDiscordId) {
+	if (!actorDiscordId) {
 		return (
 			<section className="card member-page-card">
 				<h1 className="member-page-title">My content</h1>
@@ -63,3 +63,5 @@ export default async function MyCollectionContentPage({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

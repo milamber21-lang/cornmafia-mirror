@@ -4,6 +4,7 @@
 //// Admin Discord user detail route with shared guard helpers and boring doc response                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse } from "next/server";
 
@@ -60,3 +61,5 @@ export async function GET(_req: Request, context: unknown): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

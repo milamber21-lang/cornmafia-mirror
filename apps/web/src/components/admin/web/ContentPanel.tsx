@@ -4,14 +4,20 @@
 //// Full-width admin content panel with placement-aware templates and preserved saved field values                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
 import * as React from "react";
 
-import ContentFieldInputs from "@/components/admin/web/ContentFieldInputs";
+import ContentAuthoringWorkspace from "@/components/authoring/ContentAuthoringWorkspace";
 import IconRender from "@/components/ui/IconRender";
-import { AlertBanner, DropdownMenuSingle, Input, ReadOnlyInput } from "@/components/ui";
+import {
+	AlertBanner,
+	DropdownMenuSingle,
+	Input,
+	ReadOnlyInput,
+} from "@/components/ui";
 import PanelForm, {
 	type FieldDef,
 	type Option,
@@ -81,7 +87,9 @@ type MetaLoadArgs = {
 	templateId?: string | null;
 };
 
-function toOptions(rows: Array<{ id: string; title?: string; label?: string; slug?: string }>): Option[] {
+function toOptions(
+	rows: Array<{ id: string; title?: string; label?: string; slug?: string }>,
+): Option[] {
 	return sortAdminPickerOptions(
 		rows.map((row) => ({
 			value: row.id,
@@ -108,7 +116,10 @@ function roleOptions(rows: PolicyRoleRef[]): Option[] {
 	);
 }
 
-function parsePolicy(value: unknown, fallback: ContentPolicyCode): ContentPolicyCode {
+function parsePolicy(
+	value: unknown,
+	fallback: ContentPolicyCode,
+): ContentPolicyCode {
 	if (
 		value === "inherit" ||
 		value === "public" ||
@@ -147,7 +158,10 @@ function normalizeFieldValues(value: unknown): Record<string, unknown> {
 		: {};
 }
 
-function navigationSummary(value: unknown, doc: ContentAdminDetail | null): string {
+function navigationSummary(
+	value: unknown,
+	doc: ContentAdminDetail | null,
+): string {
 	const navMode = parseNavMode(value);
 
 	if (navMode === "explicit_visible") {
@@ -174,14 +188,14 @@ function readPolicySummary(
 	if (readPolicyCode === "inherit") {
 		return doc
 			? formatRankPolicySummary(
-				doc.readEffectivePolicyCode === "rank_equal"
-					? "rank_equal"
-					: doc.readEffectivePolicyCode === "rank_at_least"
-						? "rank_at_least"
-						: "public",
-				doc.readEffectiveRank,
-				roles,
-			)
+					doc.readEffectivePolicyCode === "rank_equal"
+						? "rank_equal"
+						: doc.readEffectivePolicyCode === "rank_at_least"
+							? "rank_at_least"
+							: "public",
+					doc.readEffectiveRank,
+					roles,
+				)
 			: "Inherited from placement";
 	}
 
@@ -204,12 +218,12 @@ function writePolicySummary(
 	if (writePolicyCode === "inherit") {
 		return doc
 			? formatRankPolicySummary(
-				doc.writeEffectivePolicyCode === "rank_equal"
-					? "rank_equal"
-					: "rank_at_least",
-				doc.writeEffectiveRank,
-				roles,
-			)
+					doc.writeEffectivePolicyCode === "rank_equal"
+						? "rank_equal"
+						: "rank_at_least",
+					doc.writeEffectiveRank,
+					roles,
+				)
 			: "Inherited from placement";
 	}
 
@@ -217,13 +231,13 @@ function writePolicySummary(
 	return rank === null
 		? "Select role"
 		: formatRankPolicySummary(
-			writePolicyCode === "rank_equal" ? "rank_equal" : "rank_at_least",
-			rank,
-			roles,
-		);
+				writePolicyCode === "rank_equal" ? "rank_equal" : "rank_at_least",
+				rank,
+				roles,
+			);
 }
 
-function templateRequiresSeries(
+function templateAllowsSeries(
 	templates: ContentTemplateOption[],
 	templateId: unknown,
 ): boolean {
@@ -231,7 +245,7 @@ function templateRequiresSeries(
 		(template) => template.id === String(templateId ?? ""),
 	);
 
-	return selectedTemplate?.requiresSeries ?? false;
+	return selectedTemplate?.allowsSeries ?? false;
 }
 
 function findSeriesOptionById(
@@ -271,7 +285,11 @@ function valueToString(value: unknown): string {
 	return "";
 }
 
-function appendParam(params: URLSearchParams, key: string, value: string | null | undefined): void {
+function appendParam(
+	params: URLSearchParams,
+	key: string,
+	value: string | null | undefined,
+): void {
 	if (typeof value === "string" && value.trim().length > 0) {
 		params.set(key, value.trim());
 	}
@@ -289,16 +307,24 @@ export default function ContentPanel({
 	const [metaError, setMetaError] = React.useState("");
 	const [metaLoading, setMetaLoading] = React.useState(false);
 	const [doc, setDoc] = React.useState<ContentAdminDetail | null>(null);
-	const [categories, setCategories] = React.useState<ContentCategoryOption[]>([]);
-	const [subcategories, setSubcategories] = React.useState<ContentSubcategoryOption[]>([]);
+	const [categories, setCategories] = React.useState<ContentCategoryOption[]>(
+		[],
+	);
+	const [subcategories, setSubcategories] = React.useState<
+		ContentSubcategoryOption[]
+	>([]);
 	const [roles, setRoles] = React.useState<PolicyRoleRef[]>([]);
 	const [templates, setTemplates] = React.useState<ContentTemplateOption[]>([]);
 	const [series, setSeries] = React.useState<ContentSeriesOption[]>([]);
 	const [media, setMedia] = React.useState<ContentMediaOption[]>([]);
 	const [icons, setIcons] = React.useState<IconLookupItem[]>([]);
 	const [colors, setColors] = React.useState<ThemeColorOption[]>([]);
-	const [templateFields, setTemplateFields] = React.useState<ContentTemplateField[]>([]);
-	const [fieldOptions, setFieldOptions] = React.useState<ContentTemplateFieldOption[]>([]);
+	const [templateFields, setTemplateFields] = React.useState<
+		ContentTemplateField[]
+	>([]);
+	const [fieldOptions, setFieldOptions] = React.useState<
+		ContentTemplateFieldOption[]
+	>([]);
 	const [editorSessionSeq, setEditorSessionSeq] = React.useState(0);
 
 	const loadMeta = React.useCallback(
@@ -330,7 +356,9 @@ export default function ContentPanel({
 
 			if (scope === "all") {
 				setCategories(Array.isArray(payload.categories) ? payload.categories : []);
-				setSubcategories(Array.isArray(payload.subcategories) ? payload.subcategories : []);
+				setSubcategories(
+					Array.isArray(payload.subcategories) ? payload.subcategories : [],
+				);
 				setRoles(Array.isArray(payload.roles) ? payload.roles : []);
 				setIcons(Array.isArray(payload.icons) ? payload.icons : []);
 				setColors(Array.isArray(payload.colors) ? payload.colors : []);
@@ -433,9 +461,15 @@ export default function ContentPanel({
 		};
 	}, [contentId, loadMeta, mode, open]);
 
-	const categoryOptions = React.useMemo(() => toOptions(categories), [categories]);
+	const categoryOptions = React.useMemo(
+		() => toOptions(categories),
+		[categories],
+	);
 	const roleSelectOptions = React.useMemo(() => roleOptions(roles), [roles]);
-	const contentTemplateOptions = React.useMemo(() => templateOptions(templates), [templates]);
+	const contentTemplateOptions = React.useMemo(
+		() => templateOptions(templates),
+		[templates],
+	);
 	const seriesOptions = React.useMemo(() => toOptions(series), [series]);
 	const iconOptions = React.useMemo<Option[]>(
 		() =>
@@ -459,13 +493,14 @@ export default function ContentPanel({
 	);
 
 	const editorSessionKey = React.useMemo(
-		() => [
-			mode,
-			contentId ?? "new",
-			doc?.id ?? "pending",
-			doc?.templateId ?? "no-template",
-			editorSessionSeq,
-		].join(":"),
+		() =>
+			[
+				mode,
+				contentId ?? "new",
+				doc?.id ?? "pending",
+				doc?.templateId ?? "no-template",
+				editorSessionSeq,
+			].join(":"),
 		[contentId, doc?.id, doc?.templateId, editorSessionSeq, mode],
 	);
 
@@ -482,9 +517,9 @@ export default function ContentPanel({
 			statusCode: doc?.statusCode ?? "draft",
 			title: doc?.title ?? "",
 			slug: doc?.slug ?? "",
-			seriesId: doc?.requiresSeries ? (doc.seriesId ?? "") : "",
+			seriesId: doc?.allowsSeries ? (doc.seriesId ?? "") : "",
 			seriesPartNo:
-				doc?.requiresSeries &&
+				doc?.allowsSeries &&
 				doc.seriesPartNo !== null &&
 				typeof doc?.seriesPartNo !== "undefined"
 					? String(doc.seriesPartNo)
@@ -586,7 +621,7 @@ export default function ContentPanel({
 				onChange: ({ value, values, setValue }) => {
 					setValue("fieldValues", {});
 
-					if (!templateRequiresSeries(templates, value)) {
+					if (!templateAllowsSeries(templates, value)) {
 						setValue("seriesId", "");
 						setValue("seriesPartNo", "");
 					}
@@ -621,9 +656,7 @@ export default function ContentPanel({
 				name: "title",
 				label: "Title",
 				validate: (value) =>
-					String(value ?? "").trim().length > 0
-						? undefined
-						: "Title is required.",
+					String(value ?? "").trim().length > 0 ? undefined : "Title is required.",
 			},
 			{
 				type: "text",
@@ -636,28 +669,34 @@ export default function ContentPanel({
 				name: "seriesId",
 				label: "Series",
 				options: seriesOptions,
-				helpText: "Enabled only when the selected template requires a series.",
-				isDisabled: (values) => !templateRequiresSeries(templates, values.templateId),
+				helpText: "Optional when the selected template allows series.",
+				allowClear: true,
+				clearLabel: "No series",
+				isDisabled: (values) => !templateAllowsSeries(templates, values.templateId),
 				onChange: ({ value, values, setValue }) => {
 					const nextPartNo = formatNextSeriesPartNo(series, value);
-					if (mode === "create" && nextPartNo.length > 0 && shouldAutofillSeriesPart(values)) {
+					if (
+						mode === "create" &&
+						nextPartNo.length > 0 &&
+						shouldAutofillSeriesPart(values)
+					) {
 						setValue("seriesPartNo", nextPartNo);
 					}
 				},
-				validate: (value, values) =>
-					templateRequiresSeries(templates, values.templateId) &&
-					String(value ?? "").trim().length === 0
-						? "Series is required by the selected template."
-						: undefined,
 			},
 			{
 				type: "custom",
 				name: "seriesPartNo",
 				label: "Series Part",
-				helpText: "Create mode auto-fills the next available number after a series is selected.",
+				helpText:
+					"Create mode auto-fills the next available number after a series is selected.",
 				render: ({ value, setValue, values, readOnly }) => {
-					if (!templateRequiresSeries(templates, values.templateId)) {
+					if (!templateAllowsSeries(templates, values.templateId)) {
 						return <ReadOnlyInput value="Series disabled in template" />;
+					}
+
+					if (String(values.seriesId ?? "").trim().length === 0) {
+						return <ReadOnlyInput value="Select a series to set its part number" />;
 					}
 
 					return (
@@ -672,9 +711,10 @@ export default function ContentPanel({
 					);
 				},
 				validate: (value, values) =>
-					templateRequiresSeries(templates, values.templateId) &&
+					templateAllowsSeries(templates, values.templateId) &&
+					String(values.seriesId ?? "").trim().length > 0 &&
 					String(value ?? "").trim().length === 0
-						? "Series part number is required by the selected template."
+						? "Series part number is required when a series is selected."
 						: undefined,
 			},
 			{
@@ -770,7 +810,8 @@ export default function ContentPanel({
 				type: "readonly",
 				name: "effectiveNavigation",
 				label: "Effective navigation",
-				format: (_value, values) => navigationSummary(values.navHiddenModeCode, doc),
+				format: (_value, values) =>
+					navigationSummary(values.navHiddenModeCode, doc),
 			},
 			{
 				type: "textarea",
@@ -866,22 +907,20 @@ export default function ContentPanel({
 					const selectedColorId = String(values.iconColorId ?? "").trim();
 					const selectedIcon =
 						iconMode === "explicit"
-							? icons.find((icon) => icon.id === selectedIconId) ?? null
+							? (icons.find((icon) => icon.id === selectedIconId) ?? null)
 							: doc?.iconKeyId
-								? icons.find((icon) => icon.id === doc.iconKeyId) ?? null
+								? (icons.find((icon) => icon.id === doc.iconKeyId) ?? null)
 								: null;
 					const selectedColor =
 						colorMode === "explicit"
-							? colors.find((color) => color.id === selectedColorId) ?? null
+							? (colors.find((color) => color.id === selectedColorId) ?? null)
 							: doc?.iconColorId
-								? colors.find((color) => color.id === doc.iconColorId) ?? null
+								? (colors.find((color) => color.id === doc.iconColorId) ?? null)
 								: null;
 
 					return (
 						<div className="media-icon-preview-row">
-							<div
-								className="media-icon-preview-frame"
-							>
+							<div className="media-icon-preview-frame">
 								{selectedIcon && selectedColor ? (
 									<IconRender
 										iconKey={selectedIcon}
@@ -890,7 +929,9 @@ export default function ContentPanel({
 										mediaRouteScope="admin"
 									/>
 								) : (
-									<span className="media-icon-preview-empty">Choose explicit icon and color</span>
+									<span className="media-icon-preview-empty">
+										Choose explicit icon and color
+									</span>
 								)}
 							</div>
 						</div>
@@ -904,26 +945,38 @@ export default function ContentPanel({
 					const currentFieldValues = normalizeFieldValues(value);
 
 					return (
-						<div className="admin-template-fields-section">
-							<h2 className="admin-template-fields-title">Template Fields</h2>
-							<ContentFieldInputs
-								fields={templateFields}
-								fieldOptions={fieldOptions}
-								media={media}
-								series={series}
-								values={currentFieldValues}
-								categoryId={String(values.categoryId ?? "")}
-								subcategoryId={String(values.subcategoryId ?? "")}
-								onChange={(templateFieldId, nextValue) => {
+						<ContentAuthoringWorkspace
+							previewEndpoint="/api/admin/web/content/preview"
+							previewDraft={{
+								contentId,
+								templateId: String(values.templateId ?? ""),
+								title: String(values.title ?? ""),
+								slug: String(values.slug ?? ""),
+								summary: String(values.summary ?? ""),
+								categoryId: String(values.categoryId ?? ""),
+								subcategoryId: String(values.subcategoryId ?? "") || null,
+								seriesId: String(values.seriesId ?? "") || null,
+								seriesPartNo: valueToString(values.seriesPartNo) || null,
+								fieldValues: currentFieldValues,
+							}}
+							fieldInputProps={{
+								fields: templateFields,
+								fieldOptions,
+								media,
+								series,
+								values: currentFieldValues,
+								categoryId: String(values.categoryId ?? ""),
+								subcategoryId: String(values.subcategoryId ?? ""),
+								onChange: (templateFieldId, nextValue) => {
 									setValue({
 										...currentFieldValues,
 										[templateFieldId]: nextValue,
 									});
-								}}
-								editorSessionKey={editorSessionKey}
-								readOnly={readOnly}
-							/>
-						</div>
+								},
+								editorSessionKey,
+								readOnly,
+							}}
+						/>
 					);
 				},
 			},
@@ -1004,7 +1057,10 @@ export default function ContentPanel({
 
 		try {
 			const title = String(values.title ?? "").trim();
-			const requiresSeries = templateRequiresSeries(templates, values.templateId);
+			const allowsSeries = templateAllowsSeries(templates, values.templateId);
+			const selectedSeriesId = allowsSeries
+				? String(values.seriesId ?? "").trim()
+				: "";
 			const body = {
 				templateId: String(values.templateId ?? "").trim(),
 				statusCode: parseStatus(values.statusCode),
@@ -1013,10 +1069,11 @@ export default function ContentPanel({
 				summary: String(values.summary ?? "").trim(),
 				categoryId: String(values.categoryId ?? "").trim(),
 				subcategoryId: String(values.subcategoryId ?? "").trim(),
-				seriesId: requiresSeries ? String(values.seriesId ?? "").trim() : "",
-				seriesPartNo: requiresSeries
-					? String(values.seriesPartNo ?? "").trim()
-					: "",
+				seriesId: selectedSeriesId,
+				seriesPartNo:
+					selectedSeriesId.length > 0
+						? String(values.seriesPartNo ?? "").trim()
+						: "",
 				readPolicyCode: parsePolicy(values.readPolicyCode, "inherit"),
 				readRank: findRankByRoleId(roles, String(values.readRoleId ?? "")),
 				writePolicyCode: parsePolicy(values.writePolicyCode, "inherit"),
@@ -1047,7 +1104,8 @@ export default function ContentPanel({
 				);
 			}
 		} catch (error: unknown) {
-			const message = error instanceof Error ? error.message : "Failed to save content.";
+			const message =
+				error instanceof Error ? error.message : "Failed to save content.";
 			setTopError(message);
 			throw new Error(message);
 		} finally {
@@ -1087,3 +1145,5 @@ export default function ContentPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

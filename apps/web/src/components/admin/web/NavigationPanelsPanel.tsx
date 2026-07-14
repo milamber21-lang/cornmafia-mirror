@@ -4,13 +4,18 @@
 //// Admin panel for creating and editing DB-first navigation panel definitions                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
 import type { JSX } from "react";
 import { useEffect, useMemo, useState } from "react";
 
-import { AlertBanner, DropdownMenuSingle, ReadOnlyInput } from "@/components/ui";
+import {
+	AlertBanner,
+	DropdownMenuSingle,
+	ReadOnlyInput,
+} from "@/components/ui";
 import PanelForm, {
 	type FieldDef,
 	type RowDef,
@@ -37,7 +42,9 @@ export interface NavigationPanelsPanelProps {
 }
 
 function validateCode(value: unknown, label: string): string | undefined {
-	const code = String(value ?? "").trim().toLowerCase();
+	const code = String(value ?? "")
+		.trim()
+		.toLowerCase();
 
 	if (!code) {
 		return `${label} is required.`;
@@ -55,7 +62,10 @@ function validateLabel(value: unknown): string | undefined {
 	return label ? undefined : "Label is required.";
 }
 
-function validatePositiveInt(value: unknown, label: string): string | undefined {
+function validatePositiveInt(
+	value: unknown,
+	label: string,
+): string | undefined {
 	const raw = String(value ?? "").trim();
 	if (!raw || !/^\d+$/.test(raw)) {
 		return `${label} must be a positive integer.`;
@@ -86,7 +96,9 @@ function validateOptionalPositiveInt(
 		: `${label} must be blank or a positive integer.`;
 }
 
-function normalizeReadPolicyCode(value: unknown): NavigationPanelReadPolicyCode {
+function normalizeReadPolicyCode(
+	value: unknown,
+): NavigationPanelReadPolicyCode {
 	if (value === "equal_rank") {
 		return "equal_rank";
 	}
@@ -199,9 +211,7 @@ export default function NavigationPanelsPanel({
 				maxSubcategoriesPerCategory: numberToFieldValue(
 					row.maxSubcategoriesPerCategory,
 				),
-				maxTargetsPerSubcategory: numberToFieldValue(
-					row.maxTargetsPerSubcategory,
-				),
+				maxTargetsPerSubcategory: numberToFieldValue(row.maxTargetsPerSubcategory),
 			};
 		}
 
@@ -307,9 +317,10 @@ export default function NavigationPanelsPanel({
 				name: "readRoleId",
 				label: "Read Rank",
 				render: ({ value, setValue, values, readOnly }) => {
-					const readPolicyCode = values.isDefault === true
-						? "public"
-						: normalizeReadPolicyCode(values.readPolicyCode);
+					const readPolicyCode =
+						values.isDefault === true
+							? "public"
+							: normalizeReadPolicyCode(values.readPolicyCode);
 					if (readPolicyCode === "public") {
 						return <ReadOnlyInput value={formatPublicDefaultSummary(roles)} />;
 					}
@@ -325,9 +336,10 @@ export default function NavigationPanelsPanel({
 					);
 				},
 				validate: (value, values) => {
-					const readPolicyCode = values.isDefault === true
-						? "public"
-						: normalizeReadPolicyCode(values.readPolicyCode);
+					const readPolicyCode =
+						values.isDefault === true
+							? "public"
+							: normalizeReadPolicyCode(values.readPolicyCode);
 					if (readPolicyCode === "public") {
 						return undefined;
 					}
@@ -491,17 +503,12 @@ export default function NavigationPanelsPanel({
 
 			if (!response.ok) {
 				throw new Error(
-					await readResponseMessage(
-						response,
-						"Failed to save navigation panel.",
-					),
+					await readResponseMessage(response, "Failed to save navigation panel."),
 				);
 			}
 		} catch (error: unknown) {
 			const message =
-				error instanceof Error
-					? error.message
-					: "Failed to save navigation panel.";
+				error instanceof Error ? error.message : "Failed to save navigation panel.";
 			setTopError(message);
 			throw new Error(message);
 		} finally {
@@ -521,7 +528,9 @@ export default function NavigationPanelsPanel({
 				setMetaError("");
 				onClose();
 			}}
-			title={mode === "create" ? "Create Navigation Panel" : "Edit Navigation Panel"}
+			title={
+				mode === "create" ? "Create Navigation Panel" : "Edit Navigation Panel"
+			}
 			width="50%"
 			showSave={!metaLoading && metaError.length === 0}
 			mode={mode}
@@ -539,3 +548,5 @@ export default function NavigationPanelsPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

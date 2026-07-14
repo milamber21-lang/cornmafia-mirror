@@ -4,6 +4,8 @@
 //// DB-first member content list, create/edit metadata, and mutation helpers for the member workspace.          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 import { pg, query } from "@/lib/data/pg";
@@ -156,7 +158,10 @@ function readString(record: Record<string, unknown>, key: string): string {
 	return typeof value === "string" ? value : "";
 }
 
-function readNullableString(record: Record<string, unknown>, key: string): string | null {
+function readNullableString(
+	record: Record<string, unknown>,
+	key: string,
+): string | null {
 	const value = record[key];
 	return typeof value === "string" && value.trim().length > 0 ? value : null;
 }
@@ -166,7 +171,10 @@ function readBoolean(record: Record<string, unknown>, key: string): boolean {
 	return typeof value === "boolean" ? value : false;
 }
 
-function readNumber(record: Record<string, unknown>, key: string): number | null {
+function readNumber(
+	record: Record<string, unknown>,
+	key: string,
+): number | null {
 	const value = record[key];
 	if (typeof value === "number" && Number.isFinite(value)) {
 		return value;
@@ -178,7 +186,10 @@ function readNumber(record: Record<string, unknown>, key: string): number | null
 	return null;
 }
 
-function readDateString(record: Record<string, unknown>, key: string): string | null {
+function readDateString(
+	record: Record<string, unknown>,
+	key: string,
+): string | null {
 	const value = record[key];
 	if (value instanceof Date) {
 		return value.toISOString();
@@ -196,7 +207,9 @@ function normalizeStatusCode(value: string): MemberContentStatusCode | null {
 	return null;
 }
 
-function normalizeRenderDestination(value: string): ContentFieldRenderDestinationCode {
+function normalizeRenderDestination(
+	value: string,
+): ContentFieldRenderDestinationCode {
 	if (
 		value === "seo" ||
 		value === "hero" ||
@@ -212,17 +225,25 @@ function normalizeRenderDestination(value: string): ContentFieldRenderDestinatio
 }
 
 function normalizeLayoutWidth(value: string): ContentFieldLayoutWidthCode {
-	return value === "half" || value === "third" || value === "full" ? value : "full";
+	return value === "half" || value === "third" || value === "full"
+		? value
+		: "full";
 }
 
 function normalizeLayoutAlign(value: string): ContentFieldLayoutAlignCode {
-	return value === "left" || value === "center" || value === "right" || value === "stretch"
+	return value === "left" ||
+		value === "center" ||
+		value === "right" ||
+		value === "stretch"
 		? value
 		: "stretch";
 }
 
 function normalizeLabelStyle(value: string): ContentFieldLabelStyleCode {
-	return value === "title" || value === "text" || value === "muted" || value === "label"
+	return value === "title" ||
+		value === "text" ||
+		value === "muted" ||
+		value === "label"
 		? value
 		: "label";
 }
@@ -231,8 +252,12 @@ function normalizeLabelPosition(value: string): ContentFieldLabelPositionCode {
 	return value === "inline" ? "inline" : "above";
 }
 
-function normalizeLabelSeparator(value: string): ContentFieldLabelSeparatorCode {
-	return value === "none" || value === "dash" || value === "colon" ? value : "colon";
+function normalizeLabelSeparator(
+	value: string,
+): ContentFieldLabelSeparatorCode {
+	return value === "none" || value === "dash" || value === "colon"
+		? value
+		: "colon";
 }
 
 function mapCollection(value: unknown): MemberAuthorableCollection | null {
@@ -363,7 +388,9 @@ function mapRows(value: unknown): MemberContentItem[] {
 	});
 }
 
-function mapCollectionResult(value: unknown): MemberContentCollectionResult | null {
+function mapCollectionResult(
+	value: unknown,
+): MemberContentCollectionResult | null {
 	if (!isRecord(value)) {
 		return null;
 	}
@@ -390,9 +417,17 @@ function mapTemplate(value: unknown): ContentTemplateOption | null {
 	const label = readString(value, "label");
 	const contentKindCode = readString(value, "contentKindCode");
 	const contentKindLabel = readString(value, "contentKindLabel");
+	const rendererCode = readString(value, "rendererCode") || contentKindCode;
 	const surfaceScopeCode = readString(value, "surfaceScopeCode");
 
-	if (!id || !code || !label || !contentKindCode || !surfaceScopeCode) {
+	if (
+		!id ||
+		!code ||
+		!label ||
+		!contentKindCode ||
+		!rendererCode ||
+		!surfaceScopeCode
+	) {
 		return null;
 	}
 
@@ -403,8 +438,10 @@ function mapTemplate(value: unknown): ContentTemplateOption | null {
 		label,
 		contentKindCode,
 		contentKindLabel,
+		publicRoutePrefix: readNullableString(value, "publicRoutePrefix"),
+		rendererCode,
 		surfaceScopeCode,
-		requiresSeries: readBoolean(value, "requiresSeries"),
+		allowsSeries: readBoolean(value, "allowsSeries"),
 	};
 }
 
@@ -413,7 +450,9 @@ function mapFieldToolCodes(value: unknown): string[] {
 		return [];
 	}
 
-	return value.flatMap((item) => (typeof item === "string" && item ? [item] : []));
+	return value.flatMap((item) =>
+		typeof item === "string" && item ? [item] : [],
+	);
 }
 
 function mapField(value: unknown): ContentTemplateField | null {
@@ -453,7 +492,9 @@ function mapField(value: unknown): ContentTemplateField | null {
 		return null;
 	}
 
-	const labelStyleCode = normalizeLabelStyle(readString(value, "labelStyleCode"));
+	const labelStyleCode = normalizeLabelStyle(
+		readString(value, "labelStyleCode"),
+	);
 
 	return {
 		id,
@@ -463,20 +504,26 @@ function mapField(value: unknown): ContentTemplateField | null {
 		templateLabel,
 		contentKindCode,
 		surfaceScopeCode,
-		requiresSeries: readBoolean(value, "requiresSeries"),
+		allowsSeries: readBoolean(value, "allowsSeries"),
 		fieldListId,
 		fieldListCode,
 		label,
 		helpText: readNullableString(value, "helpText"),
 		fieldTypeCode,
 		fieldTypeLabel,
-		renderDestinationCode: normalizeRenderDestination(readString(value, "renderDestinationCode")),
+		renderDestinationCode: normalizeRenderDestination(
+			readString(value, "renderDestinationCode"),
+		),
 		layoutWidthCode: normalizeLayoutWidth(readString(value, "layoutWidthCode")),
 		layoutAlignCode: normalizeLayoutAlign(readString(value, "layoutAlignCode")),
 		showLabel: readBoolean(value, "showLabel"),
 		labelStyleCode,
-		labelPositionCode: normalizeLabelPosition(readString(value, "labelPositionCode")),
-		labelSeparatorCode: normalizeLabelSeparator(readString(value, "labelSeparatorCode")),
+		labelPositionCode: normalizeLabelPosition(
+			readString(value, "labelPositionCode"),
+		),
+		labelSeparatorCode: normalizeLabelSeparator(
+			readString(value, "labelSeparatorCode"),
+		),
 		valueColumnName,
 		displayOrder: readNumber(value, "displayOrder") ?? 0,
 		isRequired: readBoolean(value, "isRequired"),
@@ -614,7 +661,6 @@ function mapEditMeta(value: unknown): MemberContentEditMeta | null {
 	};
 }
 
-
 function mediaReferencePayload(
 	mediaReferences: ReturnType<typeof extractContentMediaReferences>,
 ): ContentMediaReferenceDbInput[] {
@@ -627,7 +673,9 @@ function mediaReferencePayload(
 	}));
 }
 
-export async function listMemberContent(actorDiscordId: string): Promise<MemberContentItem[]> {
+export async function listMemberContent(
+	actorDiscordId: string,
+): Promise<MemberContentItem[]> {
 	const result = await query<JsonPayloadRow>(
 		`SELECT web_api.web_member_content_list($1) AS payload`,
 		[actorDiscordId],
@@ -670,15 +718,15 @@ export async function findMemberContentEditMeta(args: {
 	return mapEditMeta(result.rows[0]?.payload ?? null);
 }
 
-export async function createMemberContent(args: MemberContentCreateInput): Promise<string | null> {
+export async function createMemberContent(
+	args: MemberContentCreateInput,
+): Promise<string | null> {
 	const fieldValues: ContentFieldValueDbInput[] = buildContentFieldValuePayload(
 		args.templateFields,
 		args.fieldValues,
 	);
-	const externalLinks: ContentExternalLinkDbInput[] = buildContentExternalLinkPayload(
-		args.templateFields,
-		args.fieldValues,
-	);
+	const externalLinks: ContentExternalLinkDbInput[] =
+		buildContentExternalLinkPayload(args.templateFields, args.fieldValues);
 	const mediaReferences = mediaReferencePayload(
 		extractContentMediaReferences(args.templateFields, fieldValues),
 	);
@@ -701,7 +749,10 @@ export async function createMemberContent(args: MemberContentCreateInput): Promi
 				],
 			);
 			const value = seriesResult.rows[0]?.series_id;
-			seriesId = typeof value === "string" || typeof value === "number" ? String(value) : null;
+			seriesId =
+				typeof value === "string" || typeof value === "number"
+					? String(value)
+					: null;
 		}
 
 		const result = await client.query<IdRow>(
@@ -743,7 +794,9 @@ export async function createMemberContent(args: MemberContentCreateInput): Promi
 		await client.query("COMMIT");
 
 		const value = result.rows[0]?.content_id;
-		return typeof value === "string" || typeof value === "number" ? String(value) : null;
+		return typeof value === "string" || typeof value === "number"
+			? String(value)
+			: null;
 	} catch (error: unknown) {
 		await client.query("ROLLBACK").catch(() => undefined);
 		throw error;
@@ -752,15 +805,15 @@ export async function createMemberContent(args: MemberContentCreateInput): Promi
 	}
 }
 
-export async function updateMemberContent(args: MemberContentUpdateInput): Promise<string | null> {
+export async function updateMemberContent(
+	args: MemberContentUpdateInput,
+): Promise<string | null> {
 	const fieldValues: ContentFieldValueDbInput[] = buildContentFieldValuePayload(
 		args.templateFields,
 		args.fieldValues,
 	);
-	const externalLinks: ContentExternalLinkDbInput[] = buildContentExternalLinkPayload(
-		args.templateFields,
-		args.fieldValues,
-	);
+	const externalLinks: ContentExternalLinkDbInput[] =
+		buildContentExternalLinkPayload(args.templateFields, args.fieldValues);
 	const mediaReferences = mediaReferencePayload(
 		extractContentMediaReferences(args.templateFields, fieldValues),
 	);
@@ -792,7 +845,10 @@ export async function updateMemberContent(args: MemberContentUpdateInput): Promi
 				],
 			);
 			const value = seriesResult.rows[0]?.series_id;
-			seriesId = typeof value === "string" || typeof value === "number" ? String(value) : null;
+			seriesId =
+				typeof value === "string" || typeof value === "number"
+					? String(value)
+					: null;
 		}
 
 		const result = await client.query<IdRow>(
@@ -830,7 +886,9 @@ export async function updateMemberContent(args: MemberContentUpdateInput): Promi
 		await client.query("COMMIT");
 
 		const value = result.rows[0]?.content_id;
-		return typeof value === "string" || typeof value === "number" ? String(value) : null;
+		return typeof value === "string" || typeof value === "number"
+			? String(value)
+			: null;
 	} catch (error: unknown) {
 		await client.query("ROLLBACK").catch(() => undefined);
 		throw error;
@@ -839,3 +897,4 @@ export async function updateMemberContent(args: MemberContentUpdateInput): Promi
 	}
 }
 
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

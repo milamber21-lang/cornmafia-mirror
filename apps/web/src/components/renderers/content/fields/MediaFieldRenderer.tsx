@@ -1,19 +1,21 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/renderers/content/fields/MediaFieldRenderer.tsx                                ////
 //// Language: TSX                                                                                                ////
-//// Renders media id fields from admin or public metadata with image and file-safe fallbacks.                    ////
+//// Renders resolved media safely and limits missing-media diagnostics to admin preview surfaces.                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
-import type { JSX } from "react";
 import Image from "next/image";
+import type { JSX } from "react";
 
 import ContentFieldFrame from "../ContentFieldFrame";
 import { hasRenderableValue } from "../field-utils";
-import type { ContentRenderField } from "../types";
+import type { ContentRenderField, ContentRenderModel } from "../types";
 
 type MediaFieldRendererProps = {
 	field: ContentRenderField;
+	model: ContentRenderModel;
 	showLabel?: boolean;
 };
 
@@ -45,6 +47,7 @@ function formatFileMeta(field: ContentRenderField): string | null {
 
 export default function MediaFieldRenderer({
 	field,
+	model,
 	showLabel = true,
 }: MediaFieldRendererProps): JSX.Element | null {
 	if (!hasRenderableValue(field.value)) {
@@ -52,13 +55,17 @@ export default function MediaFieldRenderer({
 	}
 
 	if (!field.media?.url) {
+		if (model.surfaceScope !== "admin") {
+			return null;
+		}
+
 		return (
 			<ContentFieldFrame
 				field={field}
 				showLabel={showLabel}
 				valueTextClassName="content-field-value"
 			>
-				<p className="content-field-muted-message">
+				<p className="content-field-warning">
 					Media id {String(field.value)} is not available for rendering yet.
 				</p>
 			</ContentFieldFrame>
@@ -67,11 +74,12 @@ export default function MediaFieldRenderer({
 
 	if (!isImageMedia(field)) {
 		return (
-			<ContentFieldFrame field={field} showLabel={showLabel} valueTextClassName="content-field-value">
-				<a
-					className="content-field-media-link"
-					href={field.media.url}
-				>
+			<ContentFieldFrame
+				field={field}
+				showLabel={showLabel}
+				valueTextClassName="content-field-value"
+			>
+				<a className="content-field-media-link" href={field.media.url}>
 					<span className="content-field-media-link__title">
 						{field.media.originalFilename}
 					</span>
@@ -86,7 +94,11 @@ export default function MediaFieldRenderer({
 	}
 
 	return (
-		<ContentFieldFrame field={field} showLabel={showLabel} valueTextClassName="content-field-value">
+		<ContentFieldFrame
+			field={field}
+			showLabel={showLabel}
+			valueTextClassName="content-field-value"
+		>
 			<figure className="content-field-media-figure">
 				<div className="content-field-media-frame">
 					<Image
@@ -105,3 +117,5 @@ export default function MediaFieldRenderer({
 		</ContentFieldFrame>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

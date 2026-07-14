@@ -4,6 +4,7 @@
 //// DB-first Riseopedia asset class helpers for hub cards and filters.                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -67,7 +68,9 @@ function toIsoString(value: Date | string | null): string | null {
 	return value instanceof Date ? value.toISOString() : value;
 }
 
-function mapAssetClassRow(row: RiseopediaAssetClassRow): RiseopediaAssetClassDoc {
+function mapAssetClassRow(
+	row: RiseopediaAssetClassRow,
+): RiseopediaAssetClassDoc {
 	return {
 		id: String(row.asset_class_id),
 		code: row.asset_class_code,
@@ -118,7 +121,6 @@ export async function listRiseopediaAssetClasses(): Promise<
 	return result.rows.map(mapAssetClassRow);
 }
 
-
 export async function listRiseopediaAssetClassMediaSamples(): Promise<
 	RiseopediaAssetClassMediaSample[]
 > {
@@ -139,3 +141,5 @@ export async function listRiseopediaAssetClassMediaSamples(): Promise<
 
 	return result.rows.map(mapAssetClassMediaSampleRow);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -1,15 +1,16 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//// FILE: apps/web/src/app/info/[category]/classes/[slug]/page.tsx                                           ////
-//// Language: TSX                                                                                             ////
-//// DB-gated /info wiki class entity overview route populated from entity read rows.                          ////
+//// FILE: apps/web/src/app/info/[category]/classes/[slug]/page.tsx                                            ////
+//// Language: TSX                                                                                               ////
+//// DB-gated class entity overview with Mafiosopedia release multi-select state.                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import RiseopediaEntityBrowser from "@/components/riseopedia/RiseopediaEntityBrowser";
+import RiseopediaEntityBrowser from "@/components/riseopedia/browse/RiseopediaEntityBrowser";
 import {
 	getOpediaHubData,
 	getOpediaWikiConfig,
@@ -17,7 +18,7 @@ import {
 	listOpediaEntityCategoryFilterOptions,
 	listOpediaEntitySubcategoryFilterOptions,
 } from "@/lib/data/opedia-wiki";
-import type { RiseopediaEntityListFilters } from "@/lib/data/riseopedia-entities";
+import { parseMafiosopediaReleaseFilters } from "@/lib/data/mafiosopedia-release";
 import {
 	firstSearchParam,
 	parsePage,
@@ -46,6 +47,7 @@ type PageProps = {
 		subcategory?: RiseopediaSearchParamValue;
 		page?: RiseopediaSearchParamValue;
 		pageSize?: RiseopediaSearchParamValue;
+		release?: RiseopediaSearchParamValue;
 	}>;
 };
 
@@ -66,30 +68,35 @@ export default async function InfoClassPage({
 		categorySlug,
 		subcategorySlug: "classes",
 	});
-
 	if (!routeContent) {
 		notFound();
 	}
 
-	const hubData = await getOpediaHubData(wiki);
+	const resolvedSearchParams = await searchParams;
+	const releaseFilters =
+		wiki.code === "mafiosopedia"
+			? parseMafiosopediaReleaseFilters(resolvedSearchParams.release ?? null)
+			: parseMafiosopediaReleaseFilters(null);
+	const hubData = await getOpediaHubData(wiki, releaseFilters);
 	const classCard = hubData.classes.find(
 		(row) => row.slug === classSlug || row.code === classSlug,
 	);
-
 	if (!classCard) {
 		notFound();
 	}
 
-	const resolvedSearchParams = await searchParams;
 	const selectedCategorySlug = firstSearchParam(resolvedSearchParams.category);
-	const selectedSubcategorySlug = firstSearchParam(resolvedSearchParams.subcategory);
-	const listFilters: RiseopediaEntityListFilters = {
+	const selectedSubcategorySlug = firstSearchParam(
+		resolvedSearchParams.subcategory,
+	);
+	const listFilters = {
 		search: firstSearchParam(resolvedSearchParams.q),
 		section: null,
 		entityClassCode: classCard.code,
 		categorySlug: selectedCategorySlug,
 		subcategorySlug: selectedSubcategorySlug,
-		cardPlacementCode: "class",
+		releaseFilters,
+		cardPlacementCode: "class" as const,
 		page: parsePage(firstSearchParam(resolvedSearchParams.page)),
 		pageSize: parsePageSize(firstSearchParam(resolvedSearchParams.pageSize)),
 	};
@@ -97,11 +104,13 @@ export default async function InfoClassPage({
 		listOpediaEntityCategoryFilterOptions(wiki, {
 			section: null,
 			entityClassCode: classCard.code,
+			releaseFilters,
 		}),
 		listOpediaEntitySubcategoryFilterOptions(wiki, {
 			section: null,
 			entityClassCode: classCard.code,
 			categorySlug: selectedCategorySlug,
+			releaseFilters,
 		}),
 		listOpediaEntities(wiki, listFilters),
 	]);
@@ -111,35 +120,36 @@ export default async function InfoClassPage({
 		<section className="public-collection-shell">
 			<div className="card public-collection-page riseopedia-page">
 				<RiseopediaEntityBrowser
-					result={result}
-					search={listFilters.search}
 					basePath={basePath}
-					filters={{
-						section: null,
-						entityClassCode: classCard.code,
-						categorySlug: selectedCategorySlug,
-						subcategorySlug: selectedSubcategorySlug,
-					}}
-					filterOptions={{
-						categories,
-						subcategories,
-					}}
-					showCategoryFilter
-					showSubcategoryFilter
 					breadcrumbs={[
 						{ label: wiki.title, href: wiki.browsePath },
 						{ label: "Classes", href: wiki.classesPath },
 						{ label: classCard.name },
 					]}
 					description={classCard.description}
+					emptyReadModelLabel={wiki.emptyPublicLabel}
 					eyebrow="Class"
+					filterOptions={{ categories, subcategories }}
+					filters={{
+						section: null,
+						entityClassCode: classCard.code,
+						categorySlug: selectedCategorySlug,
+						subcategorySlug: selectedSubcategorySlug,
+						releaseFilters,
+					}}
+					result={result}
+					search={listFilters.search}
 					searchPlaceholder={`Search ${classCard.name} entries...`}
+					showCategoryFilter
+					showReleaseFilter={wiki.code === "mafiosopedia"}
+					showSubcategoryFilter
 					title={classCard.name}
 					wikiCode={wiki.code}
 					wikiName={wiki.title}
-					emptyReadModelLabel={wiki.emptyPublicLabel}
 				/>
 			</div>
 		</section>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

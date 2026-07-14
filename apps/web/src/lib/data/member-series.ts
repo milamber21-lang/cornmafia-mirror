@@ -4,6 +4,8 @@
 //// DB-first member series list, dependency, and mutation helpers for the /me workspace.                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 import { query } from "@/lib/data/pg";
@@ -168,7 +170,9 @@ export async function createMemberSeries(args: {
 		],
 	);
 	const value = result.rows[0]?.series_id;
-	return typeof value === "string" || typeof value === "number" ? String(value) : null;
+	return typeof value === "string" || typeof value === "number"
+		? String(value)
+		: null;
 }
 
 export async function updateMemberSeries(args: {
@@ -187,8 +191,10 @@ export async function deleteMemberSeries(args: {
 	actorDiscordId: string;
 	seriesId: string;
 }): Promise<void> {
-	await query(
-		`SELECT * FROM web_api.web_member_series_delete($1, $2::bigint)`,
-		[args.actorDiscordId, args.seriesId],
-	);
+	await query(`SELECT * FROM web_api.web_member_series_delete($1, $2::bigint)`, [
+		args.actorDiscordId,
+		args.seriesId,
+	]);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

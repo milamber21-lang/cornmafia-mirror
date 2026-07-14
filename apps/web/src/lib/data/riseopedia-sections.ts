@@ -4,6 +4,7 @@
 //// DB-first Riseopedia section helpers for public hub, filters, media samples, and section detail pages.      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -277,7 +278,9 @@ function mapSectionMediaSampleRow(
 	};
 }
 
-function mapSectionItemRow(row: RiseopediaSectionItemRow): RiseopediaSectionItemDoc {
+function mapSectionItemRow(
+	row: RiseopediaSectionItemRow,
+): RiseopediaSectionItemDoc {
 	return {
 		sectionId: String(row.section_id),
 		sectionCode: row.section_code,
@@ -309,7 +312,9 @@ function mapSectionItemRow(row: RiseopediaSectionItemRow): RiseopediaSectionItem
 	};
 }
 
-export async function listRiseopediaSections(): Promise<RiseopediaSectionDoc[]> {
+export async function listRiseopediaSections(): Promise<
+	RiseopediaSectionDoc[]
+> {
 	const result = await query<RiseopediaSectionRow>(
 		`SELECT section_id,
 				section_code,
@@ -494,3 +499,5 @@ export async function listRiseopediaSectionItems(
 		totalPages: pageCount,
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

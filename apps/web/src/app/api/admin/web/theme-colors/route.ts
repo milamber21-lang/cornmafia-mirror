@@ -4,6 +4,8 @@
 //// DB-first admin theme colors API with shared admin-route plumbing and normalized rows/doc responses            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { NextRequest, NextResponse } from "next/server";
 
 import {
@@ -232,3 +234,5 @@ export async function POST(req: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

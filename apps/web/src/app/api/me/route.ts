@@ -4,10 +4,10 @@
 //// DB-first member profile API for the signed-in actor.                                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAuthSession } from "@/lib/auth/auth";
 import {
 	isMemberThemeStyleCode,
 	normalizeMemberThemeStyleCode,
@@ -17,7 +17,7 @@ import {
 	type MemberThemeStyleCode,
 	type ProfilePayload,
 } from "@/lib/data/member-profile";
-import { readDiscordIdFromSession } from "@/lib/server/current-actor";
+import { getCurrentActorDiscordId } from "@/lib/server/current-actor";
 
 export const dynamic = "force-dynamic";
 
@@ -103,7 +103,9 @@ function pickEditable(body: unknown): PickEditableResult {
 	return { updates: out, error: null };
 }
 
-function readThemeStyleCodeFromProfile(doc: ProfilePayload): MemberThemeStyleCode {
+function readThemeStyleCodeFromProfile(
+	doc: ProfilePayload,
+): MemberThemeStyleCode {
 	return normalizeMemberThemeStyleCode(doc.theme.key);
 }
 
@@ -129,8 +131,7 @@ function profileResponse(doc: ProfilePayload): NextResponse {
 }
 
 export async function GET() {
-	const session = await getAuthSession();
-	const actorDiscordId = readDiscordIdFromSession(session);
+	const actorDiscordId = await getCurrentActorDiscordId();
 
 	if (!actorDiscordId) {
 		return NextResponse.json(
@@ -157,8 +158,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-	const session = await getAuthSession();
-	const actorDiscordId = readDiscordIdFromSession(session);
+	const actorDiscordId = await getCurrentActorDiscordId();
 
 	if (!actorDiscordId) {
 		return NextResponse.json(
@@ -176,10 +176,7 @@ export async function PATCH(req: NextRequest) {
 
 	const picked = pickEditable(body);
 	if (picked.error) {
-		return NextResponse.json(
-			{ ok: false, error: picked.error },
-			{ status: 400 },
-		);
+		return NextResponse.json({ ok: false, error: picked.error }, { status: 400 });
 	}
 
 	try {
@@ -203,3 +200,5 @@ export async function PATCH(req: NextRequest) {
 		return NextResponse.json({ ok: false, error: message }, { status: 500 });
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

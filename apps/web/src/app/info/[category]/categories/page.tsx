@@ -1,22 +1,27 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/app/info/[category]/categories/page.tsx                                                ////
-//// Language: TSX                                                                                             ////
-//// DB-gated /info wiki categories index route with section and class filtering.                              ////
+//// Language: TSX                                                                                               ////
+//// DB-gated /info wiki categories index with release-aware non-empty classification filtering.                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FolderTree } from "lucide-react";
 
-import RiseopediaClassificationBrowser from "@/components/riseopedia/RiseopediaClassificationBrowser";
+import RiseopediaClassificationBrowser from "@/components/riseopedia/browse/RiseopediaClassificationBrowser";
 import {
 	getOpediaWikiConfig,
 	listOpediaCategoryDirectoryCards,
 	listOpediaClassFilterOptions,
-	listOpediaSections,
+	listOpediaSectionDirectoryCards,
 } from "@/lib/data/opedia-wiki";
+import {
+	mafiosopediaReleaseSearchParam,
+	parseMafiosopediaReleaseFilters,
+} from "@/lib/data/mafiosopedia-release";
 import {
 	firstSearchParam,
 	type RiseopediaSearchParamValue,
@@ -40,6 +45,7 @@ type PageProps = {
 		q?: RiseopediaSearchParamValue;
 		section?: RiseopediaSearchParamValue;
 		class?: RiseopediaSearchParamValue;
+		release?: RiseopediaSearchParamValue;
 	}>;
 };
 
@@ -47,12 +53,17 @@ function matchingEntriesHref(args: {
 	categorySlug: string;
 	section: string | null;
 	entityClassCode: string | null;
+	release: string | null;
 }): string | null {
-	if (args.entityClassCode) {
-		return `/info/${args.categorySlug}/classes/${args.entityClassCode}`;
-	}
+	const basePath = args.entityClassCode
+		? `/info/${args.categorySlug}/classes/${args.entityClassCode}`
+		: args.section
+			? `/info/${args.categorySlug}/sections/${args.section}`
+			: null;
 
-	return args.section ? `/info/${args.categorySlug}/sections/${args.section}` : null;
+	return basePath && args.release
+		? `${basePath}?release=${encodeURIComponent(args.release)}`
+		: basePath;
 }
 
 export default async function InfoCategoriesPage({
@@ -79,14 +90,28 @@ export default async function InfoCategoriesPage({
 	const resolvedSearchParams = await searchParams;
 	const section = firstSearchParam(resolvedSearchParams.section);
 	const entityClassCode = firstSearchParam(resolvedSearchParams.class);
+	const releaseFilters =
+		wiki.code === "mafiosopedia"
+			? parseMafiosopediaReleaseFilters(resolvedSearchParams.release ?? null)
+			: parseMafiosopediaReleaseFilters(null);
+	const release =
+		wiki.code === "mafiosopedia"
+			? mafiosopediaReleaseSearchParam(releaseFilters)
+			: null;
 	const [sections, classOptions, cards] = await Promise.all([
-		listOpediaSections(wiki),
-		listOpediaClassFilterOptions(wiki, { section }),
-		listOpediaCategoryDirectoryCards(wiki, { section, entityClassCode }),
+		listOpediaSectionDirectoryCards(wiki, releaseFilters),
+		listOpediaClassFilterOptions(wiki, { section, releaseFilters }),
+		listOpediaCategoryDirectoryCards(wiki, {
+			section,
+			entityClassCode,
+			releaseFilters,
+		}),
 	]);
-	const sectionOptions = sections
-		.filter((row) => row.publicVisible || row.showWhenEmpty)
-		.map((row) => ({ value: row.slug, label: row.name, count: row.itemCount }));
+	const sectionOptions = sections.map((row) => ({
+		value: row.slug,
+		label: row.name,
+		count: row.itemCount,
+	}));
 
 	return (
 		<RiseopediaClassificationBrowser
@@ -101,6 +126,7 @@ export default async function InfoCategoriesPage({
 				section,
 				entityClassCode,
 				categorySlug: null,
+				releaseFilters,
 			}}
 			filterOptions={{
 				sections: sectionOptions,
@@ -110,9 +136,11 @@ export default async function InfoCategoriesPage({
 				categorySlug,
 				section,
 				entityClassCode,
+				release,
 			})}
 			heroEyebrow="Classification index"
 			placeholder="Search categories..."
+			showReleaseFilter={wiki.code === "mafiosopedia"}
 			showSectionFilter
 			showClassFilter
 			title="Categories"
@@ -122,3 +150,5 @@ export default async function InfoCategoriesPage({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

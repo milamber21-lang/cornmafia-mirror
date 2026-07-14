@@ -4,6 +4,7 @@
 //// Renders safe rich-text content fields through the shared rich-text renderer.                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -18,6 +19,20 @@ type RichTextFieldRendererProps = {
 	model: ContentRenderModel;
 	showLabel?: boolean;
 };
+function proseVariantForField(
+	field: ContentRenderField,
+): "main" | "aside" | "default" {
+	if (field.renderDestinationCode === "main") {
+		return "main";
+	}
+	if (
+		field.renderDestinationCode === "left" ||
+		field.renderDestinationCode === "right"
+	) {
+		return "aside";
+	}
+	return "default";
+}
 
 export default async function RichTextFieldRenderer({
 	field,
@@ -32,14 +47,19 @@ export default async function RichTextFieldRenderer({
 		<ContentFieldFrame
 			field={field}
 			showLabel={showLabel}
-			className="content-field-frame content-field-frame--richtext"
+			className="content-field-frame--richtext"
 			valueTextClassName="content-field-value"
 		>
 			<RichTextRenderer
 				value={field.value}
-				externalLinkSurfaceScope={model.surfaceScope}
+				externalLinkSurfaceScope={
+					model.surfaceScope === "admin" ? "admin" : "public"
+				}
 				mediaRouteScope={model.mediaRouteScope}
+				proseVariant={proseVariantForField(field)}
 			/>
 		</ContentFieldFrame>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

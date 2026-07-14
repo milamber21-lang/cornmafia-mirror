@@ -4,6 +4,8 @@
 //// Server helper for sanitized and colorized SVG icon responses                                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 import { readFile } from "fs/promises";
@@ -144,7 +146,11 @@ function ensureSvgImageNamespace(svg: string): string {
 		);
 	}
 
-	if (!/\sxmlns:xlink\s*=\s*["']http:\/\/www\.w3\.org\/1999\/xlink["']/i.test(nextSvg)) {
+	if (
+		!/\sxmlns:xlink\s*=\s*["']http:\/\/www\.w3\.org\/1999\/xlink["']/i.test(
+			nextSvg,
+		)
+	) {
 		nextSvg = nextSvg.replace(
 			/^<svg(\s|>)/i,
 			(_match: string, suffix: string) =>
@@ -205,3 +211,5 @@ export function buildSvgIconResponse(args: {
 		},
 	});
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

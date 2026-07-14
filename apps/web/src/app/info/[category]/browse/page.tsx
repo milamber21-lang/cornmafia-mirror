@@ -4,12 +4,13 @@
 //// DB-gated /info wiki browse overview route backed by public wiki read models.                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import RiseopediaHub from "@/components/riseopedia/RiseopediaHub";
+import RiseopediaHub from "@/components/riseopedia/browse/RiseopediaHub";
 import {
 	getOpediaWikiConfig,
 	listOpediaCategoryDirectoryCards,
@@ -20,6 +21,10 @@ import {
 	listOpediaClassDirectoryCards,
 	listOpediaSectionDirectoryCards,
 } from "@/lib/data/opedia-wiki";
+import {
+	hasNonDefaultMafiosopediaReleaseFilters,
+	parseMafiosopediaReleaseFilters,
+} from "@/lib/data/mafiosopedia-release";
 import {
 	firstSearchParam,
 	parsePage,
@@ -49,6 +54,7 @@ type PageProps = {
 		subcategory?: RiseopediaSearchParamValue;
 		page?: RiseopediaSearchParamValue;
 		pageSize?: RiseopediaSearchParamValue;
+		release?: RiseopediaSearchParamValue;
 	}>;
 };
 
@@ -78,37 +84,62 @@ export default async function InfoBrowsePage({
 	const selectedSection = firstSearchParam(resolvedSearchParams.section);
 	const selectedClassCode = firstSearchParam(resolvedSearchParams.class);
 	const selectedCategorySlug = firstSearchParam(resolvedSearchParams.category);
-	const selectedSubcategorySlug = firstSearchParam(resolvedSearchParams.subcategory);
-	const hasActiveBrowser = Boolean(search || selectedSection || selectedClassCode || selectedCategorySlug || selectedSubcategorySlug);
+	const selectedSubcategorySlug = firstSearchParam(
+		resolvedSearchParams.subcategory,
+	);
+	const releaseFilters =
+		wiki.code === "mafiosopedia"
+			? parseMafiosopediaReleaseFilters(resolvedSearchParams.release ?? null)
+			: parseMafiosopediaReleaseFilters(null);
+	const hasActiveBrowser = Boolean(
+		search ||
+		selectedSection ||
+		selectedClassCode ||
+		selectedCategorySlug ||
+		selectedSubcategorySlug ||
+		(wiki.code === "mafiosopedia" &&
+			hasNonDefaultMafiosopediaReleaseFilters(releaseFilters)),
+	);
 	const [sections, classes, categories] = await Promise.all([
-		listOpediaSectionDirectoryCards(wiki),
-		listOpediaClassDirectoryCards(wiki, { section: null }),
-		listOpediaCategoryDirectoryCards(wiki, { section: null, entityClassCode: null }),
+		listOpediaSectionDirectoryCards(wiki, releaseFilters),
+		listOpediaClassDirectoryCards(wiki, { section: null, releaseFilters }),
+		listOpediaCategoryDirectoryCards(wiki, {
+			section: null,
+			entityClassCode: null,
+			releaseFilters,
+		}),
 	]);
-	const [classOptions, categoryOptions, subcategoryOptions, entityResult] = await Promise.all([
-		listOpediaEntityClassFilterOptions(wiki, { section: selectedSection }),
-		listOpediaEntityCategoryFilterOptions(wiki, {
-			section: selectedSection,
-			entityClassCode: selectedClassCode,
-		}),
-		listOpediaEntitySubcategoryFilterOptions(wiki, {
-			section: selectedSection,
-			entityClassCode: selectedClassCode,
-			categorySlug: selectedCategorySlug,
-		}),
-		hasActiveBrowser
-			? listOpediaEntities(wiki, {
-				search,
+	const [classOptions, categoryOptions, subcategoryOptions, entityResult] =
+		await Promise.all([
+			listOpediaEntityClassFilterOptions(wiki, {
+				section: selectedSection,
+				releaseFilters,
+			}),
+			listOpediaEntityCategoryFilterOptions(wiki, {
+				section: selectedSection,
+				entityClassCode: selectedClassCode,
+				releaseFilters,
+			}),
+			listOpediaEntitySubcategoryFilterOptions(wiki, {
 				section: selectedSection,
 				entityClassCode: selectedClassCode,
 				categorySlug: selectedCategorySlug,
-				subcategorySlug: selectedSubcategorySlug,
-				page: parsePage(firstSearchParam(resolvedSearchParams.page)),
-				pageSize: parsePageSize(firstSearchParam(resolvedSearchParams.pageSize)),
-				cardPlacementCode: "hub",
-			})
-			: Promise.resolve(null),
-	]);
+				releaseFilters,
+			}),
+			hasActiveBrowser
+				? listOpediaEntities(wiki, {
+						search,
+						section: selectedSection,
+						entityClassCode: selectedClassCode,
+						categorySlug: selectedCategorySlug,
+						subcategorySlug: selectedSubcategorySlug,
+						page: parsePage(firstSearchParam(resolvedSearchParams.page)),
+						pageSize: parsePageSize(firstSearchParam(resolvedSearchParams.pageSize)),
+						releaseFilters,
+						cardPlacementCode: "hub",
+					})
+				: Promise.resolve(null),
+		]);
 	const sectionOptions = sections.map((section) => ({
 		value: section.slug,
 		label: section.name,
@@ -125,6 +156,7 @@ export default async function InfoBrowsePage({
 			entityClassCode={selectedClassCode}
 			categorySlug={selectedCategorySlug}
 			subcategorySlug={selectedSubcategorySlug}
+			releaseFilters={releaseFilters}
 			sectionOptions={sectionOptions}
 			classOptions={classOptions}
 			categoryOptions={categoryOptions}
@@ -141,3 +173,5 @@ export default async function InfoBrowsePage({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

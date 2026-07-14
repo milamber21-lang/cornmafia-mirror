@@ -4,6 +4,7 @@
 //// Public content rendering adapter that feeds DB-resolved content into the shared content renderer.            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -18,3 +19,5 @@ export default function PublicContentRenderer({
 }): JSX.Element {
 	return <ContentRenderer model={createPublicContentRenderModel(content)} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// Lexical plugin that opens link editing from clicked editor anchors.                                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -11,19 +12,10 @@ import * as React from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { CLICK_COMMAND, COMMAND_PRIORITY_LOW } from "lexical";
 
-export type AnchorRect = {
-	top: number;
-	left: number;
-	right: number;
-	bottom: number;
-	width: number;
-	height: number;
-};
-
 export function RichTextLinkClickTrackerPlugin({
 	onOpen,
 }: {
-	onOpen: (r: AnchorRect) => void;
+	onOpen: () => void;
 }) {
 	const [editor] = useLexicalComposerContext();
 
@@ -42,15 +34,7 @@ export function RichTextLinkClickTrackerPlugin({
 					const a = el?.closest?.("a");
 					if (a) {
 						e.preventDefault();
-						const r = a.getBoundingClientRect();
-						onOpen({
-							top: r.top,
-							left: r.left,
-							right: r.right,
-							bottom: r.bottom,
-							width: r.width,
-							height: r.height,
-						});
+						onOpen();
 						return true;
 					}
 				} catch {}
@@ -62,3 +46,5 @@ export function RichTextLinkClickTrackerPlugin({
 
 	return null;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

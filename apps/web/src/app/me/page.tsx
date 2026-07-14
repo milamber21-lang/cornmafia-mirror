@@ -4,6 +4,8 @@
 //// Member profile page that renders the signed-in user workspace surface.                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { getAuthSession } from "@/lib/auth/auth";
 import LoginClient from "@/components/login/LoginClient";
 import MeTable from "@/components/me/MeTable";
@@ -15,20 +17,20 @@ export default async function MePage() {
 
 	if (!session?.user) {
 		return (
-					<section className="card member-page-card">
-						<h1 className="member-page-title">Profile</h1>
-						<p>You are not signed in.</p>
-						<LoginClient session={null} />
-					</section>
+			<section className="card member-page-card">
+				<h1 className="member-page-title">Profile</h1>
+				<p>You are not signed in.</p>
+				<LoginClient session={null} />
+			</section>
 		);
 	}
 
 	const name = session.user.name ?? "User";
-	const img = session.user.image ?? null;
-
 	return (
-				<section className="card">
-					<MeTable name={name} image={img} />
-				</section>
+		<section className="member-profile-page">
+			<MeTable name={name} />
+		</section>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

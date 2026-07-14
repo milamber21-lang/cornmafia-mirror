@@ -1,25 +1,13 @@
 <!-- FILE: docs/project_definition.md -->
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->
+
 # Corn Mafia Project Definition
 
 ## Purpose
 
-This file is the main project-definition document for Corn Mafia.
+This is the controlling architecture document for Corn Mafia. It defines current product scope, database ownership, runtime boundaries, active app surfaces, security rules, and constraints future work must preserve.
 
-It defines:
-
-- platform intent
-- V1 delivery status
-- technical baseline
-- DB-first architecture
-- runtime and ownership boundaries
-- security and access model
-- admin, member, and public context separation
-- active admin and member/public surfaces
-- current normalization model
-- bootstrap and operations baseline
-- rules that must not be violated in future work
-
-If another planning note, historical prompt, or older document conflicts with this file, this file controls unless the user explicitly overrides a specific point for a specific task.
+If another note conflicts with this file, the current repository and current SQL dump control first; this file should then be corrected.
 
 ---
 
@@ -27,603 +15,340 @@ If another planning note, historical prompt, or older document conflicts with th
 
 Corn Mafia is in V1 delivery and feature-expansion mode.
 
-The project has passed the foundation phase. The current baseline includes:
+The current baseline includes:
 
-- DB-first web app
-- Next.js 16
-- React 19
-- Turbopack build path
-- ESLint 9 flat config
-- strict TypeScript
-- PostgreSQL-backed business rules and read surfaces
-- Docker runtime with web and database services
-- DB bootstrap support
-- operator and security scripts
-- Discord-backed identity and role-aware access
-- admin, public, member, and member-authoring surfaces
-- DB-backed navigation, content routing, media, series, templates, and YouTube channel allowlist support
+- one active Next.js 16 / React 19 app under `apps/web`;
+- strict TypeScript, ESLint 9 flat config, Vitest, and Turbopack build flow;
+- PostgreSQL 16 with DB-owned read/write contracts;
+- Discord OAuth identity, guild membership, role cache, and fail-closed freshness checks;
+- public CMS content, categories, collections, series, media, navigation, and prefixed content routes;
+- admin Discord, web/CMS, template, navigation, media, and Riseopedia configuration surfaces;
+- member profile, content, media, series, preview, and authoring workflows;
+- Riseopedia and Mafiosopedia over a shared canonical game model;
+- entity-first canonical game data for assets, recipes, locations, mechanics, perks, POIs, and quests;
+- completed private-schema split from the old overloaded `web_priv` model.
 
-Future work should improve, extend, and harden this V1 baseline. Do not restart the architecture.
-
-
----
-
-## 1A. Current game-data baseline
-
-The canonical game-data foundation is ready for Riseopedia/web app read-model work.
-
-Current decisions that future work must preserve:
-
-```text
-entities are asset or recipe
-crafting benches are assets, not a separate entity type
-rarity is represented as entity variant values
-brands are entity-level
-aliases are resolver evidence only
-source mappings are variant evidence only
-recipe class is resolved from outputs
-recipe category/subcategory come from bench family and tier/no_tier_required
-vehicle subcategories use raw brand/source values without category prefixes
-properties are defined by game_data mapping rules and materialized through web_priv values
-web_priv.game_entity_properties_c is a preserved metadata catalog
-web_priv.game_entity_property_expectations_r is retired
-```
-
-The next major work is not another destructive canonical game-data cleanup. The next major work is rebuilding/auditing `web_view.riseopedia_*`, `web_view.mafiosopedia_*`, and related game read contracts so `apps/web` can safely consume the cleaned canonical truth. Durable Riseopedia-family product, channel, app, admin, and read-model rules live in `docs/riseopedia.md`.
+Do not restart the architecture or merge the private schemas back together.
 
 ---
 
 ## 2. Platform intent
 
-Corn Mafia is a guild platform with Discord-first identity and role-aware access.
+Corn Mafia is a Discord-first guild platform for:
 
-The platform supports:
+- guild information and public content;
+- role-aware navigation and content access;
+- guides, chronicles, tutorials, tips, videos, and series;
+- member-owned authoring and media;
+- game knowledge through Riseopedia and Mafiosopedia;
+- future maps, calculators, tools, and interactive apps;
+- admin-managed publication, content, and game-display configuration.
 
-- guild website content
-- Discord-only identity and login
-- role-gated content and actions
-- guides, tutorials, media, tools, and apps
-- maps and interactive features
-- events and community systems
-- admin-managed content workflows
-- V1 member-side authoring workflows
-- future reward, distribution, or value-aware workflows handled carefully and explicitly
-
-The goal is to keep the platform expandable without rebuilding the foundation for each feature family.
+The platform should grow by adding deliberate domain ownership behind stable `web_api` and `web_view` contracts.
 
 ---
 
-## 3. Technical baseline
+## 3. Runtime baseline
 
-Current runtime baseline:
+```text
+apps/web               Next.js application
+cm                     database owner / migration / operator role
+cm_client              runtime application role
+cm-db                   PostgreSQL Compose service
+cm-web                  hardened non-root web Compose service
+```
 
-- one active web app under `apps/web`
-- Next.js 16
-- React 19
-- Turbopack build path
-- ESLint 9 flat config
-- strict TypeScript
-- PostgreSQL
-- Docker Compose runtime with `cm-web` and `cm-db`
+The Docker runtime is read-only except for declared cache/media mounts and tmpfs paths. The web container drops Linux capabilities and uses `no-new-privileges`.
 
-Current app architecture:
-
-- the database owns current truth and business rules where migrated
-- app reads use `web_view` or clearly approved read functions
-- app writes use `web_api`
-- app code must not directly CRUD private truth tables
-- admin, member, and public workflows remain separate when contracts differ
-- runtime code must not require owner privileges
+The Compose and deployment scripts expect repository-owned bootstrap assets under `infra/bootstrap` and `infra/postgres-init`. Those directories are absent from the current snapshot, so bootstrap/deploy cannot be considered fully verifiable from this snapshot alone.
 
 ---
 
 ## 4. Required database architecture
 
-Use these database layers deliberately:
+### `game_data`
+
+Owns source-side evidence and interpretation rules:
+
+- patches and import batches/files/rows/messages/media;
+- source-file registration and aliases;
+- source identifier fields;
+- identity, variant, naming, classification, brand, coordinate, media, property, relationship, loot, progression, and release-evidence rules;
+- shared value maps and discovery tables;
+- owner/operator discovery procedures.
+
+`game_data` is not canonical app truth and is not readable by `cm_client`.
+
+### `web_game`
+
+Owns canonical transformed game truth:
+
+- entities and taxonomy;
+- variants, variant values, source mappings, aliases, and brands;
+- properties and exact property-value links;
+- media and media files;
+- relationships, coordinates, route points, spawn areas, placements, loot, and progression;
+- recipe, quest, mechanic, and history facts;
+- release evidence, release decisions, overrides, and patch changes;
+- deterministic transform candidate functions and canonical sync functions.
+
+`web_game` must not depend upward on `web_riseopedia` or `web_view`.
+
+### `web_riseopedia`
+
+Owns Riseopedia/Mafiosopedia product policy and presentation:
+
+- rendering channels;
+- publication channels, patch publications, and scope overrides;
+- sections and classification rules;
+- display profiles, bindings, profile properties, body blocks, and variant selectors;
+- overview-card rule sets/elements/placements/slots;
+- semantic display and relationship-display rules;
+- classification and app-misc media mappings;
+- Riseopedia/Mafiosopedia materialized-view refresh functions.
+
+It may read canonical `web_game` truth. It must not become a second canonical game store.
+
+### `web_priv`
+
+Owns private platform truth:
+
+- auth users and accounts;
+- Discord users, roles, and role cache;
+- categories, subcategories, content, templates, fields, series, and redirects;
+- navigation panels and trees;
+- web media, icons, theme colors, YouTube channels, and rate-limit buckets;
+- member profiles and platform-private validation/access helpers.
+
+It no longer owns canonical `game_*` or Riseopedia configuration tables.
+
+### `web_api`
+
+Stable app-callable façade for:
+
+- guarded auth and Discord actions;
+- admin/member/public content and media actions;
+- navigation, template, series, and validation actions;
+- guarded Riseopedia administration.
+
+Functions may call the approved private schemas, but signatures are app contracts.
+
+### `web_view`
+
+Stable app-facing read façade for:
+
+- auth/Discord lookups;
+- public/member/admin CMS reads;
+- Riseopedia/Mafiosopedia public and admin read models.
+
+The current dump contains 171 standard views and 83 materialized views.
+
+### `web_analytics`
+
+Owner/operator QA and diagnostics. It is not a runtime app contract.
+
+---
+
+## 5. Application contract
+
+- App reads come from `web_view` or a deliberately approved read function.
+- App writes and callable actions go through `web_api`.
+- Production app source must not reference `game_data`, `web_game`, `web_riseopedia`, `web_priv`, or `web_analytics` directly.
+- `cm_client` has schema usage on `web_api` and `web_view`, execute on approved API functions, and select on approved read relations.
+- `cm_client` has no private-schema usage, direct private-table grants, or private-function execution.
+- Route handlers validate input and context; they do not own database business rules.
+
+---
+
+## 6. Current canonical game model
+
+Current entity types:
 
 ```text
-game_data
-	raw game imports
-	game patch/source-file metadata
-	game_transform_* rule/config tables
-	source-to-canonical transformation rules
-	import evidence used by promotion/rebuild logic
-
-web_priv
-	canonical current truth
-	private tables
-	private helpers
-	trigger helpers
-	validation helpers
-	sync helpers
-	access helpers
-	business internals
-	private promotion/rebuild/revalidation functions
-
-web_api
-	app-callable business functions
-	app-callable write functions
-	approved action functions
-	approved app resolver functions where intentionally exposed
-	guarded admin wrappers for sensitive analytics access
-
-web_view
-	app read surfaces
-	lookup surfaces
-	admin read contracts
-	member read contracts
-	public read contracts
-
-web_analytics
-	QA views
-	audit views
-	validation summaries
-	data-quality diagnostics
-	admin/operational analytics surfaces
+asset
+recipe
+location
+mechanic
+perk
+poi
+quest
 ```
 
-Application contract:
-
-- public/member/admin app reads should come from `web_view` or a clearly approved read function
-- writes and app-callable actions should go through `web_api`
-- sensitive admin analytics should be exposed through guarded `web_api` functions, not as public `web_view` surfaces
-- `web_analytics` is a separate admin/QA read surface, not a replacement for `web_view`
-- private implementation details stay under `web_priv`
-- raw imports and transform rules stay under `game_data`
-- app code must not directly CRUD private truth tables
-- direct table ownership must not move into route handlers
-- app runtime must not require owner privileges
-- `public` must not be reintroduced as the main project schema
-
-Runtime roles:
+Durable identity:
 
 ```text
-cm        = owner / migration role
-cm_client = runtime app role
+entity_id          canonical cross-domain identity
+entity_variant_id  canonical concrete variant identity
 ```
 
-Do not design solutions that require `cm_client` to behave like `cm`.
+Source mappings and aliases are evidence/resolution data, not public identity.
 
-## 5. DB object naming taxonomy
+Current canonical decisions:
 
-Current approved DB object prefixes:
+- crafting benches are assets with `entity_class_code = 'crafting_bench'`;
+- rarity is a variant value;
+- brands are entity-level;
+- recipes use connection/output/catalyst tables rather than a separate current-state recipe table;
+- locations and POIs are distinct entity types with canonical relationships and coordinate facts;
+- mechanics, perks, and quests are first-class entities;
+- map-derived route, spawn, placement, vendor, resource, quest-marker, and POI facts are canonical `web_game` facts;
+- raw source payloads remain evidence, not normal display properties;
+- `domain_entity_id` and retired asset-level alias/source/rarity families must not return.
 
-- `actor_`
-- `auth_`
-- `discord_`
-- `game_`
-- `web_`
+---
 
-Meaning:
-
-- `actor_` = current actor access evaluation and permission helpers
-- `auth_` = authentication and account-linking concerns
-- `discord_` = Discord-sourced identity and role sync concerns
-- `game_` = canonical game/Riseopedia domain data, relationships, imports, and transformation outputs
-- `web_` = current web platform families
-
-Schema prefix rules:
+## 7. Riseopedia and Mafiosopedia
 
 ```text
-game_data may use game_transform_*, import_*, patch/source metadata helpers, and raw-import helper names
-web_priv  may use actor_, auth_, discord_, game_, web_
-web_api   may use auth_, discord_, game_, web_
-web_view  may use auth_, discord_, game_, web_
-web_analytics may use game_*, riseopedia_*, and QA/audit naming
+riseopedia    official release-aware channel
+mafiosopedia  role-locked latest/review channel
 ```
 
-Game domain taxonomy:
+Both channels share:
 
-```text
-game_asset_*    = assets and asset-specific dimensions
-game_entity_*   = cross-entity identity, release state, and relationships
-game_media_*    = game media and media mappings
-game_recipe_*   = recipes, components, outputs, benches, catalysts, and generic requirement groups
-game_quest_*    = quests and quest-specific relationships
-game_vendor_*   = vendors and shop data
-game_npc_*      = NPCs and drops
-game_location_* = locations, map/resource locations, and location relationships
-game_transform_* = source transformation, classification, identity, naming, ref-resolution, and relationship rules
-```
+- canonical `web_game` truth;
+- product configuration in `web_riseopedia`;
+- one React component family under `apps/web/src/components/riseopedia`;
+- mirrored `web_view.riseopedia_*` / `web_view.mafiosopedia_*` read contracts.
 
-Approved current game-domain decisions:
+They must remain separate where publication, visibility, release, or display behavior differs.
 
-- canonical game truth is entity-first; `game_entities` owns cross-domain identity and `game_assets` / `game_recipes` are domain rows linked to that identity
-- concrete asset variants live under `game_entity_variants_r`
-- variant dimensions and values live under `game_entity_variant_groups_c`, `game_entity_variant_value_codes_c`, and `game_entity_variant_values_r`
-- source/import evidence for concrete variants lives under `game_entity_variant_source_mappings_r`
-- property metadata lives under `game_entity_properties_c`; materialized values live under `game_entity_property_values`
-- crafting bench source rows from `dt_craft_benches` must map to canonical bench family/tier variants before property sync
-- source mappings are evidence, not canonical identity
-- recipe entity classification is output-derived and relationship-aware; do not force it into simple source-field rules
-- resolver aliases live under `game_entity_variant_aliases`; aliases resolve messy source refs to `entity_variant_id` and must not become durable relationship targets
-- brands are entity-level canonical data under `game_entity_brands_c` and `game_entity_brand_links_r`
-- rarities are entity variant values, not an asset-level reference table; `game_asset_rarities_c` has been retired
-- crafting benches are assets with `asset_class_code = 'crafting_bench'`; `entity_type_code = 'crafting_bench'` has been retired
-- bench-specific details live as asset properties, media, relationships, and recipe/bench relationships unless a future profile table is justified
-- release state, entity types, and cross-entity relationships belong under `game_entity_*`
-- relationship results use `game_entity_relationships_r`, because relationships are not asset-only
-- recipe generic resources are canonical recipe concepts under `game_recipe_generic_group_types_c`, `game_recipe_generic_groups_c`, and `game_recipe_generic_connections_r`
-- recipe catalysts live under `game_recipe_catalysts_r`
-- variant, variant value, and variant source mapping history is maintained under `_h` tables and wired through `game_sync_patch`
-- `domain_entity_id` remains a compatibility bridge and must not be removed until the Riseopedia read models are stable
+---
 
-Future first-class feature families may receive their own prefix only when they become real standalone domains.
+## 8. Security and access model
 
-Potential future examples:
+Discord is the source for guild identity and roles. PostgreSQL stores the app-facing role cache and access summaries.
 
-- `map_*`
-- `event_*`
+Required behavior:
 
-Do not create new naming families only for cosmetic symmetry.
-
-## 6. Security and access model
-
-Security requirements:
-
-- `SECURITY DEFINER` functions must use fixed `search_path`
-- SQL references should be schema-qualified
-- runtime grants should expose only needed read and execute surfaces
-- app routes must not depend on hidden buttons or client-only checks for security
-- admin API routes must guard themselves even when pages are guarded
-- member API routes must guard themselves even when pages are guarded
-- mutation APIs should use same-origin protection unless explicitly exempted for a token-protected endpoint
-- upload and media routes must validate file types, paths, and serving behavior
-- SVG handling must remain sanitizer-controlled
-- external links and embedded media must use approved validation paths
-- revalidation must remain token-protected and should not accept secrets in URL parameters
-
-Access model:
-
-- Discord is the source for identity and guild role membership
-- role cache and access summary are DB-backed
-- access can include public, authenticated, rank-based, editor, and admin behavior
-- governed content and navigation visibility should use DB-backed access evaluation
-- Discord login must fail closed when login-time guild/member/role sync cannot complete
-- server-rendered actor-sensitive public surfaces must refresh due role caches before granting gated menu/content access
-- if role verification is due and cannot complete, public surfaces render as public/anonymous instead of trusting stale elevated access
-- admin capability does not make every normal surface behave as admin
+- login fails closed when guild/member/role synchronization cannot complete;
+- actor-sensitive server rendering refreshes role state when due;
+- failed refresh causes public/anonymous behavior rather than stale elevated access;
+- admin and member APIs guard themselves;
+- mutation routes use same-origin protection unless explicitly token-protected;
+- token secrets are not accepted in query parameters;
+- media paths, MIME types, signatures, SVGs, and external hosts are validated;
+- `SECURITY DEFINER` functions use fixed `search_path` and schema-qualified references.
 
 Context model:
 
 ```text
-/admin/*     = admin context
-/api/admin/* = admin API context
-/me/*        = member context
-/api/me/*    = member API context
-everything else = public or public-content context unless a route explicitly requires auth
+/admin/*      admin context
+/api/admin/*  admin API context
+/me/*         member context
+/api/me/*     member API context
+other routes  public/public-content unless explicitly guarded
 ```
 
-Do not merge admin and member workflows into one generic workflow when:
-
-- visible fields differ
-- allowed actions differ
-- media visibility differs
-- policy controls differ
-- ownership rules differ
-- validation differs
-- error or security behavior differs
+Admin and member mutation contracts remain separate when ownership, visibility, validation, or permissions differ.
 
 ---
 
-## 7. Admin app taxonomy
+## 9. Active app surfaces
 
-Use domain-grouped folders for active admin work:
+### Public
 
-```text
-apps/web/src/app/api/admin/<domain>/*
-apps/web/src/app/admin/<domain>/*
-apps/web/src/components/admin/<domain>/*
-```
+- DB-backed homepage, terms, privacy, and unavailable internal pages;
+- category and collection hubs;
+- normal content routes and prefixed `/map`, `/tool`, `/app`, `/event`, `/custom`, `/video` routes;
+- series route;
+- Riseopedia/Mafiosopedia hub, browse, section, class, category, subcategory, and entity routes;
+- public media and wiki media endpoints;
+- transitional `/maps/[map]` filesystem-tile viewer with sample overlays.
 
-Current active admin domains:
+### Member
+
+- profile and role/access summary;
+- authorable collection lookup;
+- content list/create/edit/preview;
+- media list/upload/update/delete and picker;
+- series list/create/update/delete;
+- theme and rich-text link-picker support.
+
+### Admin
 
 ```text
 discord
-riseopedia
+    roles, guild-role refresh, users
+
 web
+    categories, subcategories, content kinds, content, media, icons,
+    themes, navigation, series, YouTube channels, external hosts,
+    templates, field types/tools/lists/options/fields
+
+riseopedia
+    sections and rules, display profiles/bindings/properties/body blocks/selectors,
+    overview-card rules/elements, publication channels/publications/scope overrides,
+    release evidence/decisions/overrides, relationship display rules, property inspection
 ```
 
-Examples:
+---
+
+## 10. Content and navigation
+
+Navigation is DB-first and panel-based. Public rendering selects a panel slot, then applies category/subcategory/content access.
+
+Content routing is controlled by:
 
 ```text
-apps/web/src/app/api/admin/discord/*
-apps/web/src/app/api/admin/riseopedia/*
-apps/web/src/app/api/admin/web/*
-apps/web/src/app/admin/discord/*
-apps/web/src/app/admin/riseopedia/*
-apps/web/src/app/admin/web/*
-apps/web/src/components/admin/discord/*
-apps/web/src/components/admin/riseopedia/*
-apps/web/src/components/admin/web/*
+content_kind_code
+public_route_prefix
+renderer_code
+category/subcategory/content access
 ```
 
-Do not create empty domain folders for theoretical future features.
+Wrong-prefix, unreadable, unpublished, invalid external-link, invalid YouTube, or non-renderable content must not render.
+
+Template-driven content uses configured Hero/Top/Left/Main/Right/Bottom/Hidden/SEO destinations. Member authoring uses member-specific DB functions and ownership rules.
 
 ---
 
-## 8. Active admin families
+## 11. Normalization conventions
 
-### Discord domain
-
-- Discord roles
-- Discord users
-
-Discord-owned truth remains system-owned. Admin-local editing should stay narrow and explicit.
-
-### Riseopedia domain
-
-- sections
-- section classification rules
-- patch publication channels
-- patch publications
-- patch scope overrides
-- release evidence
-- release decisions
-- release overrides
-- display profiles
-- display profile bindings
-- display profile properties/elements
-- display profile variant selectors
-- overview card rule sets
-- overview card rule elements
-- relationship display rules
-- property catalog inspection/options
-
-Riseopedia admin is game-domain administration over guarded `web_api.riseopedia_*` actions and `web_view.riseopedia_admin_*` read contracts. It must preserve the app/database boundary and must not directly CRUD `web_priv` or `game_data` from app code.
-
-### Web domain
-
-- theme colors
-- icons
-- categories
-- subcategories
-- content kinds
-- content
-- external link hosts
-- media
-- navigation panels
-- navigation designer
-- series
-- YouTube channels
-- templates family
-  - templates
-  - template field types
-  - template field tools
-  - template field list
-  - template field list tools
-  - template field options
-  - per-template template fields
-
-These families must respect the correct normalization pattern from `docs/codebase_rules.md`.
+- compact dictionaries use the small-list admin pattern;
+- operational families use server-driven search/page/filter contracts;
+- navigation designer owns a local editable tree and replaces it through one DB function;
+- member authoring remains member-context code;
+- list routes return `rows`;
+- single-row routes return `doc`;
+- mutations return `ok: true` and `doc` only when needed;
+- panels separate `topError`, `metaError`, `submitting`, and `metaLoading`;
+- failed saves do not close or call success callbacks.
 
 ---
 
-## 9. Active public and member surfaces
+## 12. Tooling and verification
 
-Current active public surfaces:
+Repository scripts cover formatting, watermark verification, lint, TypeScript checking, Vitest, production dependency audit, and security posture checks.
 
-- public navigation menu
-- public footer explore menu
-- normal content route: `/<category>/<subcategory>/<content>`
-- prefixed content routes:
-  - `/map/<category>/<subcategory>/<content>`
-  - `/tool/<category>/<subcategory>/<content>`
-  - `/app/<category>/<subcategory>/<content>`
-  - `/event/<category>/<subcategory>/<content>`
-  - `/custom/<category>/<subcategory>/<content>`
-  - `/video/<category>/<subcategory>/<content>`
-- public series route: `/series/<slug>`
-- Riseopedia/Mafiosopedia info routes under `/info/<category>`
-- transitional map viewer route: `/maps/<map>`
-- placeholder homepage
-- placeholder category page
-- placeholder subcategory page
-- placeholder terms and privacy pages
+Current static audit findings:
 
-Placeholder pages are intentionally active but not final product design.
+- production app source contains no direct private-schema references;
+- production TypeScript contains no `any`, `any[]`, `Record<string, any>`, direct private-table mutations, or browser `alert` calls;
+- app DB references resolve to `web_view` and `web_api` objects in the current dump.
 
-Current active member surfaces:
+Known test-hardening gap:
 
-- member profile page and API
-- member role/access summary API
-- member authoring collection lookup API
-- member content dashboard
-- member collection content dashboard
-- member content create API
-- member content edit/update API
-- member media dashboard and API
-- member series dashboard and API
-- member theme lookup API
+- `runtime-db-boundary.test.ts`, `app-db-boundary.test.ts`, and `security-posture-check.mjs` still enumerate the old private schema set and must add `web_game` and `web_riseopedia`.
 
-Member authoring is V1 scope. It must remain member-context code, not a clone of admin content admin.
+The snapshot does not include installed dependencies, so lint, typecheck, tests, and build were not rerun during this documentation audit.
 
 ---
 
-## 10. Navigation and content rules
-
-Navigation is DB-first.
-
-Navigation panels:
-
-- are editable admin-defined menu structures
-- are selected by slot for app rendering
-- should use `panel_slot_code` as the important app lookup key
-- may use `panel_type_code` as broad surface/rendering family when useful
-- save full-tree changes through a DB business function
-- should not directly CRUD private navigation child tables from app code
-
-Navigation access model:
-
-- panel access chooses the menu structure
-- category, subcategory, and content access choose what is visible inside that menu
-- saved stale rows should remain visible in admin until removed or replaced
-- public rendering should apply real access checks and preserve saved readable branches according to current DB behavior
-- public rendering should resolve a fresh server-side actor before passing actor identity into DB navigation/content read functions
-
-Content route model:
-
-- content kind controls route and render behavior
-- `public_route_prefix` controls public URL family
-- `renderer_code` controls renderer dispatch
-- direct URL rendering requires DB resolver success
-- wrong prefix should not render the content
-- unreadable or non-renderable content should not render
-- YouTube content must use the approved YouTube validation and channel allowlist path
-- external links must use the approved external host validation path
-- internal links must use the approved internal link validation path
-
----
-
-## 11. Normalization model
-
-Admin lists use two main normalization tracks.
-
-### Small-list admin pattern
-
-Use for compact dictionaries, code-table-style admin families, and low-volume reference families:
-
-- theme colors
-- icons
-- categories
-- subcategories
-- content kinds
-- external link hosts
-- YouTube channels
-- templates family
-  - templates
-  - template field types
-  - template field tools
-  - template field list
-  - template field list tools
-  - template field options
-  - per-template template fields
-
-Target shape:
-
-- local table-owned create/edit panel state
-- local `rows`
-- local `search`
-- local pagination where useful
-- parent-owned panel lifecycle
-- panel `onSaved -> refresh`
-- row-level `busyId`
-- inline load and mutation error banners
-
-Use boring names:
-
-```text
-rows
-row
-search
-loading
-error
-busyId
-panelOpen
-panelMode
-```
-
-### Server-driven admin pattern
-
-Use for operational, larger, or governed families:
-
-- Discord roles
-- Discord users
-- content
-- media
-- series
-- navigation panels
-
-Target shape:
-
-- query-param-driven `search`, `page`, `pageSize`, and filters where applicable
-- route returns current page only
-- current query context is preserved after mutation
-- parent-owned panel lifecycle
-- panel `onSaved -> refresh` through normal parent-controlled flow
-- row-level `busyId`
-- inline load and mutation error banners
-
-Server-driven list routes usually return:
-
-```text
-{
-	rows,
-	page,
-	pageSize,
-	totalDocs,
-	totalPages
-}
-```
-
-### Navigation designer pattern
-
-Navigation designer is not a generic table pattern.
-
-It should use:
-
-- server-backed initial panel load
-- full-tree local editing
-- DB lookup pickers
-- drag/drop where useful
-- stale saved rows visible until removed or replaced
-- one save action that replaces the full panel tree through DB business logic
-
-### Member-owned pattern
-
-Member authoring surfaces are member-context workflows.
-
-They may be server-backed and query-driven where useful, but they must not reuse admin mutation contracts directly when ownership, visibility, validation, or allowed actions differ.
-
----
-
-## 12. Bootstrap and operations baseline
-
-The repo contains V1 bootstrap and operator support.
-
-Bootstrap ownership:
-
-- `infra/bootstrap` contains repo-owned bootstrap logic and metadata
-- `infra/postgres-init` contains database container init integration
-- real `.env`, `.env.bootstrap`, secrets, media payloads, and deployment data are not repo-owned docs/code
-
-Bootstrap should preserve:
-
-- `cm` as owner/migration role
-- `cm_client` as runtime app role
-- `game_data`, `web_priv`, `web_api`, `web_view`, and `web_analytics` layering
-- imported IDs where bootstrap data needs stable references
-- sequence resets above imported rows
-- security boundary verification
-- media verification when configured
-
-Operator scripts should be small, explicit, and safe to inspect. Destructive behavior must be clear from naming, prompts, or documentation.
-
-Security and CI support includes:
-
-- strict TypeScript checks through lint
-- security posture script
-- production dependency audit script
-- Docker image pinning checks
-- same-origin mutation guard checks
-- security header checks
-- upload and SVG posture checks
-- secret and archive hygiene checks
-
----
-
-## 13. What must not happen
+## 13. Non-negotiable constraints
 
 Do not:
 
-- restart the architecture from scratch
-- move business-rule ownership into route handlers
-- directly CRUD private truth tables from app code
-- require runtime owner privileges
-- merge admin and member workflows into a generic contract when their behavior differs
-- replace working project-specific logic with generic abstractions
-- use one list pattern for all admin families
-- call a workflow complete if route/client/DB contracts are inconsistent
-- delete active behavior without confirming imports, routes, and usage
-- hide DB contract problems in route code when the correct fix belongs at the DB boundary
-- use old external snapshot URLs as source of truth
+- move canonical game truth back into `web_priv`;
+- put Riseopedia publication/display policy into `web_game`;
+- give `cm_client` private-schema access;
+- directly query private schemas from app code;
+- make route handlers own canonical business rules;
+- merge admin and member writes into a broad generic mutation contract;
+- recreate retired game identity/alias/rarity families;
+- invent new transform rule families when existing value maps, source links, relationship connections, or rule-part systems support the need;
+- create `web_apps` or a maps schema merely for symmetry;
+- call bootstrap self-contained while required `infra` payloads are absent;
+- treat generated `_*.md` files as durable truth.
+
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->

@@ -4,6 +4,8 @@
 //// Small-list admin table for managing web icons with local panel lifecycle                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -420,7 +422,7 @@ export default function IconsTable({
 					</div>
 
 					<div className="admin-table-toolbar-action">
-						<Button onClick={openCreate} variant="green" aria-label="Create Icon">
+						<Button onClick={openCreate} variant="primary" aria-label="Create Icon">
 							New Icon
 						</Button>
 					</div>
@@ -513,14 +515,16 @@ export default function IconsTable({
 												/>
 											</span>
 										</TD>
-										<TD className="admin-table-cell--center admin-table-cell--mono">{row.key}</TD>
+										<TD className="admin-table-cell--center admin-table-cell--mono">
+											{row.key}
+										</TD>
 										<TD className="admin-table-cell--center">{row.label}</TD>
 										<TD className="admin-table-cell--center">
 											{row.source === "media" ? "Media" : "Lucide"}
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant={row.enabled ? "green" : "neutral"}
+												variant={row.enabled ? "success" : "secondary"}
 												disabled={disabled}
 												onClick={() => void toggleEnabled(row)}
 												aria-label={row.enabled ? "Enabled" : "Disabled"}
@@ -530,7 +534,7 @@ export default function IconsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="accent"
+												variant="danger"
 												disabled={disabled}
 												onClick={() => void deleteRow(row)}
 												aria-label={`Delete ${row.key}`}
@@ -540,7 +544,7 @@ export default function IconsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="neutral"
+												variant="secondary"
 												disabled={disabled}
 												onClick={() => openEdit(row)}
 												aria-label={`Edit ${row.key}`}
@@ -554,7 +558,10 @@ export default function IconsTable({
 
 							{pageRows.length === 0 ? (
 								<TR>
-									<TD colSpan={7} className="admin-table-empty-cell admin-table-empty-cell--spacious">
+									<TD
+										colSpan={7}
+										className="admin-table-empty-cell admin-table-empty-cell--spacious"
+									>
 										No icons match your current filters.
 									</TD>
 								</TR>
@@ -586,3 +593,5 @@ export default function IconsTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

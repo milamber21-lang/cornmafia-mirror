@@ -4,6 +4,7 @@
 //// Scoped admin page for Riseopedia overview-card rule elements.                                               ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -34,8 +35,14 @@ function parsePositiveInt(value: string): number | null {
 	return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 }
 
-function findRuleSet(rows: RiseopediaAdminRow[], ruleSetId: number): RiseopediaAdminRow | null {
-	return rows.find((row) => Number(row.overview_card_rule_set_id) === ruleSetId) ?? null;
+function findRuleSet(
+	rows: RiseopediaAdminRow[],
+	ruleSetId: number,
+): RiseopediaAdminRow | null {
+	return (
+		rows.find((row) => Number(row.overview_card_rule_set_id) === ruleSetId) ??
+		null
+	);
 }
 
 export default async function RiseopediaOverviewCardRuleElementsScopedPage({
@@ -43,7 +50,9 @@ export default async function RiseopediaOverviewCardRuleElementsScopedPage({
 }: PageProps): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Overview Card Elements" reason={guard.reason} />;
+		return (
+			<RiseopediaAdminGuard title="Overview Card Elements" reason={guard.reason} />
+		);
 	}
 
 	const resolvedParams = await params;
@@ -52,8 +61,15 @@ export default async function RiseopediaOverviewCardRuleElementsScopedPage({
 		return (
 			<section className="card admin-state-card">
 				<h1 className="admin-page-card-title">Rule set not found</h1>
-				<p className="admin-state-message">The rule set id in the URL is invalid.</p>
-				<ButtonLink href="/admin/riseopedia/overview-card-rules" variant="neutral">Rule sets</ButtonLink>
+				<p className="admin-state-message">
+					The rule set id in the URL is invalid.
+				</p>
+				<ButtonLink
+					href="/admin/riseopedia/overview-card-rules"
+					variant="secondary"
+				>
+					Rule sets
+				</ButtonLink>
 			</section>
 		);
 	}
@@ -67,13 +83,22 @@ export default async function RiseopediaOverviewCardRuleElementsScopedPage({
 		return (
 			<section className="card admin-state-card">
 				<h1 className="admin-page-card-title">Rule set not found</h1>
-				<p className="admin-state-message">No Riseopedia overview-card rule set exists for id {ruleSetId}.</p>
-				<ButtonLink href="/admin/riseopedia/overview-card-rules" variant="neutral">Rule sets</ButtonLink>
+				<p className="admin-state-message">
+					No Riseopedia overview-card rule set exists for id {ruleSetId}.
+				</p>
+				<ButtonLink
+					href="/admin/riseopedia/overview-card-rules"
+					variant="secondary"
+				>
+					Rule sets
+				</ButtonLink>
 			</section>
 		);
 	}
 
-	const scopedRows = rows.ruleElements.filter((row) => String(row.overview_card_rule_set_id ?? "") === String(ruleSetId));
+	const scopedRows = rows.ruleElements.filter(
+		(row) => String(row.overview_card_rule_set_id ?? "") === String(ruleSetId),
+	);
 
 	return (
 		<RiseopediaAdminPageChrome
@@ -90,3 +115,5 @@ export default async function RiseopediaOverviewCardRuleElementsScopedPage({
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

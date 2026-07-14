@@ -4,6 +4,7 @@
 //// Small-list admin table for managing content kinds with route and renderer metadata                           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -100,10 +101,7 @@ export default function ContentKindsTable({
 			let comparison = 0;
 
 			if (sortKey === "code") {
-				comparison = compareAdminText(
-					left.contentKindCode,
-					right.contentKindCode,
-				);
+				comparison = compareAdminText(left.contentKindCode, right.contentKindCode);
 			} else if (sortKey === "route") {
 				comparison = compareAdminText(
 					formatRoutePrefix(left),
@@ -112,10 +110,7 @@ export default function ContentKindsTable({
 			} else if (sortKey === "renderer") {
 				comparison = compareAdminText(left.rendererCode, right.rendererCode);
 			} else if (sortKey === "description") {
-				comparison = compareAdminOptionalText(
-					left.description,
-					right.description,
-				);
+				comparison = compareAdminOptionalText(left.description, right.description);
 			} else {
 				comparison = compareAdminText(left.label, right.label);
 			}
@@ -201,10 +196,7 @@ export default function ContentKindsTable({
 
 				if (!response.ok) {
 					throw new Error(
-						await readResponseMessage(
-							response,
-							"Failed to update content kind.",
-						),
+						await readResponseMessage(response, "Failed to update content kind."),
 					);
 				}
 
@@ -250,10 +242,7 @@ export default function ContentKindsTable({
 
 				if (!response.ok) {
 					throw new Error(
-						await readResponseMessage(
-							response,
-							"Failed to delete content kind.",
-						),
+						await readResponseMessage(response, "Failed to delete content kind."),
 					);
 				}
 
@@ -290,7 +279,7 @@ export default function ContentKindsTable({
 					</div>
 
 					<div className="admin-table-toolbar-action">
-						<Button variant="green" onClick={openCreate}>
+						<Button variant="primary" onClick={openCreate}>
 							Create Content Kind
 						</Button>
 					</div>
@@ -365,9 +354,7 @@ export default function ContentKindsTable({
 
 								return (
 									<TR key={row.id}>
-										<TD className="admin-table-cell--center">
-											{row.contentKindCode}
-										</TD>
+										<TD className="admin-table-cell--center">{row.contentKindCode}</TD>
 										<TD className="admin-table-cell--center">{row.label}</TD>
 										<TD className="admin-table-cell--center">{formatRoutePrefix(row)}</TD>
 										<TD className="admin-table-cell--center">{row.rendererCode}</TD>
@@ -376,7 +363,7 @@ export default function ContentKindsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant={row.enabled ? "green" : "neutral"}
+												variant={row.enabled ? "success" : "secondary"}
 												disabled={disabled}
 												loading={disabled}
 												onClick={() => void toggleEnabled(row)}
@@ -387,7 +374,7 @@ export default function ContentKindsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="accent"
+												variant="danger"
 												disabled={disabled}
 												loading={disabled}
 												onClick={() => void deleteContentKind(row)}
@@ -397,7 +384,7 @@ export default function ContentKindsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="neutral"
+												variant="secondary"
 												disabled={disabled}
 												onClick={() => openEdit(row)}
 											>
@@ -445,3 +432,5 @@ export default function ContentKindsTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

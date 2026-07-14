@@ -4,6 +4,8 @@
 //// Session avatar and user menu for shared login surfaces                                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -42,7 +44,7 @@ function SignedOutButton(): JSX.Element {
 	return (
 		<Button
 			size="md"
-			variant="accent"
+			variant="primary"
 			onClick={() => signIn("discord", { callbackUrl: "/" })}
 			aria-label="Log-in with Discord"
 		>
@@ -136,7 +138,7 @@ function SignedInMenu({
 					<div className="header-avatar-actions">
 						<ButtonLink
 							size="sm"
-							variant="neutral"
+							variant="secondary"
 							href="/me"
 							block
 							onClick={() => setOpen(false)}
@@ -147,7 +149,7 @@ function SignedInMenu({
 						{canAccessAdmin ? (
 							<ButtonLink
 								size="sm"
-								variant="neutral"
+								variant="secondary"
 								href="/admin"
 								block
 								onClick={() => setOpen(false)}
@@ -158,7 +160,7 @@ function SignedInMenu({
 
 						<Button
 							size="sm"
-							variant="accent"
+							variant="secondary"
 							block
 							onClick={() => {
 								setOpen(false);
@@ -192,3 +194,5 @@ export default function LoginClient({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

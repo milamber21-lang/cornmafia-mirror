@@ -4,6 +4,7 @@
 //// Shared conversion helpers for content field values and generic external-link payloads                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import {
 	extractRichTextLinkReferences,
@@ -24,7 +25,11 @@ export type ContentFieldRenderDestinationCode =
 
 export type ContentFieldLayoutWidthCode = "full" | "half" | "third";
 
-export type ContentFieldLayoutAlignCode = "left" | "center" | "right" | "stretch";
+export type ContentFieldLayoutAlignCode =
+	| "left"
+	| "center"
+	| "right"
+	| "stretch";
 
 export type ContentFieldLabelStyleCode = "title" | "label" | "text" | "muted";
 
@@ -263,10 +268,15 @@ function setValueOnPayload(
 }
 
 function isYoutubeContentField(field: ContentTemplateFieldDefinition): boolean {
-	return field.fieldTypeCode === "youtube_url" && field.valueColumnName === "value_text";
+	return (
+		field.fieldTypeCode === "youtube_url" &&
+		field.valueColumnName === "value_text"
+	);
 }
 
-function isGenericExternalLinkField(field: ContentTemplateFieldDefinition): boolean {
+function isGenericExternalLinkField(
+	field: ContentTemplateFieldDefinition,
+): boolean {
 	if (isYoutubeContentField(field)) {
 		return false;
 	}
@@ -355,7 +365,9 @@ export function buildContentExternalLinkPayload(
 
 		const linkReferences = extractRichTextLinkReferences(normalizedRichText);
 		for (const linkReference of linkReferences) {
-			const linkPolicyResult = normalizeGeneralLinkAuthorInput(linkReference.rawUrl);
+			const linkPolicyResult = normalizeGeneralLinkAuthorInput(
+				linkReference.rawUrl,
+			);
 			if (!linkPolicyResult.ok || linkPolicyResult.kind !== "external") {
 				continue;
 			}
@@ -373,3 +385,5 @@ export function buildContentExternalLinkPayload(
 
 	return payloads;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

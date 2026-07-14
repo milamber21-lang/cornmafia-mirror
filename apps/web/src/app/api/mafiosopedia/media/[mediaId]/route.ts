@@ -1,9 +1,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/app/api/mafiosopedia/media/[mediaId]/route.ts                                          ////
 //// Language: TS                                                                                           ////
-//// Streams generated Mafiosopedia media files after DB-backed media-id resolution.                            ////
+//// Streams generated Mafiosopedia media files after DB-backed media-id resolution.                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { readFile } from "fs/promises";
 import { NextResponse } from "next/server";
@@ -69,6 +70,7 @@ export async function GET(
 		const absolutePath = resolveMafiosopediaMediaAbsolutePath({
 			lastSeenPatchCode: mediaFile.lastSeenPatchCode,
 			mediaRelPath: mediaFile.mediaRelPath,
+			sourceRootCode: mediaFile.sourceRootCode,
 		});
 		const fileBuffer = await readFile(absolutePath);
 
@@ -88,3 +90,5 @@ export async function GET(
 		);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

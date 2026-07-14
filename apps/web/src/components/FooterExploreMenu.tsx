@@ -4,11 +4,20 @@
 //// Hover, focus, and click-open footer Explore popover for DB-driven footer navigation links.                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+	useCallback,
+	useEffect,
+	useId,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 
 import IconRender from "@/components/ui/IconRender";
 import type {
@@ -63,7 +72,9 @@ function buildGroups(model: PublicMenuModel): FooterExploreGroup[] {
 
 function getTriggerLabel(model: PublicMenuModel): string {
 	const firstCategoryTitle = model[0]?.title.trim();
-	return firstCategoryTitle && firstCategoryTitle.length > 0 ? firstCategoryTitle : "Explore";
+	return firstCategoryTitle && firstCategoryTitle.length > 0
+		? firstCategoryTitle
+		: "Explore";
 }
 
 export default function FooterExploreMenu({ model }: FooterExploreMenuProps) {
@@ -74,7 +85,9 @@ export default function FooterExploreMenu({ model }: FooterExploreMenuProps) {
 
 	const groups = useMemo(() => buildGroups(model), [model]);
 	const triggerLabel = useMemo(() => getTriggerLabel(model), [model]);
-	const hasMenu = groups.some((group) => group.links.length > 0 || group.seeAllHref.length > 0);
+	const hasMenu = groups.some(
+		(group) => group.links.length > 0 || group.seeAllHref.length > 0,
+	);
 
 	const clearHideTimer = useCallback((): void => {
 		if (hideTimerRef.current !== null) {
@@ -95,7 +108,10 @@ export default function FooterExploreMenu({ model }: FooterExploreMenuProps) {
 
 	const scheduleCloseMenu = useCallback((): void => {
 		clearHideTimer();
-		hideTimerRef.current = window.setTimeout(() => setOpen(false), FOOTER_MENU_HIDE_DELAY_MS);
+		hideTimerRef.current = window.setTimeout(
+			() => setOpen(false),
+			FOOTER_MENU_HIDE_DELAY_MS,
+		);
 	}, [clearHideTimer]);
 
 	useEffect(() => {
@@ -138,7 +154,9 @@ export default function FooterExploreMenu({ model }: FooterExploreMenuProps) {
 	}, [closeMenu, open]);
 
 	if (!hasMenu) {
-		return <div className="footer-explore footer-explore--empty" aria-hidden="true" />;
+		return (
+			<div className="footer-explore footer-explore--empty" aria-hidden="true" />
+		);
 	}
 
 	return (
@@ -168,12 +186,20 @@ export default function FooterExploreMenu({ model }: FooterExploreMenuProps) {
 			</button>
 
 			{open ? (
-				<nav id={popoverId} className="footer-explore-panel" aria-label={`${triggerLabel} footer links`}>
+				<nav
+					id={popoverId}
+					className="footer-explore-panel"
+					aria-label={`${triggerLabel} footer links`}
+				>
 					<div className="footer-explore-grid">
 						{groups.map((group) => (
 							<section className="footer-explore-group" key={group.id}>
 								{group.seeAllHref.length > 0 ? (
-									<Link className="footer-explore-title" href={group.seeAllHref} onClick={closeMenu}>
+									<Link
+										className="footer-explore-title"
+										href={group.seeAllHref}
+										onClick={closeMenu}
+									>
 										{group.title}
 									</Link>
 								) : (
@@ -223,3 +249,5 @@ export default function FooterExploreMenu({ model }: FooterExploreMenuProps) {
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// DB-first admin external link whitelist API with host and path rule validation                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -112,9 +113,7 @@ function normalizePathPattern(value: unknown): string | null {
 function isHostMatchModeCode(
 	value: string,
 ): value is ExternalLinkHostMatchModeCode {
-	return HOST_MATCH_MODE_CODES.includes(
-		value as ExternalLinkHostMatchModeCode,
-	);
+	return HOST_MATCH_MODE_CODES.includes(value as ExternalLinkHostMatchModeCode);
 }
 
 function normalizeHostMatchModeCode(
@@ -135,9 +134,7 @@ function normalizeHostMatchModeCode(
 function isPathMatchModeCode(
 	value: string,
 ): value is ExternalLinkPathMatchModeCode {
-	return PATH_MATCH_MODE_CODES.includes(
-		value as ExternalLinkPathMatchModeCode,
-	);
+	return PATH_MATCH_MODE_CODES.includes(value as ExternalLinkPathMatchModeCode);
 }
 
 function normalizePathMatchModeCode(
@@ -538,3 +535,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

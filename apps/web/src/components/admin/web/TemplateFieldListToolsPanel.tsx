@@ -4,6 +4,8 @@
 //// Panel form for adding selected editor tools to a template field-list row                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -74,7 +76,10 @@ export default function TemplateFieldListToolsPanel({
 		[toolOptions],
 	);
 
-	const rows = useMemo<RowDef[]>(() => [[{ field: "fieldToolCode", span: 12 }]], []);
+	const rows = useMemo<RowDef[]>(
+		() => [[{ field: "fieldToolCode", span: 12 }]],
+		[],
+	);
 
 	const handleSubmit = useCallback(
 		async (values: Values): Promise<void> => {
@@ -142,3 +147,5 @@ export default function TemplateFieldListToolsPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

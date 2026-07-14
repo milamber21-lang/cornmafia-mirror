@@ -1,4 +1,6 @@
 <!-- FILE: docs/style_system.md -->
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->
+
 # Corn Mafia Style System
 
 ## Purpose
@@ -49,7 +51,7 @@ Preferred:
 
 ```tsx
 <Surface tone="default" density="comfortable">
-	<AdminTableToolbar search={search} onSearchChange={setSearch} />
+  <AdminTableToolbar search={search} onSearchChange={setSearch} />
 </Surface>
 ```
 
@@ -113,8 +115,8 @@ Preferred:
 
 ```css
 .admin-content-shell {
-	display: grid;
-	gap: var(--space-6);
+  display: grid;
+  gap: var(--space-6);
 }
 ```
 
@@ -139,8 +141,8 @@ A UI primitive should not hardcode visual values in TSX.
 Preferred:
 
 ```tsx
-<Button tone="primary" size="sm">
-	Save
+<Button variant="primary" size="sm">
+  Save
 </Button>
 ```
 
@@ -148,13 +150,33 @@ The visual details belong in CSS:
 
 ```css
 .ui-button {
-	border-radius: var(--radius-control);
+  border-radius: var(--radius-control);
 }
 
 .ui-button--primary {
-	background: var(--color-action);
+  background: var(--color-action);
 }
 ```
+
+Shared buttons use semantic variants across every app context:
+
+```text
+primary   = create, save, confirm, insert, upload, or select
+secondary = edit, manage, back, close, retry, or ordinary navigation
+quiet     = low-emphasis toolbar and inline actions
+danger    = delete, remove, hide, or destructive confirmation
+success   = explicit enabled, visible, active-success, or completed state
+```
+
+Rules:
+
+- do not use color names as button variants
+- `Button` and `ButtonLink` must render the same visual system
+- loading must preserve the original label width and expose `aria-busy`
+- loading buttons and button links must block repeated interaction
+- destructive actions must use `danger`
+- green/success styling must not be used as the default create/save treatment
+- domain components must not recreate button backgrounds, borders, shadows, or hover treatment
 
 ---
 
@@ -177,8 +199,12 @@ Preferred:
 
 ```tsx
 <AdminTableShell>
-	<AdminTableToolbar title="Content" search={search} onSearchChange={setSearch} />
-	<ContentRows rows={rows} />
+  <AdminTableToolbar
+    title="Content"
+    search={search}
+    onSearchChange={setSearch}
+  />
+  <ContentRows rows={rows} />
 </AdminTableShell>
 ```
 
@@ -218,6 +244,7 @@ admin.css
 forms.css
 tables.css
 media.css
+content-prose.css
 editor.css
 member.css
 public.css
@@ -365,7 +392,21 @@ Owns media and file visuals:
 - avatar frames
 - thumbnail grids
 
-### 6.13 `apps/web/src/styles/editor.css`
+### 6.13 `apps/web/src/styles/content-prose.css`
+
+Owns the semantic Rich Text typography shared by authoring and rendered content:
+
+- headings and paragraph rhythm
+- lists and quotations
+- links and inline/block code
+- separators
+- main-content prose treatment
+- compact sidebar prose treatment
+- editorial image presentation shared by editor and renderer
+
+This file must not contain editor selection handles, resize controls, toolbars, or other authoring-only chrome.
+
+### 6.14 `apps/web/src/styles/editor.css`
 
 Owns editor visuals:
 
@@ -381,7 +422,7 @@ Owns editor visuals:
 
 Editor runtime geometry may remain an inline-style exception when documented.
 
-### 6.14 `apps/web/src/styles/member.css`
+### 6.15 `apps/web/src/styles/member.css`
 
 Owns member surfaces:
 
@@ -392,7 +433,7 @@ Owns member surfaces:
 - member media cards
 - member series cards
 
-### 6.15 `apps/web/src/styles/public.css`
+### 6.16 `apps/web/src/styles/public.css`
 
 Owns public surfaces:
 
@@ -406,20 +447,339 @@ Owns public surfaces:
 
 ---
 
-## 7. Reusable UI primitive targets
+## 7. Shared material foundation and reusable UI primitives
 
-The following primitives should exist or be normalized over time.
+The shared material foundation promotes the proven Riseopedia visual grammar without making generic surfaces depend on `riseopedia-*` selectors.
 
-### Surfaces
+Current shared material tokens include:
 
-- `Surface`
+```text
+--radius-compact
+--radius-control
+--radius-module
+--radius-structure
+--shadow-structure
+--shadow-module
+--shadow-interactive
+--shadow-interactive-hover
+--shadow-inset
+--shadow-icon-well
+--shadow-media-inset
+--measure-compact
+--measure-summary
+--measure-readable
+```
+
+Existing Riseopedia shadow token names remain compatibility aliases over the generic material tokens. New public, member, admin, and content surfaces should use the generic names.
+
+### Implemented shared surface primitives
+
+The shared surface family is exported from:
+
+```text
+apps/web/src/components/ui/basic-elements/Surface.tsx
+apps/web/src/components/ui/index.ts
+```
+
+Implemented primitives:
+
 - `SurfaceCard`
 - `SurfacePanel`
-- `PageSection`
+- `PageHero`
 - `SectionHeader`
-- `PageHeader`
+- `IconWell`
+- `MediaWell`
+- `StatusPill`
+- `SurfaceMetaRow`
+- `SurfaceState`
 
-### Admin primitives
+`SurfaceCard` and `SurfacePanel` support opt-in material depth:
+
+```text
+plain
+module
+structure
+inset
+```
+
+The default is `plain` so existing consumers do not change appearance until they are migrated intentionally.
+
+`PageHero` supports optional breadcrumbs, eyebrow, icon, summary, body, metadata, actions, and media slots. Optional slot wrappers are rendered only when a slot value exists. This allows page headers to collapse cleanly when images, metadata, or actions are absent.
+
+`SurfaceMetaRow` removes empty metadata entries before rendering and preserves valid values such as `0`.
+
+`SurfaceState` provides shared empty, loading, error, success, and informational state structure with default accessibility semantics.
+
+### Shared browse grammar and application icon visuals
+
+Browse, directory, series, and profile overview pages use a dedicated shared grammar instead of forcing the media-oriented `PageHero` into every overview surface.
+
+Implemented shared browse primitives:
+
+```text
+apps/web/src/components/ui/browse/BrowsePageHeader.tsx
+apps/web/src/components/ui/browse/BrowseSurfaces.tsx
+apps/web/src/components/ui/browse/BrowseResultCard.tsx
+apps/web/src/components/ui/IconVisual.tsx
+```
+
+Responsibilities:
+
+- `BrowsePageHeader` owns breadcrumbs or an eyebrow, the page title, an optional description, and right-aligned count/actions
+- an absent description creates no description element, while the fixed browse-header rhythm still reserves the same two-line description row so overview headers remain equal in height
+- `BrowseFilterPanel` is the separate inset control surface between the header and results
+- `BrowseResultsPanel` owns result cards, empty states, and pagination
+- `BrowsePanelHeader` provides the matching title/description/action anatomy inside results modules
+- `BrowseResultCard` provides common visual, metadata, title, summary, detail, and destination-affordance slots
+- optional card slots create no wrapper when their value is absent
+
+Application icon responsibilities remain deliberately split:
+
+```text
+IconRender
+= resolves the application icon source, color, fallback, media route, and accessibility
+
+IconVisual
+= global Riseopedia-derived square material shell around IconRender
+
+RiseopediaEntityVisual
+= game entity media, fallback imagery, fit modes, and rarity-aware visuals
+
+Editorial media
+= normal page images and diagrams without an icon well
+```
+
+`PublicTaxonomyIcon` is a temporary compatibility wrapper over `IconVisual`. New general-purpose app icon consumers should use `IconVisual` directly. Riseopedia overview headers and browse panels consume the promoted shared browse primitives while entity-specific media remains under the Riseopedia component family.
+
+### Editorial image presentation
+
+Editorial images are separate from application icon wells and Riseopedia entity visuals.
+
+Current rules:
+
+- Rich Text images are borderless by default
+- the selected-image toolbar provides an explicit `Border` toggle
+- image presentation is stored in Rich Text JSON as `frameStyle = none | border`
+- older images without `frameStyle` normalize to `none`
+- editor and public renderer use the same `has-border` semantic class and the same static CSS
+- editor selection outlines, resize handles, move handles, and link badges are editor-only controls and do not change the published frame choice
+- standalone template image fields are borderless by default
+- non-image file links keep their normal interactive file-card treatment
+- `IconVisual` remains restricted to application icons
+- `RiseopediaEntityVisual` remains responsible for game/entity media
+
+The frame choice is serialized inside the existing Rich Text JSON. It does not require a new SQL column or object family.
+
+Current public/member overview migrations:
+
+```text
+category overview
+subcategory/collection overview
+public series overview
+member profile overview
+```
+
+These surfaces now use the same fixed `BrowsePageHeader` geometry as Riseopedia/Mafiosopedia: one breadcrumb row, one title/action row, and a two-line description row. Category and subcategory descriptions remain absent when the current DB contract does not provide them; no filler copy or empty description element is rendered, but the shared structural row is intentionally retained so every overview header has the same height.
+
+Category, collection, and series controls use a separate `BrowseFilterPanel` before a `BrowseResultsPanel`. Series defaults to semantic series-part order and also provides reverse order, newest, oldest, and title sorting. Public category, collection, and series cards consume the shared browse-card geometry and global application icon visual. Profile workspace application actions also use `IconVisual`; the member avatar remains identity media and is not placed inside an application icon well.
+
+### Destination-driven content use
+
+The existing template destinations remain the content layout system:
+
+```text
+Hero
+Top
+Left
+Main
+Right
+Bottom
+Hidden
+SEO
+```
+
+Shared primitives do not introduce a second page-type or header-type model.
+
+Rules:
+
+- a template with one or more configured Hero fields renders the shared `PageHero` and the canonical content title
+- the canonical summary renders in Hero only when it contains non-empty text
+- content Hero breadcrumbs are system-derived from category, subcategory, and current title; `hero_overline` is retired and never renders
+- a template without Hero fields renders no page header, header spacing, or placeholder shell
+- empty optional Hero modules render no wrapper, border, column, or reserved space
+- Hero media creates the media column only after the referenced media resolves to a safe renderable URL
+- content Hero geometry mirrors Riseopedia overview headers: `11.5rem` minimum height below `48rem`, `12.5rem` at and above `48rem`, and explicit breadcrumb/title/two-line-summary rows
+- the summary row reserves two `1.5rem` lines even for a one-line or absent summary; exceptional breadcrumb/title wrapping may still grow the panel rather than clip content
+- on wide layouts Hero media is absolutely positioned in the existing second grid area, uses block-only negative margins two pixels smaller than the Hero padding, keeps the normal horizontal inset, and must not contribute additional height to the Hero grid track
+- every Hero media wrapper, including the inner media frame, participates in the definite-height chain so the image scales fully inside the unchanged panel; the image preserves its intrinsic aspect ratio and places the visible border/radius/shadow on the rendered image box so the frame hugs the image
+- below the side-by-side breakpoint Hero media returns to normal flow and may increase the page section height rather than overlap copy
+- Top and Bottom render as independent full-width shared module panels only when populated
+- Left, Main, and Right render as independent regions selected from the populated destination combination
+- a missing Left or Right destination creates no region, grid track, minimum width, or reserved gap
+- Main always receives the complete remaining flexible width after the populated side destinations are assigned
+- a full-width Main field may use the complete Main destination width; the renderer must not impose a generic readable-measure cap on the destination itself
+- explicit `half` and `third` template field widths remain respected inside the width available to their destination
+- the narrow-screen content order is Main, Left, Right; desktop CSS places Left and Right around Main when present
+- Bottom remains outside Main and spans the full content width
+- Hidden and SEO never create visible surfaces
+- public field values must be both present and safely renderable before their visual field cell is created
+- admin preview may retain explicit diagnostics for unresolved media and invalid YouTube values without exposing those warnings publicly
+- renderer-specific featured content may be promoted to a full-width module without replacing the shared destination shell
+
+Implemented content renderer files:
+
+```text
+apps/web/src/components/renderers/content/ContentPageHero.tsx
+apps/web/src/components/renderers/content/ContentDestinationPanel.tsx
+apps/web/src/components/renderers/content/ContentRenderShell.tsx
+apps/web/src/components/renderers/content/ContentFieldGroup.tsx
+apps/web/src/components/renderers/content/field-utils.ts
+```
+
+### Normal content material and published fields
+
+Normal destination surfaces use role-specific material depth without changing their established density or padding:
+
+```text
+Hero   = shared structural page hero
+Top    = full-width module material
+Main   = structural reading material
+Left   = inset supporting material
+Right  = inset supporting material
+Bottom = full-width closing module material
+```
+
+Rules:
+
+- existing destination panel padding, page-shell padding, grid gaps, and destination widths remain unchanged
+- material differentiation comes from background layers, borders, inset highlights, and shadows rather than nested cards
+- Main remains one reading surface and does not wrap every Rich Text section in another panel
+- Hero fields remain modular; absent media, summaries, labels, and values create no visual wrapper
+- field frames expose semantic presentation classes for prose, media, embeds, facts, status values, and links
+- field frames also expose destination and label-mode classes so published fields can be styled consistently without changing template data
+- title labels act as local section headings; ordinary labels remain secondary to their values
+- option and boolean values keep compact status treatment; ordinary text, dates, and numbers remain content facts rather than disabled-form visuals
+- URL fields use the shared public link treatment and preserve visible keyboard focus
+- `content-prose.css` owns the final heading, paragraph, list, quotation, code, separator, and link treatment for Main, default, and sidebar prose
+- the same prose classes remain active in the editor and live preview, so material and typography changes are visible before save
+- editorial media remains borderless unless its explicit saved frame choice requests a border
+
+### Authoring and renderer parity
+
+Admin and member content authoring use the same semantic prose rules, destination geometry, render model, and `ContentRenderer` as saved public/admin rendering.
+
+Rules:
+
+- `tokens.css` owns the shared page width, destination padding, layout gap, and sidebar-width geometry used by both renderer and editor
+- the Rich Text editor derives its canvas width from the current destination combination: Hero/Top/Bottom, Main-only, Main with Left, Main with Right, Main with both sidebars, Left, or Right
+- template field width codes `full`, `half`, and `third` constrain the editor canvas exactly as they constrain rendered fields
+- `content-prose.css` owns semantic Rich Text typography shared by editable and rendered content
+- editor-only toolbars, selection outlines, resize handles, drag indicators, and popups remain in `editor.css`
+- admin and member authoring build an in-memory `ContentRenderModel` from the current unsaved title, summary, template, series, field values, option labels, and media selections
+- guarded preview endpoints render that model through the real `ContentRenderer`; no preview-only renderer or saved draft is required
+- authoring provides Fields, Preview, Split, and full-screen preview modes with desktop and mobile viewport choices
+- preview links, buttons, and forms are inert so authoring preview cannot navigate or submit nested actions
+- admin preview keeps admin media scope and admin/editor guards
+- member preview keeps member actor ownership, member-authorable collection metadata, app media scope, rate limiting, and same-origin protection
+- empty destinations, optional values, invalid references, image framing, Hero presence, sidebars, and Bottom placement therefore follow the same renderer rules before and after save
+
+Implemented parity files:
+
+```text
+apps/web/src/components/authoring/ContentAuthoringWorkspace.tsx
+apps/web/src/components/authoring/ContentLivePreview.tsx
+apps/web/src/lib/helpers/content-preview.ts
+apps/web/src/lib/server/content-preview-render.tsx
+apps/web/src/app/api/admin/web/content/preview/route.ts
+apps/web/src/app/api/me/content/preview/route.ts
+apps/web/src/styles/content-prose.css
+```
+
+### Public category and collection surfaces
+
+The public taxonomy routes use the shared material grammar without importing Riseopedia-specific selectors:
+
+```text
+/<category>
+/<category>/<subcategory>
+```
+
+Rules:
+
+- category and collection overviews use the shared `BrowsePageHeader` geometry
+- category and subcategory icon/color metadata comes from the existing DB-resolved public contracts
+- collection directory cards and content cards use shared material tokens for structure, icon wells, interaction, and focus
+- category pages emphasize collection discovery and show a limited recent-content section
+- collection hubs preserve search, content-kind/template filters, sorting, pagination, Create, and Manage behavior
+- missing dates, summaries, icons, or other optional metadata render no placeholder separators or empty wrappers
+- public route access remains actor-aware and DB-resolved through the existing `web_api.web_content_public_list_category` and `web_api.web_content_public_list_subcategory` functions
+
+Implemented public files:
+
+```text
+apps/web/src/components/public/PublicCategoryHub.tsx
+apps/web/src/components/public/PublicCollectionHub.tsx
+apps/web/src/components/public/PublicContentCard.tsx
+apps/web/src/components/public/PublicTaxonomyIcon.tsx
+```
+
+### Member profile and workspace surfaces
+
+The `/me` profile route uses the shared material grammar while preserving member-specific APIs, ownership, validation, and mutation behavior.
+
+Rules:
+
+- the member identity uses the shared `BrowsePageHeader` geometry with compact avatar/status/action composition
+- Edit Profile is an identity action and does not appear as a fourth workspace destination card
+- member Content, Media, and Series destinations use shared material cards and icon wells
+- the account overview uses compact definition rows instead of equally weighted statistic cards
+- optional profile notes render only when a non-empty value exists
+- guild roles use compact role rows inside a shared module panel instead of large independent cards
+- Discord role colors remain a documented runtime CSS custom-property exception
+- loading, empty, and error states use `SurfaceState`
+- the profile editor reuses the shared `Panel` chrome but keeps the member-specific `/api/me` contract and theme-loading behavior
+- failed profile saves do not call `onSaved` and do not close the panel
+
+Implemented member profile files:
+
+```text
+apps/web/src/components/me/MeTable.tsx
+apps/web/src/components/me/MePanel.tsx
+apps/web/src/components/login/RolesPanel.tsx
+```
+
+### Remaining public series, internal-page, and footer surfaces
+
+The public series and internal-page routes use the same shared material grammar as category, collection, content, and member surfaces.
+
+Rules:
+
+- `/series/<slug>` uses `BrowsePageHeader`, shared browse panels/cards, `SurfaceMetaRow`, `SurfaceState`, and the shared application icon visual
+- series descriptions, collection metadata, part numbers, dates, summaries, and episode grids render only when their values exist
+- series episodes are an ordered set of full-card links with the same material interaction and focus treatment as public discovery cards
+- previous/current/next series navigation remains a separate content-footer module and uses shared module/interactive material tokens
+- homepage, privacy, terms, and unavailable routes remain DB-backed internal content pages rendered through the normal destination system
+- internal routes receive semantic route wrapper classes only for public-page context and reading-width refinement; they do not force Hero or any other destination
+- privacy and terms may use a narrower route shell, while their Main destination still consumes all width available inside that shell
+- public rich-text typography may refine headings, lists, quotations, links, code, images, and separators without imposing a generic max-width on Main
+- the footer Explore markup, grouping, ordering, density, and DB-driven navigation model remain unchanged
+- footer work is visual only: surfaces, border depth, contrast, focus, hover, motion, and theme behavior
+- footer Explore continues to read the existing `footer_main` navigation slot and does not introduce a new navigation or SQL contract
+
+Implemented public files:
+
+```text
+apps/web/src/components/public/PublicSeriesPage.tsx
+apps/web/src/components/public/PublicInternalContentPageRoute.tsx
+apps/web/src/styles/public.css
+apps/web/src/styles/chrome.css
+```
+
+### Remaining normalization targets
+
+The following primitives may still be normalized as their real consumers are migrated:
+
+#### Admin primitives
 
 - `AdminPageHeader`
 - `AdminTableShell`
@@ -431,28 +791,18 @@ The following primitives should exist or be normalized over time.
 - `AdminLoadingRow`
 - `AdminSectionHeader`
 
-### Feedback primitives
+#### Feedback and form primitives
 
-- `AlertBanner`
 - `ToneBanner`
 - `ErrorBanner`
-- `StatusPill`
-- `Badge`
 - `InlineMeta`
-- `EmptyState`
-- `LoadingState`
-
-### Form primitives
-
 - `FormRow`
 - `FieldLabel`
 - `FieldHelp`
-- `FieldError`
-- `PanelForm`
 - `PanelFooter`
 - `SubmitBar`
 
-### Dialog and picker primitives
+#### Dialog and picker primitives
 
 - `DialogSurface`
 - `ModalBackdrop`
@@ -460,17 +810,7 @@ The following primitives should exist or be normalized over time.
 - `PickerDialog`
 - `ConfirmDialog`
 
-### Media primitives
-
-- `MediaPreviewFrame`
-- `ImageFrame`
-- `IconWell`
-- `FileTile`
-- `UploadDropzone`
-- `SvgIconFrame`
-- `AvatarFrame`
-
-### Dashboard and content primitives
+#### Dashboard and content primitives
 
 - `DashboardCard`
 - `StatCard`
@@ -523,7 +863,7 @@ random-card-style
 Prefer semantic CSS:
 
 ```tsx
-className="surface-card surface-card--muted"
+className = "surface-card surface-card--muted";
 ```
 
 ---
@@ -669,10 +1009,12 @@ Preferred with runtime DB color:
 
 ```tsx
 <span
-	className="media-icon-render"
-	style={{
-		"--runtime-color": iconColor,
-	} as React.CSSProperties}
+  className="media-icon-render"
+  style={
+    {
+      "--runtime-color": iconColor,
+    } as React.CSSProperties
+  }
 />
 ```
 
@@ -680,7 +1022,7 @@ CSS owns the visual use:
 
 ```css
 .media-icon-render {
-	color: var(--runtime-color, var(--color-text));
+  color: var(--runtime-color, var(--color-text));
 }
 ```
 
@@ -1358,3 +1700,34 @@ The codebase is style-clean when:
 - build passes
 - lint passes
 - visual smoke test passes
+
+## Member workspace browse surfaces
+
+Member profile and authoring-management pages use the shared browse grammar rather than a separate dashboard visual system.
+
+Required structure:
+
+```text
+BrowsePageHeader
+BrowseFilterPanel when filters exist
+BrowseResultsPanel
+shared browse/management cards
+shared pagination and state surfaces
+```
+
+Rules:
+
+- the profile header does not repeat the global-menu avatar
+- member status lives on the title row opposite the profile nickname
+- Edit profile and member management actions live in the reserved second header row
+- the profile workspace links use `BrowseResultCard` directly
+- My Content, per-collection content, My Media, and My Series use `BrowsePageHeader`, `BrowseFilterPanel`, and `BrowseResultsPanel`
+- member management headers keep the manageable-item counter on the title row, omit explanatory copy, and place action buttons on the second row
+- member filter bars use the same single-row control/search geometry as the public browse system
+- management cards use the global browse-card geometry with separate member-safe action controls
+- media-management cards may use editorial thumbnails instead of `IconVisual`
+- member APIs, ownership checks, panels, and mutation contracts remain member-specific
+- empty results use shared state surfaces rather than dashed member-only boxes
+- shared cards and button links must not inherit content-link underlines
+
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->

@@ -1,14 +1,15 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/renderers/content/ContentFieldGroup.tsx                                        ////
 //// Language: TSX                                                                                                ////
-//// Renders destination field groups as template-controlled responsive grids with debug support.                  ////
+//// Renders safely resolved destination fields as template-controlled responsive grids with debug support.       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
 import ContentFieldRenderer from "./ContentFieldRenderer";
-import { hasRenderableValue } from "./field-utils";
+import { getRenderableFields } from "./field-utils";
 import RenderDebugFrame from "./RenderDebugFrame";
 import type {
 	ContentRenderField,
@@ -83,7 +84,7 @@ export default function ContentFieldGroup({
 	debugDescription,
 	debugVariant = "generic",
 }: ContentFieldGroupProps): JSX.Element | null {
-	const renderableFields = fields.filter((field) => hasRenderableValue(field.value));
+	const renderableFields = getRenderableFields(fields, model);
 	if (renderableFields.length === 0) {
 		return null;
 	}
@@ -110,3 +111,5 @@ export default function ContentFieldGroup({
 		</RenderDebugFrame>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Dedicated Riseopedia section rule panel.                                                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -12,20 +14,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import PanelForm from "@/components/ui/PanelForm";
 import { readResponseMessage } from "@/lib/helpers/http-response";
 
-import {
-	buildInitialValues,
-	buildPayloadData,
-} from "./RiseopediaAdminHelpers";
-import {
-	idText,
-} from "./RiseopediaAdminConfigHelpers";
+import { buildInitialValues, buildPayloadData } from "./RiseopediaAdminHelpers";
+import { idText } from "./RiseopediaAdminConfigHelpers";
 import {
 	buildRiseopediaPanelFieldDef,
 	buildRiseopediaPanelRows,
 } from "./RiseopediaAdminPanelHelpers";
-import {
-	buildRiseopediaSectionRuleFields,
-} from "./RiseopediaAdminPanelFieldBuilders";
+import { buildRiseopediaSectionRuleFields } from "./RiseopediaAdminPanelFieldBuilders";
 import type {
 	RiseopediaAdminPanelMode,
 	RiseopediaAdminRow,
@@ -92,15 +87,21 @@ export default function RiseopediaSectionRulesPanel({
 			setTopError("");
 
 			try {
-				const response = await fetch(section ? `/api/admin/riseopedia/section-rules?sectionId=${scopedSectionId}` : "/api/admin/riseopedia/section-rules", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						op: "upsert",
-						id: mode === "edit" && row ? row["section_classification_rule_id"] : null,
-						data: buildPayloadData(fields, values),
-					}),
-				});
+				const response = await fetch(
+					section
+						? `/api/admin/riseopedia/section-rules?sectionId=${scopedSectionId}`
+						: "/api/admin/riseopedia/section-rules",
+					{
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							op: "upsert",
+							id:
+								mode === "edit" && row ? row["section_classification_rule_id"] : null,
+							data: buildPayloadData(fields, values),
+						}),
+					},
+				);
 
 				if (!response.ok) {
 					throw new Error(
@@ -132,7 +133,11 @@ export default function RiseopediaSectionRulesPanel({
 				setTopError("");
 				onClose();
 			}}
-			title={mode === "create" ? "Create section classification rule" : "Edit section classification rule"}
+			title={
+				mode === "create"
+					? "Create section classification rule"
+					: "Edit section classification rule"
+			}
 			width="50%"
 			showSave={true}
 			mode={mode}
@@ -153,3 +158,5 @@ export default function RiseopediaSectionRulesPanel({
 }
 
 export { RiseopediaSectionRulesPanel };
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

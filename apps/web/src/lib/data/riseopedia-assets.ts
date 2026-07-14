@@ -4,6 +4,7 @@
 //// DB-first public Riseopedia asset list and detail helpers for public and card-rule driven overviews.         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -282,7 +283,9 @@ function normalizeSearch(value: string | null): string | null {
 
 function normalizePlacement(value: string | null | undefined): string {
 	const normalized = value?.trim();
-	return normalized && /^[a-z0-9][a-z0-9_]*$/.test(normalized) ? normalized : "hub";
+	return normalized && /^[a-z0-9][a-z0-9_]*$/.test(normalized)
+		? normalized
+		: "hub";
 }
 
 export async function listRiseopediaAssets(
@@ -317,7 +320,8 @@ export async function listRiseopediaAssets(
 		? toNumber(countResult.rows[0].total_count)
 		: 0;
 	const totalPages = totalDocs > 0 ? Math.ceil(totalDocs / filters.pageSize) : 0;
-	const page = totalPages > 0 ? Math.min(filters.page, totalPages) : filters.page;
+	const page =
+		totalPages > 0 ? Math.min(filters.page, totalPages) : filters.page;
 	const offset = (page - 1) * filters.pageSize;
 	const result = await query<RiseopediaAssetRow>(
 		`WITH filtered_assets AS (
@@ -454,3 +458,5 @@ export async function listRiseopediaAssetSections(
 
 	return result.rows.map(mapEntitySectionRefRow);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

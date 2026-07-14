@@ -4,6 +4,8 @@
 //// RichText image picker with admin/member media context, stable paging, and drag/drop upload                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
@@ -201,7 +203,10 @@ function buildMediaListUrl(args: {
 		params.set("source", args.source.trim());
 	}
 
-	const basePath = args.mediaContext === "member" ? "/api/me/media-picker" : "/api/admin/web/media";
+	const basePath =
+		args.mediaContext === "member"
+			? "/api/me/media-picker"
+			: "/api/admin/web/media";
 	return `${basePath}?${params.toString()}`;
 }
 
@@ -291,7 +296,16 @@ function useListMedia(
 		return () => {
 			cancelled = true;
 		};
-	}, [categoryId, mediaContext, page, pageSize, refreshSeq, search, source, subcategoryId]);
+	}, [
+		categoryId,
+		mediaContext,
+		page,
+		pageSize,
+		refreshSeq,
+		search,
+		source,
+		subcategoryId,
+	]);
 
 	return { rows, loading, error, totalDocs, resolvedPage, sourceOptions };
 }
@@ -309,20 +323,23 @@ export default function ImagePickerPopup({
 }: ImagePickerPopupProps) {
 	const adminMediaContext = mediaContext === "admin";
 	const [search, setSearch] = useState<string>("");
-	const [source, setSource] = useState<string>(adminMediaContext && defaultShared ? "shared" : "");
+	const [source, setSource] = useState<string>(
+		adminMediaContext && defaultShared ? "shared" : "",
+	);
 	const [page, setPage] = useState<number>(1);
 	const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 	const [refreshSeq, setRefreshSeq] = useState(0);
-	const { rows, loading, error, totalDocs, resolvedPage, sourceOptions } = useListMedia(
-		mediaContext,
-		categoryId,
-		subcategoryId,
-		search,
-		source,
-		page,
-		pageSize,
-		refreshSeq,
-	);
+	const { rows, loading, error, totalDocs, resolvedPage, sourceOptions } =
+		useListMedia(
+			mediaContext,
+			categoryId,
+			subcategoryId,
+			search,
+			source,
+			page,
+			pageSize,
+			refreshSeq,
+		);
 	const [selectedId, setSelectedId] = useState<string>("");
 
 	const selectedRow =
@@ -380,7 +397,9 @@ export default function ImagePickerPopup({
 
 	const [busy, setBusy] = useState<boolean>(false);
 	const [localAlt, setLocalAlt] = useState<string>("");
-	const [uploadShared, setUploadShared] = useState<boolean>(adminMediaContext && defaultShared);
+	const [uploadShared, setUploadShared] = useState<boolean>(
+		adminMediaContext && defaultShared,
+	);
 	const [file, setFile] = useState<File | null>(null);
 	const [draggingUpload, setDraggingUpload] = useState<boolean>(false);
 	const [uploadError, setUploadError] = useState<string>("");
@@ -389,7 +408,9 @@ export default function ImagePickerPopup({
 	const maxBytes = Math.max(1, Math.floor(maxSizeMB * 1024 * 1024));
 	const altMissing = localAlt.trim().length === 0;
 	const hasUnsavedUploadChanges =
-		Boolean(file) || localAlt.trim().length > 0 || uploadShared !== (adminMediaContext && defaultShared);
+		Boolean(file) ||
+		localAlt.trim().length > 0 ||
+		uploadShared !== (adminMediaContext && defaultShared);
 	const visibleError = closeWarning
 		? "You have unsaved image upload changes. Click Close again or press Escape again to close without saving."
 		: uploadError || error;
@@ -465,22 +486,28 @@ export default function ImagePickerPopup({
 		[setUploadFile],
 	);
 
-	const onUploadDragOver = useCallback((event: DragEvent<HTMLDivElement>): void => {
-		event.preventDefault();
-		event.stopPropagation();
-		setDraggingUpload(true);
-	}, []);
+	const onUploadDragOver = useCallback(
+		(event: DragEvent<HTMLDivElement>): void => {
+			event.preventDefault();
+			event.stopPropagation();
+			setDraggingUpload(true);
+		},
+		[],
+	);
 
-	const onUploadDragLeave = useCallback((event: DragEvent<HTMLDivElement>): void => {
-		event.preventDefault();
-		event.stopPropagation();
+	const onUploadDragLeave = useCallback(
+		(event: DragEvent<HTMLDivElement>): void => {
+			event.preventDefault();
+			event.stopPropagation();
 
-		if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
-			return;
-		}
+			if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
+				return;
+			}
 
-		setDraggingUpload(false);
-	}, []);
+			setDraggingUpload(false);
+		},
+		[],
+	);
 
 	const onUploadDrop = useCallback(
 		(event: DragEvent<HTMLDivElement>): void => {
@@ -527,7 +554,9 @@ export default function ImagePickerPopup({
 			formData.set("file", file, file.name);
 			formData.set("alt", localAlt.trim());
 
-			const uploadPath = adminMediaContext ? "/api/admin/web/media/upload" : "/api/me/media";
+			const uploadPath = adminMediaContext
+				? "/api/admin/web/media/upload"
+				: "/api/me/media";
 			if (adminMediaContext) {
 				formData.set("category", categoryId);
 				formData.set("subcategory", subcategoryId);
@@ -606,9 +635,7 @@ export default function ImagePickerPopup({
 				onClick={(event) => event.stopPropagation()}
 			>
 				<div className="editor-picker-header">
-					<h3 className="editor-picker-title">
-						Select an image
-					</h3>
+					<h3 className="editor-picker-title">Select an image</h3>
 					<div className="editor-image-picker-filters">
 						{adminMediaContext ? (
 							<div>
@@ -638,7 +665,7 @@ export default function ImagePickerPopup({
 						<div className="editor-picker-action-end">
 							<Button
 								size="md"
-								variant="neutral"
+								variant="secondary"
 								onClick={requestClose}
 								aria-label="Close picker"
 							>
@@ -650,20 +677,14 @@ export default function ImagePickerPopup({
 
 				<div className="editor-picker-body">
 					{visibleError ? (
-						<div className="editor-picker-error">
-							{visibleError}
-						</div>
+						<div className="editor-picker-error">{visibleError}</div>
 					) : null}
 
 					<section className="editor-picker-section editor-picker-section--media">
 						<div className="editor-picker-section__header">
 							<div>
-								<h4 className="editor-picker-section__title">
-									Available images
-								</h4>
-								<div className="editor-picker-muted">
-									{totalDocs} images
-								</div>
+								<h4 className="editor-picker-section__title">Available images</h4>
+								<div className="editor-picker-muted">{totalDocs} images</div>
 							</div>
 							<div className="editor-picker-selected-row">
 								{selectedRow ? (
@@ -676,7 +697,7 @@ export default function ImagePickerPopup({
 								) : null}
 								<Button
 									size="sm"
-									variant="accent"
+									variant="primary"
 									disabled={!selectedRow}
 									onClick={() => {
 										if (selectedRow) {
@@ -691,13 +712,9 @@ export default function ImagePickerPopup({
 
 						<div className="editor-image-picker-grid-scroll">
 							{loading ? (
-								<div className="editor-picker-grid-state">
-									Loading...
-								</div>
+								<div className="editor-picker-grid-state">Loading...</div>
 							) : rows.length === 0 ? (
-								<div className="editor-picker-grid-state">
-									No images found.
-								</div>
+								<div className="editor-picker-grid-state">No images found.</div>
 							) : (
 								<div className="editor-image-picker-grid">
 									{rows.map((row) => {
@@ -716,7 +733,9 @@ export default function ImagePickerPopup({
 												aria-disabled={!canInsert}
 												className={[
 													"editor-image-picker-card",
-													canInsert ? "editor-image-picker-card--enabled" : "editor-image-picker-card--disabled",
+													canInsert
+														? "editor-image-picker-card--enabled"
+														: "editor-image-picker-card--disabled",
 													isSelected ? "editor-image-picker-card--selected" : "",
 												].join(" ")}
 												title={title || undefined}
@@ -730,15 +749,11 @@ export default function ImagePickerPopup({
 															draggable={false}
 														/>
 													) : (
-														<div className="editor-picker-muted">
-															Unsupported media
-														</div>
+														<div className="editor-picker-muted">Unsupported media</div>
 													)}
 												</div>
 												<div className="editor-image-picker-card__meta">
-													<div className="editor-image-picker-card__title">
-														{title}
-													</div>
+													<div className="editor-image-picker-card__title">{title}</div>
 													<div className="editor-image-picker-card__size">
 														{fmtBytes(row.sizeBytes)}
 													</div>
@@ -764,9 +779,7 @@ export default function ImagePickerPopup({
 					</section>
 
 					<div className="editor-picker-upload">
-						<h4 className="editor-picker-upload__title">
-							Upload new
-						</h4>
+						<h4 className="editor-picker-upload__title">Upload new</h4>
 
 						<input
 							ref={fileInputRef}
@@ -794,11 +807,12 @@ export default function ImagePickerPopup({
 										</div>
 									</div>
 									<div className="editor-image-upload-body-column">
-										<Button size="md" variant="accent" onClick={triggerSelect}>
+										<Button size="md" variant="primary" onClick={triggerSelect}>
 											Select image
 										</Button>
 										<div className="editor-picker-help">
-											Drag an image into this upload card or select one from your device. Max {maxSizeMB} MB.
+											Drag an image into this upload card or select one from your device.
+											Max {maxSizeMB} MB.
 										</div>
 									</div>
 								</div>
@@ -813,19 +827,15 @@ export default function ImagePickerPopup({
 
 									<div className="editor-image-upload-body-column">
 										<Label className="editor-picker-label">Filename</Label>
-										<div className="editor-image-upload-filename">
-											{file.name}
-										</div>
-										<div className="editor-picker-help">
-											Size: {fmtBytes(file.size)}
-										</div>
+										<div className="editor-image-upload-filename">{file.name}</div>
+										<div className="editor-picker-help">Size: {fmtBytes(file.size)}</div>
 
-										<Label htmlFor="upload-alt" className="editor-picker-label editor-picker-label--spaced">
+										<Label
+											htmlFor="upload-alt"
+											className="editor-picker-label editor-picker-label--spaced"
+										>
 											Alt text{" "}
-											<span
-												aria-hidden="true"
-												className="editor-picker-required"
-											>
+											<span aria-hidden="true" className="editor-picker-required">
 												*
 											</span>
 										</Label>
@@ -847,7 +857,7 @@ export default function ImagePickerPopup({
 											<div className="editor-picker-action-start">
 												<Button
 													size="md"
-													variant="neutral"
+													variant="secondary"
 													onClick={triggerSelect}
 													className="editor-picker-action-button"
 												>
@@ -870,7 +880,7 @@ export default function ImagePickerPopup({
 											<div className="editor-picker-action-end">
 												<Button
 													size="md"
-													variant="accent"
+													variant="primary"
 													onClick={() => void doUpload()}
 													disabled={busy || !file || altMissing}
 													className="editor-picker-action-button"
@@ -889,3 +899,5 @@ export default function ImagePickerPopup({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

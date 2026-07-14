@@ -4,6 +4,8 @@
 //// Member API route for member-context content edit metadata and updates.                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { NextRequest, NextResponse } from "next/server";
 
 import {
@@ -82,7 +84,10 @@ function jsonError(message: string, status: number): NextResponse {
 	return NextResponse.json({ message }, { status });
 }
 
-export async function GET(_request: NextRequest, context: RouteContext): Promise<Response> {
+export async function GET(
+	_request: NextRequest,
+	context: RouteContext,
+): Promise<Response> {
 	const actorDiscordId = await getCurrentActorDiscordId();
 	if (!actorDiscordId) {
 		return jsonError("Sign in required.", 401);
@@ -101,12 +106,18 @@ export async function GET(_request: NextRequest, context: RouteContext): Promise
 		}
 		return NextResponse.json({ meta });
 	} catch (error: unknown) {
-		const message = error instanceof Error ? error.message : "Failed to load content edit metadata.";
+		const message =
+			error instanceof Error
+				? error.message
+				: "Failed to load content edit metadata.";
 		return jsonError(message, 500);
 	}
 }
 
-export async function PATCH(request: NextRequest, context: RouteContext): Promise<Response> {
+export async function PATCH(
+	request: NextRequest,
+	context: RouteContext,
+): Promise<Response> {
 	const actorDiscordId = await getCurrentActorDiscordId();
 	if (!actorDiscordId) {
 		return jsonError("Sign in required.", 401);
@@ -118,7 +129,7 @@ export async function PATCH(request: NextRequest, context: RouteContext): Promis
 		return jsonError("Content id is required.", 400);
 	}
 
-	const rateLimitResponse = checkRateLimit({
+	const rateLimitResponse = await checkRateLimit({
 		request,
 		bucket: "member:content:update",
 		identity: actorDiscordId,
@@ -154,20 +165,26 @@ export async function PATCH(request: NextRequest, context: RouteContext): Promis
 			return jsonError("This content is not available for member editing.", 404);
 		}
 
-		const template = meta.templates.find((row) => row.id === meta.doc.templateId) ?? null;
+		const template =
+			meta.templates.find((row) => row.id === meta.doc.templateId) ?? null;
 		if (!template || (templateId && template.id !== templateId)) {
 			return jsonError("Template cannot be changed in member editing.", 400);
 		}
 
-		const templateFields = meta.fields.filter((field) => field.templateId === template.id);
+		const templateFields = meta.fields.filter(
+			(field) => field.templateId === template.id,
+		);
 		const seriesMode = readString(body.seriesMode);
 		let seriesId: string | null = null;
 		let seriesPartNo: number | null = null;
 		let newSeriesTitle: string | null = null;
 		let newSeriesDescription: string | null = null;
 
-		if (template.requiresSeries) {
-			if (seriesMode === "new") {
+		if (template.allowsSeries) {
+			if (seriesMode === "none") {
+				seriesId = null;
+				seriesPartNo = null;
+			} else if (seriesMode === "new") {
 				newSeriesTitle = readNullableString(body.newSeriesTitle);
 				newSeriesDescription = readNullableString(body.newSeriesDescription);
 				seriesPartNo = readPositiveNumber(body.seriesPartNo) ?? 1;
@@ -179,9 +196,12 @@ export async function PATCH(request: NextRequest, context: RouteContext): Promis
 				seriesId = readString(body.seriesId);
 				const series = meta.series.find((row) => row.id === seriesId) ?? null;
 				if (!series) {
-					return jsonError("Series is required.", 400);
+					return jsonError("Select an existing series or choose No series.", 400);
 				}
-				seriesPartNo = readPositiveNumber(body.seriesPartNo) ?? meta.doc.seriesPartNo ?? series.nextPartNo;
+				seriesPartNo =
+					readPositiveNumber(body.seriesPartNo) ??
+					meta.doc.seriesPartNo ??
+					series.nextPartNo;
 			}
 		}
 
@@ -203,7 +223,10 @@ export async function PATCH(request: NextRequest, context: RouteContext): Promis
 
 		return NextResponse.json({ ok: true, contentId: updatedContentId });
 	} catch (error: unknown) {
-		const message = error instanceof Error ? error.message : "Failed to update content.";
+		const message =
+			error instanceof Error ? error.message : "Failed to update content.";
 		return jsonError(message, 400);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

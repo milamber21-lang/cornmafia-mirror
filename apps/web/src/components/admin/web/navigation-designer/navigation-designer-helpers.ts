@@ -4,6 +4,7 @@
 //// Pure helpers for navigation designer limits, icons, guards, search, and local tree identity.                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type {
 	NavigationCategoryLookupItem,
@@ -83,31 +84,37 @@ export function makeLocalEditorId(prefix: string, value: number): string {
 	return `${prefix}:local:${value}`;
 }
 
-export function hydrateNavigationPanelTree(doc: NavigationPanelTree): DesignerPanelTree {
+export function hydrateNavigationPanelTree(
+	doc: NavigationPanelTree,
+): DesignerPanelTree {
 	return {
 		...doc,
 		items: doc.items.map((category): DesignerTreeCategory => {
 			return {
 				...category,
 				editorId: `category:${category.id}`,
-				subcategories: category.subcategories.map((subcategory): DesignerTreeSubcategory => {
-					return {
-						...subcategory,
-						editorId: `subcategory:${subcategory.id}`,
-						content: subcategory.content.map((target): DesignerTreeTarget => {
-							return {
-								...target,
-								editorId: `content:${target.id}`,
-							};
-						}),
-					};
-				}),
+				subcategories: category.subcategories.map(
+					(subcategory): DesignerTreeSubcategory => {
+						return {
+							...subcategory,
+							editorId: `subcategory:${subcategory.id}`,
+							content: subcategory.content.map((target): DesignerTreeTarget => {
+								return {
+									...target,
+									editorId: `content:${target.id}`,
+								};
+							}),
+						};
+					},
+				),
 			};
 		}),
 	};
 }
 
-export function stripDesignerItemsForSave(items: DesignerTreeCategory[]): NavigationTreeCategory[] {
+export function stripDesignerItemsForSave(
+	items: DesignerTreeCategory[],
+): NavigationTreeCategory[] {
 	return items.map((category): NavigationTreeCategory => {
 		return {
 			id: category.id,
@@ -116,32 +123,34 @@ export function stripDesignerItemsForSave(items: DesignerTreeCategory[]): Naviga
 			slug: category.slug,
 			isEnabled: category.isEnabled,
 			isSelectable: category.isSelectable,
-			subcategories: category.subcategories.map((subcategory): NavigationTreeSubcategory => {
-				return {
-					id: subcategory.id,
-					subcategoryId: subcategory.subcategoryId,
-					title: subcategory.title,
-					slug: subcategory.slug,
-					isEnabled: subcategory.isEnabled,
-					isSelectable: subcategory.isSelectable,
-					content: subcategory.content.map((target): NavigationTreeTarget => {
-						return {
-							id: target.id,
-							contentId: target.contentId,
-							title: target.title,
-							slug: target.slug,
-							summary: target.summary,
-							statusCode: target.statusCode,
-							isEnabled: target.isEnabled,
-							isSelectable: target.isSelectable,
-							contentKindCode: target.contentKindCode,
-							contentKindLabel: target.contentKindLabel,
-							publicRoutePrefix: target.publicRoutePrefix,
-							rendererCode: target.rendererCode,
-						};
-					}),
-				};
-			}),
+			subcategories: category.subcategories.map(
+				(subcategory): NavigationTreeSubcategory => {
+					return {
+						id: subcategory.id,
+						subcategoryId: subcategory.subcategoryId,
+						title: subcategory.title,
+						slug: subcategory.slug,
+						isEnabled: subcategory.isEnabled,
+						isSelectable: subcategory.isSelectable,
+						content: subcategory.content.map((target): NavigationTreeTarget => {
+							return {
+								id: target.id,
+								contentId: target.contentId,
+								title: target.title,
+								slug: target.slug,
+								summary: target.summary,
+								statusCode: target.statusCode,
+								isEnabled: target.isEnabled,
+								isSelectable: target.isSelectable,
+								contentKindCode: target.contentKindCode,
+								contentKindLabel: target.contentKindLabel,
+								publicRoutePrefix: target.publicRoutePrefix,
+								rendererCode: target.rendererCode,
+							};
+						}),
+					};
+				},
+			),
 		};
 	});
 }
@@ -166,7 +175,9 @@ export function findContentIndexByEditorId(
 	subcategory: DesignerTreeSubcategory,
 	contentEditorId: string,
 ): number {
-	return subcategory.content.findIndex((target) => target.editorId === contentEditorId);
+	return subcategory.content.findIndex(
+		(target) => target.editorId === contentEditorId,
+	);
 }
 
 export function findCategoryByEditorId(
@@ -246,7 +257,9 @@ export function isGuardedMouseClick(event: MouseEvent): boolean {
 	);
 }
 
-export function findAnchorTarget(target: EventTarget | null): HTMLAnchorElement | null {
+export function findAnchorTarget(
+	target: EventTarget | null,
+): HTMLAnchorElement | null {
 	if (!(target instanceof Element)) {
 		return null;
 	}
@@ -302,13 +315,18 @@ function isLimitExceeded(count: number, limit: number | null): boolean {
 	return limit !== null && count > limit;
 }
 
-export function limitReachedMessage(subject: string, limit: number | null): string {
+export function limitReachedMessage(
+	subject: string,
+	limit: number | null,
+): string {
 	return limit === null
 		? ""
 		: `${subject} has reached its configured limit of ${limit}.`;
 }
 
-export function hasStaleNavigationItems(items: DesignerTreeCategory[]): boolean {
+export function hasStaleNavigationItems(
+	items: DesignerTreeCategory[],
+): boolean {
 	return items.some((category) => {
 		return (
 			!category.isSelectable ||
@@ -321,7 +339,6 @@ export function hasStaleNavigationItems(items: DesignerTreeCategory[]): boolean 
 		);
 	});
 }
-
 
 export function validateNavigationDesignerItems(params: {
 	items: DesignerTreeCategory[];
@@ -341,7 +358,8 @@ export function validateNavigationDesignerItems(params: {
 	}
 
 	params.items.forEach((category, categoryIndex) => {
-		const categoryLabel = category.title.trim() || `Category ${categoryIndex + 1}`;
+		const categoryLabel =
+			category.title.trim() || `Category ${categoryIndex + 1}`;
 
 		if (!isNonEmptyNavigationId(category.categoryId)) {
 			addValidationIssue({
@@ -351,7 +369,10 @@ export function validateNavigationDesignerItems(params: {
 			});
 		}
 
-		if (!category.isSelectable && isLocalUnsavedTreeId(category.id, category.editorId)) {
+		if (
+			!category.isSelectable &&
+			isLocalUnsavedTreeId(category.id, category.editorId)
+		) {
 			addValidationIssue({
 				issues,
 				key: `category.${category.editorId}.local-stale`,
@@ -370,7 +391,9 @@ export function validateNavigationDesignerItems(params: {
 			categoryIds.set(category.categoryId, category);
 		}
 
-		if (isLimitExceeded(category.subcategories.length, params.subcategorySlotLimit)) {
+		if (
+			isLimitExceeded(category.subcategories.length, params.subcategorySlotLimit)
+		) {
 			addValidationIssue({
 				issues,
 				key: `category.${category.editorId}.subcategory-limit`,
@@ -380,7 +403,8 @@ export function validateNavigationDesignerItems(params: {
 
 		const subcategoryIds = new Map<string, DesignerTreeSubcategory>();
 		category.subcategories.forEach((subcategory, subcategoryIndex) => {
-			const subcategoryLabel = subcategory.title.trim() || `Subcategory ${subcategoryIndex + 1}`;
+			const subcategoryLabel =
+				subcategory.title.trim() || `Subcategory ${subcategoryIndex + 1}`;
 			const subcategoryPath = `${categoryLabel} / ${subcategoryLabel}`;
 
 			if (!isNonEmptyNavigationId(subcategory.subcategoryId)) {
@@ -391,7 +415,10 @@ export function validateNavigationDesignerItems(params: {
 				});
 			}
 
-			if (!subcategory.isSelectable && isLocalUnsavedTreeId(subcategory.id, subcategory.editorId)) {
+			if (
+				!subcategory.isSelectable &&
+				isLocalUnsavedTreeId(subcategory.id, subcategory.editorId)
+			) {
 				addValidationIssue({
 					issues,
 					key: `subcategory.${subcategory.editorId}.local-stale`,
@@ -400,7 +427,10 @@ export function validateNavigationDesignerItems(params: {
 			}
 
 			const existingSubcategory = subcategoryIds.get(subcategory.subcategoryId);
-			if (isNonEmptyNavigationId(subcategory.subcategoryId) && existingSubcategory) {
+			if (
+				isNonEmptyNavigationId(subcategory.subcategoryId) &&
+				existingSubcategory
+			) {
 				addValidationIssue({
 					issues,
 					key: `subcategory.${category.editorId}.${subcategory.subcategoryId}.duplicate`,
@@ -431,7 +461,10 @@ export function validateNavigationDesignerItems(params: {
 					});
 				}
 
-				if (!target.isSelectable && isLocalUnsavedTreeId(target.id, target.editorId)) {
+				if (
+					!target.isSelectable &&
+					isLocalUnsavedTreeId(target.id, target.editorId)
+				) {
 					addValidationIssue({
 						issues,
 						key: `content.${target.editorId}.local-stale`,
@@ -533,3 +566,5 @@ export function buildDragPreview(params: {
 		fallbackLucideName: "FileText",
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

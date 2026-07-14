@@ -4,6 +4,7 @@
 //// Materialized hub data loader for public Riseopedia classification overview cards.                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -135,13 +136,18 @@ function directoryHref(row: RiseopediaHubDirectoryRow): string | null {
 	}
 
 	if (row.node_type_code === "subcategory") {
-		return buildRiseopediaInfoPath({ family: "subcategories", slug: row.node_slug });
+		return buildRiseopediaInfoPath({
+			family: "subcategories",
+			slug: row.node_slug,
+		});
 	}
 
 	return null;
 }
 
-function mapHubDirectoryRow(row: RiseopediaHubDirectoryRow): RiseopediaHubDirectoryCardDoc {
+function mapHubDirectoryRow(
+	row: RiseopediaHubDirectoryRow,
+): RiseopediaHubDirectoryCardDoc {
 	return {
 		id: String(row.node_id),
 		nodeTypeCode: row.node_type_code,
@@ -179,7 +185,9 @@ function emptyCounts(): RiseopediaHubCounts {
 	};
 }
 
-function mapCountsRow(row: RiseopediaHubCountsRow | undefined): RiseopediaHubCounts {
+function mapCountsRow(
+	row: RiseopediaHubCountsRow | undefined,
+): RiseopediaHubCounts {
 	if (!row) {
 		return emptyCounts();
 	}
@@ -195,9 +203,10 @@ function mapCountsRow(row: RiseopediaHubCountsRow | undefined): RiseopediaHubCou
 }
 
 export async function getRiseopediaHubData(): Promise<RiseopediaHubData> {
-	const [countResult, sectionResult, classResult, categoryResult] = await Promise.all([
-		query<RiseopediaHubCountsRow>(
-			`SELECT entity_count,
+	const [countResult, sectionResult, classResult, categoryResult] =
+		await Promise.all([
+			query<RiseopediaHubCountsRow>(
+				`SELECT entity_count,
 					asset_count,
 					recipe_count,
 					section_count,
@@ -205,9 +214,9 @@ export async function getRiseopediaHubData(): Promise<RiseopediaHubData> {
 					category_count
 			 FROM web_view.riseopedia_hub_counts
 			 LIMIT 1`,
-		),
-		query<RiseopediaHubDirectoryRow>(
-			`SELECT node_type_code,
+			),
+			query<RiseopediaHubDirectoryRow>(
+				`SELECT node_type_code,
 					node_id,
 					node_code,
 					node_slug,
@@ -228,12 +237,13 @@ export async function getRiseopediaHubData(): Promise<RiseopediaHubData> {
 					sample_media_height_px,
 					sample_media_mime_type
 			 FROM web_view.riseopedia_hub_sections
+			 WHERE item_count > 0
 			 ORDER BY sort_order,
 				  node_name,
 				  node_id`,
-		),
-		query<RiseopediaHubDirectoryRow>(
-			`SELECT node_type_code,
+			),
+			query<RiseopediaHubDirectoryRow>(
+				`SELECT node_type_code,
 					node_id,
 					node_code,
 					node_slug,
@@ -254,12 +264,13 @@ export async function getRiseopediaHubData(): Promise<RiseopediaHubData> {
 					sample_media_height_px,
 					sample_media_mime_type
 			 FROM web_view.riseopedia_hub_classes
+			 WHERE item_count > 0
 			 ORDER BY sort_order,
 				  node_name,
 				  node_id`,
-		),
-		query<RiseopediaHubDirectoryRow>(
-			`SELECT node_type_code,
+			),
+			query<RiseopediaHubDirectoryRow>(
+				`SELECT node_type_code,
 					node_id,
 					node_code,
 					node_slug,
@@ -280,11 +291,12 @@ export async function getRiseopediaHubData(): Promise<RiseopediaHubData> {
 					sample_media_height_px,
 					sample_media_mime_type
 			 FROM web_view.riseopedia_hub_categories
+			 WHERE item_count > 0
 			 ORDER BY sort_order,
 				  node_name,
 				  node_id`,
-		),
-	]);
+			),
+		]);
 
 	return {
 		counts: mapCountsRow(countResult.rows[0]),
@@ -293,3 +305,5 @@ export async function getRiseopediaHubData(): Promise<RiseopediaHubData> {
 		categories: categoryResult.rows.map(mapHubDirectoryRow),
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

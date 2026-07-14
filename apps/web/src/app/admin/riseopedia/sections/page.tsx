@@ -4,6 +4,7 @@
 //// Admin page for rebuilt Riseopedia sections.                                                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -13,9 +14,7 @@ import RiseopediaAdminPageChrome, {
 import RiseopediaAdminNav from "@/components/admin/riseopedia/RiseopediaAdminNav";
 import { requireAdmin } from "@/lib/auth/authz";
 import RiseopediaSectionsTable from "@/components/admin/riseopedia/RiseopediaSectionsTable";
-import {
-	listRiseopediaAdminSections,
-} from "@/lib/data/riseopedia-admin";
+import { listRiseopediaAdminSections } from "@/lib/data/riseopedia-admin";
 
 export const dynamic = "force-dynamic";
 
@@ -37,3 +36,5 @@ export default async function SectionsAdminPage(): Promise<JSX.Element> {
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

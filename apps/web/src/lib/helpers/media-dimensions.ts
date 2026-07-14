@@ -4,6 +4,8 @@
 //// Image dimension detection helpers for DB-first admin media uploads                                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 export type MediaImageDimensions = {
@@ -284,3 +286,5 @@ export async function getImageDimensionsFromFile(
 		return { width: null, height: null };
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

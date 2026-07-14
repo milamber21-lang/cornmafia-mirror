@@ -4,6 +4,7 @@
 //// DB-first admin Discord roles API with shared admin route helpers and server-driven list responses            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -35,7 +36,6 @@ export const dynamic = "force-dynamic";
 
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 1000;
-
 
 const ROLE_SORT_BY_VALUES = new Set<DiscordRoleAdminSortBy>([
 	"name",
@@ -222,10 +222,7 @@ export async function POST(req: NextRequest): Promise<Response> {
 				fullEditorialAccess: parseBoolean(data.fullEditorialAccess, false),
 				isAdmin: parseBoolean(data.isAdmin, false),
 				isPublicDefault: parseBoolean(data.isPublicDefault, false),
-				isAuthenticatedDefault: parseBoolean(
-					data.isAuthenticatedDefault,
-					false,
-				),
+				isAuthenticatedDefault: parseBoolean(data.isAuthenticatedDefault, false),
 			});
 
 			return NextResponse.json({ ok: true, doc });
@@ -270,10 +267,7 @@ export async function POST(req: NextRequest): Promise<Response> {
 						: existingRole.isAccessRole,
 				fullEditorialAccess:
 					data.fullEditorialAccess !== undefined
-						? parseBoolean(
-								data.fullEditorialAccess,
-								existingRole.fullEditorialAccess,
-							)
+						? parseBoolean(data.fullEditorialAccess, existingRole.fullEditorialAccess)
 						: existingRole.fullEditorialAccess,
 				isAdmin:
 					data.isAdmin !== undefined
@@ -332,3 +326,5 @@ export async function POST(req: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

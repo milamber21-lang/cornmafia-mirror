@@ -4,6 +4,8 @@
 //// Panel form for DB-first template rows with content metadata controls                                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -123,7 +125,7 @@ export default function TemplatesPanel({
 			description: row?.description ?? "",
 			contentKindCode: row?.contentKindCode ?? "",
 			surfaceScopeCode: row?.surfaceScopeCode ?? "admin",
-			requiresSeries: row?.requiresSeries ?? false,
+			allowsSeries: row?.allowsSeries ?? false,
 			defaultIconKeyId: row?.defaultIconKey?.id ?? "",
 			defaultIconColorId: row?.defaultIconColor?.id ?? "",
 			enabled: row?.enabled ?? true,
@@ -169,7 +171,9 @@ export default function TemplatesPanel({
 			});
 		}
 
-		return options.sort((left, right) => compareAdminText(left.label, right.label));
+		return options.sort((left, right) =>
+			compareAdminText(left.label, right.label),
+		);
 	}, [contentKinds, row?.contentKindCode, row?.contentKindLabel]);
 
 	const surfaceScopeOptions = useMemo(
@@ -247,8 +251,8 @@ export default function TemplatesPanel({
 			},
 			{
 				type: "checkbox",
-				name: "requiresSeries",
-				label: "Requires Series",
+				name: "allowsSeries",
+				label: "Allow Series",
 			},
 			{
 				type: "select-single",
@@ -293,9 +297,7 @@ export default function TemplatesPanel({
 
 					return (
 						<div className="media-icon-preview-row">
-							<div
-								className="media-icon-preview-frame"
-							>
+							<div className="media-icon-preview-frame">
 								{selectedIcon && selectedColor ? (
 									<IconRender
 										iconKey={selectedIcon}
@@ -335,7 +337,7 @@ export default function TemplatesPanel({
 				{ field: "surfaceScopeCode", span: 6 },
 			],
 			[
-				{ field: "requiresSeries", span: 6 },
+				{ field: "allowsSeries", span: 6 },
 				{ field: "enabled", span: 6 },
 			],
 			[
@@ -371,7 +373,7 @@ export default function TemplatesPanel({
 							surfaceScopeCode: String(values.surfaceScopeCode ?? "")
 								.trim()
 								.toLowerCase(),
-							requiresSeries: values.requiresSeries === true,
+							allowsSeries: values.allowsSeries === true,
 							defaultIconKeyId: String(values.defaultIconKeyId ?? "").trim(),
 							defaultIconColorId: String(values.defaultIconColorId ?? "").trim(),
 							enabled: values.enabled === true,
@@ -428,3 +430,5 @@ export default function TemplatesPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

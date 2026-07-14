@@ -4,6 +4,8 @@
 //// Panel form for reusable template field definitions                                                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -63,9 +65,9 @@ export default function TemplateFieldListPanel({
 	const [topError, setTopError] = useState("");
 	const [metaError, setMetaError] = useState("");
 	const [fieldTypes, setFieldTypes] = useState<TemplateFieldTypeAdminItem[]>([]);
-	const [renderDestinations, setRenderDestinations] = useState<RenderDestinationOption[]>(
-		fallbackRenderDestinations,
-	);
+	const [renderDestinations, setRenderDestinations] = useState<
+		RenderDestinationOption[]
+	>(fallbackRenderDestinations);
 	const [metaLoading, setMetaLoading] = useState(false);
 
 	useEffect(() => {
@@ -315,3 +317,5 @@ export default function TemplateFieldListPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

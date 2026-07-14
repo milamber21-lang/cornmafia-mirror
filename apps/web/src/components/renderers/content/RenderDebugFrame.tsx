@@ -4,6 +4,7 @@
 //// Debug frame with labeled colored borders for understanding preview layout, shells, destinations, and fields. ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX, ReactNode } from "react";
 
@@ -92,10 +93,14 @@ export default function RenderDebugFrame({
 			<div className="render-debug-frame__badge-position">
 				<div className="render-debug-frame__badge">
 					<span className="render-debug-frame__label">{label}</span>
-					{description ? <span className="render-debug-frame__description">{description}</span> : null}
+					{description ? (
+						<span className="render-debug-frame__description">{description}</span>
+					) : null}
 				</div>
 			</div>
 			<div className={innerClassName}>{children}</div>
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

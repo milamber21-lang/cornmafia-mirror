@@ -4,6 +4,8 @@
 //// Login page entry that renders the session-aware login client                                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { getAuthSession } from "@/lib/auth/auth";
 import LoginClient from "./LoginClient";
 
@@ -14,3 +16,5 @@ export default async function Page() {
 	const session = await getAuthSession();
 	return <LoginClient session={session} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

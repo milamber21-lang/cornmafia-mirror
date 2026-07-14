@@ -4,6 +4,7 @@
 //// Admin API route for live Discord guild role lookup options                                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse } from "next/server";
 
@@ -62,3 +63,5 @@ export async function GET(): Promise<Response> {
 		return jsonError("SERVER_ERROR", message, 500);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

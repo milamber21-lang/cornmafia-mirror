@@ -4,6 +4,7 @@
 //// DB-first admin API for navigation panel definitions                                                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -95,7 +96,9 @@ function isPanelTypeCode(value: string): value is NavigationPanelTypeCode {
 	return PANEL_TYPE_CODES.includes(value as NavigationPanelTypeCode);
 }
 
-function normalizePanelTypeCode(value: unknown): NavigationPanelTypeCode | null {
+function normalizePanelTypeCode(
+	value: unknown,
+): NavigationPanelTypeCode | null {
 	if (typeof value !== "string") {
 		return null;
 	}
@@ -104,7 +107,9 @@ function normalizePanelTypeCode(value: unknown): NavigationPanelTypeCode | null 
 	return isPanelTypeCode(normalized) ? normalized : null;
 }
 
-function isReadPolicyCode(value: string): value is NavigationPanelReadPolicyCode {
+function isReadPolicyCode(
+	value: string,
+): value is NavigationPanelReadPolicyCode {
 	return READ_POLICY_CODES.includes(value as NavigationPanelReadPolicyCode);
 }
 
@@ -150,7 +155,9 @@ function parseOptionalPositiveInt(value: unknown): number | null | undefined {
 	return parsed;
 }
 
-function parseOptionalNonNegativeInt(value: unknown): number | null | undefined {
+function parseOptionalNonNegativeInt(
+	value: unknown,
+): number | null | undefined {
 	if (value === null || value === undefined) {
 		return null;
 	}
@@ -457,3 +464,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// Resolves YouTube video metadata needed for DB-backed channel allowlist validation                           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -39,7 +40,9 @@ function readString(value: unknown): string | null {
 		: null;
 }
 
-function readFirstVideoSnippet(payload: unknown): Record<string, unknown> | null {
+function readFirstVideoSnippet(
+	payload: unknown,
+): Record<string, unknown> | null {
 	if (!isRecord(payload) || !Array.isArray(payload.items)) {
 		return null;
 	}
@@ -101,7 +104,9 @@ export async function resolveYoutubeVideoMetadata(
 
 	const channelExternalId = readString(snippet.channelId);
 	if (!channelExternalId || !CHANNEL_ID_PATTERN.test(channelExternalId)) {
-		throw new Error(`YouTube video ${parsed.videoId} did not return a stable channel ID.`);
+		throw new Error(
+			`YouTube video ${parsed.videoId} did not return a stable channel ID.`,
+		);
 	}
 
 	return {
@@ -112,3 +117,5 @@ export async function resolveYoutubeVideoMetadata(
 		videoTitle: readString(snippet.title),
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

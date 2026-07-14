@@ -4,6 +4,14 @@
 //// Shared RichText stored-document contract, normalization, and reference extraction helpers.                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
+import {
+	normalizeRichTextLinkTarget,
+	richTextLinkTargetHref,
+	richTextLinkTargetOpensNewTab,
+	type RichTextLinkTarget,
+} from "./rich-text-link-targets";
 
 export type RichTextJsonRecord = Record<string, unknown>;
 
@@ -37,6 +45,8 @@ export type RichTextLinkReference = {
 	rawUrl: string;
 	linkText: string | null;
 	displayOrder: number;
+	sourceKind: "text" | "image";
+	target: RichTextLinkTarget;
 };
 
 function isRecord(value: unknown): value is RichTextJsonRecord {
@@ -75,9 +85,7 @@ function normalizePositiveInteger(value: unknown): number | null {
 
 	if (typeof value === "string" && /^\d+$/.test(value.trim())) {
 		const parsedValue = Number(value.trim());
-		return Number.isInteger(parsedValue) && parsedValue > 0
-			? parsedValue
-			: null;
+		return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : null;
 	}
 
 	return null;
@@ -143,7 +151,8 @@ function readImageSource(node: RichTextJsonRecord): string | null {
 }
 
 function readImageCaption(node: RichTextJsonRecord): string | null {
-	const directCaption = normalizeString(node.alt) ?? normalizeString(node.caption);
+	const directCaption =
+		normalizeString(node.alt) ?? normalizeString(node.caption);
 
 	if (directCaption !== null) {
 		return directCaption;
@@ -192,14 +201,18 @@ function isNodeVisuallyEmpty(value: unknown): boolean {
 	return children.every((child) => isNodeVisuallyEmpty(child));
 }
 
-function stripRootEditorOnlyFlags(root: RichTextJsonRecord): RichTextJsonRecord {
+function stripRootEditorOnlyFlags(
+	root: RichTextJsonRecord,
+): RichTextJsonRecord {
 	const next: RichTextJsonRecord = { ...root };
 	delete next.textFormat;
 	delete next.textStyle;
 	return next;
 }
 
-function normalizeLinkNode(node: RichTextJsonRecord): RichTextJsonRecord | RichTextJsonRecord[] {
+function normalizeLinkNode(
+	node: RichTextJsonRecord,
+): RichTextJsonRecord | RichTextJsonRecord[] {
 	const rawChildren = readNodeChildren(node);
 	const normalizedChildren: unknown[] = [];
 
@@ -218,31 +231,36 @@ function normalizeLinkNode(node: RichTextJsonRecord): RichTextJsonRecord | RichT
 	}
 
 	const fields = readNodeFields(node);
-	const urlValue =
+	const rawUrl =
 		normalizeString(fields?.url) ??
 		normalizeString(node.url) ??
 		normalizeString(node.href);
+	const opensNewTab =
+		normalizeString(node.target) === "_blank" ||
+		asBoolean(fields?.newTab) === true;
+	const linkTarget = normalizeRichTextLinkTarget(
+		fields?.linkTarget ?? node.linkTarget,
+		{ href: rawUrl, newTab: opensNewTab },
+	);
 
-	if (!urlValue) {
+	if (!linkTarget) {
 		return normalizedChildren.filter(isRecord);
 	}
 
-	const target =
-		normalizeString(node.target) ??
-		(asBoolean(fields?.newTab) === true ? "_blank" : null);
 	const nextFields: RichTextJsonRecord = {
-		url: urlValue,
-		linkType: normalizeString(fields?.linkType) ?? "custom",
+		url: richTextLinkTargetHref(linkTarget),
+		linkType: linkTarget.kind,
+		linkTarget,
 	};
 
-	if (target === "_blank") {
+	if (richTextLinkTargetOpensNewTab(linkTarget)) {
 		nextFields.newTab = true;
 	}
 
 	const nextNode: RichTextJsonRecord = {
 		...node,
 		type: "link",
-		version: asNumber(node.version) ?? 3,
+		version: asNumber(node.version) ?? 4,
 		fields: nextFields,
 		children: normalizedChildren,
 	};
@@ -251,15 +269,63 @@ function normalizeLinkNode(node: RichTextJsonRecord): RichTextJsonRecord | RichT
 	delete nextNode.href;
 	delete nextNode.target;
 	delete nextNode.rel;
+	delete nextNode.linkTarget;
 
 	return nextNode;
 }
 
-function normalizeStoredNode(node: RichTextJsonRecord): RichTextJsonRecord | RichTextJsonRecord[] {
+function normalizeImageNode(node: RichTextJsonRecord): RichTextJsonRecord {
+	const fields = readNodeFields(node);
+	const linkTarget = normalizeRichTextLinkTarget(
+		fields?.linkTarget ?? node.linkTarget,
+	);
+	const frameStyle =
+		fields?.frameStyle === "border" ||
+		node.frameStyle === "border" ||
+		asBoolean(fields?.border ?? node.border) === true
+			? "border"
+			: "none";
+	const nextNode: RichTextJsonRecord = {
+		...node,
+		version: Math.max(asNumber(node.version) ?? 1, 3),
+		frameStyle,
+	};
+
+	delete nextNode.border;
+
+	if (linkTarget) {
+		nextNode.linkTarget = linkTarget;
+	} else {
+		delete nextNode.linkTarget;
+	}
+
+	if (fields) {
+		const nextFields = { ...fields };
+		delete nextFields.linkTarget;
+		delete nextFields.frameStyle;
+		delete nextFields.border;
+
+		if (Object.keys(nextFields).length > 0) {
+			nextNode.fields = nextFields;
+		} else {
+			delete nextNode.fields;
+		}
+	}
+
+	return nextNode;
+}
+
+function normalizeStoredNode(
+	node: RichTextJsonRecord,
+): RichTextJsonRecord | RichTextJsonRecord[] {
 	const nodeType = readNodeType(node);
 
-	if (nodeType === "link") {
+	if (nodeType === "link" || nodeType === "richtext-link") {
 		return normalizeLinkNode(node);
+	}
+
+	if (nodeType === "image" || nodeType === "resizable-image") {
+		return normalizeImageNode(node);
 	}
 
 	const rawChildren = readNodeChildren(node);
@@ -330,7 +396,9 @@ export function normalizeRichTextJson(value: unknown): RichTextJson | null {
 		return null;
 	}
 
-	const root = isRecord(value.root) ? stripRootEditorOnlyFlags(value.root) : null;
+	const root = isRecord(value.root)
+		? stripRootEditorOnlyFlags(value.root)
+		: null;
 	if (!root) {
 		return null;
 	}
@@ -348,12 +416,16 @@ export function normalizeRichTextJson(value: unknown): RichTextJson | null {
 	return isRichTextJsonEmpty(normalized) ? null : normalized;
 }
 
-export function normalizeRichTextEditorOutput(value: unknown): RichTextJson | null {
+export function normalizeRichTextEditorOutput(
+	value: unknown,
+): RichTextJson | null {
 	if (!isRecord(value)) {
 		return null;
 	}
 
-	const root = isRecord(value.root) ? stripRootEditorOnlyFlags(value.root) : null;
+	const root = isRecord(value.root)
+		? stripRootEditorOnlyFlags(value.root)
+		: null;
 	if (!root) {
 		return null;
 	}
@@ -416,26 +488,56 @@ export function extractRichTextLinkReferences(
 	const references: RichTextLinkReference[] = [];
 	let linkIndex = 0;
 
+	function appendReference(
+		target: RichTextLinkTarget | null,
+		linkText: string | null,
+		sourceKind: "text" | "image",
+	): void {
+		if (!target) {
+			return;
+		}
+
+		linkIndex += 1;
+		references.push({
+			rawUrl: richTextLinkTargetHref(target),
+			linkText,
+			displayOrder: linkIndex,
+			sourceKind,
+			target,
+		});
+	}
+
 	function visit(node: unknown): void {
 		if (!isRecord(node)) {
 			return;
 		}
 
-		if (readNodeType(node) === "link") {
-			const fields = readNodeFields(node);
+		const nodeType = readNodeType(node);
+		const fields = readNodeFields(node);
+
+		if (nodeType === "link" || nodeType === "richtext-link") {
 			const rawUrl =
 				normalizeString(fields?.url) ??
 				normalizeString(node.url) ??
 				normalizeString(node.href);
+			appendReference(
+				normalizeRichTextLinkTarget(fields?.linkTarget ?? node.linkTarget, {
+					href: rawUrl,
+					newTab:
+						normalizeString(node.target) === "_blank" ||
+						asBoolean(fields?.newTab) === true,
+				}),
+				normalizeString(readTextFromNode(node)),
+				"text",
+			);
+		}
 
-			if (rawUrl !== null) {
-				linkIndex += 1;
-				references.push({
-					rawUrl,
-					linkText: normalizeString(readTextFromNode(node)),
-					displayOrder: linkIndex,
-				});
-			}
+		if (nodeType === "image" || nodeType === "resizable-image") {
+			appendReference(
+				normalizeRichTextLinkTarget(fields?.linkTarget ?? node.linkTarget),
+				readImageCaption(node),
+				"image",
+			);
 		}
 
 		for (const child of readNodeChildren(node)) {
@@ -451,3 +553,5 @@ export function extractRichTextLinkReferences(
 
 	return references;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

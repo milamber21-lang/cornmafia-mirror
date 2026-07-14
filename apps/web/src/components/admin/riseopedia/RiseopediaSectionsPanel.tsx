@@ -4,6 +4,8 @@
 //// Dedicated Riseopedia section panel.                                                                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -12,17 +14,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import PanelForm from "@/components/ui/PanelForm";
 import { readResponseMessage } from "@/lib/helpers/http-response";
 
-import {
-	buildInitialValues,
-	buildPayloadData,
-} from "./RiseopediaAdminHelpers";
+import { buildInitialValues, buildPayloadData } from "./RiseopediaAdminHelpers";
 import {
 	buildRiseopediaPanelFieldDef,
 	buildRiseopediaPanelRows,
 } from "./RiseopediaAdminPanelHelpers";
-import {
-	buildRiseopediaSectionFields,
-} from "./RiseopediaAdminPanelFieldBuilders";
+import { buildRiseopediaSectionFields } from "./RiseopediaAdminPanelFieldBuilders";
 import type {
 	RiseopediaAdminPanelMode,
 	RiseopediaAdminRow,
@@ -52,10 +49,7 @@ export default function RiseopediaSectionsPanel({
 		}
 	}, [mode, open, row]);
 
-	const fields = useMemo(
-		() => buildRiseopediaSectionFields(),
-		[],
-	);
+	const fields = useMemo(() => buildRiseopediaSectionFields(), []);
 
 	const defaultValues = useMemo(
 		() => buildInitialValues(fields, row),
@@ -141,3 +135,5 @@ export default function RiseopediaSectionsPanel({
 }
 
 export { RiseopediaSectionsPanel };
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

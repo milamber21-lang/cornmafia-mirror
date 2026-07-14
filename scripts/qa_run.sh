@@ -5,6 +5,7 @@
 #//// Runs a SQL audit script from ./scripts by basename parameter and writes per-script result/error files.      ////
 #//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 set -Eeuo pipefail
 
@@ -407,3 +408,5 @@ case "$MODE" in
 		fail "Unknown mode: $MODE"
 		;;
 esac
+
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

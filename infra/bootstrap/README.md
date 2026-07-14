@@ -1,4 +1,6 @@
 <!-- FILE: infra/bootstrap/README.md -->
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->
+
 # Corn Mafia DB bootstrap
 
 This folder contains repo-owned bootstrap logic and bootstrap metadata only. It intentionally does not contain filled environment files or media payload data.
@@ -137,3 +139,5 @@ If the DB exists in a partial state, the script stops and requires manual review
 ```text
 postgresql://cm_client:<CM_CLIENT_DB_PASSWORD>@<host>:5432/<POSTGRES_DB>
 ```
+
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->

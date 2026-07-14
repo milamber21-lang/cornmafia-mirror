@@ -4,6 +4,7 @@
 //// Shared helpers for local admin table sorting                                                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 export type SortDirection = "asc" | "desc";
 
@@ -42,3 +43,5 @@ export function compareAdminOptionalText(
 export function compareAdminNumber(left: number, right: number): number {
 	return left - right;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

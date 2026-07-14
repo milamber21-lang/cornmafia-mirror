@@ -4,6 +4,7 @@
 //// Public DB-first series landing route that lists readable published episodes by series slug.                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 import { notFound } from "next/navigation";
@@ -20,7 +21,9 @@ type PageProps = {
 	}>;
 };
 
-export default async function Page({ params }: PageProps): Promise<JSX.Element> {
+export default async function Page({
+	params,
+}: PageProps): Promise<JSX.Element> {
 	const resolvedParams = await params;
 	const seriesSlug = resolvedParams.slug.trim();
 
@@ -40,3 +43,5 @@ export default async function Page({ params }: PageProps): Promise<JSX.Element> 
 
 	return <PublicSeriesPage series={series} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

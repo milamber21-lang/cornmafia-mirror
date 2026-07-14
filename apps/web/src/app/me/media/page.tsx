@@ -4,20 +4,20 @@
 //// Member route for owned/manageable media management.                                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-import { getAuthSession } from "@/lib/auth/auth";
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { listMemberAuthorableCollections } from "@/lib/data/member-authoring";
 import { listMemberMedia } from "@/lib/data/member-media";
-import { readDiscordIdFromSession } from "@/lib/server/current-actor";
+import { getCurrentActorDiscordId } from "@/lib/server/current-actor";
 import LoginClient from "@/components/login/LoginClient";
 import MemberMediaDashboard from "@/components/me/MemberMediaDashboard";
 
 export const dynamic = "force-dynamic";
 
 export default async function MyMediaPage() {
-	const session = await getAuthSession();
-	const actorDiscordId = readDiscordIdFromSession(session);
+	const actorDiscordId = await getCurrentActorDiscordId();
 
-	if (!session?.user || !actorDiscordId) {
+	if (!actorDiscordId) {
 		return (
 			<main className="card member-page-card">
 				<h1 className="member-page-title">My media</h1>
@@ -33,9 +33,8 @@ export default async function MyMediaPage() {
 	]);
 
 	return (
-		<MemberMediaDashboard
-			initialRows={rows}
-			initialCollections={collections}
-		/>
+		<MemberMediaDashboard initialRows={rows} initialCollections={collections} />
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

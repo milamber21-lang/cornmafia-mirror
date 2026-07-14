@@ -4,6 +4,7 @@
 //// Public Mafiosopedia asset detail API backed by entity-first public detail read models.                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse } from "next/server";
 
@@ -35,7 +36,11 @@ export async function GET(
 		return NextResponse.json(detail, { status: 200 });
 	} catch (error: unknown) {
 		const message =
-			error instanceof Error ? error.message : "Failed to load Mafiosopedia asset.";
+			error instanceof Error
+				? error.message
+				: "Failed to load Mafiosopedia asset.";
 		return NextResponse.json({ ok: false, message }, { status: 500 });
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

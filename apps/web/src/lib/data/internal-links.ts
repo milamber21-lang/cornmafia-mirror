@@ -4,6 +4,7 @@
 //// DB-first internal content-route link validation helper for editor workflows                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -71,3 +72,5 @@ export async function validateInternalLinkPath(args: {
 
 	return mapInternalLinkValidationRow(result.rows[0]);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

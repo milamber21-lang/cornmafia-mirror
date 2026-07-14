@@ -4,6 +4,7 @@
 //// Shared guarded page chrome for Riseopedia admin pages.                                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX, ReactNode } from "react";
 import Link from "next/link";
@@ -37,7 +38,9 @@ export function RiseopediaAdminGuard({
 		return (
 			<div className="admin-guard-shell">
 				<h1 className="admin-guard-title">{title}</h1>
-				<p className="admin-guard-message">You need to sign in to access the admin area.</p>
+				<p className="admin-guard-message">
+					You need to sign in to access the admin area.
+				</p>
 				<Link href="/login" className="admin-guard-link">
 					Go to login
 				</Link>
@@ -49,7 +52,7 @@ export function RiseopediaAdminGuard({
 		<div className="admin-guard-shell">
 			<h1 className="admin-guard-title">{title}</h1>
 			<p className="admin-guard-message">Admin access is required.</p>
-			<ButtonLink href="/admin" variant="neutral">
+			<ButtonLink href="/admin" variant="secondary">
 				Go back
 			</ButtonLink>
 		</div>
@@ -70,7 +73,7 @@ export default function RiseopediaAdminPageChrome({
 					<h1 className="admin-page-card-title">{title}</h1>
 				</div>
 				<div className="admin-page-card-actions">
-					<ButtonLink href={backHref} variant="neutral">
+					<ButtonLink href={backHref} variant="secondary">
 						{backLabel}
 					</ButtonLink>
 				</div>
@@ -80,3 +83,5 @@ export default function RiseopediaAdminPageChrome({
 		</section>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

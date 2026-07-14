@@ -4,6 +4,7 @@
 //// Admin content list and create route for the server-driven content family                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse } from "next/server";
 
@@ -39,7 +40,6 @@ import {
 } from "@/lib/server/admin-route";
 
 export const dynamic = "force-dynamic";
-
 
 const CONTENT_SORT_KEYS: readonly ContentAdminSortBy[] = [
 	"title",
@@ -113,7 +113,10 @@ function parseStatusCode(value: unknown): ContentStatusCode {
 	return "draft";
 }
 
-function parsePolicyCode(value: unknown, fallback: ContentPolicyCode): ContentPolicyCode {
+function parsePolicyCode(
+	value: unknown,
+	fallback: ContentPolicyCode,
+): ContentPolicyCode {
 	if (
 		value === "inherit" ||
 		value === "public" ||
@@ -138,7 +141,10 @@ function parseIconModeCode(value: unknown): ContentIconModeCode {
 	return value === "explicit" ? "explicit" : "template_default";
 }
 
-function parseNavHidden(value: unknown, navHiddenModeCode: ContentNavModeCode): boolean | null {
+function parseNavHidden(
+	value: unknown,
+	navHiddenModeCode: ContentNavModeCode,
+): boolean | null {
 	if (navHiddenModeCode === "explicit_visible") {
 		return false;
 	}
@@ -200,9 +206,15 @@ function parseMutationData(value: unknown): MutationData | NextResponse {
 		seriesPartNo,
 		statusCode: parseStatusCode(data.statusCode),
 		readPolicyCode,
-		readRank: readPolicyCode === "inherit" || readPolicyCode === "public" ? null : parseNullablePositiveInt(data.readRank),
+		readRank:
+			readPolicyCode === "inherit" || readPolicyCode === "public"
+				? null
+				: parseNullablePositiveInt(data.readRank),
 		writePolicyCode,
-		writeRank: writePolicyCode === "inherit" ? null : parseNullablePositiveInt(data.writeRank),
+		writeRank:
+			writePolicyCode === "inherit"
+				? null
+				: parseNullablePositiveInt(data.writeRank),
 		navHiddenModeCode,
 		navHidden: parseNavHidden(data.navHidden, navHiddenModeCode),
 		iconModeCode: parseIconModeCode(data.iconModeCode),
@@ -334,3 +346,5 @@ export async function POST(request: Request): Promise<NextResponse> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

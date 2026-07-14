@@ -4,6 +4,8 @@
 //// Client-side mega menu using CSS-compatible menu triggers and normalized icon objects                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -38,7 +40,10 @@ const MENU_TEXT_CHARACTER_WIDTH_PX = 8;
 const MENU_ICON_AND_GAP_WIDTH_PX = 34;
 
 function clampMenuColumnWidth(width: number): number {
-	return Math.min(MENU_MAX_COLUMN_WIDTH_PX, Math.max(MENU_MIN_COLUMN_WIDTH_PX, width));
+	return Math.min(
+		MENU_MAX_COLUMN_WIDTH_PX,
+		Math.max(MENU_MIN_COLUMN_WIDTH_PX, width),
+	);
 }
 
 function estimateColumnWidth(category: MenuModel[number]): number {
@@ -91,12 +96,19 @@ export default function MenuClient({ model }: Props) {
 				return;
 			}
 
-			const columnCount = Math.min(MENU_MAX_COLUMNS, Math.max(1, category.columns.length));
+			const columnCount = Math.min(
+				MENU_MAX_COLUMNS,
+				Math.max(1, category.columns.length),
+			);
 			const columnWidth = estimateColumnWidth(category);
 			const anchorRect = anchor.getBoundingClientRect();
 			const containerRect = container.getBoundingClientRect();
-			const contentWidth = columnCount * columnWidth + (columnCount - 1) * MENU_COLUMN_GAP_PX;
-			const nextWidth = Math.min(containerRect.width, contentWidth + MENU_PANEL_HORIZONTAL_PADDING_PX);
+			const contentWidth =
+				columnCount * columnWidth + (columnCount - 1) * MENU_COLUMN_GAP_PX;
+			const nextWidth = Math.min(
+				containerRect.width,
+				contentWidth + MENU_PANEL_HORIZONTAL_PADDING_PX,
+			);
 
 			let nextLeft = Math.round(anchorRect.left - containerRect.left);
 			const maxLeft = Math.max(0, containerRect.width - nextWidth);
@@ -189,7 +201,7 @@ export default function MenuClient({ model }: Props) {
 										iconColor={category.iconColor}
 										relationHint="pages"
 										size={16}
-												/>
+									/>
 								) : null}
 								<span>{category.title}</span>
 								<ChevronDown size={16} className="chev" aria-hidden />
@@ -256,3 +268,5 @@ export default function MenuClient({ model }: Props) {
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

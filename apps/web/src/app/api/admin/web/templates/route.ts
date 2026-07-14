@@ -4,10 +4,14 @@
 //// DB-first admin API route for templates with content metadata wiring                                           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { findTemplateAdminById, listTemplatesAdmin } from "@/lib/data/templates";
+import {
+	findTemplateAdminById,
+	listTemplatesAdmin,
+} from "@/lib/data/templates";
 import {
 	createTemplateAdmin,
 	deleteTemplateAdmin,
@@ -39,14 +43,16 @@ type MutationBody = {
 		description?: unknown;
 		contentKindCode?: unknown;
 		surfaceScopeCode?: unknown;
-		requiresSeries?: unknown;
+		allowsSeries?: unknown;
 		defaultIconKeyId?: unknown;
 		defaultIconColorId?: unknown;
 		enabled?: unknown;
 	};
 };
 
-function parseSurfaceScopeCode(value: unknown): TemplateSurfaceScopeCode | null {
+function parseSurfaceScopeCode(
+	value: unknown,
+): TemplateSurfaceScopeCode | null {
 	const surfaceScopeCode = normalizeCode(value);
 
 	if (surfaceScopeCode === "admin" || surfaceScopeCode === "public") {
@@ -117,7 +123,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 		const description = normalizeNullableString(data.description);
 		const contentKindCode = normalizeCode(data.contentKindCode);
 		const surfaceScopeCode = parseSurfaceScopeCode(data.surfaceScopeCode);
-		const requiresSeries = parseRequiredBoolean(data.requiresSeries);
+		const allowsSeries = parseRequiredBoolean(data.allowsSeries);
 		const defaultIconKeyId = parsePositiveInt(data.defaultIconKeyId);
 		const defaultIconColorId = parsePositiveInt(data.defaultIconColorId);
 		const enabled = parseRequiredBoolean(data.enabled);
@@ -158,10 +164,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 			);
 		}
 
-		if (requiresSeries === null) {
+		if (allowsSeries === null) {
 			return jsonError(
 				"VALIDATION_REQUIRED",
-				"Requires series flag is required.",
+				"Allow series flag is required.",
 				400,
 			);
 		}
@@ -178,7 +184,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 				description,
 				contentKindCode,
 				surfaceScopeCode,
-				requiresSeries,
+				allowsSeries,
 				defaultIconKeyId,
 				defaultIconColorId,
 				enabled,
@@ -201,7 +207,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 				description,
 				contentKindCode,
 				surfaceScopeCode,
-				requiresSeries,
+				allowsSeries,
 				defaultIconKeyId,
 				defaultIconColorId,
 				enabled,
@@ -220,3 +226,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

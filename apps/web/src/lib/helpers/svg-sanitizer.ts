@@ -4,6 +4,7 @@
 //// Strict SVG sanitization and inline loading helpers for client and server surfaces                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 export type SanitizeOptions = {
 	maxBytes?: number;
@@ -173,7 +174,11 @@ const EXTRA_ATTRIBUTES_BY_ELEMENT: Record<string, Record<string, string>> = {
 		gradienttransform: "gradientTransform",
 		spreadmethod: "spreadMethod",
 	},
-	stop: { offset: "offset", "stop-color": "stop-color", "stop-opacity": "stop-opacity" },
+	stop: {
+		offset: "offset",
+		"stop-color": "stop-color",
+		"stop-opacity": "stop-opacity",
+	},
 	clippath: { clippathunits: "clipPathUnits" },
 	mask: {
 		maskunits: "maskUnits",
@@ -184,7 +189,13 @@ const EXTRA_ATTRIBUTES_BY_ELEMENT: Record<string, Record<string, string>> = {
 		height: "height",
 	},
 	use: { href: "href", "xlink:href": "xlink:href" },
-	svg: { xmlns: "xmlns", "xmlns:xlink": "xmlns:xlink", viewbox: "viewBox", width: "width", height: "height" },
+	svg: {
+		xmlns: "xmlns",
+		"xmlns:xlink": "xmlns:xlink",
+		viewbox: "viewBox",
+		width: "width",
+		height: "height",
+	},
 	g: {},
 	title: {},
 	desc: {},
@@ -227,7 +238,13 @@ export function isLikelySvgUrlish(src: unknown): boolean {
 }
 
 function isWhitespaceChar(char: string): boolean {
-	return char === " " || char === "\n" || char === "\r" || char === "\t" || char === "\f";
+	return (
+		char === " " ||
+		char === "\n" ||
+		char === "\r" ||
+		char === "\t" ||
+		char === "\f"
+	);
 }
 
 function isNameStartChar(char: string): boolean {
@@ -246,7 +263,10 @@ function skipWhitespace(input: string, index: number): number {
 	return nextIndex;
 }
 
-function readName(input: string, index: number): { name: string; nextIndex: number } | null {
+function readName(
+	input: string,
+	index: number,
+): { name: string; nextIndex: number } | null {
 	if (index >= input.length || !isNameStartChar(input[index])) {
 		return null;
 	}
@@ -315,7 +335,7 @@ function parseOpeningTag(input: string, startIndex: number): ParsedTag | null {
 		index = skipWhitespace(input, index + 1);
 
 		const quote = input[index];
-		if (quote !== "\"" && quote !== "'") {
+		if (quote !== '"' && quote !== "'") {
 			return null;
 		}
 		index += 1;
@@ -335,7 +355,10 @@ function parseOpeningTag(input: string, startIndex: number): ParsedTag | null {
 	return null;
 }
 
-function parseClosingTag(input: string, startIndex: number): { name: string; nextIndex: number } | null {
+function parseClosingTag(
+	input: string,
+	startIndex: number,
+): { name: string; nextIndex: number } | null {
 	let index = skipWhitespace(input, startIndex + 2);
 	const tagNameResult = readName(input, index);
 	if (!tagNameResult) {
@@ -366,7 +389,13 @@ function appendText(stack: SvgNode[], text: string): void {
 
 function parseSvgDocument(input: string): SvgNode | null {
 	const trimmed = input.trim();
-	if (!trimmed || trimmed.includes("<!DOCTYPE") || trimmed.includes("<!doctype") || trimmed.includes("<!ENTITY") || trimmed.includes("<!entity")) {
+	if (
+		!trimmed ||
+		trimmed.includes("<!DOCTYPE") ||
+		trimmed.includes("<!doctype") ||
+		trimmed.includes("<!ENTITY") ||
+		trimmed.includes("<!entity")
+	) {
 		return null;
 	}
 
@@ -401,7 +430,10 @@ function parseSvgDocument(input: string): SvgNode | null {
 			continue;
 		}
 
-		if (trimmed.startsWith("<?", nextOpen) || trimmed.startsWith("<!", nextOpen)) {
+		if (
+			trimmed.startsWith("<?", nextOpen) ||
+			trimmed.startsWith("<!", nextOpen)
+		) {
 			return null;
 		}
 
@@ -507,7 +539,12 @@ function isLocalUrlReference(value: string): boolean {
 		.slice(4, -1)
 		.trim()
 		.replace(/^['"]|['"]$/g, "");
-	return innerValue.startsWith("#") && !innerValue.includes("<") && !innerValue.includes(">") && !innerValue.includes(":");
+	return (
+		innerValue.startsWith("#") &&
+		!innerValue.includes("<") &&
+		!innerValue.includes(">") &&
+		!innerValue.includes(":")
+	);
 }
 
 function isSafeSvgValue(value: string): boolean {
@@ -568,7 +605,10 @@ function cleanStyle(value: string, colorMode: "keep" | "currentColor"): string {
 			continue;
 		}
 
-		if ((property === "fill" || property === "stroke") && colorMode === "currentColor") {
+		if (
+			(property === "fill" || property === "stroke") &&
+			colorMode === "currentColor"
+		) {
 			const normalizedColor = normalizeColorAttr(rawValue, colorMode);
 			if (normalizedColor) {
 				cleaned.push(`${property}: ${normalizedColor}`);
@@ -576,11 +616,17 @@ function cleanStyle(value: string, colorMode: "keep" | "currentColor"): string {
 			continue;
 		}
 
-		if ((property === "clip-path" || property === "mask") && !isLocalUrlReference(rawValue)) {
+		if (
+			(property === "clip-path" || property === "mask") &&
+			!isLocalUrlReference(rawValue)
+		) {
 			continue;
 		}
 
-		if (rawValue.toLowerCase().includes("url(") && !isLocalUrlReference(rawValue)) {
+		if (
+			rawValue.toLowerCase().includes("url(") &&
+			!isLocalUrlReference(rawValue)
+		) {
 			continue;
 		}
 
@@ -594,11 +640,16 @@ function canonicalElementName(name: string): string | null {
 	return ELEMENT_NAME_MAP[name.toLowerCase()] ?? null;
 }
 
-function canonicalAttributeName(elementName: string, attrName: string): string | null {
+function canonicalAttributeName(
+	elementName: string,
+	attrName: string,
+): string | null {
 	const lowerAttrName = attrName.toLowerCase();
 	const lowerElementName = elementName.toLowerCase();
 	const extraAttributes = EXTRA_ATTRIBUTES_BY_ELEMENT[lowerElementName] ?? {};
-	return extraAttributes[lowerAttrName] ?? BASE_ATTRIBUTE_MAP[lowerAttrName] ?? null;
+	return (
+		extraAttributes[lowerAttrName] ?? BASE_ATTRIBUTE_MAP[lowerAttrName] ?? null
+	);
 }
 
 function sanitizeAttributes(
@@ -657,7 +708,10 @@ function sanitizeAttributes(
 			continue;
 		}
 
-		if ((attrName === "clip-path" || attrName === "mask") && !isLocalUrlReference(value)) {
+		if (
+			(attrName === "clip-path" || attrName === "mask") &&
+			!isLocalUrlReference(value)
+		) {
 			continue;
 		}
 
@@ -696,11 +750,17 @@ function sanitizeAndSerializeNode(
 		}
 
 		return node.children
-			.map((child) => sanitizeAndSerializeNode(child, colorMode, parentElementName))
+			.map((child) =>
+				sanitizeAndSerializeNode(child, colorMode, parentElementName),
+			)
 			.join("");
 	}
 
-	const attributes = sanitizeAttributes(canonicalName, node.attributes, colorMode);
+	const attributes = sanitizeAttributes(
+		canonicalName,
+		node.attributes,
+		colorMode,
+	);
 	const childParent = canonicalName;
 	const children = LEAF_SHAPES.has(canonicalName)
 		? ""
@@ -725,7 +785,11 @@ function ensureSvgImageNamespace(svg: string): string {
 		);
 	}
 
-	if (!/\sxmlns:xlink\s*=\s*["']http:\/\/www\.w3\.org\/1999\/xlink["']/i.test(nextSvg)) {
+	if (
+		!/\sxmlns:xlink\s*=\s*["']http:\/\/www\.w3\.org\/1999\/xlink["']/i.test(
+			nextSvg,
+		)
+	) {
 		nextSvg = nextSvg.replace(
 			/^<svg(\s|>)/i,
 			(_match: string, suffix: string) =>
@@ -743,7 +807,9 @@ export function sanitizeSvg(raw: string, opts?: SanitizeOptions): string {
 		return "";
 	}
 
-	return ensureSvgImageNamespace(sanitizeAndSerializeNode(parsed, colorMode, null));
+	return ensureSvgImageNamespace(
+		sanitizeAndSerializeNode(parsed, colorMode, null),
+	);
 }
 
 export function svgToDataUrl(sanitized: string): string {
@@ -803,3 +869,5 @@ export async function getInlineSvgForUrl(
 	CACHE.set(key, sanitized || "", opts?.cacheTtlMs ?? 60_000);
 	return sanitized || "";
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

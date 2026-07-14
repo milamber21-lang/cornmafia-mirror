@@ -4,10 +4,9 @@
 //// Streams sanitized colorized SVG icons for admin media previews                                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
-import {
-	assertSafeMediaRelativePath,
-} from "@/lib/helpers/media-files";
+import { assertSafeMediaRelativePath } from "@/lib/helpers/media-files";
 import {
 	buildColorizedSvgIcon,
 	buildSvgIconResponse,
@@ -73,3 +72,5 @@ export async function GET(
 			: jsonError("NOT_FOUND", "Not found.", status === 404 ? 404 : 500);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

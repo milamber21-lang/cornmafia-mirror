@@ -4,21 +4,35 @@
 //// Client member content dashboard with collection, template, kind, status, search, sort, and pagination.      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
-import { BookOpen, Eye, FileText, FolderOpen, Pencil } from "lucide-react";
+import { Eye, FolderOpen, Pencil } from "lucide-react";
 
 import MemberContentCreatePanel from "@/components/me/MemberContentCreatePanel";
+import MemberManagementCard from "@/components/me/MemberManagementCard";
 
 import {
 	AlertBanner,
+	BrowseFilterPanel,
+	BrowsePageHeader,
+	BrowsePanelHeader,
+	BrowseResultsPanel,
 	Button,
 	ButtonLink,
 	DropdownMenuSingle,
+	IconVisual,
 	Input,
 	Pagination,
+	StatusPill,
+	SurfaceState,
 } from "@/components/ui";
+import {
+	compareDisplayText,
+	formatDisplayDate,
+} from "@/lib/helpers/display-format";
 import type { MemberAuthorableCollection } from "@/lib/data/member-authoring";
 import type {
 	MemberContentItem,
@@ -39,7 +53,10 @@ const SORT_OPTIONS: { value: SortCode; label: string }[] = [
 	{ value: "published", label: "Recently published" },
 	{ value: "title", label: "Title A-Z" },
 ];
-const STATUS_OPTIONS: { value: typeof ALL_FILTER_VALUE | MemberContentStatusCode; label: string }[] = [
+const STATUS_OPTIONS: {
+	value: typeof ALL_FILTER_VALUE | MemberContentStatusCode;
+	label: string;
+}[] = [
 	{ value: ALL_FILTER_VALUE, label: "All statuses" },
 	{ value: "draft", label: "Draft" },
 	{ value: "published", label: "Published" },
@@ -47,17 +64,7 @@ const STATUS_OPTIONS: { value: typeof ALL_FILTER_VALUE | MemberContentStatusCode
 ];
 
 function formatDate(value: string | null): string {
-	if (!value) {
-		return "-";
-	}
-	const date = new Date(value);
-	return Number.isNaN(date.getTime())
-		? value
-		: date.toLocaleDateString(undefined, {
-				year: "numeric",
-				month: "short",
-				day: "numeric",
-			});
+	return formatDisplayDate(value) ?? value ?? "-";
 }
 
 function normalizeSearch(value: string): string {
@@ -92,36 +99,62 @@ function matchesFilters(args: {
 	templateId: string;
 	contentKindCode: string;
 }): boolean {
-	const categoryMatches = args.categoryId === ALL_FILTER_VALUE || args.row.categoryId === args.categoryId;
+	const categoryMatches =
+		args.categoryId === ALL_FILTER_VALUE ||
+		args.row.categoryId === args.categoryId;
 	const subcategoryMatches =
-		args.subcategoryId === ALL_FILTER_VALUE || args.row.subcategoryId === args.subcategoryId;
-	const statusMatches = args.statusCode === ALL_FILTER_VALUE || args.row.statusCode === args.statusCode;
-	const templateMatches = args.templateId === ALL_FILTER_VALUE || args.row.templateId === args.templateId;
+		args.subcategoryId === ALL_FILTER_VALUE ||
+		args.row.subcategoryId === args.subcategoryId;
+	const statusMatches =
+		args.statusCode === ALL_FILTER_VALUE ||
+		args.row.statusCode === args.statusCode;
+	const templateMatches =
+		args.templateId === ALL_FILTER_VALUE ||
+		args.row.templateId === args.templateId;
 	const kindMatches =
-		args.contentKindCode === ALL_FILTER_VALUE || args.row.contentKindCode === args.contentKindCode;
+		args.contentKindCode === ALL_FILTER_VALUE ||
+		args.row.contentKindCode === args.contentKindCode;
 
-	return categoryMatches && subcategoryMatches && statusMatches && templateMatches && kindMatches;
+	return (
+		categoryMatches &&
+		subcategoryMatches &&
+		statusMatches &&
+		templateMatches &&
+		kindMatches
+	);
 }
 
-function compareContent(left: MemberContentItem, right: MemberContentItem, sort: SortCode): number {
+function compareContent(
+	left: MemberContentItem,
+	right: MemberContentItem,
+	sort: SortCode,
+): number {
 	if (sort === "title") {
-		return left.title.localeCompare(right.title, undefined, { sensitivity: "base" });
+		return compareDisplayText(left.title, right.title);
 	}
 
 	const leftUpdated = new Date(left.updatedAt).getTime();
 	const rightUpdated = new Date(right.updatedAt).getTime();
-	const leftPublished = left.publishedAt ? new Date(left.publishedAt).getTime() : 0;
-	const rightPublished = right.publishedAt ? new Date(right.publishedAt).getTime() : 0;
+	const leftPublished = left.publishedAt
+		? new Date(left.publishedAt).getTime()
+		: 0;
+	const rightPublished = right.publishedAt
+		? new Date(right.publishedAt).getTime()
+		: 0;
 
 	if (sort === "published" && leftPublished !== rightPublished) {
 		return rightPublished - leftPublished;
 	}
 
 	if (leftUpdated !== rightUpdated) {
-		return sort === "oldest" ? leftUpdated - rightUpdated : rightUpdated - leftUpdated;
+		return sort === "oldest"
+			? leftUpdated - rightUpdated
+			: rightUpdated - leftUpdated;
 	}
 
-	return left.title.localeCompare(right.title, undefined, { sensitivity: "base" });
+	return left.title.localeCompare(right.title, undefined, {
+		sensitivity: "base",
+	});
 }
 
 function getPageRows<T>(rows: T[], page: number, pageSize: number): T[] {
@@ -149,7 +182,7 @@ function uniqueSortedOptions(args: {
 		{ value: ALL_FILTER_VALUE, label: args.allLabel },
 		...Array.from(byValue.entries())
 			.map(([value, label]) => ({ value, label }))
-			.sort((left, right) => left.label.localeCompare(right.label, undefined, { sensitivity: "base" })),
+			.sort((left, right) => compareDisplayText(left.label, right.label)),
 	];
 }
 
@@ -173,18 +206,20 @@ function uniqueRowOptions(args: {
 		{ value: ALL_FILTER_VALUE, label: args.allLabel },
 		...Array.from(byValue.entries())
 			.map(([value, label]) => ({ value, label }))
-			.sort((left, right) => left.label.localeCompare(right.label, undefined, { sensitivity: "base" })),
+			.sort((left, right) => compareDisplayText(left.label, right.label)),
 	];
 }
 
-function getStatusClass(statusCode: MemberContentStatusCode): string {
+function getStatusTone(
+	statusCode: MemberContentStatusCode,
+): "success" | "warning" | "muted" {
 	if (statusCode === "published") {
-		return "member-card-status--published";
+		return "success";
 	}
 	if (statusCode === "archived") {
-		return "member-card-status--archived";
+		return "muted";
 	}
-	return "member-card-status--draft";
+	return "warning";
 }
 
 function getStatusLabel(statusCode: MemberContentStatusCode): string {
@@ -197,8 +232,9 @@ function getStatusLabel(statusCode: MemberContentStatusCode): string {
 	return "Draft";
 }
 
-function getContentSummary(row: MemberContentItem): string {
-	return row.summary || "No summary saved for this content yet.";
+function getContentSummary(row: MemberContentItem): string | null {
+	const summary = row.summary.trim();
+	return summary || null;
 }
 
 function buildCollectionManageHref(row: MemberContentItem): string {
@@ -241,7 +277,9 @@ export default function MemberContentDashboard({
 				collections:
 					categoryId === ALL_FILTER_VALUE
 						? collections
-						: collections.filter((collection) => collection.categoryId === categoryId),
+						: collections.filter(
+								(collection) => collection.categoryId === categoryId,
+							),
 				getValue: (collection) => collection.subcategoryId,
 				getLabel: (collection) => collection.subcategoryTitle,
 				allLabel: "All collections",
@@ -283,7 +321,16 @@ export default function MemberContentDashboard({
 				)
 				.filter((row) => matchesSearch(row, search))
 				.sort((left, right) => compareContent(left, right, sort)),
-		[categoryId, contentKindCode, rows, search, sort, statusCode, subcategoryId, templateId],
+		[
+			categoryId,
+			contentKindCode,
+			rows,
+			search,
+			sort,
+			statusCode,
+			subcategoryId,
+			templateId,
+		],
 	);
 	const visibleRows = React.useMemo(
 		() => getPageRows(filteredRows, page, pageSize),
@@ -306,180 +353,229 @@ export default function MemberContentDashboard({
 	}, [filteredRows.length, page, pageSize]);
 
 	return (
-		<section className="card member-dashboard-main">
-			<section className="member-hero">
-				<div className="member-hero__main">
-					<div className="member-hero__icon">
-						<BookOpen className="member-icon member-icon--lg" aria-hidden />
+		<main className="member-dashboard-main member-browse-page">
+			<BrowsePageHeader
+				className="member-browse-header"
+				breadcrumbs={[{ label: "Member", href: "/me" }, { label: "Content" }]}
+				title="My content"
+				actions={<StatusPill tone="info">{rows.length} manageable</StatusPill>}
+				description={
+					<div className="member-browse-header__secondary-actions">
+						<ButtonLink href="/me" variant="secondary" size="sm">
+							Back to profile
+						</ButtonLink>
 					</div>
-					<div>
-						<h1 className="member-hero__title">My content</h1>
-						<p className="member-hero__text">
-							Manage content you authored where your current member permissions still allow authoring.
-						</p>
+				}
+			/>
+
+			<BrowseFilterPanel
+				className="member-browse-filter-panel"
+				aria-label="Member content filters"
+			>
+				<div className="member-browse-filter-controls member-browse-filter-controls--content">
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={categoryOptions}
+							value={categoryId}
+							onChange={(value) => {
+								const nextCategoryId = value || ALL_FILTER_VALUE;
+								setCategoryId(nextCategoryId);
+								setSubcategoryId(ALL_FILTER_VALUE);
+								setPage(1);
+							}}
+							ariaLabel="Filter by category"
+							className="member-control-full"
+						/>
+					</div>
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={subcategoryOptions}
+							value={subcategoryId}
+							onChange={(value) => {
+								setSubcategoryId(value || ALL_FILTER_VALUE);
+								setPage(1);
+							}}
+							ariaLabel="Filter by collection"
+							className="member-control-full"
+						/>
+					</div>
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={STATUS_OPTIONS}
+							value={statusCode}
+							onChange={(value) => {
+								setStatusCode(value || ALL_FILTER_VALUE);
+								setPage(1);
+							}}
+							ariaLabel="Filter by status"
+							className="member-control-full"
+						/>
+					</div>
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={templateOptions}
+							value={templateId}
+							onChange={(value) => {
+								setTemplateId(value || ALL_FILTER_VALUE);
+								setPage(1);
+							}}
+							ariaLabel="Filter by template"
+							className="member-control-full"
+						/>
+					</div>
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={kindOptions}
+							value={contentKindCode}
+							onChange={(value) => {
+								setContentKindCode(value || ALL_FILTER_VALUE);
+								setPage(1);
+							}}
+							ariaLabel="Filter by content kind"
+							className="member-control-full"
+						/>
+					</div>
+					<div className="member-browse-filter__search">
+						<label className="sr-only" htmlFor="member-content-search">
+							Search content
+						</label>
+						<Input
+							id="member-content-search"
+							type="search"
+							value={search}
+							onChange={(event) => {
+								setSearch(event.currentTarget.value);
+								setPage(1);
+							}}
+							placeholder="Search content..."
+						/>
+					</div>
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={SORT_OPTIONS}
+							value={sort}
+							onChange={(value) => {
+								setSort(
+									value === "oldest" || value === "title" || value === "published"
+										? value
+										: "newest",
+								);
+								setPage(1);
+							}}
+							ariaLabel="Sort content"
+							className="member-control-full"
+						/>
 					</div>
 				</div>
-				<div className="member-hero__actions">
-					<ButtonLink href="/me" variant="neutral">
-						Back to profile
-					</ButtonLink>
-				</div>
-			</section>
+			</BrowseFilterPanel>
 
-			<section className="member-stat-grid member-stat-grid--three">
-				<div className="member-stat-card">
-					<div className="member-stat-card__label">Manageable</div>
-					<div className="member-stat-card__value">{rows.length}</div>
-				</div>
-				<div className="member-stat-card">
-					<div className="member-stat-card__label">Published</div>
-					<div className="member-stat-card__value member-stat-card__value--success">{publishedCount}</div>
-				</div>
-				<div className="member-stat-card">
-					<div className="member-stat-card__label">Drafts</div>
-					<div className="member-stat-card__value member-stat-card__value--accent">{draftCount}</div>
-				</div>
-			</section>
-
-			<section className="member-panel">
-				<div className="member-filter-grid member-filter-grid--content">
-					<DropdownMenuSingle
-						options={categoryOptions}
-						value={categoryId}
-						onChange={(value) => {
-							const nextCategoryId = value || ALL_FILTER_VALUE;
-							setCategoryId(nextCategoryId);
-							setSubcategoryId(ALL_FILTER_VALUE);
-							setPage(1);
-						}}
-						ariaLabel="Filter by category"
-						className="member-control-full"
-					/>
-					<DropdownMenuSingle
-						options={subcategoryOptions}
-						value={subcategoryId}
-						onChange={(value) => {
-							setSubcategoryId(value || ALL_FILTER_VALUE);
-							setPage(1);
-						}}
-						ariaLabel="Filter by collection"
-						className="member-control-full"
-					/>
-					<DropdownMenuSingle
-						options={STATUS_OPTIONS}
-						value={statusCode}
-						onChange={(value) => {
-							setStatusCode(value || ALL_FILTER_VALUE);
-							setPage(1);
-						}}
-						ariaLabel="Filter by status"
-						className="member-control-full"
-					/>
-					<DropdownMenuSingle
-						options={templateOptions}
-						value={templateId}
-						onChange={(value) => {
-							setTemplateId(value || ALL_FILTER_VALUE);
-							setPage(1);
-						}}
-						ariaLabel="Filter by template"
-						className="member-control-full"
-					/>
-					<DropdownMenuSingle
-						options={kindOptions}
-						value={contentKindCode}
-						onChange={(value) => {
-							setContentKindCode(value || ALL_FILTER_VALUE);
-							setPage(1);
-						}}
-						ariaLabel="Filter by content kind"
-						className="member-control-full"
-					/>
-					<Input
-						type="search"
-						value={search}
-						onChange={(event) => {
-							setSearch(event.currentTarget.value);
-							setPage(1);
-						}}
-						placeholder="Search content..."
-					/>
-					<DropdownMenuSingle
-						options={SORT_OPTIONS}
-						value={sort}
-						onChange={(value) => {
-							setSort(value === "oldest" || value === "title" || value === "published" ? value : "newest");
-							setPage(1);
-						}}
-						ariaLabel="Sort content"
-						className="member-control-full"
-					/>
-				</div>
+			<BrowseResultsPanel
+				className="member-browse-results-panel"
+				aria-label="Member content results"
+			>
+				<BrowsePanelHeader
+					title="Content"
+					description={`Showing ${filteredRows.length} of ${rows.length} manageable items.`}
+					actions={
+						<div className="member-browse-result-statuses">
+							<StatusPill tone="success" size="xs">
+								{publishedCount} published
+							</StatusPill>
+							<StatusPill tone="warning" size="xs">
+								{draftCount} drafts
+							</StatusPill>
+						</div>
+					}
+				/>
 
 				{visibleRows.length > 0 ? (
-					<div className="member-card-grid">
+					<div className="member-management-grid">
 						{visibleRows.map((row) => (
-							<article key={row.id} className="member-card">
-								<div className="member-card__pill-row">
-									<div className="member-card__pill">
-										<FileText className="member-card__pill-icon" aria-hidden />
-										<span className="member-truncate">{row.contentKindLabel}</span>
-									</div>
-									<span className={`member-card-status ${getStatusClass(row.statusCode)}`}>
-										{getStatusLabel(row.statusCode)}
+							<MemberManagementCard
+								key={row.id}
+								visual={
+									<IconVisual
+										iconKey={null}
+										iconColor={null}
+										fallback={{ lucideName: "FileText" }}
+										mediaRouteScope="app"
+										size="card"
+										title={row.title}
+									/>
+								}
+								eyebrow={
+									<span className="member-management-card__eyebrow">
+										<span>
+											{row.categoryTitle} / {row.subcategoryTitle}
+										</span>
+										<StatusPill tone={getStatusTone(row.statusCode)} size="xs">
+											{getStatusLabel(row.statusCode)}
+										</StatusPill>
 									</span>
-								</div>
-								<div className="member-card__eyebrow">
-									{row.categoryTitle} / {row.subcategoryTitle}
-								</div>
-								<h2 className="member-card__title member-card__title--lg">
-									{row.title}
-								</h2>
-								<p className="member-card__description">
-									{getContentSummary(row)}
-								</p>
-								<div className="member-card__footer">
-									<div className="member-card__meta-grid">
-										<div>Template: {row.templateLabel}</div>
+								}
+								title={row.title}
+								summary={getContentSummary(row)}
+								details={
+									<span className="member-management-card__meta">
+										<span>{row.contentKindLabel}</span>
+										<span>{row.templateLabel}</span>
 										{row.seriesTitle ? (
-											<div>
-												Series: {row.seriesTitle}{row.seriesPartNo ? ` #${row.seriesPartNo}` : ""}
-											</div>
+											<span>
+												{row.seriesTitle}
+												{row.seriesPartNo ? ` #${row.seriesPartNo}` : ""}
+											</span>
 										) : null}
-										<div>Updated {formatDate(row.updatedAt)}</div>
-										{row.statusCode === "published" ? <div>Published {formatDate(row.publishedAt)}</div> : null}
-									</div>
-									<div className="member-card__actions">
-										<ButtonLink href={buildCollectionManageHref(row)} size="sm" variant="neutral" leftIcon={<FolderOpen className="member-icon member-icon--sm" aria-hidden />}>
+										<span>Updated {formatDate(row.updatedAt)}</span>
+									</span>
+								}
+								actions={
+									<>
+										<ButtonLink
+											href={buildCollectionManageHref(row)}
+											size="sm"
+											variant="secondary"
+											leftIcon={<FolderOpen aria-hidden />}
+										>
 											Collection
 										</ButtonLink>
 										{row.publicHref && row.canViewPublic ? (
-											<ButtonLink href={row.publicHref} size="sm" variant="neutral" leftIcon={<Eye className="member-icon member-icon--sm" aria-hidden />}>
+											<ButtonLink
+												href={row.publicHref}
+												size="sm"
+												variant="secondary"
+												leftIcon={<Eye aria-hidden />}
+											>
 												View
 											</ButtonLink>
 										) : (
-											<Button type="button" size="sm" variant="neutral" disabled leftIcon={<Eye className="member-icon member-icon--sm" aria-hidden />}>
+											<Button
+												size="sm"
+												variant="secondary"
+												disabled
+												leftIcon={<Eye aria-hidden />}
+											>
 												View
 											</Button>
 										)}
 										<Button
-											type="button"
 											size="sm"
-											variant="neutral"
-											leftIcon={<Pencil className="member-icon member-icon--sm" aria-hidden />}
+											variant="secondary"
+											leftIcon={<Pencil aria-hidden />}
 											onClick={() => setEditContentId(row.id)}
 										>
 											Edit
 										</Button>
-									</div>
-								</div>
-							</article>
+									</>
+								}
+							/>
 						))}
 					</div>
 				) : (
-					<div className="member-empty-state">
-						No manageable content found for the current filters.
-					</div>
+					<SurfaceState
+						kind="empty"
+						title="No manageable content"
+						description="No authored content matches the current filters."
+					/>
 				)}
 
 				<Pagination
@@ -494,11 +590,13 @@ export default function MemberContentDashboard({
 					pageSizeOptions={[...PAGE_SIZE_OPTIONS]}
 					pageSizeLabel=""
 				/>
-			</section>
+			</BrowseResultsPanel>
 
 			{collections.length === 0 ? (
 				<AlertBanner tone="info">
-					No authorable collections are currently available. The collection list now requires both live create permission and at least one public template valid for that exact category/subcategory.
+					No authorable collections are currently available. The collection list now
+					requires both live create permission and at least one public template valid
+					for that exact category/subcategory.
 				</AlertBanner>
 			) : null}
 
@@ -510,6 +608,8 @@ export default function MemberContentDashboard({
 				memberManagePath={null}
 				onClose={() => setEditContentId(null)}
 			/>
-		</section>
+		</main>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

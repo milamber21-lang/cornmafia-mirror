@@ -4,6 +4,8 @@
 //// Small-list admin table for managing theme colors with local panel lifecycle                                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -265,7 +267,7 @@ export default function ThemeColorsTable({
 					</div>
 
 					<div className="admin-table-toolbar-action">
-						<Button variant="green" onClick={openCreate}>
+						<Button variant="primary" onClick={openCreate}>
 							Create Theme Color
 						</Button>
 					</div>
@@ -341,7 +343,7 @@ export default function ThemeColorsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant={row.enabled ? "green" : "neutral"}
+												variant={row.enabled ? "success" : "secondary"}
 												disabled={disabled}
 												loading={disabled}
 												onClick={() => void toggleEnabled(row)}
@@ -352,7 +354,7 @@ export default function ThemeColorsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="accent"
+												variant="danger"
 												disabled={disabled}
 												loading={disabled}
 												onClick={() => void deleteColor(row)}
@@ -362,7 +364,7 @@ export default function ThemeColorsTable({
 										</TD>
 										<TD className="admin-table-cell--center">
 											<Button
-												variant="neutral"
+												variant="secondary"
 												disabled={disabled}
 												onClick={() => openEdit(row)}
 											>
@@ -375,7 +377,10 @@ export default function ThemeColorsTable({
 
 							{pageRows.length === 0 ? (
 								<TR>
-									<TD colSpan={7} className="admin-table-empty-cell admin-table-empty-cell--spacious">
+									<TD
+										colSpan={7}
+										className="admin-table-empty-cell admin-table-empty-cell--spacious"
+									>
 										No theme colors match your search.
 									</TD>
 								</TR>
@@ -407,3 +412,5 @@ export default function ThemeColorsTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

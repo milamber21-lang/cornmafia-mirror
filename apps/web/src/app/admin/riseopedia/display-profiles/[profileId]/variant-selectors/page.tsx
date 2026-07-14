@@ -4,6 +4,7 @@
 //// Scoped admin page for Riseopedia display profile variant selectors.                                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -34,8 +35,13 @@ function parsePositiveInt(value: string): number | null {
 	return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 }
 
-function findProfile(rows: RiseopediaAdminRow[], profileId: number): RiseopediaAdminRow | null {
-	return rows.find((row) => Number(row.display_profile_id) === profileId) ?? null;
+function findProfile(
+	rows: RiseopediaAdminRow[],
+	profileId: number,
+): RiseopediaAdminRow | null {
+	return (
+		rows.find((row) => Number(row.display_profile_id) === profileId) ?? null
+	);
 }
 
 export default async function RiseopediaProfileVariantSelectorsScopedPage({
@@ -43,7 +49,9 @@ export default async function RiseopediaProfileVariantSelectorsScopedPage({
 }: PageProps): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Variant Selectors" reason={guard.reason} />;
+		return (
+			<RiseopediaAdminGuard title="Variant Selectors" reason={guard.reason} />
+		);
 	}
 
 	const resolvedParams = await params;
@@ -53,7 +61,9 @@ export default async function RiseopediaProfileVariantSelectorsScopedPage({
 			<section className="card admin-state-card">
 				<h1 className="admin-page-card-title">Profile not found</h1>
 				<p className="admin-state-message">The profile id in the URL is invalid.</p>
-				<ButtonLink href="/admin/riseopedia/display-profiles" variant="neutral">Profiles</ButtonLink>
+				<ButtonLink href="/admin/riseopedia/display-profiles" variant="secondary">
+					Profiles
+				</ButtonLink>
 			</section>
 		);
 	}
@@ -67,13 +77,19 @@ export default async function RiseopediaProfileVariantSelectorsScopedPage({
 		return (
 			<section className="card admin-state-card">
 				<h1 className="admin-page-card-title">Profile not found</h1>
-				<p className="admin-state-message">No Riseopedia display profile exists for id {profileId}.</p>
-				<ButtonLink href="/admin/riseopedia/display-profiles" variant="neutral">Profiles</ButtonLink>
+				<p className="admin-state-message">
+					No Riseopedia display profile exists for id {profileId}.
+				</p>
+				<ButtonLink href="/admin/riseopedia/display-profiles" variant="secondary">
+					Profiles
+				</ButtonLink>
 			</section>
 		);
 	}
 
-	const scopedRows = rows.variantSelectors.filter((row) => String(row.display_profile_id ?? "") === String(profileId));
+	const scopedRows = rows.variantSelectors.filter(
+		(row) => String(row.display_profile_id ?? "") === String(profileId),
+	);
 
 	return (
 		<RiseopediaAdminPageChrome
@@ -90,3 +106,5 @@ export default async function RiseopediaProfileVariantSelectorsScopedPage({
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

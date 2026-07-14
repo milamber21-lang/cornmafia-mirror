@@ -4,6 +4,8 @@
 //// Dedicated Riseopedia profile element panel.                                                           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -12,20 +14,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import PanelForm from "@/components/ui/PanelForm";
 import { readResponseMessage } from "@/lib/helpers/http-response";
 
-import {
-	buildInitialValues,
-	buildPayloadData,
-} from "./RiseopediaAdminHelpers";
-import {
-	idText,
-} from "./RiseopediaAdminConfigHelpers";
+import { buildInitialValues, buildPayloadData } from "./RiseopediaAdminHelpers";
+import { idText } from "./RiseopediaAdminConfigHelpers";
 import {
 	buildRiseopediaPanelFieldDef,
 	buildRiseopediaPanelRows,
 } from "./RiseopediaAdminPanelHelpers";
-import {
-	buildRiseopediaProfileElementFields,
-} from "./RiseopediaAdminPanelFieldBuilders";
+import { buildRiseopediaProfileElementFields } from "./RiseopediaAdminPanelFieldBuilders";
 import type {
 	RiseopediaAdminPanelMode,
 	RiseopediaAdminRow,
@@ -41,6 +36,7 @@ export interface RiseopediaProfileElementsPanelProps {
 	meta: RiseopediaAdminMeta;
 	displayProfile?: RiseopediaAdminRow | null;
 	allBindings?: RiseopediaAdminRows;
+	bodyBlocks?: RiseopediaAdminRows;
 	rows: RiseopediaAdminRows;
 	onClose: () => void;
 	onSaved: () => void | Promise<void>;
@@ -54,13 +50,16 @@ export default function RiseopediaProfileElementsPanel({
 	meta,
 	displayProfile,
 	allBindings,
+	bodyBlocks,
 	rows,
 	onClose,
 	onSaved,
 }: RiseopediaProfileElementsPanelProps): JSX.Element | null {
 	const [submitting, setSubmitting] = useState(false);
 	const [topError, setTopError] = useState("");
-	const scopedProfileId = displayProfile ? idText(displayProfile.display_profile_id) : "";
+	const scopedProfileId = displayProfile
+		? idText(displayProfile.display_profile_id)
+		: "";
 
 	useEffect(() => {
 		if (open) {
@@ -69,8 +68,17 @@ export default function RiseopediaProfileElementsPanel({
 	}, [mode, open, row]);
 
 	const fields = useMemo(
-		() => buildRiseopediaProfileElementFields({ displayProfiles, displayProfile, allBindings, meta, row, rows }),
-		[allBindings, displayProfile, displayProfiles, meta, row, rows],
+		() =>
+			buildRiseopediaProfileElementFields({
+				displayProfiles,
+				displayProfile,
+				allBindings,
+				bodyBlocks,
+				meta,
+				row,
+				rows,
+			}),
+		[allBindings, bodyBlocks, displayProfile, displayProfiles, meta, row, rows],
 	);
 
 	const defaultValues = useMemo(
@@ -96,15 +104,20 @@ export default function RiseopediaProfileElementsPanel({
 			setTopError("");
 
 			try {
-				const response = await fetch(displayProfile ? `/api/admin/riseopedia/profile-properties?displayProfileId=${scopedProfileId}` : "/api/admin/riseopedia/profile-properties", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						op: "upsert",
-						id: mode === "edit" && row ? row["display_profile_element_id"] : null,
-						data: buildPayloadData(fields, values),
-					}),
-				});
+				const response = await fetch(
+					displayProfile
+						? `/api/admin/riseopedia/profile-properties?displayProfileId=${scopedProfileId}`
+						: "/api/admin/riseopedia/profile-properties",
+					{
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							op: "upsert",
+							id: mode === "edit" && row ? row["display_profile_element_id"] : null,
+							data: buildPayloadData(fields, values),
+						}),
+					},
+				);
 
 				if (!response.ok) {
 					throw new Error(
@@ -157,3 +170,5 @@ export default function RiseopediaProfileElementsPanel({
 }
 
 export { RiseopediaProfileElementsPanel };
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

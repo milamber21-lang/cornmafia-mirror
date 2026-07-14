@@ -4,6 +4,7 @@
 //// DB-first public Mafiosopedia entity list helpers for overview and classification result cards.              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -14,6 +15,11 @@ import {
 	type MafiosopediaOverviewCardMode,
 } from "@/lib/data/mafiosopedia-card-properties";
 import { query } from "@/lib/data/pg";
+import {
+	hasNonDefaultMafiosopediaReleaseFilters,
+	mafiosopediaReleaseFilterFlags,
+	type MafiosopediaReleaseFilterCode,
+} from "@/lib/data/mafiosopedia-release";
 import { buildMafiosopediaMediaFileUrl } from "@/lib/helpers/mafiosopedia-media-files";
 
 export type MafiosopediaEntityMediaRef = {
@@ -52,7 +58,12 @@ export type MafiosopediaEntityDoc = {
 	cardProperties: MafiosopediaEntityCardProperty[];
 };
 
-export type MafiosopediaEntityCardPlacementCode = "hub" | "section" | "class" | "category" | "subcategory";
+export type MafiosopediaEntityCardPlacementCode =
+	| "hub"
+	| "section"
+	| "class"
+	| "category"
+	| "subcategory";
 
 export type MafiosopediaEntityListFilters = {
 	search: string | null;
@@ -60,6 +71,7 @@ export type MafiosopediaEntityListFilters = {
 	entityClassCode: string | null;
 	categorySlug: string | null;
 	subcategorySlug: string | null;
+	releaseFilters: MafiosopediaReleaseFilterCode[];
 	page: number;
 	pageSize: number;
 	cardPlacementCode?: MafiosopediaEntityCardPlacementCode;
@@ -84,6 +96,7 @@ export type MafiosopediaEntityFilterOptionFilters = {
 	entityClassCode: string | null;
 	categorySlug: string | null;
 	subcategorySlug: string | null;
+	releaseFilters: MafiosopediaReleaseFilterCode[];
 };
 
 type MafiosopediaEntityRow = {
@@ -128,26 +141,41 @@ type MafiosopediaFilterOptionRow = {
 const DEFAULT_PAGE_SIZE = 24;
 const DEFAULT_CARD_PLACEMENT: MafiosopediaEntityCardPlacementCode = "hub";
 
-const ENTITY_FILTER_WHERE = `detail.public_visible_flag = true
-		   AND detail.detail_visible_flag = true
-		   AND ($1::text IS NULL
-				OR detail.entity_name ILIKE $1
-				OR detail.entity_code ILIKE $1
-				OR detail.entity_type_name ILIKE $1
-				OR detail.entity_class_name ILIKE $1
-				OR detail.entity_category_name ILIKE $1
-				OR detail.entity_subcategory_name ILIKE $1)
-		   AND ($2::text IS NULL OR detail.section_code = $2 OR detail.section_slug = $2)
-		   AND ($3::text IS NULL OR detail.entity_class_code = $3)
-		   AND ($4::text IS NULL OR detail.entity_category_slug = $4)
-		   AND ($5::text IS NULL OR detail.entity_subcategory_slug = $5)`;
+function releaseFilterWhere(firstParameterIndex: number): string {
+	return `(( $${firstParameterIndex}::boolean AND release_status.public_match_flag)
+			 OR ($${firstParameterIndex + 1}::boolean AND release_status.patch_rule_match_flag)
+			 OR ($${firstParameterIndex + 2}::boolean AND release_status.evidence_rule_match_flag)
+			 OR ($${firstParameterIndex + 3}::boolean AND release_status.manual_rule_match_flag))`;
+}
 
-const ENTITY_SCOPE_WHERE = `detail.public_visible_flag = true
-		   AND detail.detail_visible_flag = true
-		   AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
-		   AND ($2::text IS NULL OR detail.entity_class_code = $2)
-		   AND ($3::text IS NULL OR detail.entity_category_slug = $3)
-		   AND ($4::text IS NULL OR detail.entity_subcategory_slug = $4)`;
+function releaseFilterValues(
+	filters: readonly MafiosopediaReleaseFilterCode[],
+): [boolean, boolean, boolean, boolean] {
+	const flags = mafiosopediaReleaseFilterFlags(filters);
+	return [flags.public, flags.patch, flags.evidence, flags.manual];
+}
+
+const ENTITY_FILTER_WHERE = `($1::text IS NULL
+			OR detail.entity_name ILIKE $1
+			OR detail.entity_code ILIKE $1
+			OR detail.entity_type_name ILIKE $1
+			OR detail.entity_class_name ILIKE $1
+			OR detail.entity_category_name ILIKE $1
+			OR detail.entity_subcategory_name ILIKE $1)
+			AND ($2::text IS NULL OR detail.section_code = $2 OR detail.section_slug = $2)
+			AND ($3::text IS NULL OR detail.entity_class_code = $3)
+			AND ($4::text IS NULL
+			OR detail.entity_category_slug = $4
+			OR lower(btrim(detail.entity_category_name)) = lower(btrim($4)))
+			AND ($5::text IS NULL
+			OR detail.entity_subcategory_slug = $5
+			OR lower(btrim(detail.entity_subcategory_name)) = lower(btrim($5)))`;
+
+const ENTITY_SCOPE_WHERE = `($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
+			AND ($2::text IS NULL OR detail.entity_class_code = $2)
+			AND ($3::text IS NULL
+			OR detail.entity_category_slug = $3
+			OR lower(btrim(detail.entity_category_name)) = lower(btrim($3)))`;
 
 function toNumber(value: string | number): number {
 	const parsed = typeof value === "number" ? value : Number(value);
@@ -155,7 +183,9 @@ function toNumber(value: string | number): number {
 }
 
 function normalizedPageSize(pageSize: number): number {
-	return Number.isInteger(pageSize) && pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
+	return Number.isInteger(pageSize) && pageSize > 0
+		? pageSize
+		: DEFAULT_PAGE_SIZE;
 }
 
 function totalPages(totalDocs: number, pageSize: number): number {
@@ -185,13 +215,9 @@ function normalizedPlacement(
 	return placementCode ?? DEFAULT_CARD_PLACEMENT;
 }
 
-function filterValues(filters: MafiosopediaEntityListFilters): [
-	string | null,
-	string | null,
-	string | null,
-	string | null,
-	string | null,
-] {
+function filterValues(
+	filters: MafiosopediaEntityListFilters,
+): [string | null, string | null, string | null, string | null, string | null] {
 	return [
 		normalizedSearch(filters.search),
 		filters.section,
@@ -255,12 +281,43 @@ function mapEntityRow(row: MafiosopediaEntityRow): MafiosopediaEntityDoc {
 	};
 }
 
-function mapFilterOptionRow(row: MafiosopediaFilterOptionRow): MafiosopediaEntityFilterOption {
+function mapFilterOptionRow(
+	row: MafiosopediaFilterOptionRow,
+): MafiosopediaEntityFilterOption {
 	return {
 		value: row.option_value,
 		label: row.option_label,
 		count: toNumber(row.option_count),
 	};
+}
+
+function usesDefaultRelease(
+	releaseFilters: readonly MafiosopediaReleaseFilterCode[],
+): boolean {
+	return !hasNonDefaultMafiosopediaReleaseFilters(releaseFilters);
+}
+
+type MafiosopediaMaterializedEntityOptionViewName =
+	| "web_view.mafiosopedia_hub_classes"
+	| "web_view.mafiosopedia_hub_categories"
+	| "web_view.mafiosopedia_hub_subcategories";
+
+async function listMafiosopediaMaterializedEntityFilterOptions(args: {
+	viewName: MafiosopediaMaterializedEntityOptionViewName;
+	valueColumn: "node_code" | "node_name";
+}): Promise<MafiosopediaEntityFilterOption[]> {
+	const result = await query<MafiosopediaFilterOptionRow>(
+		`SELECT ${args.valueColumn} AS option_value,
+			node_name AS option_label,
+			item_count AS option_count
+		 FROM ${args.viewName}
+		 WHERE item_count > 0
+		 ORDER BY sort_order,
+			node_name,
+			node_id`,
+	);
+
+	return result.rows.map(mapFilterOptionRow);
 }
 
 export async function listMafiosopediaEntities(
@@ -269,11 +326,15 @@ export async function listMafiosopediaEntities(
 	const values = filterValues(filters);
 	const pageSize = normalizedPageSize(filters.pageSize);
 	const placementCode = normalizedPlacement(filters.cardPlacementCode);
+	const releaseValues = releaseFilterValues(filters.releaseFilters);
 	const countResult = await query<CountRow>(
 		`SELECT COUNT(*)::bigint AS total_count
 		 FROM web_view.mafiosopedia_entity_detail detail
-		 WHERE ${ENTITY_FILTER_WHERE}`,
-		values,
+		 JOIN web_view.mafiosopedia_entity_release_status release_status
+		   ON release_status.entity_id = detail.entity_id
+		 WHERE ${ENTITY_FILTER_WHERE}
+		   AND ${releaseFilterWhere(6)}`,
+		[...values, ...releaseValues],
 	);
 	const totalDocs = countResult.rows[0]
 		? toNumber(countResult.rows[0].total_count)
@@ -320,16 +381,39 @@ export async function listMafiosopediaEntities(
 			COALESCE(resolved.card_mode_code, 'compact') AS resolved_card_mode_code,
 			COALESCE(card_elements.card_properties, '[]'::jsonb) AS card_properties
 		 FROM web_view.mafiosopedia_entity_detail detail
+		 JOIN web_view.mafiosopedia_entity_release_status release_status
+		   ON release_status.entity_id = detail.entity_id
 		 LEFT JOIN web_view.mafiosopedia_entity_overview_card_resolved_rules resolved
 		   ON resolved.entity_id = detail.entity_id
 		  AND resolved.placement_code = $8
-		 LEFT JOIN LATERAL (SELECT media_row.media_file_id,
-						  media_row.width_px,
-						  media_row.height_px,
-						  media_row.mime_type
+		 LEFT JOIN LATERAL (SELECT COALESCE(card_media.media_file_id, media_row.media_file_id) AS media_file_id,
+						  COALESCE(card_media.width_px, media_row.width_px) AS width_px,
+						  COALESCE(card_media.height_px, media_row.height_px) AS height_px,
+						  COALESCE(card_media.mime_type, media_row.mime_type) AS mime_type
 				   FROM web_view.mafiosopedia_entity_detail_media media_row
+				   LEFT JOIN LATERAL (SELECT card_file.media_file_id,
+								  card_file.width_px,
+								  card_file.height_px,
+								  card_file.mime_type
+							   FROM web_view.mafiosopedia_media_files_source_v card_file
+							   WHERE card_file.media_id = media_row.media_id
+							   ORDER BY CASE
+									WHEN COALESCE(resolved.card_mode_code, 'compact') = 'full'
+									 AND lower(card_file.media_rel_path) LIKE '%icon_128/%' THEN 0
+									WHEN COALESCE(resolved.card_mode_code, 'compact') = 'full'
+									 AND card_file.width_px = 128
+									 AND card_file.height_px = 128 THEN 1
+									WHEN lower(card_file.media_rel_path) LIKE '%icon_64/%' THEN 2
+									WHEN card_file.width_px = 64 AND card_file.height_px = 64 THEN 3
+									WHEN lower(card_file.media_rel_path) LIKE '%icon_128/%' THEN 20
+									WHEN card_file.width_px = 128 AND card_file.height_px = 128 THEN 21
+									ELSE 100
+								END,
+								card_file.media_file_id
+							   LIMIT 1) card_media ON true
 				   WHERE media_row.entity_id = detail.entity_id
 				     AND media_row.public_display_flag = true
+				     AND media_row.media_role_code IN ('icon'::text, 'thumbnail'::text, 'brand_logo'::text)
 				   ORDER BY CASE WHEN media_row.media_file_id = detail.primary_icon_media_file_id THEN 0 ELSE 1 END,
 						media_row.selected_icon_rank,
 						media_row.selected_header_rank,
@@ -353,6 +437,7 @@ export async function listMafiosopediaEntities(
 				   WHERE element.entity_id = detail.entity_id
 				     AND element.placement_code = $8) card_elements ON true
 		 WHERE ${ENTITY_FILTER_WHERE}
+		   AND ${releaseFilterWhere(9)}
 		 ORDER BY detail.section_name NULLS LAST,
 			  detail.entity_class_name NULLS LAST,
 			  detail.entity_category_name NULLS LAST,
@@ -362,7 +447,7 @@ export async function listMafiosopediaEntities(
 			  detail.entity_id
 		 LIMIT $6
 		 OFFSET $7`,
-		[...values, pageSize, offset, placementCode],
+		[...values, pageSize, offset, placementCode, ...releaseValues],
 	);
 
 	return {
@@ -375,79 +460,119 @@ export async function listMafiosopediaEntities(
 }
 
 export async function listMafiosopediaEntityClassFilterOptions(
-	filters: Pick<MafiosopediaEntityFilterOptionFilters, "section">,
+	filters: Pick<
+		MafiosopediaEntityFilterOptionFilters,
+		"section" | "releaseFilters"
+	>,
 ): Promise<MafiosopediaEntityFilterOption[]> {
+	if (!filters.section && usesDefaultRelease(filters.releaseFilters)) {
+		return listMafiosopediaMaterializedEntityFilterOptions({
+			viewName: "web_view.mafiosopedia_hub_classes",
+			valueColumn: "node_code",
+		});
+	}
+
+	const releaseValues = releaseFilterValues(filters.releaseFilters);
 	const result = await query<MafiosopediaFilterOptionRow>(
 		`SELECT detail.entity_class_code AS option_value,
 			detail.entity_class_name AS option_label,
 			COUNT(*)::bigint AS option_count
 		 FROM web_view.mafiosopedia_entity_detail detail
+		 JOIN web_view.mafiosopedia_entity_release_status release_status
+		   ON release_status.entity_id = detail.entity_id
 		 WHERE detail.entity_class_code IS NOT NULL
 		   AND detail.entity_class_name IS NOT NULL
-		   AND detail.public_visible_flag = true
-		   AND detail.detail_visible_flag = true
 		   AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
+		   AND ${releaseFilterWhere(2)}
 		 GROUP BY detail.entity_class_code,
 			  detail.entity_class_name
 		 ORDER BY detail.entity_class_name,
 			  detail.entity_class_code`,
-		[filters.section],
+		[filters.section, ...releaseValues],
 	);
 
 	return result.rows.map(mapFilterOptionRow);
 }
 
 export async function listMafiosopediaEntityCategoryFilterOptions(
-	filters: Pick<MafiosopediaEntityFilterOptionFilters, "section" | "entityClassCode">,
+	filters: Pick<
+		MafiosopediaEntityFilterOptionFilters,
+		"section" | "entityClassCode" | "releaseFilters"
+	>,
 ): Promise<MafiosopediaEntityFilterOption[]> {
+	if (
+		!filters.section &&
+		!filters.entityClassCode &&
+		usesDefaultRelease(filters.releaseFilters)
+	) {
+		return listMafiosopediaMaterializedEntityFilterOptions({
+			viewName: "web_view.mafiosopedia_hub_categories",
+			valueColumn: "node_name",
+		});
+	}
+
+	const releaseValues = releaseFilterValues(filters.releaseFilters);
 	const result = await query<MafiosopediaFilterOptionRow>(
-		`SELECT detail.entity_category_slug AS option_value,
-			detail.entity_category_name AS option_label,
+		`SELECT MIN(detail.entity_category_name) AS option_value,
+			MIN(detail.entity_category_name) AS option_label,
 			COUNT(*)::bigint AS option_count
 		 FROM web_view.mafiosopedia_entity_detail detail
+		 JOIN web_view.mafiosopedia_entity_release_status release_status
+		   ON release_status.entity_id = detail.entity_id
 		 WHERE detail.entity_category_slug IS NOT NULL
 		   AND detail.entity_category_name IS NOT NULL
-		   AND detail.public_visible_flag = true
-		   AND detail.detail_visible_flag = true
 		   AND ($1::text IS NULL OR detail.section_code = $1 OR detail.section_slug = $1)
 		   AND ($2::text IS NULL OR detail.entity_class_code = $2)
-		 GROUP BY detail.entity_category_slug,
-			  detail.entity_category_name,
-			  detail.section_name,
-			  detail.entity_class_name
-		 ORDER BY detail.section_name NULLS LAST,
-			  detail.entity_class_name NULLS LAST,
-			  detail.entity_category_name,
-			  detail.entity_category_slug`,
-		[filters.section, filters.entityClassCode],
+		   AND ${releaseFilterWhere(3)}
+		 GROUP BY lower(btrim(detail.entity_category_name))
+		 ORDER BY MIN(detail.entity_category_name)`,
+		[filters.section, filters.entityClassCode, ...releaseValues],
 	);
 
 	return result.rows.map(mapFilterOptionRow);
 }
 
 export async function listMafiosopediaEntitySubcategoryFilterOptions(
-	filters: Pick<MafiosopediaEntityFilterOptionFilters, "section" | "entityClassCode" | "categorySlug">,
+	filters: Pick<
+		MafiosopediaEntityFilterOptionFilters,
+		"section" | "entityClassCode" | "categorySlug" | "releaseFilters"
+	>,
 ): Promise<MafiosopediaEntityFilterOption[]> {
+	if (
+		!filters.section &&
+		!filters.entityClassCode &&
+		!filters.categorySlug &&
+		usesDefaultRelease(filters.releaseFilters)
+	) {
+		return listMafiosopediaMaterializedEntityFilterOptions({
+			viewName: "web_view.mafiosopedia_hub_subcategories",
+			valueColumn: "node_name",
+		});
+	}
+
+	const releaseValues = releaseFilterValues(filters.releaseFilters);
 	const result = await query<MafiosopediaFilterOptionRow>(
-		`SELECT detail.entity_subcategory_slug AS option_value,
-			detail.entity_subcategory_name AS option_label,
+		`SELECT MIN(detail.entity_subcategory_name) AS option_value,
+			MIN(detail.entity_subcategory_name) AS option_label,
 			COUNT(*)::bigint AS option_count
 		 FROM web_view.mafiosopedia_entity_detail detail
+		 JOIN web_view.mafiosopedia_entity_release_status release_status
+		   ON release_status.entity_id = detail.entity_id
 		 WHERE detail.entity_subcategory_slug IS NOT NULL
 		   AND detail.entity_subcategory_name IS NOT NULL
 		   AND ${ENTITY_SCOPE_WHERE}
-		 GROUP BY detail.entity_subcategory_slug,
-			  detail.entity_subcategory_name,
-			  detail.section_name,
-			  detail.entity_class_name,
-			  detail.entity_category_name
-		 ORDER BY detail.section_name NULLS LAST,
-			  detail.entity_class_name NULLS LAST,
-			  detail.entity_category_name NULLS LAST,
-			  detail.entity_subcategory_name,
-			  detail.entity_subcategory_slug`,
-		[filters.section, filters.entityClassCode, filters.categorySlug, null],
+		   AND ${releaseFilterWhere(4)}
+		 GROUP BY lower(btrim(detail.entity_subcategory_name))
+		 ORDER BY MIN(detail.entity_subcategory_name)`,
+		[
+			filters.section,
+			filters.entityClassCode,
+			filters.categorySlug,
+			...releaseValues,
+		],
 	);
 
 	return result.rows.map(mapFilterOptionRow);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

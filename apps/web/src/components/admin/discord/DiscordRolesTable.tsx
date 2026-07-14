@@ -4,6 +4,8 @@
 //// Admin Discord roles table with server-driven search, sorting, and pagination                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -61,12 +63,7 @@ type RolesResponse = {
 };
 
 const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
-const SORT_KEYS = new Set<SortKey>([
-	"name",
-	"source",
-	"roleId",
-	"rank",
-]);
+const SORT_KEYS = new Set<SortKey>(["name", "source", "roleId", "rank"]);
 
 type SearchParamsReader = {
 	get(name: string): string | null;
@@ -142,7 +139,9 @@ function readSortKeyParam(searchParams: SearchParamsReader): SortKey {
 	return value && SORT_KEYS.has(value as SortKey) ? (value as SortKey) : "name";
 }
 
-function readSortDirectionParam(searchParams: SearchParamsReader): SortDirection {
+function readSortDirectionParam(
+	searchParams: SearchParamsReader,
+): SortDirection {
 	return searchParams.get("sortDir") === "desc" ? "desc" : "asc";
 }
 
@@ -164,7 +163,9 @@ export default function DiscordRolesTable(): JSX.Element {
 	const [pageSize, setPageSize] = useState<number>(
 		parsePositiveQueryValue(searchParams.get("pageSize"), 20),
 	);
-	const [sortKey, setSortKey] = useState<SortKey>(readSortKeyParam(searchParams));
+	const [sortKey, setSortKey] = useState<SortKey>(
+		readSortKeyParam(searchParams),
+	);
 	const [sortDirection, setSortDirection] = useState<SortDirection>(
 		readSortDirectionParam(searchParams),
 	);
@@ -446,7 +447,7 @@ export default function DiscordRolesTable(): JSX.Element {
 					<div className="admin-table-toolbar-action">
 						<Button
 							onClick={openCreate}
-							variant="green"
+							variant="primary"
 							aria-label="Create Role"
 							disabled={busyId !== null}
 						>
@@ -532,7 +533,7 @@ export default function DiscordRolesTable(): JSX.Element {
 											<TD className="admin-table-cell--center">{row.rank}</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant={row.isAccessRole ? "green" : "neutral"}
+													variant={row.isAccessRole ? "success" : "secondary"}
 													onClick={() => void toggleFlag(row, "isAccessRole")}
 													disabled={rowBusy || busyId !== null}
 												>
@@ -541,7 +542,7 @@ export default function DiscordRolesTable(): JSX.Element {
 											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant={row.fullEditorialAccess ? "green" : "neutral"}
+													variant={row.fullEditorialAccess ? "success" : "secondary"}
 													onClick={() => void toggleFlag(row, "fullEditorialAccess")}
 													disabled={rowBusy || busyId !== null}
 												>
@@ -550,7 +551,7 @@ export default function DiscordRolesTable(): JSX.Element {
 											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant={row.isAdmin ? "green" : "neutral"}
+													variant={row.isAdmin ? "success" : "secondary"}
 													onClick={() => void toggleFlag(row, "isAdmin")}
 													disabled={rowBusy || busyId !== null}
 												>
@@ -559,7 +560,7 @@ export default function DiscordRolesTable(): JSX.Element {
 											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant="accent"
+													variant="danger"
 													onClick={() => void handleDelete(row)}
 													disabled={rowBusy || busyId !== null}
 												>
@@ -568,7 +569,7 @@ export default function DiscordRolesTable(): JSX.Element {
 											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant="neutral"
+													variant="secondary"
 													onClick={() => openEdit(row)}
 													disabled={rowBusy || busyId !== null}
 												>
@@ -624,3 +625,5 @@ export default function DiscordRolesTable(): JSX.Element {
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Template field editor tool catalog table with admin actions                                                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -47,13 +49,7 @@ export interface TemplateFieldToolsTableProps {
 }
 
 type Mode = "create" | "edit";
-type SortKey =
-	| "tool"
-	| "fieldType"
-	| "label"
-	| "group"
-	| "order"
-	| "usage";
+type SortKey = "tool" | "fieldType" | "label" | "group" | "order" | "usage";
 
 const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
 
@@ -321,7 +317,7 @@ export default function TemplateFieldToolsTable({
 					</div>
 
 					<div className="admin-table-toolbar-action admin-table-toolbar-action--end">
-						<Button onClick={openCreate} variant="green">
+						<Button onClick={openCreate} variant="primary">
 							New Field Tool
 						</Button>
 					</div>
@@ -401,10 +397,7 @@ export default function TemplateFieldToolsTable({
 						<TBody>
 							{pageRows.length === 0 ? (
 								<TR>
-									<TD
-										colSpan={9}
-										className="admin-table-empty-cell"
-									>
+									<TD colSpan={9} className="admin-table-empty-cell">
 										No field tools found.
 									</TD>
 								</TR>
@@ -428,7 +421,7 @@ export default function TemplateFieldToolsTable({
 											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant={row.enabled ? "green" : "neutral"}
+													variant={row.enabled ? "success" : "secondary"}
 													disabled={disabled}
 													onClick={() => void toggleEnabled(row)}
 													aria-label={row.enabled ? "Enabled" : "Disabled"}
@@ -439,7 +432,7 @@ export default function TemplateFieldToolsTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => void deleteFieldTool(row)}
-													variant="accent"
+													variant="danger"
 													disabled={disabled}
 												>
 													Delete
@@ -448,7 +441,7 @@ export default function TemplateFieldToolsTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => openEdit(row)}
-													variant="neutral"
+													variant="secondary"
 													disabled={disabled}
 												>
 													Edit
@@ -486,3 +479,5 @@ export default function TemplateFieldToolsTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Tool content renderer shell for future tool-focused layouts.                                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { JSX } from "react";
 
 import ContentRenderShell from "../ContentRenderShell";
@@ -20,3 +22,5 @@ export default function ToolContentRenderer({
 }: ToolContentRendererProps): JSX.Element {
 	return <ContentRenderShell model={model} debug={debug} />;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

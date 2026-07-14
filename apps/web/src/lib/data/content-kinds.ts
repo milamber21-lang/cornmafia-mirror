@@ -4,6 +4,7 @@
 //// DB-first admin content kind read and mutation helpers                                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -77,7 +78,9 @@ export type ContentKindOption = {
 };
 
 function toIsoString(value: string | Date): string {
-	return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+	return value instanceof Date
+		? value.toISOString()
+		: new Date(value).toISOString();
 }
 
 function mapContentKindRow(row: ContentKindAdminDbRow): ContentKindAdminItem {
@@ -148,7 +151,9 @@ export async function findContentKindAdminByCode(
 	return row ? mapContentKindRow(row) : null;
 }
 
-export async function listEnabledContentKindOptions(): Promise<ContentKindOption[]> {
+export async function listEnabledContentKindOptions(): Promise<
+	ContentKindOption[]
+> {
 	const result = await query<ContentKindLookupDbRow>(
 		`
 			SELECT content_kind_code,
@@ -257,3 +262,5 @@ export async function deleteContentKindAdmin(args: {
 		[args.actorDiscordId, args.contentKindCode],
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

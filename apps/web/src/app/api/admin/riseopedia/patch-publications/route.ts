@@ -4,6 +4,7 @@
 //// Admin API route for Riseopedia patch publication rows and stable promotion.                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -72,7 +73,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const channelCode = getRequiredCode(data, "channelCode");
 			const publicationStatusCode = getRequiredCode(data, "publicationStatusCode");
 			if (!patchId || !channelCode || !publicationStatusCode) {
-				return jsonError("VALIDATION_REQUIRED", "Patch, channel, and status are required.", 400);
+				return jsonError(
+					"VALIDATION_REQUIRED",
+					"Patch, channel, and status are required.",
+					400,
+				);
 			}
 
 			const id = await upsertRiseopediaPatchPublicationAdmin({
@@ -95,7 +100,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
 			}
 
-			await setRiseopediaPatchPublicationStableAdmin({ actorDiscordId: actorOrResponse, patchPublicationId });
+			await setRiseopediaPatchPublicationStableAdmin({
+				actorDiscordId: actorOrResponse,
+				patchPublicationId,
+			});
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 
@@ -105,7 +113,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
 			}
 
-			await deleteRiseopediaPatchPublicationAdmin({ actorDiscordId: actorOrResponse, patchPublicationId });
+			await deleteRiseopediaPatchPublicationAdmin({
+				actorDiscordId: actorOrResponse,
+				patchPublicationId,
+			});
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 
@@ -115,3 +126,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

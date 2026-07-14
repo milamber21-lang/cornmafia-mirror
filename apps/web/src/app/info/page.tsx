@@ -4,6 +4,7 @@
 //// Info route root intentionally stays unavailable until a category namespace is selected.                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { notFound } from "next/navigation";
 
@@ -12,3 +13,5 @@ export const dynamic = "force-dynamic";
 export default async function InfoRootPage() {
 	notFound();
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

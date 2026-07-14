@@ -4,6 +4,7 @@
 //// DB-first Riseopedia admin read and mutation helpers for rebuilt admin contracts.                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -27,6 +28,10 @@ export type RiseopediaAdminMeta = {
 	entityOptions: RiseopediaAdminRows;
 	propertyOptions: RiseopediaAdminRows;
 	renderingChannels: RiseopediaAdminRows;
+	bodyRenderers: RiseopediaAdminRows;
+	bodyBlockRenderers: RiseopediaAdminRows;
+	bodyBlockDataSources: RiseopediaAdminRows;
+	bodyBlockEmptyBehaviors: RiseopediaAdminRows;
 	variantGroups: RiseopediaAdminRows;
 	variantGroupScopes: RiseopediaAdminRows;
 	patchOptions: RiseopediaAdminRows;
@@ -49,6 +54,7 @@ export type RiseopediaDisplayProfileAdminRows = {
 	profiles: RiseopediaAdminRows;
 	bindings: RiseopediaAdminRows;
 	properties: RiseopediaAdminRows;
+	bodyBlocks: RiseopediaAdminRows;
 	variantSelectors: RiseopediaAdminRows;
 };
 
@@ -106,6 +112,10 @@ export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 		entityOptions,
 		propertyOptions,
 		renderingChannels,
+		bodyRenderers,
+		bodyBlockRenderers,
+		bodyBlockDataSources,
+		bodyBlockEmptyBehaviors,
 		variantGroups,
 		variantGroupScopes,
 		patchOptions,
@@ -123,29 +133,87 @@ export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 		relationshipDisplayBlocks,
 		relationshipDisplayPerspectives,
 	] = await Promise.all([
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_entity_type_options ORDER BY sort_order, entity_type_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_entity_class_options ORDER BY entity_type_code, sort_order, entity_class_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_entity_category_options ORDER BY entity_type_code, entity_class_name, sort_order, entity_category_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_entity_subcategory_options ORDER BY entity_type_code, entity_class_name, entity_category_name, sort_order, entity_subcategory_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_entity_options ORDER BY entity_type_code, entity_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_property_options ORDER BY entity_type_code, entity_class_name NULLS FIRST, display_order, property_label`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_rendering_channels ORDER BY sort_order, channel_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_variant_group_options ORDER BY sort_order, variant_group_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_variant_group_scope_options ORDER BY entity_type_code, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST, variant_group_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_patch_options ORDER BY created_dt DESC, patch_code DESC`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_release_state_options ORDER BY sort_order, release_state_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_display_slots ORDER BY sort_order, display_slot_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_display_element_source_types ORDER BY sort_order, source_type_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_builtin_display_fields ORDER BY sort_order, builtin_field_label`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_display_element_source_options ORDER BY source_type_code, sort_order, source_label`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_overview_card_placements ORDER BY sort_order, placement_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_overview_card_modes ORDER BY sort_order, card_mode_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_overview_card_display_slots ORDER BY sort_order, display_slot_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_sections ORDER BY sort_order, section_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_section_classification_rules ORDER BY section_name, sort_order, entity_type_code, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_relationship_type_options ORDER BY sort_order, relationship_name, relationship_code`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_relationship_display_block_options ORDER BY sort_order, dependency_block_label`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_relationship_display_perspective_options ORDER BY sort_order, perspective_name`),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_entity_type_options ORDER BY sort_order, entity_type_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_entity_class_options ORDER BY entity_type_code, sort_order, entity_class_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_entity_category_options ORDER BY entity_type_code, entity_class_name, sort_order, entity_category_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_entity_subcategory_options ORDER BY entity_type_code, entity_class_name, entity_category_name, sort_order, entity_subcategory_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_entity_options ORDER BY entity_type_code, entity_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_property_options ORDER BY entity_type_code, entity_class_name NULLS FIRST, display_order, property_label`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_rendering_channels ORDER BY sort_order, channel_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_body_renderers ORDER BY sort_order, body_renderer_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_body_block_renderers ORDER BY sort_order, body_block_renderer_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_body_block_data_sources ORDER BY sort_order, data_source_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_body_block_empty_behaviors ORDER BY sort_order, empty_behavior_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_variant_group_options ORDER BY sort_order, variant_group_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_variant_group_scope_options ORDER BY entity_type_code, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST, variant_group_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_patch_options ORDER BY created_dt DESC, patch_code DESC`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_release_state_options ORDER BY sort_order, release_state_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_display_slots ORDER BY sort_order, display_slot_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_display_element_source_types ORDER BY sort_order, source_type_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_builtin_display_fields ORDER BY sort_order, builtin_field_label`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_display_element_source_options ORDER BY source_type_code, sort_order, source_label`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_overview_card_placements ORDER BY sort_order, placement_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_overview_card_modes ORDER BY sort_order, card_mode_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_overview_card_display_slots ORDER BY sort_order, display_slot_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_sections ORDER BY sort_order, section_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_section_classification_rules ORDER BY section_name, sort_order, entity_type_code, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_relationship_type_options ORDER BY sort_order, relationship_name, relationship_code`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_relationship_display_block_options ORDER BY sort_order, dependency_block_label`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_relationship_display_perspective_options ORDER BY sort_order, perspective_name`,
+		),
 	]);
 
 	return {
@@ -156,6 +224,10 @@ export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 		entityOptions: entityOptions.rows,
 		propertyOptions: propertyOptions.rows,
 		renderingChannels: renderingChannels.rows,
+		bodyRenderers: bodyRenderers.rows,
+		bodyBlockRenderers: bodyBlockRenderers.rows,
+		bodyBlockDataSources: bodyBlockDataSources.rows,
+		bodyBlockEmptyBehaviors: bodyBlockEmptyBehaviors.rows,
 		variantGroups: variantGroups.rows,
 		variantGroupScopes: variantGroupScopes.rows,
 		patchOptions: patchOptions.rows,
@@ -176,36 +248,64 @@ export async function listRiseopediaAdminMeta(): Promise<RiseopediaAdminMeta> {
 }
 
 export async function listRiseopediaAdminDisplayProfiles(): Promise<RiseopediaDisplayProfileAdminRows> {
-	const [profiles, bindings, properties, variantSelectors] = await Promise.all([
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_display_profiles ORDER BY channel_name, entity_type_code, sort_order, display_profile_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_display_profile_bindings ORDER BY channel_code, display_profile_name, priority_order, entity_type_code, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_display_profile_elements ORDER BY channel_code, display_profile_name, display_slot_code, sort_order, source_label`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_display_profile_variant_selectors ORDER BY channel_code, display_profile_name, sort_order, selector_label`),
-	]);
+	const [profiles, bindings, properties, bodyBlocks, variantSelectors] =
+		await Promise.all([
+			query<DbRow>(
+				`SELECT * FROM web_view.riseopedia_admin_display_profiles ORDER BY channel_name, entity_type_code, sort_order, display_profile_name`,
+			),
+			query<DbRow>(
+				`SELECT * FROM web_view.riseopedia_admin_display_profile_bindings ORDER BY channel_code, display_profile_name, priority_order, entity_type_code, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST`,
+			),
+			query<DbRow>(
+				`SELECT * FROM web_view.riseopedia_admin_display_profile_elements ORDER BY channel_code, display_profile_name, display_slot_code, sort_order, source_label`,
+			),
+			query<DbRow>(
+				`SELECT * FROM web_view.riseopedia_admin_display_profile_body_blocks ORDER BY channel_code, display_profile_name, sort_order, body_block_label`,
+			),
+			query<DbRow>(
+				`SELECT * FROM web_view.riseopedia_admin_display_profile_variant_selectors ORDER BY channel_code, display_profile_name, sort_order, selector_label`,
+			),
+		]);
 
 	return {
 		profiles: profiles.rows,
 		bindings: bindings.rows,
 		properties: properties.rows,
+		bodyBlocks: bodyBlocks.rows,
 		variantSelectors: variantSelectors.rows,
 	};
 }
 
 export async function listRiseopediaAdminSections(): Promise<RiseopediaSectionAdminRows> {
 	const [sections, classificationRules] = await Promise.all([
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_sections ORDER BY sort_order, section_name, section_id`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_section_classification_rules ORDER BY section_name, sort_order, entity_type_code, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST`),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_sections ORDER BY sort_order, section_name, section_id`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_section_classification_rules ORDER BY section_name, sort_order, entity_type_code, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST`,
+		),
 	]);
 
-	return { sections: sections.rows, classificationRules: classificationRules.rows };
+	return {
+		sections: sections.rows,
+		classificationRules: classificationRules.rows,
+	};
 }
 
 export async function listRiseopediaOverviewCardAdmin(): Promise<RiseopediaOverviewCardAdminRows> {
 	const [placements, displaySlots, ruleSets, ruleElements] = await Promise.all([
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_overview_card_placements ORDER BY sort_order, placement_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_overview_card_display_slots ORDER BY sort_order, display_slot_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_overview_card_rule_sets ORDER BY channel_name, placement_code, entity_type_name NULLS FIRST, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST, rule_set_label`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_overview_card_rule_elements ORDER BY channel_code, placement_code, entity_type_name NULLS FIRST, rule_set_label, sort_order, element_label, source_code`),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_overview_card_placements ORDER BY sort_order, placement_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_overview_card_display_slots ORDER BY sort_order, display_slot_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_overview_card_rule_sets ORDER BY channel_name, placement_code, entity_type_name NULLS FIRST, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST, rule_set_label`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_overview_card_rule_elements ORDER BY channel_code, placement_code, entity_type_name NULLS FIRST, rule_set_label, sort_order, element_label, source_code`,
+		),
 	]);
 
 	return {
@@ -218,24 +318,43 @@ export async function listRiseopediaOverviewCardAdmin(): Promise<RiseopediaOverv
 
 export async function listRiseopediaPatchAdmin(): Promise<RiseopediaPatchAdminRows> {
 	const [channels, publications, scopeOverrides] = await Promise.all([
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_patch_publication_channels ORDER BY sort_order, channel_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_patch_publications ORDER BY CASE channel_code WHEN 'new' THEN 1 WHEN 'stable' THEN 2 WHEN 'stale' THEN 3 ELSE 99 END, valid_from DESC, patch_code DESC`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_patch_scope_overrides ORDER BY entity_type_code, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST, valid_from DESC`),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_patch_publication_channels ORDER BY sort_order, channel_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_patch_publications ORDER BY CASE channel_code WHEN 'new' THEN 1 WHEN 'stable' THEN 2 WHEN 'stale' THEN 3 ELSE 99 END, valid_from DESC, patch_code DESC`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_patch_scope_overrides ORDER BY entity_type_code, entity_class_name NULLS FIRST, entity_category_name NULLS FIRST, entity_subcategory_name NULLS FIRST, valid_from DESC`,
+		),
 	]);
 
-	return { channels: channels.rows, publications: publications.rows, scopeOverrides: scopeOverrides.rows };
+	return {
+		channels: channels.rows,
+		publications: publications.rows,
+		scopeOverrides: scopeOverrides.rows,
+	};
 }
 
 export async function listRiseopediaReleaseAdmin(): Promise<RiseopediaReleaseAdminRows> {
 	const [decisions, evidence, overrides] = await Promise.all([
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_release_decision_rows ORDER BY patch_code DESC, effective_release_state_code, entity_name`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_release_evidence_rows ORDER BY patch_code DESC, entity_id, severity_code, evidence_code`),
-		query<DbRow>(`SELECT * FROM web_view.riseopedia_admin_entity_release_overrides ORDER BY active_flag DESC, updated_dt DESC`),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_release_decision_rows ORDER BY patch_code DESC, effective_release_state_code, entity_name`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_release_evidence_rows ORDER BY patch_code DESC, entity_id, severity_code, evidence_code`,
+		),
+		query<DbRow>(
+			`SELECT * FROM web_view.riseopedia_admin_entity_release_overrides ORDER BY active_flag DESC, updated_dt DESC`,
+		),
 	]);
 
-	return { decisions: decisions.rows, evidence: evidence.rows, overrides: overrides.rows };
+	return {
+		decisions: decisions.rows,
+		evidence: evidence.rows,
+		overrides: overrides.rows,
+	};
 }
-
 
 export async function listRiseopediaRelationshipDisplayRuleAdmin(): Promise<RiseopediaRelationshipDisplayRuleAdminRows> {
 	const rules = await query<DbRow>(
@@ -293,13 +412,14 @@ export async function upsertRiseopediaDisplayProfileAdmin(args: {
 	displayProfileCode: string;
 	displayProfileName: string;
 	entityTypeCode: string;
+	bodyRendererCode: string;
 	description: string | null;
 	sortOrder: number;
 	active: boolean;
 }): Promise<number | null> {
 	const result = await query<IdRow>(
 		`SELECT display_profile_id
-		 FROM web_api.riseopedia_display_profile_upsert($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+		 FROM web_api.riseopedia_display_profile_upsert($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
 		[
 			args.actorDiscordId,
 			args.displayProfileId,
@@ -307,6 +427,7 @@ export async function upsertRiseopediaDisplayProfileAdmin(args: {
 			args.displayProfileCode,
 			args.displayProfileName,
 			args.entityTypeCode,
+			args.bodyRendererCode,
 			args.description,
 			args.sortOrder,
 			args.active,
@@ -320,10 +441,10 @@ export async function deleteRiseopediaDisplayProfileAdmin(args: {
 	actorDiscordId: string;
 	displayProfileId: number;
 }): Promise<void> {
-	await query(`SELECT display_profile_id FROM web_api.riseopedia_display_profile_delete($1, $2)`, [
-		args.actorDiscordId,
-		args.displayProfileId,
-	]);
+	await query(
+		`SELECT display_profile_id FROM web_api.riseopedia_display_profile_delete($1, $2)`,
+		[args.actorDiscordId, args.displayProfileId],
+	);
 }
 
 export async function upsertRiseopediaDisplayProfileBindingAdmin(args: {
@@ -372,6 +493,7 @@ export async function upsertRiseopediaDisplayProfilePropertyAdmin(args: {
 	actorDiscordId: string;
 	displayProfileElementId: number | null;
 	displayProfileId: number;
+	displayProfileBodyBlockId: number | null;
 	displaySlotCode: string;
 	sourceTypeCode: string;
 	propertyCode: string | null;
@@ -386,11 +508,12 @@ export async function upsertRiseopediaDisplayProfilePropertyAdmin(args: {
 }): Promise<number | null> {
 	const result = await query<IdRow>(
 		`SELECT display_profile_element_id
-		 FROM web_api.riseopedia_display_profile_element_upsert($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+		 FROM web_api.riseopedia_display_profile_element_upsert($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
 		[
 			args.actorDiscordId,
 			args.displayProfileElementId,
 			args.displayProfileId,
+			args.displayProfileBodyBlockId,
 			args.displaySlotCode,
 			args.sourceTypeCode,
 			args.propertyCode,
@@ -415,6 +538,54 @@ export async function deleteRiseopediaDisplayProfilePropertyAdmin(args: {
 	await query(
 		`SELECT display_profile_element_id FROM web_api.riseopedia_display_profile_element_delete($1, $2)`,
 		[args.actorDiscordId, args.displayProfileElementId],
+	);
+}
+
+export async function upsertRiseopediaDisplayProfileBodyBlockAdmin(args: {
+	actorDiscordId: string;
+	displayProfileBodyBlockId: number | null;
+	displayProfileId: number;
+	bodyBlockCode: string;
+	bodyBlockLabel: string;
+	bodyBlockRendererCode: string;
+	bodyBlockDataSourceCode: string;
+	displaySlotCode: "body_main" | "detail_aside";
+	sortOrder: number;
+	visible: boolean;
+	emptyBehaviorCode: string;
+	active: boolean;
+	adminNote: string | null;
+}): Promise<number | null> {
+	const result = await query<IdRow>(
+		`SELECT display_profile_body_block_id
+		 FROM web_api.riseopedia_display_profile_body_block_upsert($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+		[
+			args.actorDiscordId,
+			args.displayProfileBodyBlockId,
+			args.displayProfileId,
+			args.bodyBlockCode,
+			args.bodyBlockLabel,
+			args.bodyBlockRendererCode,
+			args.bodyBlockDataSourceCode,
+			args.displaySlotCode,
+			args.sortOrder,
+			args.visible,
+			args.emptyBehaviorCode,
+			args.active,
+			args.adminNote,
+		],
+	);
+
+	return firstId(result.rows, "display_profile_body_block_id");
+}
+
+export async function deleteRiseopediaDisplayProfileBodyBlockAdmin(args: {
+	actorDiscordId: string;
+	displayProfileBodyBlockId: number;
+}): Promise<void> {
+	await query(
+		`SELECT display_profile_body_block_id FROM web_api.riseopedia_display_profile_body_block_delete($1, $2)`,
+		[args.actorDiscordId, args.displayProfileBodyBlockId],
 	);
 }
 
@@ -488,10 +659,10 @@ export async function deleteRiseopediaSectionAdmin(args: {
 	actorDiscordId: string;
 	sectionId: number;
 }): Promise<void> {
-	await query(`SELECT section_id FROM web_api.riseopedia_section_delete($1, $2)`, [
-		args.actorDiscordId,
-		args.sectionId,
-	]);
+	await query(
+		`SELECT section_id FROM web_api.riseopedia_section_delete($1, $2)`,
+		[args.actorDiscordId, args.sectionId],
+	);
 }
 
 export async function upsertRiseopediaSectionClassificationRuleAdmin(args: {
@@ -766,20 +937,20 @@ export async function deleteRiseopediaPatchPublicationAdmin(args: {
 	actorDiscordId: string;
 	patchPublicationId: number;
 }): Promise<void> {
-	await query(`SELECT patch_publication_id FROM web_api.riseopedia_patch_publication_delete($1, $2)`, [
-		args.actorDiscordId,
-		args.patchPublicationId,
-	]);
+	await query(
+		`SELECT patch_publication_id FROM web_api.riseopedia_patch_publication_delete($1, $2)`,
+		[args.actorDiscordId, args.patchPublicationId],
+	);
 }
 
 export async function setRiseopediaPatchPublicationStableAdmin(args: {
 	actorDiscordId: string;
 	patchPublicationId: number;
 }): Promise<void> {
-	await query(`SELECT patch_publication_id FROM web_api.riseopedia_patch_publication_set_stable($1, $2)`, [
-		args.actorDiscordId,
-		args.patchPublicationId,
-	]);
+	await query(
+		`SELECT patch_publication_id FROM web_api.riseopedia_patch_publication_set_stable($1, $2)`,
+		[args.actorDiscordId, args.patchPublicationId],
+	);
 }
 
 export async function upsertRiseopediaPatchScopeOverrideAdmin(args: {
@@ -903,8 +1074,10 @@ export async function deleteRiseopediaRelationshipDisplayRuleAdmin(args: {
 	actorDiscordId: string;
 	ruleKey: string;
 }): Promise<void> {
-	await query(`SELECT rule_key FROM web_api.riseopedia_relationship_display_rule_delete($1, $2)`, [
-		args.actorDiscordId,
-		args.ruleKey,
-	]);
+	await query(
+		`SELECT rule_key FROM web_api.riseopedia_relationship_display_rule_delete($1, $2)`,
+		[args.actorDiscordId, args.ruleKey],
+	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

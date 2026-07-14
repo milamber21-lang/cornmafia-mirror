@@ -4,6 +4,7 @@
 --//// Resets identity and serial sequences after an ID-preserving bootstrap import.                              ////
 --//// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 --//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 DO $$
 DECLARE v_row record;
@@ -60,3 +61,5 @@ BEGIN
 	END LOOP;
 END;
 $$;
+
+-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

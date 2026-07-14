@@ -4,6 +4,7 @@
 //// Public collection hub route for DB-first role-aware content discovery                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 import { notFound, redirect } from "next/navigation";
@@ -33,13 +34,19 @@ type PageProps = {
 	}>;
 };
 
-const SORT_CODES: readonly PublicCollectionSortCode[] = ["newest", "title"] as const;
+const SORT_CODES: readonly PublicCollectionSortCode[] = [
+	"newest",
+	"title",
+] as const;
 
 function parseSortCode(value: string | undefined): PublicCollectionSortCode {
 	return SORT_CODES.find((sortCode) => sortCode === value) ?? "newest";
 }
 
-function parsePositiveInteger(value: string | undefined, fallback: number): number {
+function parsePositiveInteger(
+	value: string | undefined,
+	fallback: number,
+): number {
 	if (!value) {
 		return fallback;
 	}
@@ -99,3 +106,5 @@ export default async function PublicCollectionPage({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// Admin API route for Riseopedia overview-card rule sets.                                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -70,7 +71,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const channelCode = getRequiredCode(data, "channelCode") ?? "riseopedia";
 			const placementCode = getRequiredCode(data, "placementCode");
 			if (!channelCode || !placementCode) {
-				return jsonError("VALIDATION_REQUIRED", "Channel and placement are required.", 400);
+				return jsonError(
+					"VALIDATION_REQUIRED",
+					"Channel and placement are required.",
+					400,
+				);
 			}
 
 			const cardModeCode = getRequiredCode(data, "cardModeCode") ?? "compact";
@@ -99,7 +104,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
 			}
 
-			await deleteRiseopediaOverviewCardRuleSetAdmin({ actorDiscordId: actorOrResponse, overviewCardRuleSetId });
+			await deleteRiseopediaOverviewCardRuleSetAdmin({
+				actorDiscordId: actorOrResponse,
+				overviewCardRuleSetId,
+			});
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 
@@ -109,3 +117,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

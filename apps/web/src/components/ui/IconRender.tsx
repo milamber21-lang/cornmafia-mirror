@@ -4,6 +4,8 @@
 //// Lightweight icon renderer for lucide or media-backed icon shapes                                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -20,7 +22,10 @@ import {
 	type IconMediaRef,
 	type IconShape,
 } from "@/lib/helpers/icons";
-import { cssColorFromThemePreview, isNoTintIconColor } from "@/lib/helpers/icon-color";
+import {
+	cssColorFromThemePreview,
+	isNoTintIconColor,
+} from "@/lib/helpers/icon-color";
 import {
 	buildMediaIconUrl,
 	extractStorageRelPathFromMediaUrl,
@@ -303,3 +308,5 @@ export default function IconRender({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

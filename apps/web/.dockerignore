@@ -1,6 +1,7 @@
 # FILE: apps/web/.dockerignore
 # Language: Dockerignore
 # Web app Docker context exclusions for source-only, secret-safe image builds.
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 node_modules
 node_modules/**
@@ -17,6 +18,15 @@ Dockerfile
 .vscode
 coverage
 coverage/**
+
+# Unit and contract tests run in CI, not in the production image build context.
+vitest.config.ts
+src/test
+src/test/**
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
 
 .env
 .env.*
@@ -49,3 +59,5 @@ uploads/**
 # The broad host-data exclusions above must not hide src/lib/data/* imports.
 !src/lib/data
 !src/lib/data/**
+
+# WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

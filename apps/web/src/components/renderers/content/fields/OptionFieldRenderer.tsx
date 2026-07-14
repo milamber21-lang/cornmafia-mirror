@@ -4,6 +4,7 @@
 //// Renders option fields using the resolved option label when available.                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -26,10 +27,14 @@ export default function OptionFieldRenderer({
 	}
 
 	return (
-		<ContentFieldFrame field={field} showLabel={showLabel} valueTextClassName="content-field-value--compact">
-			<span className="content-field-pill">
-				{formattedValue}
-			</span>
+		<ContentFieldFrame
+			field={field}
+			showLabel={showLabel}
+			valueTextClassName="content-field-value--compact"
+		>
+			<span className="content-field-pill">{formattedValue}</span>
 		</ContentFieldFrame>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

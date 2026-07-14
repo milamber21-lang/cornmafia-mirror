@@ -4,6 +4,7 @@
 //// Admin page for Riseopedia entity release overrides.                                                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -28,23 +29,36 @@ export interface ReleaseOverridesAdminPageProps {
 }
 
 function readSafeDecisionReturnHref(value: string | undefined): string {
-	if (typeof value !== "string" || !value.startsWith("/admin/riseopedia/release-decisions")) {
+	if (
+		typeof value !== "string" ||
+		!value.startsWith("/admin/riseopedia/release-decisions")
+	) {
 		return "/admin";
 	}
 
 	return value;
 }
 
-export default async function ReleaseOverridesAdminPage({ searchParams }: ReleaseOverridesAdminPageProps): Promise<JSX.Element> {
+export default async function ReleaseOverridesAdminPage({
+	searchParams,
+}: ReleaseOverridesAdminPageProps): Promise<JSX.Element> {
 	const guard = await requireAdmin();
 	if (!guard.allowed) {
-		return <RiseopediaAdminGuard title="Release Overrides" reason={guard.reason} />;
+		return (
+			<RiseopediaAdminGuard title="Release Overrides" reason={guard.reason} />
+		);
 	}
 
 	const resolvedSearchParams = searchParams ? await searchParams : {};
-	const entityId = typeof resolvedSearchParams.entityId === "string" ? resolvedSearchParams.entityId : "";
+	const entityId =
+		typeof resolvedSearchParams.entityId === "string"
+			? resolvedSearchParams.entityId
+			: "";
 	const returnHref = readSafeDecisionReturnHref(resolvedSearchParams.returnTo);
-	const [meta, rows] = await Promise.all([listRiseopediaAdminMeta(), listRiseopediaReleaseAdmin()]);
+	const [meta, rows] = await Promise.all([
+		listRiseopediaAdminMeta(),
+		listRiseopediaReleaseAdmin(),
+	]);
 	const overrideRows = entityId
 		? rows.overrides.filter((row) => String(row.entity_id ?? "") === entityId)
 		: rows.overrides;
@@ -53,10 +67,16 @@ export default async function ReleaseOverridesAdminPage({ searchParams }: Releas
 		<RiseopediaAdminPageChrome
 			title="Release Overrides"
 			backHref={returnHref}
-			backLabel={returnHref.startsWith("/admin/riseopedia/release-decisions") ? "Entity Decisions" : "Go back"}
+			backLabel={
+				returnHref.startsWith("/admin/riseopedia/release-decisions")
+					? "Entity Decisions"
+					: "Go back"
+			}
 		>
 			<RiseopediaAccessControlNav active="decisions" />
 			<RiseopediaReleaseOverridesTable initialRows={overrideRows} meta={meta} />
 		</RiseopediaAdminPageChrome>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// Admin API route for Riseopedia display profile classification bindings.                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -12,7 +13,11 @@ import {
 	listRiseopediaAdminDisplayProfiles,
 	upsertRiseopediaDisplayProfileBindingAdmin,
 } from "@/lib/data/riseopedia-admin";
-import { jsonError, parsePositiveInt, requireAdminResponse } from "@/lib/server/admin-route";
+import {
+	jsonError,
+	parsePositiveInt,
+	requireAdminResponse,
+} from "@/lib/server/admin-route";
 import {
 	classifyRiseopediaAdminError,
 	getBoolean,
@@ -37,12 +42,16 @@ export async function GET(request: NextRequest): Promise<Response> {
 		return guardResponse;
 	}
 
-	const scopedId = parsePositiveInt(request.nextUrl.searchParams.get("displayProfileId"));
+	const scopedId = parsePositiveInt(
+		request.nextUrl.searchParams.get("displayProfileId"),
+	);
 
 	try {
 		const rows = await listRiseopediaAdminDisplayProfiles();
 		const filteredRows = scopedId
-			? rows.bindings.filter((row) => String(row.display_profile_id ?? "") === String(scopedId))
+			? rows.bindings.filter(
+					(row) => String(row.display_profile_id ?? "") === String(scopedId),
+				)
 			: rows.bindings;
 		return NextResponse.json({ rows: filteredRows }, { status: 200 });
 	} catch (error: unknown) {
@@ -67,7 +76,9 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError("VALIDATION_REQUIRED", "Missing op.", 400);
 	}
 
-	const scopedId = parsePositiveInt(request.nextUrl.searchParams.get("displayProfileId"));
+	const scopedId = parsePositiveInt(
+		request.nextUrl.searchParams.get("displayProfileId"),
+	);
 
 	try {
 		if (op === "upsert") {
@@ -79,10 +90,18 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const displayProfileId = getPositiveInt(data, "displayProfileId");
 			const entityTypeCode = getRequiredCode(data, "entityTypeCode");
 			if (!displayProfileId || !entityTypeCode) {
-				return jsonError("VALIDATION_REQUIRED", "Display profile and entity type are required.", 400);
+				return jsonError(
+					"VALIDATION_REQUIRED",
+					"Display profile and entity type are required.",
+					400,
+				);
 			}
 			if (scopedId && displayProfileId !== scopedId) {
-				return jsonError("VALIDATION_REQUIRED", "This binding can only be saved under the selected display profile.", 400);
+				return jsonError(
+					"VALIDATION_REQUIRED",
+					"This binding can only be saved under the selected display profile.",
+					400,
+				);
 			}
 
 			const id = await upsertRiseopediaDisplayProfileBindingAdmin({
@@ -109,13 +128,23 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 			if (scopedId) {
 				const rows = await listRiseopediaAdminDisplayProfiles();
-				const target = rows.bindings.find((row) => Number(row.display_profile_binding_id) === displayProfileBindingId);
+				const target = rows.bindings.find(
+					(row) =>
+						Number(row.display_profile_binding_id) === displayProfileBindingId,
+				);
 				if (!target || Number(target.display_profile_id) !== scopedId) {
-					return jsonError("VALIDATION_REQUIRED", "This binding does not belong to the selected display profile.", 400);
+					return jsonError(
+						"VALIDATION_REQUIRED",
+						"This binding does not belong to the selected display profile.",
+						400,
+					);
 				}
 			}
 
-			await deleteRiseopediaDisplayProfileBindingAdmin({ actorDiscordId: actorOrResponse, displayProfileBindingId });
+			await deleteRiseopediaDisplayProfileBindingAdmin({
+				actorDiscordId: actorOrResponse,
+				displayProfileBindingId,
+			});
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 
@@ -125,3 +154,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

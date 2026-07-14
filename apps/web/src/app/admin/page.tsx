@@ -4,6 +4,7 @@
 //// Permission-aware control center entry page for active DB-first admin surfaces.                               ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import {
 	ArrowRight,
@@ -162,7 +163,8 @@ const publishingLinks: AdminLink[] = [
 const riseopediaLinks: AdminLink[] = [
 	{
 		title: "Riseopedia Access Control",
-		description: "Manage game patch publications, publication scope overrides, and release evidence.",
+		description:
+			"Manage game patch publications, publication scope overrides, and release evidence.",
 		href: "/admin/riseopedia/patch-publications",
 		icon: Shield,
 		minimumAccess: "admin",
@@ -176,7 +178,8 @@ const riseopediaLinks: AdminLink[] = [
 	},
 	{
 		title: "Riseopedia Display Profiles",
-		description: "Manage detail display profiles and their child configuration tables.",
+		description:
+			"Manage detail display profiles and their child configuration tables.",
 		href: "/admin/riseopedia/display-profiles",
 		icon: LayoutTemplate,
 		minimumAccess: "admin",
@@ -190,7 +193,8 @@ const riseopediaLinks: AdminLink[] = [
 	},
 	{
 		title: "Riseopedia Relationship Display",
-		description: "Manage Obtained from, Used for, and hidden relationship display rules.",
+		description:
+			"Manage Obtained from, Used for, and hidden relationship display rules.",
 		href: "/admin/riseopedia/relationship-display-rules",
 		icon: Link2,
 		minimumAccess: "admin",
@@ -205,7 +209,8 @@ const sections: AdminSection[] = [
 	},
 	{
 		title: "Web Structure",
-		description: "Configure templates, routing structure, navigation, links, colors, and icon rules.",
+		description:
+			"Configure templates, routing structure, navigation, links, colors, and icon rules.",
 		items: webStructureLinks,
 	},
 	{
@@ -215,7 +220,8 @@ const sections: AdminSection[] = [
 	},
 	{
 		title: "Riseopedia",
-		description: "Configure Riseopedia access control, sections, display profiles, and card rules.",
+		description:
+			"Configure Riseopedia access control, sections, display profiles, and card rules.",
 		items: riseopediaLinks,
 	},
 ];
@@ -233,7 +239,9 @@ function buildVisibleSections(isAdmin: boolean): VisibleAdminSection[] {
 		.filter((section) => section.items.length > 0);
 }
 
-function buildRailGroups(visibleSections: VisibleAdminSection[]): AdminRailGroup[] {
+function buildRailGroups(
+	visibleSections: VisibleAdminSection[],
+): AdminRailGroup[] {
 	return visibleSections.map((section) => ({
 		title: section.title,
 		items: section.items.map(({ title, href, icon }) => ({ title, href, icon })),
@@ -294,7 +302,10 @@ function AdminRail({ groups }: { groups: AdminRailGroup[] }) {
 				</div>
 			</div>
 
-			<nav aria-label="Control center sections" className="admin-control-rail__nav">
+			<nav
+				aria-label="Control center sections"
+				className="admin-control-rail__nav"
+			>
 				{groups.map((group) => (
 					<div key={group.title}>
 						<div className="admin-control-rail__group-title">{group.title}</div>
@@ -303,8 +314,16 @@ function AdminRail({ groups }: { groups: AdminRailGroup[] }) {
 								const Icon = item.icon;
 
 								return (
-									<Link key={item.href} href={item.href} className="admin-control-rail__link">
-										<Icon aria-hidden className="admin-control-rail__link-icon" strokeWidth={1.8} />
+									<Link
+										key={item.href}
+										href={item.href}
+										className="admin-control-rail__link"
+									>
+										<Icon
+											aria-hidden
+											className="admin-control-rail__link-icon"
+											strokeWidth={1.8}
+										/>
 										<span className="admin-control-rail__link-label">{item.title}</span>
 									</Link>
 								);
@@ -338,7 +357,9 @@ export default async function AdminIndex() {
 					<header className="admin-control-hero">
 						<div className="admin-control-hero__content">
 							<h1 className="admin-control-hero__title">Control Center</h1>
-							<p className="admin-control-hero__description">{getHeaderText(isAdmin)}</p>
+							<p className="admin-control-hero__description">
+								{getHeaderText(isAdmin)}
+							</p>
 						</div>
 					</header>
 
@@ -350,3 +371,5 @@ export default async function AdminIndex() {
 		</section>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

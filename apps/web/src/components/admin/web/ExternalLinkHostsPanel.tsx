@@ -4,6 +4,7 @@
 //// Admin panel for creating and editing external link host and path whitelist rows                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -60,7 +61,10 @@ function getPathMatchMode(values: Values): string {
 }
 
 function validateHostPattern(value: unknown): string | undefined {
-	const hostPattern = String(value ?? "").trim().toLowerCase().replace(/\.$/, "");
+	const hostPattern = String(value ?? "")
+		.trim()
+		.toLowerCase()
+		.replace(/\.$/, "");
 
 	if (!hostPattern) {
 		return "Host pattern is required.";
@@ -273,9 +277,7 @@ export default function ExternalLinkHostsPanel({
 					: String(values.pathPattern ?? "").trim();
 			const data = {
 				hostPattern: String(values.hostPattern ?? "").trim(),
-				hostMatchModeCode: String(
-					values.hostMatchModeCode ?? "exact_host",
-				).trim(),
+				hostMatchModeCode: String(values.hostMatchModeCode ?? "exact_host").trim(),
 				pathPattern,
 				pathMatchModeCode,
 				allowedSurfaceScopeCode: String(
@@ -299,10 +301,7 @@ export default function ExternalLinkHostsPanel({
 
 			if (!response.ok) {
 				throw new Error(
-					await readResponseMessage(
-						response,
-						"Failed to save external link rule.",
-					),
+					await readResponseMessage(response, "Failed to save external link rule."),
 				);
 			}
 		} catch (error: unknown) {
@@ -325,9 +324,7 @@ export default function ExternalLinkHostsPanel({
 				onClose();
 			}}
 			title={
-				mode === "create"
-					? "Create External Link Rule"
-					: "Edit External Link Rule"
+				mode === "create" ? "Create External Link Rule" : "Edit External Link Rule"
 			}
 			width="50%"
 			showSave
@@ -347,3 +344,5 @@ export default function ExternalLinkHostsPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

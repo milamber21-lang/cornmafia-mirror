@@ -4,6 +4,8 @@
 //// Table-owned Riseopedia display profile admin list and row actions.                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { Dispatch, JSX, ReactNode, SetStateAction } from "react";
@@ -39,9 +41,7 @@ import type {
 	RiseopediaAdminRows,
 } from "./RiseopediaAdminTypes";
 import RiseopediaDisplayProfilesPanel from "./RiseopediaDisplayProfilesPanel";
-import {
-	buildRiseopediaDisplayProfileFields,
-} from "./RiseopediaAdminPanelFieldBuilders";
+import { buildRiseopediaDisplayProfileFields } from "./RiseopediaAdminPanelFieldBuilders";
 import {
 	activeFilter,
 	entityTypeFilter,
@@ -72,7 +72,10 @@ export interface DisplayProfileTableProps {
 	meta: RiseopediaAdminMeta;
 }
 
-export default function RiseopediaDisplayProfilesTable({ initialRows, meta }: DisplayProfileTableProps): JSX.Element {
+export default function RiseopediaDisplayProfilesTable({
+	initialRows,
+	meta,
+}: DisplayProfileTableProps): JSX.Element {
 	return (
 		<DisplayProfilesTableBody
 			initialRows={initialRows}
@@ -81,19 +84,43 @@ export default function RiseopediaDisplayProfilesTable({ initialRows, meta }: Di
 			searchPlaceholder="Search display profiles"
 			createLabel="Create profile"
 			deleteConfirmTitle="Delete display profile"
-			deleteConfirmMessage={(row) => `Delete display profile ${idText(row.display_profile_name)}?`}
+			deleteConfirmMessage={(row) =>
+				`Delete display profile ${idText(row.display_profile_name)}?`
+			}
 			emptyText="No display profiles found."
 			defaultSortKey="sort_order"
 			filters={[entityTypeFilter(meta), activeFilter()]}
 			rowActions={[
-				{ label: "Bindings", href: (row) => `/admin/riseopedia/display-profiles/${idText(row.display_profile_id)}/bindings`, variant: "neutral" },
-				{ label: "Elements", href: (row) => `/admin/riseopedia/display-profiles/${idText(row.display_profile_id)}/properties`, variant: "neutral" },
-				{ label: "Selectors", href: (row) => `/admin/riseopedia/display-profiles/${idText(row.display_profile_id)}/variant-selectors`, variant: "neutral" },
+				{
+					label: "Bindings",
+					href: (row) =>
+						`/admin/riseopedia/display-profiles/${idText(row.display_profile_id)}/bindings`,
+					variant: "secondary",
+				},
+				{
+					label: "Blocks",
+					href: (row) =>
+						`/admin/riseopedia/display-profiles/${idText(row.display_profile_id)}/body-blocks`,
+					variant: "secondary",
+				},
+				{
+					label: "Elements",
+					href: (row) =>
+						`/admin/riseopedia/display-profiles/${idText(row.display_profile_id)}/properties`,
+					variant: "secondary",
+				},
+				{
+					label: "Selectors",
+					href: (row) =>
+						`/admin/riseopedia/display-profiles/${idText(row.display_profile_id)}/variant-selectors`,
+					variant: "secondary",
+				},
 			]}
 			columns={[
 				{ rowKey: "display_profile_name", label: "Profile", strong: true },
 				{ rowKey: "display_profile_code", label: "Code" },
 				{ rowKey: "entity_type_name", label: "Entity type" },
+				{ rowKey: "body_renderer_name", label: "Body renderer" },
 				{ rowKey: "active_flag", label: "Status", kind: "status" },
 			]}
 			fields={buildRiseopediaDisplayProfileFields(meta)}
@@ -102,7 +129,7 @@ export default function RiseopediaDisplayProfilesTable({ initialRows, meta }: Di
 					open={open}
 					mode={mode}
 					row={row}
-						meta={meta}
+					meta={meta}
 					onClose={onClose}
 					onSaved={onSaved}
 				/>
@@ -162,7 +189,10 @@ function getRiseopediaOwnedCellClassName(column: TableColumnConfig): string {
 		: "admin-table-cell--center";
 }
 
-function formatRiseopediaOwnedCell(row: TableRow, column: TableColumnConfig): string {
+function formatRiseopediaOwnedCell(
+	row: TableRow,
+	column: TableColumnConfig,
+): string {
 	const value = tableReadRowValue(row, column.rowKey);
 	if (column.kind === "boolean") {
 		return tableToBoolean(value) ? "Yes" : "No";
@@ -175,15 +205,21 @@ function formatRiseopediaOwnedCell(row: TableRow, column: TableColumnConfig): st
 	return tableToDisplayText(value);
 }
 
-function getRiseopediaOwnedStatusColumns(columns: TableColumnConfig[]): TableColumnConfig[] {
+function getRiseopediaOwnedStatusColumns(
+	columns: TableColumnConfig[],
+): TableColumnConfig[] {
 	return columns.filter((column) => column.kind === "status");
 }
 
-function getRiseopediaOwnedDataColumns(columns: TableColumnConfig[]): TableColumnConfig[] {
+function getRiseopediaOwnedDataColumns(
+	columns: TableColumnConfig[],
+): TableColumnConfig[] {
 	return columns.filter((column) => column.kind !== "status");
 }
 
-function getRiseopediaOwnedColumnWidthClassName(column: TableColumnConfig): string {
+function getRiseopediaOwnedColumnWidthClassName(
+	column: TableColumnConfig,
+): string {
 	if (column.width === "narrow") {
 		return "table-col table-col--w-8";
 	}
@@ -206,11 +242,20 @@ function getRiseopediaOwnedColumnWidthClassName(column: TableColumnConfig): stri
 
 	const key = column.rowKey.toLowerCase();
 	const label = column.label.toLowerCase();
-	if (column.kind === "boolean" || column.kind === "count" || column.kind === "status") {
+	if (
+		column.kind === "boolean" ||
+		column.kind === "count" ||
+		column.kind === "status"
+	) {
 		return "table-col table-col--w-10";
 	}
 
-	if (column.strong === true || key.includes("name") || label.includes("name") || label.includes("profile")) {
+	if (
+		column.strong === true ||
+		key.includes("name") ||
+		label.includes("name") ||
+		label.includes("profile")
+	) {
 		return "table-col table-col--w-18";
 	}
 
@@ -229,21 +274,33 @@ function renderRiseopediaOwnedColGroup(args: {
 	return (
 		<colgroup>
 			{args.dataColumns.map((column) => (
-				<col key={`data-${column.rowKey}`} className={getRiseopediaOwnedColumnWidthClassName(column)} />
+				<col
+					key={`data-${column.rowKey}`}
+					className={getRiseopediaOwnedColumnWidthClassName(column)}
+				/>
 			))}
 			{args.statusColumns.map((column) => (
-				<col key={`status-${column.rowKey}`} className="table-col table-col--w-10" />
+				<col
+					key={`status-${column.rowKey}`}
+					className="table-col table-col--w-10"
+				/>
 			))}
 			<col className="table-col table-col--w-10" />
 			{args.rowActions.map((action) => (
-				<col key={`row-action-${action.label}`} className="table-col table-col--w-10" />
+				<col
+					key={`row-action-${action.label}`}
+					className="table-col table-col--w-10"
+				/>
 			))}
 			<col className="table-col table-col--w-10" />
 		</colgroup>
 	);
 }
 
-function getRiseopediaOwnedRowSearchText(row: TableRow, columns: TableColumnConfig[]): string {
+function getRiseopediaOwnedRowSearchText(
+	row: TableRow,
+	columns: TableColumnConfig[],
+): string {
 	return columns
 		.filter((column) => column.searchable !== false)
 		.map((column) => formatRiseopediaOwnedCell(row, column))
@@ -251,7 +308,9 @@ function getRiseopediaOwnedRowSearchText(row: TableRow, columns: TableColumnConf
 		.toLowerCase();
 }
 
-function buildRiseopediaOwnedInitialFilterState(filters: TableFilterConfig[]): TableFilterState {
+function buildRiseopediaOwnedInitialFilterState(
+	filters: TableFilterConfig[],
+): TableFilterState {
 	const state: TableFilterState = {};
 	for (const filter of filters) {
 		state[filter.key] = "";
@@ -259,7 +318,10 @@ function buildRiseopediaOwnedInitialFilterState(filters: TableFilterConfig[]): T
 	return state;
 }
 
-function riseopediaOwnedFilterValueMatches(rowValue: unknown, selectedValue: string): boolean {
+function riseopediaOwnedFilterValueMatches(
+	rowValue: unknown,
+	selectedValue: string,
+): boolean {
 	if (!selectedValue) {
 		return true;
 	}
@@ -267,10 +329,14 @@ function riseopediaOwnedFilterValueMatches(rowValue: unknown, selectedValue: str
 	if (typeof rowValue === "boolean") {
 		const normalizedSelectedValue = selectedValue.trim().toLowerCase();
 		if (rowValue) {
-			return ["true", "yes", "enabled", "active", "1"].includes(normalizedSelectedValue);
+			return ["true", "yes", "enabled", "active", "1"].includes(
+				normalizedSelectedValue,
+			);
 		}
 
-		return ["false", "no", "disabled", "inactive", "0"].includes(normalizedSelectedValue);
+		return ["false", "no", "disabled", "inactive", "0"].includes(
+			normalizedSelectedValue,
+		);
 	}
 
 	return tableToDisplayText(rowValue) === selectedValue;
@@ -283,7 +349,12 @@ function riseopediaOwnedMatchesFilters(
 ): boolean {
 	for (const filter of filters) {
 		const selectedValue = filterState[filter.key] ?? "";
-		if (!riseopediaOwnedFilterValueMatches(tableReadRowValue(row, filter.rowKey), selectedValue)) {
+		if (
+			!riseopediaOwnedFilterValueMatches(
+				tableReadRowValue(row, filter.rowKey),
+				selectedValue,
+			)
+		) {
 			return false;
 		}
 	}
@@ -295,7 +366,9 @@ function getRiseopediaOwnedFilterOptions(
 	filter: TableFilterConfig,
 	filterState: TableFilterState,
 ): TableOption[] {
-	return filter.optionsBuilder ? filter.optionsBuilder(filterState) : filter.options ?? [];
+	return filter.optionsBuilder
+		? filter.optionsBuilder(filterState)
+		: (filter.options ?? []);
 }
 
 function renderRiseopediaOwnedFilterControlItems(args: {
@@ -337,15 +410,24 @@ function renderRiseopediaOwnedFilterControlItems(args: {
 	));
 }
 
-function renderRiseopediaOwnedToolbarCluster(content: ReactNode): JSX.Element | null {
+function renderRiseopediaOwnedToolbarCluster(
+	content: ReactNode,
+): JSX.Element | null {
 	if (!content) {
 		return null;
 	}
 
-	return <div className="admin-table-toolbar-filter admin-table-toolbar-filter--riseopedia">{content}</div>;
+	return (
+		<div className="admin-table-toolbar-filter admin-table-toolbar-filter--riseopedia">
+			{content}
+		</div>
+	);
 }
 
-function combineRiseopediaOwnedToolbarContent(primary: ReactNode, secondary: ReactNode): ReactNode {
+function combineRiseopediaOwnedToolbarContent(
+	primary: ReactNode,
+	secondary: ReactNode,
+): ReactNode {
 	if (primary && secondary) {
 		return renderRiseopediaOwnedToolbarCluster(
 			<>
@@ -379,45 +461,65 @@ function DisplayProfilesTableBody({
 	secondaryLeft,
 	secondaryCenter,
 	secondaryRight,
-	filtersPlacement = "secondaryLeft",
+	filtersPlacement = "primaryLeft",
 	renderPanel,
 }: DisplayProfilesTableBodyProps): JSX.Element {
 	const [rows, setRows] = useState<TableRow[]>(initialRows);
 	const [busyId, setBusyId] = useState<string | null>(null);
 	const [error, setError] = useState("");
 	const [search, setSearch] = useState("");
-	const [filterState, setFilterState] = useState<TableFilterState>(() => buildRiseopediaOwnedInitialFilterState(filters));
+	const [filterState, setFilterState] = useState<TableFilterState>(() =>
+		buildRiseopediaOwnedInitialFilterState(filters),
+	);
 	const [panelOpen, setPanelOpen] = useState(false);
 	const [panelMode, setPanelMode] = useState<RiseopediaOwnedPanelMode>("create");
 	const [selectedRow, setSelectedRow] = useState<TableRow | null>(null);
 	const [page, setPage] = useState<number>(1);
 	const [pageSize, setPageSize] = useState<number>(20);
-	const [sortKey, setSortKey] = useState<string>(defaultSortKey ?? columns[0]?.rowKey ?? idKey);
+	const [sortKey, setSortKey] = useState<string>(
+		defaultSortKey ?? columns[0]?.rowKey ?? idKey,
+	);
 	const [sortDirection, setSortDirection] = useState<TableSortDirection>("asc");
 	const rowActionColumnCount = rowActions.length;
-	const statusColumns = useMemo(() => getRiseopediaOwnedStatusColumns(columns), [columns]);
-	const dataColumns = useMemo(() => getRiseopediaOwnedDataColumns(columns), [columns]);
-	const filterControlItems = renderRiseopediaOwnedFilterControlItems({ filters, filterState, setFilterState, setPage });
-	const primaryLeft = filtersPlacement === "primaryLeft"
-		? combineRiseopediaOwnedToolbarContent(toolbarLeft, filterControlItems)
-		: toolbarLeft;
-	const secondaryLeftContent = filtersPlacement === "secondaryLeft"
-		? renderRiseopediaOwnedToolbarCluster(filterControlItems)
-		: secondaryLeft;
-	const secondaryCenterContent = filtersPlacement === "secondaryCenter"
-		? renderRiseopediaOwnedToolbarCluster(filterControlItems)
-		: secondaryCenter;
-	const hasSecondaryToolbar = Boolean(secondaryLeftContent || secondaryCenterContent || secondaryRight);
-	const secondaryToolbarClassName = filtersPlacement === "secondaryLeft"
-		? "admin-table-toolbar admin-table-toolbar--secondary admin-table-toolbar--secondary-left"
-		: "admin-table-toolbar admin-table-toolbar--secondary";
+	const statusColumns = useMemo(
+		() => getRiseopediaOwnedStatusColumns(columns),
+		[columns],
+	);
+	const dataColumns = useMemo(
+		() => getRiseopediaOwnedDataColumns(columns),
+		[columns],
+	);
+	const filterControlItems = renderRiseopediaOwnedFilterControlItems({
+		filters,
+		filterState,
+		setFilterState,
+		setPage,
+	});
+	const primaryLeft =
+		filtersPlacement === "primaryLeft"
+			? combineRiseopediaOwnedToolbarContent(toolbarLeft, filterControlItems)
+			: toolbarLeft;
+	const secondaryLeftContent =
+		filtersPlacement === "secondaryLeft"
+			? renderRiseopediaOwnedToolbarCluster(filterControlItems)
+			: secondaryLeft;
+	const secondaryCenterContent =
+		filtersPlacement === "secondaryCenter"
+			? renderRiseopediaOwnedToolbarCluster(filterControlItems)
+			: secondaryCenter;
+	const hasSecondaryToolbar = Boolean(
+		secondaryLeftContent || secondaryCenterContent || secondaryRight,
+	);
+	const secondaryToolbarClassName =
+		filtersPlacement === "secondaryLeft"
+			? "admin-table-toolbar admin-table-toolbar--secondary admin-table-toolbar--secondary-left"
+			: "admin-table-toolbar admin-table-toolbar--secondary";
 
 	const buildFieldsFor = useCallback(
 		(mode: RiseopediaOwnedPanelMode, row: TableRow | null): TableFieldConfig[] =>
 			fieldsBuilder ? fieldsBuilder({ mode, row, rows }) : fields,
 		[fields, fieldsBuilder, rows],
 	);
-
 
 	useEffect(() => {
 		setFilterState((currentState) => {
@@ -482,7 +584,10 @@ function DisplayProfilesTableBody({
 		const response = await fetch(apiPath, { cache: "no-store" });
 		if (!response.ok) {
 			throw new Error(
-				await tableReadResponseMessage(response, "Failed to refresh Riseopedia rows."),
+				await tableReadResponseMessage(
+					response,
+					"Failed to refresh Riseopedia rows.",
+				),
 			);
 		}
 
@@ -550,7 +655,10 @@ function DisplayProfilesTableBody({
 
 				if (!response.ok) {
 					throw new Error(
-						await tableReadResponseMessage(response, "Failed to update Riseopedia row status."),
+						await tableReadResponseMessage(
+							response,
+							"Failed to update Riseopedia row status.",
+						),
 					);
 				}
 
@@ -597,7 +705,10 @@ function DisplayProfilesTableBody({
 
 				if (!response.ok) {
 					throw new Error(
-						await tableReadResponseMessage(response, "Failed to delete Riseopedia row."),
+						await tableReadResponseMessage(
+							response,
+							"Failed to delete Riseopedia row.",
+						),
 					);
 				}
 
@@ -612,7 +723,15 @@ function DisplayProfilesTableBody({
 				setBusyId(null);
 			}
 		},
-		[apiPath, busyId, deleteConfirmMessage, deleteConfirmTitle, deleteOp, idKey, refreshFromServer],
+		[
+			apiPath,
+			busyId,
+			deleteConfirmMessage,
+			deleteConfirmTitle,
+			deleteOp,
+			idKey,
+			refreshFromServer,
+		],
 	);
 
 	const runColumnAction = useCallback(
@@ -629,12 +748,18 @@ function DisplayProfilesTableBody({
 				const response = await fetch(apiPath, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ op: column.actionOp, id: tableReadRowValue(row, idKey) }),
+					body: JSON.stringify({
+						op: column.actionOp,
+						id: tableReadRowValue(row, idKey),
+					}),
 				});
 
 				if (!response.ok) {
 					throw new Error(
-						await tableReadResponseMessage(response, "Failed to update Riseopedia row."),
+						await tableReadResponseMessage(
+							response,
+							"Failed to update Riseopedia row.",
+						),
 					);
 				}
 
@@ -657,7 +782,12 @@ function DisplayProfilesTableBody({
 			<div className="admin-table-stack">
 				<div className="admin-table-toolbar">
 					<div className="admin-table-toolbar-nav">
-						{primaryLeft ?? <div className="admin-table-toolbar-spacer admin-table-toolbar-spacer--action" aria-hidden="true" />}
+						{primaryLeft ?? (
+							<div
+								className="admin-table-toolbar-spacer admin-table-toolbar-spacer--action"
+								aria-hidden="true"
+							/>
+						)}
 					</div>
 
 					<div className="admin-table-toolbar-search">
@@ -672,7 +802,7 @@ function DisplayProfilesTableBody({
 					</div>
 
 					<div className="admin-table-toolbar-action">
-						<TableButton variant="green" onClick={openCreate}>
+						<TableButton variant="primary" onClick={openCreate}>
 							{createLabel}
 						</TableButton>
 					</div>
@@ -690,7 +820,11 @@ function DisplayProfilesTableBody({
 
 				<TableAdminTableFrame>
 					<TableElement className="admin-data-table">
-						{renderRiseopediaOwnedColGroup({ dataColumns, statusColumns, rowActions })}
+						{renderRiseopediaOwnedColGroup({
+							dataColumns,
+							statusColumns,
+							rowActions,
+						})}
 						<TableTHead>
 							<TableTR>
 								{dataColumns.map((column) =>
@@ -717,7 +851,10 @@ function DisplayProfilesTableBody({
 								))}
 								<TableTH className="admin-table-cell--center">Delete</TableTH>
 								{rowActions.map((action) => (
-									<TableTH key={`action-${action.label}`} className="admin-table-cell--center">
+									<TableTH
+										key={`action-${action.label}`}
+										className="admin-table-cell--center"
+									>
 										{action.label}
 									</TableTH>
 								))}
@@ -733,10 +870,19 @@ function DisplayProfilesTableBody({
 								return (
 									<TableTR key={rowId}>
 										{dataColumns.map((column) => (
-											<TableTD key={column.rowKey} className={getRiseopediaOwnedCellClassName(column)}>
+											<TableTD
+												key={column.rowKey}
+												className={getRiseopediaOwnedCellClassName(column)}
+											>
 												{column.kind === "patchChannel" ? (
 													<TableButton
-														variant={tableToDisplayText(tableReadRowValue(row, "channel_code")).trim() === "stable" ? "green" : "neutral"}
+														variant={
+															tableToDisplayText(
+																tableReadRowValue(row, "channel_code"),
+															).trim() === "stable"
+																? "primary"
+																: "secondary"
+														}
 														disabled={disabled}
 														onClick={() => void runColumnAction(row, column)}
 													>
@@ -748,11 +894,13 @@ function DisplayProfilesTableBody({
 											</TableTD>
 										))}
 										{statusColumns.map((column) => {
-											const enabled = tableToBoolean(tableReadRowValue(row, column.rowKey));
+											const enabled = tableToBoolean(
+												tableReadRowValue(row, column.rowKey),
+											);
 											return (
 												<TableTD key={column.rowKey} className="admin-table-cell--center">
 													<TableButton
-														variant={enabled ? "green" : "neutral"}
+														variant={enabled ? "success" : "secondary"}
 														disabled={disabled}
 														onClick={() => void toggleStatus(row)}
 														aria-label={enabled ? "Enabled" : "Disabled"}
@@ -764,7 +912,7 @@ function DisplayProfilesTableBody({
 										})}
 										<TableTD className="admin-table-cell--center">
 											<TableButton
-												variant="accent"
+												variant="danger"
 												disabled={disabled}
 												loading={disabled}
 												onClick={() => void deleteRow(row)}
@@ -773,10 +921,13 @@ function DisplayProfilesTableBody({
 											</TableButton>
 										</TableTD>
 										{rowActions.map((action) => (
-											<TableTD key={`${rowId}-${action.label}`} className="admin-table-cell--center">
+											<TableTD
+												key={`${rowId}-${action.label}`}
+												className="admin-table-cell--center"
+											>
 												<TableButtonLink
 													href={action.href(row)}
-													variant={action.variant ?? "neutral"}
+													variant={action.variant ?? "secondary"}
 												>
 													{action.label}
 												</TableButtonLink>
@@ -784,7 +935,7 @@ function DisplayProfilesTableBody({
 										))}
 										<TableTD className="admin-table-cell--center">
 											<TableButton
-												variant="neutral"
+												variant="secondary"
 												disabled={disabled}
 												onClick={() => openEdit(row)}
 											>
@@ -834,3 +985,4 @@ function DisplayProfilesTableBody({
 	);
 }
 
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

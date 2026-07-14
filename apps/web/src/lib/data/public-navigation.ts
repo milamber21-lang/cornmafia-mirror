@@ -4,6 +4,7 @@
 //// DB-first public navigation loader that maps selected navigation panels into the menu model                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -255,3 +256,5 @@ export async function getPublicNavigationMenuModel(args: {
 
 	return mapPublicMenuModel(result.rows[0]?.doc ?? null);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

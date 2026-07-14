@@ -4,6 +4,7 @@
 //// Shared helpers for icon color preview values and no-tint icon rendering behavior                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 export const ICON_NO_TINT_PREVIEW = "currentColor";
 
@@ -11,7 +12,9 @@ export function isNoTintIconColor(value?: string | null): boolean {
 	return value?.trim().toLowerCase() === ICON_NO_TINT_PREVIEW.toLowerCase();
 }
 
-export function cssColorFromThemePreview(value?: string | null): string | undefined {
+export function cssColorFromThemePreview(
+	value?: string | null,
+): string | undefined {
 	if (!value) {
 		return undefined;
 	}
@@ -28,7 +31,9 @@ export function cssColorFromThemePreview(value?: string | null): string | undefi
 	return preview;
 }
 
-export function validateThemeColorPreviewValue(value: unknown): string | undefined {
+export function validateThemeColorPreviewValue(
+	value: unknown,
+): string | undefined {
 	const preview = String(value ?? "").trim();
 
 	if (!preview) {
@@ -53,3 +58,5 @@ export function validateThemeColorPreviewValue(value: unknown): string | undefin
 
 	return "Use #RRGGBB, currentColor, --theme-name, or var(--theme-name).";
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

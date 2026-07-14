@@ -4,13 +4,21 @@
 //// DB-first public content path resolver and field bucketing for public render routes                          ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
 import { query } from "@/lib/data/pg";
 import { buildAppMediaFileUrl } from "@/lib/helpers/media-url";
 
-export type PublicRoutePrefix = "map" | "tool" | "app" | "event" | "custom" | "info" | "video";
+export type PublicRoutePrefix =
+	| "map"
+	| "tool"
+	| "app"
+	| "event"
+	| "custom"
+	| "info"
+	| "video";
 export type PublicRendererCode =
 	| "page"
 	| "map"
@@ -68,13 +76,19 @@ export type PublicContentDoc = {
 	contentKindLabel: string;
 	publicRoutePrefix: PublicRoutePrefix | null;
 	rendererCode: PublicRendererCode;
+	authorUsername: string | null;
 	publishedAt: string | null;
+	updatedAt: string | null;
 	series: PublicContentSeries | null;
 };
 
 export type PublicFieldLayoutWidthCode = "full" | "half" | "third";
 
-export type PublicFieldLayoutAlignCode = "left" | "center" | "right" | "stretch";
+export type PublicFieldLayoutAlignCode =
+	| "left"
+	| "center"
+	| "right"
+	| "stretch";
 
 export type PublicFieldLabelStyleCode = "title" | "label" | "text" | "muted";
 
@@ -94,6 +108,12 @@ export type PublicContentMedia = {
 	height: number | null;
 };
 
+export type PublicContentLink = {
+	id: string;
+	title: string;
+	href: string;
+};
+
 export type PublicContentField = {
 	id: string;
 	fieldListCode: string;
@@ -111,12 +131,16 @@ export type PublicContentField = {
 	value: unknown;
 	optionLabel: string | null;
 	media: PublicContentMedia | null;
+	contentLink: PublicContentLink | null;
 };
 
 export type PublicContentResult = {
 	doc: PublicContentDoc;
 	fields: PublicContentField[];
-	fieldsByDestination: Record<PublicFieldRenderDestinationCode, PublicContentField[]>;
+	fieldsByDestination: Record<
+		PublicFieldRenderDestinationCode,
+		PublicContentField[]
+	>;
 };
 
 export type PublicContentRedirectResult = {
@@ -130,6 +154,8 @@ export type PublicCollectionDoc = {
 	id: string;
 	title: string;
 	slug: string;
+	iconKey: PublicCollectionIconKey | null;
+	iconColor: PublicCollectionIconColor | null;
 };
 
 export type PublicCollectionActions = {
@@ -158,13 +184,11 @@ export type PublicCollectionIconColor = {
 	preview: string | null;
 };
 
-export type PublicCollectionContentCard = {
+export type PublicContentCardDoc = {
 	id: string;
 	title: string;
 	slug: string;
 	summary: string | null;
-	templateId: string;
-	templateLabel: string;
 	contentKindCode: string;
 	contentKindLabel: string;
 	rendererCode: PublicRendererCode;
@@ -175,6 +199,26 @@ export type PublicCollectionContentCard = {
 	iconColor: PublicCollectionIconColor | null;
 };
 
+export type PublicCollectionContentCard = PublicContentCardDoc & {
+	templateId: string;
+	templateLabel: string;
+};
+
+export type PublicCategoryContentCard = PublicContentCardDoc & {
+	collection: PublicCollectionDoc | null;
+};
+
+export type PublicCategorySubcategory = PublicCollectionDoc & {
+	href: string;
+	contentCount: number;
+};
+
+export type PublicCategoryResult = {
+	category: PublicCollectionDoc;
+	subcategories: PublicCategorySubcategory[];
+	content: PublicCategoryContentCard[];
+};
+
 export type PublicCollectionResult = {
 	category: PublicCollectionDoc;
 	collection: PublicCollectionDoc;
@@ -183,6 +227,10 @@ export type PublicCollectionResult = {
 };
 
 type PublicContentDbRow = {
+	doc: unknown;
+};
+
+type PublicCategoryDbRow = {
 	doc: unknown;
 };
 
@@ -220,7 +268,10 @@ function getString(value: Record<string, unknown>, key: string): string | null {
 		: null;
 }
 
-function getNullableString(value: Record<string, unknown>, key: string): string | null {
+function getNullableString(
+	value: Record<string, unknown>,
+	key: string,
+): string | null {
 	const fieldValue = value[key];
 	return typeof fieldValue === "string" ? fieldValue : null;
 }
@@ -288,17 +339,25 @@ function normalizeRendererCode(value: unknown): PublicRendererCode | null {
 }
 
 function normalizeLayoutWidth(value: unknown): PublicFieldLayoutWidthCode {
-	return value === "half" || value === "third" || value === "full" ? value : "full";
+	return value === "half" || value === "third" || value === "full"
+		? value
+		: "full";
 }
 
 function normalizeLayoutAlign(value: unknown): PublicFieldLayoutAlignCode {
-	return value === "left" || value === "center" || value === "right" || value === "stretch"
+	return value === "left" ||
+		value === "center" ||
+		value === "right" ||
+		value === "stretch"
 		? value
 		: "stretch";
 }
 
 function normalizeLabelStyle(value: unknown): PublicFieldLabelStyleCode {
-	return value === "title" || value === "text" || value === "muted" || value === "label"
+	return value === "title" ||
+		value === "text" ||
+		value === "muted" ||
+		value === "label"
 		? value
 		: "label";
 }
@@ -314,7 +373,9 @@ function normalizeLabelPosition(args: {
 	return args.value === "inline" ? "inline" : "above";
 }
 
-function normalizeLabelSeparator(value: unknown): PublicFieldLabelSeparatorCode {
+function normalizeLabelSeparator(
+	value: unknown,
+): PublicFieldLabelSeparatorCode {
 	if (value === "none" || value === "dash") {
 		return value;
 	}
@@ -326,7 +387,9 @@ function normalizeBoolean(value: unknown, fallback: boolean): boolean {
 	return typeof value === "boolean" ? value : fallback;
 }
 
-function normalizeDestination(value: unknown): PublicFieldRenderDestinationCode {
+function normalizeDestination(
+	value: unknown,
+): PublicFieldRenderDestinationCode {
 	return value === "seo" ||
 		value === "hero" ||
 		value === "top" ||
@@ -338,7 +401,10 @@ function normalizeDestination(value: unknown): PublicFieldRenderDestinationCode 
 		: "main";
 }
 
-function createFieldBuckets(): Record<PublicFieldRenderDestinationCode, PublicContentField[]> {
+function createFieldBuckets(): Record<
+	PublicFieldRenderDestinationCode,
+	PublicContentField[]
+> {
 	return {
 		seo: [],
 		hero: [],
@@ -364,7 +430,15 @@ function mapSeriesEpisode(value: unknown): PublicContentSeriesEpisode | null {
 	const rendererCode = normalizeRendererCode(value.rendererCode);
 	const href = getString(value, "href");
 
-	if (!id || !title || !slug || !categorySlug || !subcategorySlug || !rendererCode || !href) {
+	if (
+		!id ||
+		!title ||
+		!slug ||
+		!categorySlug ||
+		!subcategorySlug ||
+		!rendererCode ||
+		!href
+	) {
 		return null;
 	}
 
@@ -455,7 +529,9 @@ function mapDoc(value: unknown): PublicContentDoc | null {
 		contentKindLabel,
 		publicRoutePrefix: normalizeRoutePrefix(value.publicRoutePrefix),
 		rendererCode,
+		authorUsername: getNullableString(value, "authorUsername"),
 		publishedAt: getNullableString(value, "publishedAt"),
+		updatedAt: getNullableString(value, "updatedAt"),
 		series: mapSeries(value.series),
 	};
 }
@@ -476,7 +552,9 @@ function mapMedia(value: unknown): PublicContentMedia | null {
 
 	return {
 		id,
-		label: altText?.trim() ? `${originalFilename} - ${altText}` : originalFilename,
+		label: altText?.trim()
+			? `${originalFilename} - ${altText}`
+			: originalFilename,
 		originalFilename,
 		altText,
 		url: buildAppMediaFileUrl(storageRelPath),
@@ -485,6 +563,22 @@ function mapMedia(value: unknown): PublicContentMedia | null {
 		width: getNumber(value, "width"),
 		height: getNumber(value, "height"),
 	};
+}
+
+function mapContentLink(value: unknown): PublicContentLink | null {
+	if (!isRecord(value)) {
+		return null;
+	}
+
+	const id = getString(value, "id");
+	const title = getString(value, "title");
+	const href = getString(value, "href");
+
+	if (!id || !title || !href) {
+		return null;
+	}
+
+	return { id, title, href };
 }
 
 function mapField(value: unknown): PublicContentField | null {
@@ -523,6 +617,7 @@ function mapField(value: unknown): PublicContentField | null {
 		value: value.value ?? null,
 		optionLabel: getNullableString(value, "optionLabel"),
 		media: mapMedia(value.media),
+		contentLink: mapContentLink(value.contentLink),
 	};
 }
 
@@ -580,6 +675,8 @@ function mapCollectionDoc(value: unknown): PublicCollectionDoc | null {
 		id,
 		title,
 		slug,
+		iconKey: mapCollectionIconKey(value.iconKey),
+		iconColor: mapCollectionIconColor(value.iconColor),
 	};
 }
 
@@ -597,7 +694,9 @@ function mapCollectionActions(value: unknown): PublicCollectionActions {
 	};
 }
 
-function mapCollectionIconMedia(value: unknown): PublicCollectionIconMedia | null {
+function mapCollectionIconMedia(
+	value: unknown,
+): PublicCollectionIconMedia | null {
 	if (!isRecord(value)) {
 		return null;
 	}
@@ -640,7 +739,9 @@ function mapCollectionIconKey(value: unknown): PublicCollectionIconKey | null {
 	};
 }
 
-function mapCollectionIconColor(value: unknown): PublicCollectionIconColor | null {
+function mapCollectionIconColor(
+	value: unknown,
+): PublicCollectionIconColor | null {
 	if (!isRecord(value)) {
 		return null;
 	}
@@ -650,7 +751,7 @@ function mapCollectionIconColor(value: unknown): PublicCollectionIconColor | nul
 	};
 }
 
-function mapCollectionContentCard(value: unknown): PublicCollectionContentCard | null {
+function mapPublicContentCardBase(value: unknown): PublicContentCardDoc | null {
 	if (!isRecord(value)) {
 		return null;
 	}
@@ -658,22 +759,10 @@ function mapCollectionContentCard(value: unknown): PublicCollectionContentCard |
 	const id = getString(value, "id");
 	const title = getString(value, "title");
 	const slug = getString(value, "slug");
-	const templateId = getString(value, "templateId");
-	const templateLabel = getString(value, "templateLabel");
 	const contentKindCode = getString(value, "contentKindCode");
-	const contentKindLabel = getString(value, "contentKindLabel");
 	const rendererCode = normalizeRendererCode(value.rendererCode);
 
-	if (
-		!id ||
-		!title ||
-		!slug ||
-		!templateId ||
-		!templateLabel ||
-		!contentKindCode ||
-		!contentKindLabel ||
-		!rendererCode
-	) {
+	if (!id || !title || !slug || !contentKindCode || !rendererCode) {
 		return null;
 	}
 
@@ -682,10 +771,8 @@ function mapCollectionContentCard(value: unknown): PublicCollectionContentCard |
 		title,
 		slug,
 		summary: getNullableString(value, "summary"),
-		templateId,
-		templateLabel,
 		contentKindCode,
-		contentKindLabel,
+		contentKindLabel: getString(value, "contentKindLabel") ?? contentKindCode,
 		rendererCode,
 		publicHref: getNullableString(value, "href"),
 		publishedAt: getNullableString(value, "publishedAt"),
@@ -695,7 +782,90 @@ function mapCollectionContentCard(value: unknown): PublicCollectionContentCard |
 	};
 }
 
-function mapPublicCollectionResult(value: unknown): PublicCollectionResult | null {
+function mapCollectionContentCard(
+	value: unknown,
+): PublicCollectionContentCard | null {
+	if (!isRecord(value)) {
+		return null;
+	}
+
+	const base = mapPublicContentCardBase(value);
+	const templateId = getString(value, "templateId");
+	const templateLabel = getString(value, "templateLabel");
+
+	if (!base || !templateId || !templateLabel) {
+		return null;
+	}
+
+	return {
+		...base,
+		templateId,
+		templateLabel,
+	};
+}
+
+function mapCategoryContentCard(
+	value: unknown,
+): PublicCategoryContentCard | null {
+	if (!isRecord(value)) {
+		return null;
+	}
+
+	const base = mapPublicContentCardBase(value);
+	if (!base) {
+		return null;
+	}
+
+	return {
+		...base,
+		collection: mapCollectionDoc(value.collection),
+	};
+}
+
+function mapCategorySubcategory(
+	value: unknown,
+): PublicCategorySubcategory | null {
+	if (!isRecord(value)) {
+		return null;
+	}
+
+	const doc = mapCollectionDoc(value);
+	const href = getString(value, "href");
+	if (!doc || !href) {
+		return null;
+	}
+
+	return {
+		...doc,
+		href,
+		contentCount: Math.max(0, getNumber(value, "contentCount") ?? 0),
+	};
+}
+
+function mapPublicCategoryResult(value: unknown): PublicCategoryResult | null {
+	if (!isRecord(value)) {
+		return null;
+	}
+
+	const category = mapCollectionDoc(value.category);
+	if (!category) {
+		return null;
+	}
+
+	return {
+		category,
+		subcategories: getArray(value, "subcategories")
+			.map(mapCategorySubcategory)
+			.filter((row): row is PublicCategorySubcategory => row !== null),
+		content: getArray(value, "content")
+			.map(mapCategoryContentCard)
+			.filter((row): row is PublicCategoryContentCard => row !== null),
+	};
+}
+
+function mapPublicCollectionResult(
+	value: unknown,
+): PublicCollectionResult | null {
 	if (!isRecord(value)) {
 		return null;
 	}
@@ -782,6 +952,20 @@ export async function findPublicSubcategoryAppHref(args: {
 	return typeof href === "string" && href.trim().length > 0 ? href : null;
 }
 
+export async function findPublicCategoryByPath(args: {
+	actorDiscordId: string | null;
+	categorySlug: string;
+}): Promise<PublicCategoryResult | null> {
+	const result = await query<PublicCategoryDbRow>(
+		`
+			SELECT web_api.web_content_public_list_category($1, $2) AS doc
+		`,
+		[args.actorDiscordId, args.categorySlug],
+	);
+
+	return mapPublicCategoryResult(result.rows[0]?.doc ?? null);
+}
+
 export async function findPublicCollectionByPath(args: {
 	actorDiscordId: string | null;
 	categorySlug: string;
@@ -837,3 +1021,5 @@ export async function findPublicContentRedirectByPath(args: {
 
 	return mapPublicContentRedirectResult(result.rows[0]?.doc ?? null);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Member API route for owned/manageable series list, dependencies, and mutations.                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { NextRequest, NextResponse } from "next/server";
 
 import { listMemberAuthorableCollections } from "@/lib/data/member-authoring";
@@ -85,7 +87,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const subcategoryId = readString(data.subcategoryId);
 
 			if (!title) {
-				return NextResponse.json({ message: "Series title is required." }, { status: 400 });
+				return NextResponse.json(
+					{ message: "Series title is required." },
+					{ status: 400 },
+				);
 			}
 			if (!categoryId || !subcategoryId) {
 				return NextResponse.json(
@@ -110,23 +115,40 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const description = readString(data.description);
 
 			if (!id) {
-				return NextResponse.json({ message: "Series id is required." }, { status: 400 });
+				return NextResponse.json(
+					{ message: "Series id is required." },
+					{ status: 400 },
+				);
 			}
 			if (!title) {
-				return NextResponse.json({ message: "Series title is required." }, { status: 400 });
+				return NextResponse.json(
+					{ message: "Series title is required." },
+					{ status: 400 },
+				);
 			}
 
-			await updateMemberSeries({ actorDiscordId, seriesId: id, title, description });
+			await updateMemberSeries({
+				actorDiscordId,
+				seriesId: id,
+				title,
+				description,
+			});
 			return await readSeriesPayload(actorDiscordId);
 		}
 
 		if (op === "delete") {
 			const id = readString(body.id);
 			if (!id) {
-				return NextResponse.json({ message: "Series id is required." }, { status: 400 });
+				return NextResponse.json(
+					{ message: "Series id is required." },
+					{ status: 400 },
+				);
 			}
 
-			const blockers = await listMemberSeriesDeleteBlockers({ actorDiscordId, seriesId: id });
+			const blockers = await listMemberSeriesDeleteBlockers({
+				actorDiscordId,
+				seriesId: id,
+			});
 			if (blockers.length > 0) {
 				return NextResponse.json(
 					{
@@ -151,3 +173,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return NextResponse.json({ message }, { status: 400 });
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

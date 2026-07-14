@@ -4,6 +4,8 @@
 //// Reusable template field definitions table with contextual option/tool access                                       ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -278,7 +280,6 @@ export default function TemplateFieldListTable({
 		[busyId, refreshFromServer],
 	);
 
-
 	const handleSortChange = useCallback(
 		(nextSortKey: SortKey): void => {
 			setSortDirection((currentDirection) =>
@@ -310,7 +311,7 @@ export default function TemplateFieldListTable({
 					</div>
 
 					<div className="admin-table-toolbar-action">
-						<Button onClick={openCreate} variant="green">
+						<Button onClick={openCreate} variant="primary">
 							New Field Row
 						</Button>
 					</div>
@@ -333,11 +334,41 @@ export default function TemplateFieldListTable({
 						</colgroup>
 						<THead>
 							<TR>
-								<AdminSortableTH label="Code" sortKey="code" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Label" sortKey="label" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Type" sortKey="type" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Destination" sortKey="destination" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Usage" sortKey="usage" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
+								<AdminSortableTH
+									label="Code"
+									sortKey="code"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Label"
+									sortKey="label"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Type"
+									sortKey="type"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Destination"
+									sortKey="destination"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Usage"
+									sortKey="usage"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
 								<TH className="admin-table-cell--center">Status</TH>
 								<TH className="admin-table-cell--center">Delete</TH>
 								<TH className="admin-table-cell--center">Options</TH>
@@ -348,10 +379,7 @@ export default function TemplateFieldListTable({
 						<TBody>
 							{pageRows.length === 0 ? (
 								<TR>
-									<TD
-										colSpan={9}
-										className="admin-table-empty-cell"
-									>
+									<TD colSpan={9} className="admin-table-empty-cell">
 										No field list rows found.
 									</TD>
 								</TR>
@@ -374,10 +402,12 @@ export default function TemplateFieldListTable({
 											<TD className="admin-table-cell--center">
 												{formatDestination(row.renderDestinationCode)}
 											</TD>
-											<TD className="admin-table-cell--center">{row.templateUsageCount}</TD>
+											<TD className="admin-table-cell--center">
+												{row.templateUsageCount}
+											</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant={row.enabled ? "green" : "neutral"}
+													variant={row.enabled ? "success" : "secondary"}
 													disabled={disabled}
 													onClick={() => void toggleEnabled(row)}
 													aria-label={row.enabled ? "Enabled" : "Disabled"}
@@ -388,7 +418,7 @@ export default function TemplateFieldListTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => void deleteFieldListItem(row)}
-													variant="accent"
+													variant="danger"
 													disabled={disabled}
 												>
 													Delete
@@ -398,7 +428,7 @@ export default function TemplateFieldListTable({
 												{canManageOptions ? (
 													<ButtonLink
 														href={`/admin/web/templates/field-options?fieldListId=${encodeURIComponent(row.id)}`}
-														variant="neutral"
+														variant="secondary"
 													>
 														Options
 													</ButtonLink>
@@ -406,7 +436,7 @@ export default function TemplateFieldListTable({
 												{!canManageOptions && canManageTools ? (
 													<ButtonLink
 														href={`/admin/web/templates/field-list-tools?fieldListId=${encodeURIComponent(row.id)}`}
-														variant="neutral"
+														variant="secondary"
 													>
 														Tools
 													</ButtonLink>
@@ -415,7 +445,7 @@ export default function TemplateFieldListTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => openEdit(row)}
-													variant="neutral"
+													variant="secondary"
 													disabled={disabled}
 												>
 													Edit
@@ -452,3 +482,5 @@ export default function TemplateFieldListTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

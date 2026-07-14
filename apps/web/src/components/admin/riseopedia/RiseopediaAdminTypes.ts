@@ -4,6 +4,7 @@
 //// Shared strict types for rebuilt Riseopedia admin table and panel components.                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 export type RiseopediaAdminRow = {
 	[key: string]: unknown;
@@ -19,6 +20,10 @@ export type RiseopediaAdminMeta = {
 	entityOptions?: RiseopediaAdminRows;
 	propertyOptions?: RiseopediaAdminRows;
 	renderingChannels?: RiseopediaAdminRows;
+	bodyRenderers?: RiseopediaAdminRows;
+	bodyBlockRenderers?: RiseopediaAdminRows;
+	bodyBlockDataSources?: RiseopediaAdminRows;
+	bodyBlockEmptyBehaviors?: RiseopediaAdminRows;
 	variantGroups?: RiseopediaAdminRows;
 	variantGroupScopes?: RiseopediaAdminRows;
 	patchOptions?: RiseopediaAdminRows;
@@ -47,7 +52,12 @@ export type RiseopediaAdminFilterState = {
 	[key: string]: string;
 };
 
-export type RiseopediaAdminButtonVariant = "neutral" | "accent" | "ghost" | "green";
+export type RiseopediaAdminButtonVariant =
+	| "primary"
+	| "secondary"
+	| "quiet"
+	| "danger"
+	| "success";
 
 export type RiseopediaAdminFieldType =
 	| "text"
@@ -58,9 +68,13 @@ export type RiseopediaAdminFieldType =
 
 export type RiseopediaAdminFieldValues = { [key: string]: unknown };
 
-export type RiseopediaAdminFieldOptionBuilder = (values: RiseopediaAdminFieldValues) => RiseopediaAdminOption[];
+export type RiseopediaAdminFieldOptionBuilder = (
+	values: RiseopediaAdminFieldValues,
+) => RiseopediaAdminOption[];
 
-export type RiseopediaAdminFieldPredicate = (values: RiseopediaAdminFieldValues) => boolean;
+export type RiseopediaAdminFieldPredicate = (
+	values: RiseopediaAdminFieldValues,
+) => boolean;
 
 export type RiseopediaAdminFieldChangeHandler = (args: {
 	value: string;
@@ -87,9 +101,19 @@ export type RiseopediaAdminFieldConfig = {
 	onChange?: RiseopediaAdminFieldChangeHandler;
 };
 
-export type RiseopediaAdminColumnKind = "text" | "boolean" | "count" | "status" | "patchChannel";
+export type RiseopediaAdminColumnKind =
+	| "text"
+	| "boolean"
+	| "count"
+	| "status"
+	| "patchChannel";
 
-export type RiseopediaAdminColumnWidth = "narrow" | "compact" | "normal" | "wide" | "fluid";
+export type RiseopediaAdminColumnWidth =
+	| "narrow"
+	| "compact"
+	| "normal"
+	| "wide"
+	| "fluid";
 
 export type RiseopediaAdminColumnConfig = {
 	rowKey: string;
@@ -108,7 +132,9 @@ export type RiseopediaAdminFilterConfig = {
 	rowKey: string;
 	label: string;
 	options?: RiseopediaAdminOption[];
-	optionsBuilder?: (filterState: RiseopediaAdminFilterState) => RiseopediaAdminOption[];
+	optionsBuilder?: (
+		filterState: RiseopediaAdminFilterState,
+	) => RiseopediaAdminOption[];
 	clearLabel: string;
 	placeholder?: string;
 	clearKeysOnChange?: string[];
@@ -121,7 +147,6 @@ export type RiseopediaAdminRowActionConfig = {
 };
 
 export type RiseopediaAdminPanelMode = "create" | "edit";
-
 
 export type RiseopediaAdminFieldsBuilder = (args: {
 	mode: RiseopediaAdminPanelMode;
@@ -137,9 +162,16 @@ export type RiseopediaAdminReadOnlyActionContext = {
 export type RiseopediaAdminReadOnlyRowActionConfig = {
 	label: string | ((row: RiseopediaAdminRow) => string);
 	columnLabel?: string;
-	variant?: RiseopediaAdminButtonVariant | ((row: RiseopediaAdminRow) => RiseopediaAdminButtonVariant);
+	variant?:
+		| RiseopediaAdminButtonVariant
+		| ((row: RiseopediaAdminRow) => RiseopediaAdminButtonVariant);
 	ariaLabel?: (row: RiseopediaAdminRow) => string;
-	href?: (row: RiseopediaAdminRow, context: RiseopediaAdminReadOnlyActionContext) => string;
+	href?: (
+		row: RiseopediaAdminRow,
+		context: RiseopediaAdminReadOnlyActionContext,
+	) => string;
 	onClick?: (row: RiseopediaAdminRow) => Promise<void>;
 	isVisible?: (row: RiseopediaAdminRow) => boolean;
 };
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

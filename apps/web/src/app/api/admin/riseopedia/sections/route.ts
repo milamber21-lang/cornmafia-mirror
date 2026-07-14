@@ -4,6 +4,7 @@
 //// Admin API route for rebuilt Riseopedia section rows.                                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -72,7 +73,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const sectionSlug = getRequiredString(data, "sectionSlug");
 			const sectionName = getRequiredString(data, "sectionName");
 			if (!sectionCode || !sectionSlug || !sectionName) {
-				return jsonError("VALIDATION_REQUIRED", "Section code, slug, and name are required.", 400);
+				return jsonError(
+					"VALIDATION_REQUIRED",
+					"Section code, slug, and name are required.",
+					400,
+				);
 			}
 
 			const id = await upsertRiseopediaSectionAdmin({
@@ -95,7 +100,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
 			}
 
-			await deleteRiseopediaSectionAdmin({ actorDiscordId: actorOrResponse, sectionId });
+			await deleteRiseopediaSectionAdmin({
+				actorDiscordId: actorOrResponse,
+				sectionId,
+			});
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 
@@ -105,3 +113,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

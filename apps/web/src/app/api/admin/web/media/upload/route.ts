@@ -4,6 +4,8 @@
 //// Admin media upload compatibility route with explicit shared app-side guard                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { NextResponse } from "next/server";
 
 import { requireActorDiscordId } from "@/lib/server/admin-route";
@@ -18,3 +20,5 @@ export async function POST(request: Request): Promise<NextResponse> {
 
 	return handleMediaUploadForActor(request, actorDiscordIdOrResponse);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

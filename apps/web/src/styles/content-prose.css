@@ -1,0 +1,246 @@
+/* FILE: apps/web/src/styles/content-prose.css
+   Shared published and editable content prose typography.
+*/
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */
+
+.content-prose {
+  min-width: 0;
+}
+
+.content-prose > :first-child,
+.content-prose > div:first-child > :first-child {
+  margin-top: 0;
+}
+
+.content-prose > :last-child,
+.content-prose > div:last-child > :last-child {
+  margin-bottom: 0;
+}
+
+.content-prose :where(strong, b) {
+  color: var(--theme-text);
+  font-weight: var(--font-weight-bold);
+}
+
+.content-prose :where(em, i) {
+  color: color-mix(in oklab, var(--theme-text) 88%, var(--theme-text-muted));
+}
+
+.content-prose :where(s, del) {
+  color: var(--theme-text-muted);
+}
+
+.content-prose--main {
+  color: var(--theme-text);
+  font-size: var(--font-size-base);
+  line-height: 1.78;
+
+  --rt-block-gap: clamp(var(--space-3), 1.8vw, var(--space-5));
+  --rt-li-gap: var(--space-2);
+  --rt-list-indent: clamp(1.4rem, 3vw, 2rem);
+}
+
+.content-prose--main p {
+  color: var(--theme-text);
+}
+
+.content-prose--main h1,
+.content-prose--main h2,
+.content-prose--main h3,
+.content-prose--main h4,
+.content-prose--main h5,
+.content-prose--main h6,
+.content-prose--default h1,
+.content-prose--default h2,
+.content-prose--default h3,
+.content-prose--default h4,
+.content-prose--default h5,
+.content-prose--default h6 {
+  color: var(--theme-text);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-tight);
+  text-wrap: balance;
+}
+
+.content-prose--main h1 {
+  margin-top: clamp(var(--space-6), 4vw, var(--space-10));
+  font-size: clamp(var(--font-size-2xl), 4vw, var(--font-size-display));
+}
+
+.content-prose--main h2 {
+  margin-top: clamp(var(--space-6), 3.2vw, var(--space-8));
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--theme-border);
+  font-size: clamp(var(--font-size-xl), 3vw, var(--font-size-2xl));
+}
+
+.content-prose--main h3 {
+  margin-top: var(--space-6);
+  color: var(--theme-text);
+  font-size: var(--font-size-xl);
+}
+
+.content-prose--main h4,
+.content-prose--main h5,
+.content-prose--main h6 {
+  margin-top: var(--space-5);
+  font-size: var(--font-size-lg);
+}
+
+.content-prose--main :where(ul.rt-ul, ol.rt-ol),
+.content-prose--default :where(ul.rt-ul, ol.rt-ol) {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.content-prose :where(ul.rt-ul, ol.rt-ol) ::marker {
+  color: var(--theme-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+.content-prose :where(ul.rt-ul, ol.rt-ol) :where(ul, ol) {
+  color: color-mix(in oklab, var(--theme-text) 88%, var(--theme-text-muted));
+}
+
+.content-prose--main .rt-quote,
+.content-prose--main blockquote {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--theme-border);
+  border-left: 3px solid var(--theme-accent);
+  border-radius: 0 var(--radius-compact) var(--radius-compact) 0;
+  background: linear-gradient(
+    135deg,
+    var(--theme-surface-alpha-76),
+    var(--theme-bg-alpha-62)
+  );
+  box-shadow: var(--shadow-inset);
+  color: var(--theme-text-muted);
+}
+
+.content-prose--default .rt-quote,
+.content-prose--default blockquote,
+.content-prose--aside .rt-quote,
+.content-prose--aside blockquote {
+  border-left-color: var(--theme-accent);
+  background: linear-gradient(
+    135deg,
+    var(--theme-surface-alpha-76),
+    transparent
+  );
+  box-shadow: var(--shadow-inset);
+}
+
+.content-prose .rt-code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--theme-border);
+  background: var(--theme-surface-ink-soft);
+  color: var(--theme-text);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.content-prose--main .rt-code {
+  padding: 0.12em 0.35em;
+  border-radius: var(--radius-compact);
+}
+
+.content-prose .rt-link {
+  color: var(--theme-accent);
+  text-decoration-color: var(--theme-accent-border-78);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
+  transition:
+    color var(--dur-2) var(--ease-standard),
+    text-decoration-color var(--dur-2) var(--ease-standard);
+}
+
+.content-prose .rt-link:hover {
+  color: var(--theme-text);
+  text-decoration-color: var(--theme-accent);
+}
+
+.content-prose .rt-link:focus-visible {
+  border-radius: var(--radius-compact);
+  outline: 2px solid var(--theme-focus);
+  outline-offset: 3px;
+}
+
+.content-prose hr,
+.content-prose .rt-hr {
+  border-color: var(--theme-border);
+}
+
+.content-prose--main hr,
+.content-prose--main .rt-hr {
+  margin-block: clamp(var(--space-6), 4vw, var(--space-10));
+}
+
+.content-prose--default {
+  color: var(--theme-text);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-body);
+
+  --rt-block-gap: var(--space-4);
+  --rt-li-gap: var(--space-2);
+  --rt-list-indent: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+
+.content-prose--default p {
+  color: var(--theme-text-muted);
+}
+
+.content-prose--default h1 {
+  font-size: var(--font-size-2xl);
+}
+
+.content-prose--default h2 {
+  font-size: var(--font-size-xl);
+}
+
+.content-prose--default h3 {
+  font-size: var(--font-size-lg);
+}
+
+.content-prose--default h4,
+.content-prose--default h5,
+.content-prose--default h6 {
+  font-size: var(--font-size-base);
+}
+
+.content-prose--aside {
+  color: var(--theme-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+
+  --rt-block-gap: var(--space-3);
+  --rt-list-indent: 1.25rem;
+}
+
+.content-prose--aside h1,
+.content-prose--aside h2,
+.content-prose--aside h3,
+.content-prose--aside h4,
+.content-prose--aside h5,
+.content-prose--aside h6 {
+  color: var(--theme-text);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-tight);
+  text-wrap: balance;
+}
+
+.content-prose :where(img, video, iframe) {
+  max-width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content-prose .rt-link {
+    transition: none;
+  }
+}
+
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */

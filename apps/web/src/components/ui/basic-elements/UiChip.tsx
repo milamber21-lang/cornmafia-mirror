@@ -4,6 +4,8 @@
 //// Exports chip button wrapper                                                                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { ReactNode } from "react";
@@ -42,7 +44,7 @@ export default function UiChip({
 		<div className={cn("ui-chip", className)} title={title}>
 			<Button
 				size="sm"
-				variant="neutral"
+				variant="secondary"
 				pill
 				onClick={onClick}
 				disabled={disabled}
@@ -61,7 +63,7 @@ export default function UiChip({
 			{onRemove ? (
 				<Button
 					size="sm"
-					variant="ghost"
+					variant="quiet"
 					pill
 					onClick={onRemove}
 					disabled={disabled}
@@ -75,3 +77,5 @@ export default function UiChip({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

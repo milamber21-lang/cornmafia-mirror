@@ -1,13 +1,15 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/renderers/content/field-utils.ts                                               ////
 //// Language: TS                                                                                                 ////
-//// Shared value detection, formatting, and URL helpers for content field renderers.                             ////
+//// Shared value, renderability, formatting, and URL helpers for content field renderers.                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { isRichTextJsonEmpty } from "@/lib/editors/richtext/rich-text-json";
+import { parseYoutubeVideoUrl } from "@/lib/helpers/youtube-url";
 
-import type { ContentRenderField } from "./types";
+import type { ContentRenderField, ContentRenderModel } from "./types";
 
 function hasUnsafeUrlCharacter(value: string): boolean {
 	for (const character of value) {
@@ -18,6 +20,20 @@ function hasUnsafeUrlCharacter(value: string): boolean {
 	}
 
 	return false;
+}
+
+function hasResolvedMedia(field: ContentRenderField): boolean {
+	return (
+		field.media !== null &&
+		typeof field.media.url === "string" &&
+		field.media.url.trim().length > 0
+	);
+}
+
+function supportsAdminDiagnostic(field: ContentRenderField): boolean {
+	return (
+		field.fieldTypeCode === "media_id" || field.fieldTypeCode === "youtube_url"
+	);
 }
 
 export function hasRenderableValue(value: unknown): boolean {
@@ -36,8 +52,55 @@ export function hasRenderableValue(value: unknown): boolean {
 	return true;
 }
 
-export function hasRenderableFields(fields: readonly ContentRenderField[]): boolean {
-	return fields.some((field) => hasRenderableValue(field.value));
+export function isContentFieldDisplayable(field: ContentRenderField): boolean {
+	if (!hasRenderableValue(field.value)) {
+		return false;
+	}
+
+	if (field.fieldTypeCode === "media_id") {
+		return hasResolvedMedia(field);
+	}
+
+	if (field.fieldTypeCode === "youtube_url") {
+		return parseYoutubeVideoUrl(field.value) !== null;
+	}
+
+	return true;
+}
+
+export function isContentFieldRenderable(
+	field: ContentRenderField,
+	model: ContentRenderModel,
+): boolean {
+	if (isContentFieldDisplayable(field)) {
+		return true;
+	}
+
+	return (
+		model.surfaceScope === "admin" &&
+		hasRenderableValue(field.value) &&
+		supportsAdminDiagnostic(field)
+	);
+}
+
+export function getDisplayableFields(
+	fields: readonly ContentRenderField[],
+): ContentRenderField[] {
+	return fields.filter(isContentFieldDisplayable);
+}
+
+export function getRenderableFields(
+	fields: readonly ContentRenderField[],
+	model: ContentRenderModel,
+): ContentRenderField[] {
+	return fields.filter((field) => isContentFieldRenderable(field, model));
+}
+
+export function hasRenderableFields(
+	fields: readonly ContentRenderField[],
+	model: ContentRenderModel,
+): boolean {
+	return fields.some((field) => isContentFieldRenderable(field, model));
 }
 
 export function isUrlLikeField(field: ContentRenderField): boolean {
@@ -89,7 +152,9 @@ export function formatNumberValue(value: unknown): string | null {
 
 	if (typeof value === "string" && value.trim().length > 0) {
 		const parsed = Number(value.trim());
-		return Number.isFinite(parsed) ? new Intl.NumberFormat("en").format(parsed) : value;
+		return Number.isFinite(parsed)
+			? new Intl.NumberFormat("en").format(parsed)
+			: value;
 	}
 
 	return null;
@@ -138,7 +203,9 @@ export type NormalizedRenderableUrl = {
 	isExternal: boolean;
 };
 
-export function normalizeRenderableUrl(value: unknown): NormalizedRenderableUrl | null {
+export function normalizeRenderableUrl(
+	value: unknown,
+): NormalizedRenderableUrl | null {
 	if (typeof value !== "string") {
 		return null;
 	}
@@ -177,3 +244,5 @@ export function normalizeRenderableUrl(value: unknown): NormalizedRenderableUrl 
 		return null;
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

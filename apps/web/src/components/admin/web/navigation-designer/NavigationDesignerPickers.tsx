@@ -4,6 +4,7 @@
 //// Picker list components for navigation designer category, subcategory, and content selection.                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 "use client";
 
@@ -244,10 +245,7 @@ export function ContentPicker({
 
 					if (!response.ok) {
 						throw new Error(
-							await readResponseMessage(
-								response,
-								"Failed to load content picker.",
-							),
+							await readResponseMessage(response, "Failed to load content picker."),
 						);
 					}
 
@@ -380,3 +378,5 @@ export function ContentPicker({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

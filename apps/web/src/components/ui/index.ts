@@ -4,9 +4,16 @@
 //// Shared UI export surface for app components                                                                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 export { default as AlertBanner } from "./basic-elements/AlertBanner";
 export { default as Badge } from "./basic-elements/Badge";
-export { Button, ButtonLink } from "./basic-elements/Button";
+export {
+	Button,
+	ButtonLink,
+	type ButtonSize,
+	type ButtonVariant,
+} from "./basic-elements/Button";
 export { default as Card } from "./basic-elements/Card";
 export { default as Checkbox } from "./basic-elements/Checkbox";
 export { default as DateTimeInput } from "./basic-elements/DateTimeInput";
@@ -27,10 +34,29 @@ export { default as ReadOnlyTextarea } from "./basic-elements/ReadOnlyTextarea";
 export { default as Separator } from "./basic-elements/Separator";
 export {
 	IconWell,
+	MediaWell,
+	PageHero,
+	SectionHeader,
 	StatusPill,
 	SurfaceCard,
+	SurfaceMetaRow,
 	SurfacePanel,
+	SurfaceState,
+	type IconWellProps,
+	type MediaWellProps,
+	type PageHeroProps,
+	type SectionHeaderProps,
+	type StatusPillProps,
+	type SurfaceAlign,
+	type SurfaceCardProps,
 	type SurfaceDensity,
+	type SurfaceMaterial,
+	type SurfaceMediaAspect,
+	type SurfaceMetaRowProps,
+	type SurfaceMetaSeparator,
+	type SurfacePanelProps,
+	type SurfaceStateKind,
+	type SurfaceStateProps,
 	type SurfaceTone,
 } from "./basic-elements/Surface";
 export { default as SvgInline } from "./basic-elements/SvgInline";
@@ -39,11 +65,34 @@ export { default as Textarea } from "./basic-elements/Textarea";
 export { default as UiChip } from "./basic-elements/UiChip";
 export { default as Upload } from "./basic-elements/Upload";
 
-export {
-	AdminTableFrame,
-	AdminTableSearchInput,
-} from "./admin/AdminTable";
+export { AdminTableFrame, AdminTableSearchInput } from "./admin/AdminTable";
 
 export { default as IconRender } from "./IconRender";
+export {
+	default as IconVisual,
+	type IconVisualProps,
+	type IconVisualSize,
+} from "./IconVisual";
+export {
+	BrowsePageBreadcrumbs,
+	default as BrowsePageHeader,
+	type BrowsePageBreadcrumbsProps,
+	type BrowsePageHeaderBreadcrumbItem,
+	type BrowsePageHeaderProps,
+} from "./browse/BrowsePageHeader";
+export {
+	BrowseFilterPanel,
+	BrowsePanelHeader,
+	BrowseResultsPanel,
+	type BrowsePanelHeaderProps,
+	type BrowseSurfaceProps,
+} from "./browse/BrowseSurfaces";
+export {
+	default as BrowseResultCard,
+	type BrowseResultCardDensity,
+	type BrowseResultCardProps,
+} from "./browse/BrowseResultCard";
 export { default as Panel } from "./Panel";
 export { default as PanelForm } from "./PanelForm";
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Builds and normalizes app/admin media file and icon routes for DB-backed media serving                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 export type MediaRouteScope = "admin" | "app";
 
 type InternalMediaRouteMatch = {
@@ -84,7 +86,9 @@ function parseInternalMediaRoute(
 	};
 }
 
-export function extractStorageRelPathFromMediaUrl(inputUrl: string): string | null {
+export function extractStorageRelPathFromMediaUrl(
+	inputUrl: string,
+): string | null {
 	return parseInternalMediaRoute(inputUrl)?.storageRelPath ?? null;
 }
 
@@ -132,3 +136,5 @@ export function normalizeMediaUrlToRouteScope(
 	const nextUrl = `${scopedPath}${match.search}${match.hash}`;
 	return match.isAbsolute ? `${match.origin}${nextUrl}` : nextUrl;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

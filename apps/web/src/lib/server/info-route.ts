@@ -4,6 +4,7 @@
 //// Shared server helpers for DB-gated public /info route resolution.                                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -31,7 +32,9 @@ export type InfoRouteContentArgs = {
 	contentSlug?: string | null;
 };
 
-export function normalizeInfoRouteSegment(value: string | null | undefined): string | null {
+export function normalizeInfoRouteSegment(
+	value: string | null | undefined,
+): string | null {
 	const trimmed = value?.trim().toLowerCase();
 	if (!trimmed || trimmed.length <= 0) {
 		return null;
@@ -42,7 +45,9 @@ export function normalizeInfoRouteSegment(value: string | null | undefined): str
 
 export type InfoWikiCategorySlug = (typeof INFO_WIKI_CATEGORIES)[number];
 
-export function isInfoWikiCategory(categorySlug: string): categorySlug is InfoWikiCategorySlug {
+export function isInfoWikiCategory(
+	categorySlug: string,
+): categorySlug is InfoWikiCategorySlug {
 	return INFO_WIKI_CATEGORIES.some((slug) => slug === categorySlug);
 }
 
@@ -78,3 +83,5 @@ export async function findInfoRouteContent(
 		contentSlug: args.contentSlug,
 	});
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

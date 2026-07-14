@@ -4,6 +4,7 @@
 //// Converts public and admin content data into the shared content render model.                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { ContentAdminPreview } from "@/lib/data/content";
 import type {
@@ -12,6 +13,7 @@ import type {
 } from "@/lib/data/public-content";
 
 import type {
+	ContentRenderContentLink,
 	ContentRenderDestinationCode,
 	ContentRenderDoc,
 	ContentRenderField,
@@ -70,7 +72,9 @@ function bucketFields(fields: ContentRenderField[]): ContentRenderFieldBuckets {
 	}
 
 	for (const destination of RENDER_DESTINATIONS) {
-		fieldsByDestination[destination] = sortFields(fieldsByDestination[destination]);
+		fieldsByDestination[destination] = sortFields(
+			fieldsByDestination[destination],
+		);
 	}
 
 	return fieldsByDestination;
@@ -91,7 +95,9 @@ function buildPublicHref(args: {
 		args.categorySlug,
 		args.subcategorySlug,
 		args.contentSlug,
-	].filter((part): part is string => typeof part === "string" && part.length > 0);
+	].filter(
+		(part): part is string => typeof part === "string" && part.length > 0,
+	);
 
 	return `/${routeParts.join("/")}`;
 }
@@ -133,6 +139,21 @@ function mapPublicField(field: PublicContentField): ContentRenderField {
 		value: field.value,
 		optionLabel: field.optionLabel,
 		media: mapPublicMedia(field),
+		contentLink: mapContentLink(field.contentLink),
+	};
+}
+
+function mapContentLink(
+	contentLink: { id: string; title: string; href: string } | null,
+): ContentRenderContentLink | null {
+	if (!contentLink) {
+		return null;
+	}
+
+	return {
+		id: contentLink.id,
+		title: contentLink.title,
+		href: contentLink.href,
 	};
 }
 
@@ -153,7 +174,9 @@ function mapPublicDoc(content: PublicContentResult): ContentRenderDoc {
 		templateLabel: null,
 		seriesTitle: doc.series?.title ?? null,
 		series: doc.series,
+		authorUsername: doc.authorUsername,
 		publishedAt: doc.publishedAt,
+		updatedAt: doc.updatedAt,
 		rendererCode: doc.rendererCode,
 		publicHref: buildPublicHref({
 			publicRoutePrefix: doc.publicRoutePrefix,
@@ -174,9 +197,16 @@ function normalizeIconSource(value: string | null): "lucide" | "media" | null {
 	return null;
 }
 
-function mapAdminIconKey(content: ContentAdminPreview): ContentRenderIconKey | null {
+function mapAdminIconKey(
+	content: ContentAdminPreview,
+): ContentRenderIconKey | null {
 	const { doc } = content;
-	if (!doc.iconKeyId && !doc.iconKeyKey && !doc.iconKeyLucideName && !doc.iconMediaId) {
+	if (
+		!doc.iconKeyId &&
+		!doc.iconKeyKey &&
+		!doc.iconKeyLucideName &&
+		!doc.iconMediaId
+	) {
 		return null;
 	}
 
@@ -198,7 +228,9 @@ function mapAdminIconKey(content: ContentAdminPreview): ContentRenderIconKey | n
 	};
 }
 
-function mapAdminMedia(media: ContentAdminPreview["fields"][number]["media"]): ContentRenderMedia | null {
+function mapAdminMedia(
+	media: ContentAdminPreview["fields"][number]["media"],
+): ContentRenderMedia | null {
 	if (!media) {
 		return null;
 	}
@@ -216,7 +248,9 @@ function mapAdminMedia(media: ContentAdminPreview["fields"][number]["media"]): C
 	};
 }
 
-function mapAdminSeries(content: ContentAdminPreview): ContentRenderSeries | null {
+function mapAdminSeries(
+	content: ContentAdminPreview,
+): ContentRenderSeries | null {
 	const { doc } = content;
 
 	if (!doc.seriesId || !doc.seriesTitle || !doc.seriesSlug) {
@@ -233,7 +267,9 @@ function mapAdminSeries(content: ContentAdminPreview): ContentRenderSeries | nul
 	};
 }
 
-function mapAdminField(field: ContentAdminPreview["fields"][number]): ContentRenderField {
+function mapAdminField(
+	field: ContentAdminPreview["fields"][number],
+): ContentRenderField {
 	return {
 		id: field.id,
 		fieldListCode: field.fieldListCode,
@@ -252,6 +288,7 @@ function mapAdminField(field: ContentAdminPreview["fields"][number]): ContentRen
 		value: field.value,
 		optionLabel: field.optionLabel,
 		media: mapAdminMedia(field.media),
+		contentLink: mapContentLink(field.contentLink),
 	};
 }
 
@@ -272,7 +309,9 @@ function mapAdminDoc(content: ContentAdminPreview): ContentRenderDoc {
 		templateLabel: doc.templateLabel,
 		seriesTitle: doc.seriesTitle,
 		series: mapAdminSeries(content),
+		authorUsername: doc.authorUsername,
 		publishedAt: doc.publishedAt,
+		updatedAt: doc.updatedAt,
 		rendererCode: doc.rendererCode,
 		publicHref: buildPublicHref({
 			publicRoutePrefix: doc.publicRoutePrefix,
@@ -312,3 +351,5 @@ export function createAdminContentRenderModel(
 		fieldsByDestination: bucketFields(fields),
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Login page client showing the current user role summary                                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { CSSProperties, JSX } from "react";
@@ -119,7 +121,9 @@ export default function LoginClient({
 									title={role.roleId ?? ""}
 								>
 									{role.name}
-									<span className="login-role-summary__role-rank">· rank {role.rank}</span>
+									<span className="login-role-summary__role-rank">
+										· rank {role.rank}
+									</span>
 								</li>
 							))}
 						</ul>
@@ -135,3 +139,5 @@ export default function LoginClient({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

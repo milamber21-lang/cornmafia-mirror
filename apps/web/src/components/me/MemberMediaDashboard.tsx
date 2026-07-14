@@ -1,27 +1,41 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// FILE: apps/web/src/components/me/MemberMediaDashboard.tsx                                                    ////
 //// Language: TSX                                                                                              ////
-//// Client member media dashboard with R6B layout, member-safe upload, filters, sorting, and metadata edits.    ////
+//// Shared member media dashboard with member-safe upload, browse filters, management cards, and metadata edits. ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
-import { Clapperboard, Pencil, Plus, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import {
 	AlertBanner,
+	BrowseFilterPanel,
+	BrowsePageHeader,
+	BrowsePanelHeader,
+	BrowseResultsPanel,
 	Button,
 	ButtonLink,
 	DropdownMenuSingle,
 	FilePreview,
 	Input,
 	Pagination,
+	StatusPill,
+	SurfaceState,
 	Textarea,
 	Upload,
 } from "@/components/ui";
+import MemberManagementCard from "@/components/me/MemberManagementCard";
 import Panel from "@/components/ui/Panel";
 import { confirmAction } from "@/lib/client/confirm-dialog";
+import {
+	compareDisplayText,
+	formatDisplayDate,
+} from "@/lib/helpers/display-format";
 import type { MemberAuthorableCollection } from "@/lib/data/member-authoring";
 import type { MemberMediaItem } from "@/lib/data/member-media";
 import { readResponseMessage } from "@/lib/helpers/http-response";
@@ -71,17 +85,7 @@ function isMediaItem(value: unknown): value is MemberMediaItem {
 }
 
 function formatDate(value: string): string {
-	if (!value) {
-		return "-";
-	}
-	const date = new Date(value);
-	return Number.isNaN(date.getTime())
-		? value
-		: date.toLocaleDateString(undefined, {
-				year: "numeric",
-				month: "short",
-				day: "numeric",
-			});
+	return formatDisplayDate(value) ?? (value || "-");
 }
 
 function formatBytes(value: number): string {
@@ -127,18 +131,22 @@ function matchesFilters(args: {
 	subcategoryId: string;
 }): boolean {
 	const categoryMatches =
-		args.categoryId === ALL_FILTER_VALUE || args.row.categoryId === args.categoryId;
+		args.categoryId === ALL_FILTER_VALUE ||
+		args.row.categoryId === args.categoryId;
 	const subcategoryMatches =
-		args.subcategoryId === ALL_FILTER_VALUE || args.row.subcategoryId === args.subcategoryId;
+		args.subcategoryId === ALL_FILTER_VALUE ||
+		args.row.subcategoryId === args.subcategoryId;
 
 	return categoryMatches && subcategoryMatches;
 }
 
-function compareMedia(left: MemberMediaItem, right: MemberMediaItem, sort: SortCode): number {
+function compareMedia(
+	left: MemberMediaItem,
+	right: MemberMediaItem,
+	sort: SortCode,
+): number {
 	if (sort === "filename") {
-		return left.originalFilename.localeCompare(right.originalFilename, undefined, {
-			sensitivity: "base",
-		});
+		return compareDisplayText(left.originalFilename, right.originalFilename);
 	}
 
 	const leftDate = left.updatedAt ? new Date(left.updatedAt).getTime() : 0;
@@ -148,9 +156,7 @@ function compareMedia(left: MemberMediaItem, right: MemberMediaItem, sort: SortC
 		return sort === "oldest" ? leftDate - rightDate : rightDate - leftDate;
 	}
 
-	return left.originalFilename.localeCompare(right.originalFilename, undefined, {
-		sensitivity: "base",
-	});
+	return compareDisplayText(left.originalFilename, right.originalFilename);
 }
 
 function getPageRows<T>(rows: T[], page: number, pageSize: number): T[] {
@@ -177,13 +183,13 @@ function uniqueSortedOptions(args: {
 		{ value: ALL_FILTER_VALUE, label: "All" },
 		...Array.from(byValue.entries())
 			.map(([value, label]) => ({ value, label }))
-			.sort((left, right) =>
-				left.label.localeCompare(right.label, undefined, { sensitivity: "base" }),
-			),
+			.sort((left, right) => compareDisplayText(left.label, right.label)),
 	];
 }
 
-function buildCollectionOptions(collections: MemberAuthorableCollection[]): FilterOption[] {
+function buildCollectionOptions(
+	collections: MemberAuthorableCollection[],
+): FilterOption[] {
 	return collections.map((collection) => ({
 		value: `${collection.categoryId}:${collection.subcategoryId}`,
 		label: collection.label,
@@ -208,7 +214,9 @@ export default function MemberMediaDashboard({
 	const [error, setError] = React.useState("");
 	const [panelOpen, setPanelOpen] = React.useState(false);
 	const [panelMode, setPanelMode] = React.useState<PanelMode>("upload");
-	const [selectedRow, setSelectedRow] = React.useState<MemberMediaItem | null>(null);
+	const [selectedRow, setSelectedRow] = React.useState<MemberMediaItem | null>(
+		null,
+	);
 	const [collectionValue, setCollectionValue] = React.useState("");
 	const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
 	const [alt, setAlt] = React.useState("");
@@ -231,7 +239,9 @@ export default function MemberMediaDashboard({
 				collections:
 					categoryId === ALL_FILTER_VALUE
 						? collections
-						: collections.filter((collection) => collection.categoryId === categoryId),
+						: collections.filter(
+								(collection) => collection.categoryId === categoryId,
+							),
 				getValue: (collection) => collection.subcategoryId,
 				getLabel: (collection) => collection.subcategoryTitle,
 			}),
@@ -304,7 +314,8 @@ export default function MemberMediaDashboard({
 		try {
 			let response: Response;
 			if (panelMode === "upload") {
-				const [nextCategoryId = "", nextSubcategoryId = ""] = collectionValue.split(":");
+				const [nextCategoryId = "", nextSubcategoryId = ""] =
+					collectionValue.split(":");
 				if (!nextCategoryId || !nextSubcategoryId) {
 					setTopError("Collection is required.");
 					setSubmitting(false);
@@ -342,12 +353,18 @@ export default function MemberMediaDashboard({
 			}
 
 			if (!response.ok) {
-				throw new Error(await readResponseMessage(response, "Failed to save media."));
+				throw new Error(
+					await readResponseMessage(response, "Failed to save media."),
+				);
 			}
 			await refreshFromPayload((await response.json()) as MediaApiResponse);
 			setPanelOpen(false);
 		} catch (submitError: unknown) {
-			setTopError(submitError instanceof Error ? submitError.message : "Failed to save media.");
+			setTopError(
+				submitError instanceof Error
+					? submitError.message
+					: "Failed to save media.",
+			);
 		} finally {
 			setSubmitting(false);
 		}
@@ -373,11 +390,17 @@ export default function MemberMediaDashboard({
 				credentials: "include",
 			});
 			if (!response.ok) {
-				throw new Error(await readResponseMessage(response, "Failed to delete media."));
+				throw new Error(
+					await readResponseMessage(response, "Failed to delete media."),
+				);
 			}
 			await refreshFromPayload((await response.json()) as MediaApiResponse);
 		} catch (deleteError: unknown) {
-			setError(deleteError instanceof Error ? deleteError.message : "Failed to delete media.");
+			setError(
+				deleteError instanceof Error
+					? deleteError.message
+					: "Failed to delete media.",
+			);
 		}
 	}
 
@@ -387,104 +410,161 @@ export default function MemberMediaDashboard({
 			: alt !== (selectedRow?.alt ?? "") || credit !== (selectedRow?.credit ?? "");
 
 	return (
-		<main className="card member-dashboard-main">
-			<section className="member-hero">
-				<div className="member-hero__main">
-					<div className="member-hero__icon">
-						<Clapperboard className="member-icon member-icon--lg" aria-hidden />
+		<main className="member-dashboard-main member-browse-page">
+			<BrowsePageHeader
+				className="member-browse-header"
+				breadcrumbs={[{ label: "Member", href: "/me" }, { label: "Media" }]}
+				title="My media"
+				actions={<StatusPill tone="info">{rows.length} manageable</StatusPill>}
+				description={
+					<div className="member-browse-header__secondary-actions">
+						<Button
+							type="button"
+							size="sm"
+							variant="primary"
+							onClick={openUploadPanel}
+							leftIcon={<Plus aria-hidden />}
+						>
+							Upload image
+						</Button>
+						<ButtonLink href="/me" variant="secondary" size="sm">
+							Back to profile
+						</ButtonLink>
 					</div>
-					<div>
-						<h1 className="member-hero__title">My media</h1>
-						<p className="member-hero__text">Manage image uploads that can be attached to your public/member content.</p>
-					</div>
-				</div>
-				<div className="member-hero__actions">
-					<Button type="button" variant="green" onClick={openUploadPanel} leftIcon={<Plus className="member-icon member-icon--sm" aria-hidden />}>Upload image</Button>
-					<ButtonLink href="/me" variant="neutral">Back to profile</ButtonLink>
-				</div>
-			</section>
+				}
+			/>
 
 			{error ? <AlertBanner tone="error">{error}</AlertBanner> : null}
 
-			<section className="member-panel">
-				<div className="member-filter-grid member-filter-grid--media">
-					<DropdownMenuSingle
-						options={categoryOptions}
-						value={categoryId}
-						onChange={(value) => {
-							const nextCategoryId = value || ALL_FILTER_VALUE;
-							setCategoryId(nextCategoryId);
-							setSubcategoryId(ALL_FILTER_VALUE);
-							setPage(1);
-						}}
-						ariaLabel="Filter by category"
-						className="member-control-full"
-					/>
-					<DropdownMenuSingle
-						options={subcategoryOptions}
-						value={subcategoryId}
-						onChange={(value) => {
-							setSubcategoryId(value || ALL_FILTER_VALUE);
-							setPage(1);
-						}}
-						ariaLabel="Filter by collection"
-						className="member-control-full"
-					/>
-					<Input
-						type="search"
-						value={search}
-						onChange={(event) => {
-							setSearch(event.currentTarget.value);
-							setPage(1);
-						}}
-						placeholder="Search media..."
-					/>
-					<DropdownMenuSingle
-						options={SORT_OPTIONS}
-						value={sort}
-						onChange={(value) => {
-							setSort(value === "filename" || value === "oldest" ? value : "newest");
-							setPage(1);
-						}}
-						ariaLabel="Sort media"
-						className="member-control-full"
-					/>
+			<BrowseFilterPanel
+				className="member-browse-filter-panel"
+				aria-label="Member media filters"
+			>
+				<div className="member-browse-filter-controls member-browse-filter-controls--media">
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={categoryOptions}
+							value={categoryId}
+							onChange={(value) => {
+								const nextCategoryId = value || ALL_FILTER_VALUE;
+								setCategoryId(nextCategoryId);
+								setSubcategoryId(ALL_FILTER_VALUE);
+								setPage(1);
+							}}
+							ariaLabel="Filter by category"
+							className="member-control-full"
+						/>
+					</div>
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={subcategoryOptions}
+							value={subcategoryId}
+							onChange={(value) => {
+								setSubcategoryId(value || ALL_FILTER_VALUE);
+								setPage(1);
+							}}
+							ariaLabel="Filter by collection"
+							className="member-control-full"
+						/>
+					</div>
+					<div className="member-browse-filter__search">
+						<label className="sr-only" htmlFor="member-media-search">
+							Search media
+						</label>
+						<Input
+							id="member-media-search"
+							type="search"
+							value={search}
+							onChange={(event) => {
+								setSearch(event.currentTarget.value);
+								setPage(1);
+							}}
+							placeholder="Search media..."
+						/>
+					</div>
+					<div className="member-browse-filter__control">
+						<DropdownMenuSingle
+							options={SORT_OPTIONS}
+							value={sort}
+							onChange={(value) => {
+								setSort(value === "filename" || value === "oldest" ? value : "newest");
+								setPage(1);
+							}}
+							ariaLabel="Sort media"
+							className="member-control-full"
+						/>
+					</div>
 				</div>
+			</BrowseFilterPanel>
+
+			<BrowseResultsPanel
+				className="member-browse-results-panel"
+				aria-label="Member media results"
+			>
+				<BrowsePanelHeader
+					title="Media"
+					description={`Showing ${filteredRows.length} of ${rows.length} manageable uploads.`}
+				/>
 
 				{visibleRows.length > 0 ? (
-					<div className="member-card-grid">
+					<div className="member-management-grid member-management-grid--media">
 						{visibleRows.map((row) => (
-							<article key={row.id} className="member-card">
-								<div className="member-card__media">
-									<FilePreview
-										src={row.url}
-										filename={row.originalFilename}
-										mimeType={row.mimeType}
-										sizeBytes={row.sizeBytes}
-										alt={row.alt || row.originalFilename}
-										width={260}
-										showMeta={false}
-									/>
-								</div>
-								<div className="member-card__eyebrow">{row.categoryTitle} / {row.subcategoryTitle}</div>
-								<h2 className="member-card__title">{row.originalFilename}</h2>
-								<p className="member-card__description member-card__description--short">{row.alt || "Alt text missing."}</p>
-								<div className="member-card__footer">
-									<div className="member-card__meta-row">
+							<MemberManagementCard
+								key={row.id}
+								visual={
+									<span className="member-management-card__thumbnail">
+										<Image
+											src={row.url}
+											alt={row.alt || row.originalFilename}
+											width={64}
+											height={64}
+											unoptimized
+										/>
+									</span>
+								}
+								eyebrow={`${row.categoryTitle} / ${row.subcategoryTitle}`}
+								title={row.originalFilename}
+								summary={row.alt.trim() || null}
+								details={
+									<span className="member-management-card__meta">
 										<span>{formatBytes(row.sizeBytes)}</span>
-										<span>{row.width && row.height ? `${row.width} x ${row.height}` : "Image"}</span>
+										<span>
+											{row.width && row.height ? `${row.width} x ${row.height}` : "Image"}
+										</span>
 										<span>Updated {formatDate(row.updatedAt)}</span>
-									</div>
-									<div className="member-card__actions">
-										<Button type="button" size="sm" variant="neutral" onClick={() => openEditPanel(row)} leftIcon={<Pencil className="member-icon member-icon--sm" aria-hidden />}>Edit</Button>
-										<Button type="button" size="sm" variant="accent" onClick={() => void deleteRow(row)} leftIcon={<Trash2 className="member-icon member-icon--sm" aria-hidden />}>Delete</Button>
-									</div>
-								</div>
-							</article>
+									</span>
+								}
+								actions={
+									<>
+										<Button
+											type="button"
+											size="sm"
+											variant="secondary"
+											onClick={() => openEditPanel(row)}
+											leftIcon={<Pencil aria-hidden />}
+										>
+											Edit
+										</Button>
+										<Button
+											type="button"
+											size="sm"
+											variant="danger"
+											onClick={() => void deleteRow(row)}
+											leftIcon={<Trash2 aria-hidden />}
+										>
+											Delete
+										</Button>
+									</>
+								}
+							/>
 						))}
 					</div>
 				) : (
-					<div className="member-empty-state">No manageable media found.</div>
+					<SurfaceState
+						kind="empty"
+						title="No manageable media"
+						description="No uploads match the current filters."
+					/>
 				)}
 
 				<Pagination
@@ -499,7 +579,7 @@ export default function MemberMediaDashboard({
 					pageSizeOptions={[...PAGE_SIZE_OPTIONS]}
 					pageSizeLabel=""
 				/>
-			</section>
+			</BrowseResultsPanel>
 
 			<Panel
 				open={panelOpen}
@@ -509,7 +589,14 @@ export default function MemberMediaDashboard({
 				loading={submitting}
 				dirtyGuard={dirtyGuard}
 				renderSave={() => (
-					<Button type="button" variant="green" loading={submitting} onClick={() => void submitPanel()}>Save</Button>
+					<Button
+						type="button"
+						variant="primary"
+						loading={submitting}
+						onClick={() => void submitPanel()}
+					>
+						Save
+					</Button>
 				)}
 			>
 				<div className="member-panel-form-stack">
@@ -518,7 +605,12 @@ export default function MemberMediaDashboard({
 						<>
 							<div>
 								<label className="member-panel-field-label">Collection</label>
-								<DropdownMenuSingle options={collectionOptions} value={collectionValue} onChange={setCollectionValue} placeholder="Select collection" />
+								<DropdownMenuSingle
+									options={collectionOptions}
+									value={collectionValue}
+									onChange={setCollectionValue}
+									placeholder="Select collection"
+								/>
 							</div>
 							<Upload
 								accept={ACCEPTED_IMAGE_TYPES}
@@ -532,19 +624,35 @@ export default function MemberMediaDashboard({
 						</>
 					) : selectedRow ? (
 						<div className="member-panel-preview">
-							<FilePreview src={selectedRow.url} filename={selectedRow.originalFilename} mimeType={selectedRow.mimeType} sizeBytes={selectedRow.sizeBytes} alt={selectedRow.alt || selectedRow.originalFilename} width={320} />
+							<FilePreview
+								src={selectedRow.url}
+								filename={selectedRow.originalFilename}
+								mimeType={selectedRow.mimeType}
+								sizeBytes={selectedRow.sizeBytes}
+								alt={selectedRow.alt || selectedRow.originalFilename}
+								width={320}
+							/>
 						</div>
 					) : null}
 					<div>
 						<label className="member-panel-field-label">Alt text</label>
-						<Input value={alt} onChange={(event) => setAlt(event.currentTarget.value)} />
+						<Input
+							value={alt}
+							onChange={(event) => setAlt(event.currentTarget.value)}
+						/>
 					</div>
 					<div>
 						<label className="member-panel-field-label">Credit</label>
-						<Textarea rows={4} value={credit} onChange={(event) => setCredit(event.currentTarget.value)} />
+						<Textarea
+							rows={4}
+							value={credit}
+							onChange={(event) => setCredit(event.currentTarget.value)}
+						/>
 					</div>
 				</div>
 			</Panel>
 		</main>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

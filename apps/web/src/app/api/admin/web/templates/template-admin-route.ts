@@ -4,6 +4,7 @@
 //// Template-family admin route helpers built on shared server admin route utilities                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import {
 	classifyAdminMutationError,
@@ -30,3 +31,5 @@ export function classifyTemplateAdminError(
 ): AdminRouteError {
 	return classifyAdminMutationError(error, fallbackMessage);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

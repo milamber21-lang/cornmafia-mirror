@@ -4,6 +4,7 @@
 //// DB-backed public media file resolver used before streaming protected media bytes                              ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -123,3 +124,5 @@ export async function findEnabledIconMediaFileByPath(args: {
 	const row = result.rows[0] ?? null;
 	return row ? mapEnabledIconMediaResolveRow(row) : null;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

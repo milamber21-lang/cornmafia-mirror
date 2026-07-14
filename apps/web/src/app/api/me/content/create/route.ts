@@ -4,6 +4,8 @@
 //// Member API route for collection-context content create metadata and creation.                               ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { NextRequest, NextResponse } from "next/server";
 
 import {
@@ -97,12 +99,16 @@ export async function GET(request: NextRequest): Promise<Response> {
 		});
 
 		if (!meta) {
-			return jsonError("This collection is not available for member authoring.", 404);
+			return jsonError(
+				"This collection is not available for member authoring.",
+				404,
+			);
 		}
 
 		return NextResponse.json({ meta });
 	} catch (error: unknown) {
-		const message = error instanceof Error ? error.message : "Failed to load create metadata.";
+		const message =
+			error instanceof Error ? error.message : "Failed to load create metadata.";
 		return jsonError(message, 500);
 	}
 }
@@ -113,7 +119,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError("Sign in required.", 401);
 	}
 
-	const rateLimitResponse = checkRateLimit({
+	const rateLimitResponse = await checkRateLimit({
 		request,
 		bucket: "member:content:create",
 		identity: actorDiscordId,
@@ -161,7 +167,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 		});
 
 		if (!meta) {
-			return jsonError("This collection is not available for member authoring.", 404);
+			return jsonError(
+				"This collection is not available for member authoring.",
+				404,
+			);
 		}
 
 		const template = meta.templates.find((row) => row.id === templateId) ?? null;
@@ -169,15 +178,20 @@ export async function POST(request: NextRequest): Promise<Response> {
 			return jsonError("Template is not valid for this collection.", 400);
 		}
 
-		const templateFields = meta.fields.filter((field) => field.templateId === templateId);
+		const templateFields = meta.fields.filter(
+			(field) => field.templateId === templateId,
+		);
 		const seriesMode = readString(body.seriesMode);
 		let seriesId: string | null = null;
 		let seriesPartNo: number | null = null;
 		let newSeriesTitle: string | null = null;
 		let newSeriesDescription: string | null = null;
 
-		if (template.requiresSeries) {
-			if (seriesMode === "new") {
+		if (template.allowsSeries) {
+			if (seriesMode === "none") {
+				seriesId = null;
+				seriesPartNo = null;
+			} else if (seriesMode === "new") {
 				newSeriesTitle = readNullableString(body.newSeriesTitle);
 				newSeriesDescription = readNullableString(body.newSeriesDescription);
 				seriesPartNo = readPositiveNumber(body.seriesPartNo) ?? 1;
@@ -189,7 +203,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 				seriesId = readString(body.seriesId);
 				const series = meta.series.find((row) => row.id === seriesId) ?? null;
 				if (!series) {
-					return jsonError("Series is required.", 400);
+					return jsonError("Select an existing series or choose No series.", 400);
 				}
 				seriesPartNo = readPositiveNumber(body.seriesPartNo) ?? series.nextPartNo;
 			}
@@ -214,7 +228,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 		return NextResponse.json({ ok: true, contentId });
 	} catch (error: unknown) {
-		const message = error instanceof Error ? error.message : "Failed to create content.";
+		const message =
+			error instanceof Error ? error.message : "Failed to create content.";
 		return jsonError(message, 400);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

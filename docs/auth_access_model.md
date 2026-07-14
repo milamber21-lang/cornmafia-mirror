@@ -1,4 +1,6 @@
 <!-- FILE: docs/auth_access_model.md -->
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->
+
 # Auth And Access Freshness Model
 
 ## Purpose
@@ -85,3 +87,5 @@ stale role cache when a refresh is due
 ```
 
 Security-sensitive auth code should remain explicit, boring, and fail-closed.
+
+<!-- WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE -->

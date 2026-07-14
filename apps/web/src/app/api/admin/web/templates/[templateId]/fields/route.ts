@@ -4,6 +4,7 @@
 //// DB-first admin API route for per-template field placements                                                    ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -27,7 +28,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-function normalizeLayoutWidthCode(value: unknown): "full" | "half" | "third" | null {
+function normalizeLayoutWidthCode(
+	value: unknown,
+): "full" | "half" | "third" | null {
 	if (value === "full" || value === "half" || value === "third") {
 		return value;
 	}
@@ -35,8 +38,15 @@ function normalizeLayoutWidthCode(value: unknown): "full" | "half" | "third" | n
 	return null;
 }
 
-function normalizeLayoutAlignCode(value: unknown): "left" | "center" | "right" | "stretch" | null {
-	if (value === "left" || value === "center" || value === "right" || value === "stretch") {
+function normalizeLayoutAlignCode(
+	value: unknown,
+): "left" | "center" | "right" | "stretch" | null {
+	if (
+		value === "left" ||
+		value === "center" ||
+		value === "right" ||
+		value === "stretch"
+	) {
 		return value;
 	}
 
@@ -63,7 +73,11 @@ function normalizeLabelStyleCode(args: {
 		return args.labelPositionCode === "above" ? "title" : null;
 	}
 
-	if (args.value === "label" || args.value === "text" || args.value === "muted") {
+	if (
+		args.value === "label" ||
+		args.value === "text" ||
+		args.value === "muted"
+	) {
 		return args.value;
 	}
 
@@ -194,10 +208,16 @@ export async function POST(
 		const displayOrder = parseNonNegativeInt(data.displayOrder);
 		const required = parseRequiredBoolean(data.required);
 		const enabled = parseRequiredBoolean(data.enabled);
-		const layoutWidthCode = normalizeLayoutWidthCode(data.layoutWidthCode ?? "full");
-		const layoutAlignCode = normalizeLayoutAlignCode(data.layoutAlignCode ?? "stretch");
+		const layoutWidthCode = normalizeLayoutWidthCode(
+			data.layoutWidthCode ?? "full",
+		);
+		const layoutAlignCode = normalizeLayoutAlignCode(
+			data.layoutAlignCode ?? "stretch",
+		);
 		const showLabel = parseRequiredBoolean(data.showLabel ?? true);
-		const labelPositionCode = normalizeLabelPositionCode(data.labelPositionCode ?? "above");
+		const labelPositionCode = normalizeLabelPositionCode(
+			data.labelPositionCode ?? "above",
+		);
 		const labelStyleCode = normalizeLabelStyleCode({
 			value: data.labelStyleCode ?? "label",
 			labelPositionCode: labelPositionCode ?? "above",
@@ -232,7 +252,11 @@ export async function POST(
 		}
 
 		if (labelStyleCode === null) {
-			return jsonError("VALIDATION_REQUIRED", "Label style is invalid for the selected label position.", 400);
+			return jsonError(
+				"VALIDATION_REQUIRED",
+				"Label style is invalid for the selected label position.",
+				400,
+			);
 		}
 
 		if (labelPositionCode === null) {
@@ -240,7 +264,11 @@ export async function POST(
 		}
 
 		if (labelSeparatorCode === null) {
-			return jsonError("VALIDATION_REQUIRED", "Label separator is invalid for the selected label position.", 400);
+			return jsonError(
+				"VALIDATION_REQUIRED",
+				"Label separator is invalid for the selected label position.",
+				400,
+			);
 		}
 
 		const existingRows = await listTemplateFieldsAdminByTemplateId(templateId);
@@ -250,7 +278,9 @@ export async function POST(
 				return jsonError("VALIDATION_REQUIRED", "Field list is required.", 400);
 			}
 
-			if (existingRows.some((row) => row.fieldListId === String(requestedFieldListId))) {
+			if (
+				existingRows.some((row) => row.fieldListId === String(requestedFieldListId))
+			) {
 				return jsonError(
 					"VALIDATION_REQUIRED",
 					"Field list is already selected for this template.",
@@ -340,3 +370,5 @@ export async function POST(
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

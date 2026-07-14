@@ -4,6 +4,7 @@
 //// NextAuth Discord login sync backed by DB-first auth and role surfaces.                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -205,6 +206,7 @@ async function fetchDiscordSyncData(
 		};
 	}
 
+	const botTokenAvailable = Boolean(getOptionalEnv("DISCORD_BOT_TOKEN"));
 	let guildMember: APIGuildMember | null = null;
 	let guildRoles: APIRole[] = [];
 	let memberFetchOk = false;
@@ -227,7 +229,23 @@ async function fetchDiscordSyncData(
 		}
 	}
 
-	if (!memberFetchOk && getOptionalEnv("DISCORD_BOT_TOKEN")) {
+	const requiresBotMemberVerification =
+		memberFetchOk &&
+		guildMember !== null &&
+		Array.isArray(guildMember.roles) &&
+		guildMember.roles.length === 0;
+
+	if (requiresBotMemberVerification) {
+		memberFetchOk = false;
+
+		if (!botTokenAvailable) {
+			console.warn(
+				`[auth] Discord OAuth returned an empty role list for ${discordUserId}, but bot verification is unavailable.`,
+			);
+		}
+	}
+
+	if (!memberFetchOk && botTokenAvailable) {
 		try {
 			guildMember = await getGuildMember(guildId, discordUserId);
 			memberFetchOk = true;
@@ -244,7 +262,7 @@ async function fetchDiscordSyncData(
 		}
 	}
 
-	if (getOptionalEnv("DISCORD_BOT_TOKEN")) {
+	if (botTokenAvailable) {
 		try {
 			guildRoles = await getGuildRoles(guildId);
 			rolesFetchOk = true;
@@ -841,3 +859,5 @@ export function buildAuthOptions(): NextAuthOptions {
 export async function getAuthSession(): Promise<Session | null> {
 	return getServerSession(buildAuthOptions());
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

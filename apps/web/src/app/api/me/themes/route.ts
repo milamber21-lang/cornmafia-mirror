@@ -4,18 +4,17 @@
 //// Member profile CSS theme style options for signed-in users.                                                 ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAuthSession } from "@/lib/auth/auth";
 import { listMemberThemeOptions } from "@/lib/data/member-profile";
-import { readDiscordIdFromSession } from "@/lib/server/current-actor";
+import { getCurrentActorDiscordId } from "@/lib/server/current-actor";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-	const session = await getAuthSession();
-	const actorDiscordId = readDiscordIdFromSession(session);
+	const actorDiscordId = await getCurrentActorDiscordId();
 
 	if (!actorDiscordId) {
 		return NextResponse.json(
@@ -35,3 +34,5 @@ export async function GET(req: NextRequest) {
 		return NextResponse.json({ ok: false, message }, { status: 500 });
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

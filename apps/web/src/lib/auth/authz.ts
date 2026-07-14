@@ -4,6 +4,8 @@
 //// Admin and editor guards backed by DB access and stale-role verification                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import "server-only";
 
 import { resolveAccessForUser } from "@/lib/access/resolve";
@@ -137,3 +139,5 @@ export async function requireAdminOrEditor(): Promise<GuardResult> {
 
 	return { allowed: false, reason: "not-admin-or-editor" };
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,8 @@
 //// Templates table with content metadata columns and shared icon rendering                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -46,7 +48,15 @@ export interface TemplatesTableProps {
 type Mode = "create" | "edit";
 
 const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
-type SortKey = "icon" | "code" | "label" | "contentKind" | "surface" | "series" | "fieldCount" | "version";
+type SortKey =
+	| "icon"
+	| "code"
+	| "label"
+	| "contentKind"
+	| "surface"
+	| "series"
+	| "fieldCount"
+	| "version";
 
 function formatSurfaceScope(surfaceScopeCode: string): string {
 	if (surfaceScopeCode === "admin") {
@@ -87,7 +97,7 @@ export default function TemplatesTable({
 						row.contentKindCode,
 						row.contentKindLabel,
 						row.surfaceScopeCode,
-						row.requiresSeries ? "requires series" : "no series",
+						row.allowsSeries ? "series allowed" : "series unavailable",
 						row.description ?? "",
 					]
 						.join(" ")
@@ -108,7 +118,10 @@ export default function TemplatesTable({
 			} else if (sortKey === "label") {
 				comparison = compareAdminText(left.label, right.label);
 			} else if (sortKey === "contentKind") {
-				comparison = compareAdminText(left.contentKindLabel, right.contentKindLabel);
+				comparison = compareAdminText(
+					left.contentKindLabel,
+					right.contentKindLabel,
+				);
 			} else if (sortKey === "surface") {
 				comparison = compareAdminText(
 					formatSurfaceScope(left.surfaceScopeCode),
@@ -116,13 +129,16 @@ export default function TemplatesTable({
 				);
 			} else if (sortKey === "series") {
 				comparison = compareAdminText(
-					left.requiresSeries ? "Yes" : "No",
-					right.requiresSeries ? "Yes" : "No",
+					left.allowsSeries ? "Yes" : "No",
+					right.allowsSeries ? "Yes" : "No",
 				);
 			} else if (sortKey === "fieldCount") {
 				comparison = compareAdminNumber(left.fieldCount, right.fieldCount);
 			} else if (sortKey === "version") {
-				comparison = compareAdminNumber(left.schemaVersionNo, right.schemaVersionNo);
+				comparison = compareAdminNumber(
+					left.schemaVersionNo,
+					right.schemaVersionNo,
+				);
 			} else {
 				comparison = compareAdminText(left.templateCode, right.templateCode);
 			}
@@ -213,7 +229,7 @@ export default function TemplatesTable({
 							description: template.description,
 							contentKindCode: template.contentKindCode,
 							surfaceScopeCode: template.surfaceScopeCode,
-							requiresSeries: template.requiresSeries,
+							allowsSeries: template.allowsSeries,
 							defaultIconKeyId: template.defaultIconKey?.id ?? "",
 							defaultIconColorId: template.defaultIconColor?.id ?? "",
 							enabled: !template.enabled,
@@ -223,10 +239,7 @@ export default function TemplatesTable({
 
 				if (!response.ok) {
 					throw new Error(
-						await readResponseMessage(
-							response,
-							"Failed to update template status.",
-						),
+						await readResponseMessage(response, "Failed to update template status."),
 					);
 				}
 
@@ -290,7 +303,6 @@ export default function TemplatesTable({
 		[busyId, refreshFromServer],
 	);
 
-
 	const handleSortChange = React.useCallback(
 		(nextSortKey: SortKey): void => {
 			setSortDirection((currentDirection) =>
@@ -322,7 +334,7 @@ export default function TemplatesTable({
 					</div>
 
 					<div className="admin-table-toolbar-action">
-						<Button onClick={openCreate} variant="green">
+						<Button onClick={openCreate} variant="primary">
 							New Template
 						</Button>
 					</div>
@@ -348,14 +360,62 @@ export default function TemplatesTable({
 						</colgroup>
 						<THead>
 							<TR>
-								<AdminSortableTH label="Icon" sortKey="icon" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Code" sortKey="code" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Label" sortKey="label" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Content Kind" sortKey="contentKind" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Surface" sortKey="surface" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Series" sortKey="series" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Field #" sortKey="fieldCount" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
-								<AdminSortableTH label="Version" sortKey="version" activeSortKey={sortKey} sortDirection={sortDirection} onSortChange={handleSortChange} />
+								<AdminSortableTH
+									label="Icon"
+									sortKey="icon"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Code"
+									sortKey="code"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Label"
+									sortKey="label"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Content Kind"
+									sortKey="contentKind"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Surface"
+									sortKey="surface"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Series"
+									sortKey="series"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Field #"
+									sortKey="fieldCount"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
+								<AdminSortableTH
+									label="Version"
+									sortKey="version"
+									activeSortKey={sortKey}
+									sortDirection={sortDirection}
+									onSortChange={handleSortChange}
+								/>
 								<TH className="admin-table-cell--center">Status</TH>
 								<TH className="admin-table-cell--center">Delete</TH>
 								<TH className="admin-table-cell--center">Fields</TH>
@@ -366,10 +426,7 @@ export default function TemplatesTable({
 						<TBody>
 							{pageRows.length === 0 ? (
 								<TR>
-									<TD
-										colSpan={12}
-										className="admin-table-empty-cell"
-									>
+									<TD colSpan={12} className="admin-table-empty-cell">
 										No templates found.
 									</TD>
 								</TR>
@@ -394,19 +451,21 @@ export default function TemplatesTable({
 											</TD>
 											<TD className="admin-table-cell--center">{row.label}</TD>
 											<TD className="admin-table-cell--center">
-												<div className="admin-table-cell--strong">{row.contentKindLabel}</div>
+												<div className="admin-table-cell--strong">
+													{row.contentKindLabel}
+												</div>
 											</TD>
 											<TD className="admin-table-cell--center">
 												{formatSurfaceScope(row.surfaceScopeCode)}
 											</TD>
 											<TD className="admin-table-cell--center">
-												{row.requiresSeries ? "Yes" : "No"}
+												{row.allowsSeries ? "Yes" : "No"}
 											</TD>
 											<TD className="admin-table-cell--center">{row.fieldCount}</TD>
 											<TD className="admin-table-cell--center">{row.schemaVersionNo}</TD>
 											<TD className="admin-table-cell--center">
 												<Button
-													variant={row.enabled ? "green" : "neutral"}
+													variant={row.enabled ? "success" : "secondary"}
 													disabled={disabled}
 													onClick={() => void toggleEnabled(row)}
 													aria-label={row.enabled ? "Enabled" : "Disabled"}
@@ -417,7 +476,7 @@ export default function TemplatesTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => void deleteTemplate(row)}
-													variant="accent"
+													variant="danger"
 													disabled={disabled}
 												>
 													Delete
@@ -426,7 +485,7 @@ export default function TemplatesTable({
 											<TD className="admin-table-cell--center">
 												<ButtonLink
 													href={`/admin/web/templates/${row.id}`}
-													variant="neutral"
+													variant="secondary"
 												>
 													Manage
 												</ButtonLink>
@@ -434,7 +493,7 @@ export default function TemplatesTable({
 											<TD className="admin-table-cell--center">
 												<Button
 													onClick={() => openEdit(row)}
-													variant="neutral"
+													variant="secondary"
 													disabled={disabled}
 												>
 													Edit
@@ -473,3 +532,5 @@ export default function TemplatesTable({
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

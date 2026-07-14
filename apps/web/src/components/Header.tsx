@@ -4,6 +4,8 @@
 //// Header with logo and login menu using current admin-access guard                                             ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import type { JSX } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -52,3 +54,5 @@ export default async function Header(): Promise<JSX.Element> {
 		</>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

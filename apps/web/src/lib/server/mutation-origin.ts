@@ -4,6 +4,7 @@
 //// Shared same-origin guard for API mutation requests before privileged business logic runs.                   ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextResponse } from "next/server";
 
@@ -83,15 +84,22 @@ function isExemptMutationPath(request: Request): boolean {
 		return true;
 	}
 
-	return EXEMPT_MUTATION_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+	return EXEMPT_MUTATION_PATH_PREFIXES.some((prefix) =>
+		pathname.startsWith(prefix),
+	);
 }
 
 function readSecFetchSite(request: Request): string | null {
-	return normalizeHeaderValue(request.headers.get("sec-fetch-site"))?.toLowerCase() ?? null;
+	return (
+		normalizeHeaderValue(request.headers.get("sec-fetch-site"))?.toLowerCase() ??
+		null
+	);
 }
 
 function isExplicitlyCrossSite(secFetchSite: string | null): boolean {
-	return secFetchSite !== null && CROSS_SITE_SEC_FETCH_SITE_VALUES.has(secFetchSite);
+	return (
+		secFetchSite !== null && CROSS_SITE_SEC_FETCH_SITE_VALUES.has(secFetchSite)
+	);
 }
 
 function buildForbiddenResponse(message: string): NextResponse {
@@ -109,7 +117,9 @@ export function isMutationMethod(method: string): boolean {
 	return MUTATION_METHODS.has(method.trim().toUpperCase());
 }
 
-export function assertSameOriginMutation(request: Request): NextResponse | null {
+export function assertSameOriginMutation(
+	request: Request,
+): NextResponse | null {
 	if (!isMutationMethod(request.method)) {
 		return null;
 	}
@@ -146,3 +156,5 @@ export function assertSameOriginMutation(request: Request): NextResponse | null 
 
 	return buildForbiddenResponse("Mutation requests require same-origin proof.");
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

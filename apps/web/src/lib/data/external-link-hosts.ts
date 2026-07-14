@@ -4,6 +4,7 @@
 //// DB-first admin external link host, path-rule, and validation helpers                                        ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -71,7 +72,9 @@ export type ExternalLinkValidationResult = {
 };
 
 function toIsoString(value: string | Date): string {
-	return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+	return value instanceof Date
+		? value.toISOString()
+		: new Date(value).toISOString();
 }
 
 function toNullableIsoString(value: string | Date | null): string | null {
@@ -274,3 +277,5 @@ export async function validateExternalLinkUrl(args: {
 
 	return mapExternalLinkValidationRow(result.rows[0]);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

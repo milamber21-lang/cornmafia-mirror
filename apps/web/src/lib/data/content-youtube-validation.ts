@@ -4,6 +4,7 @@
 //// Validates embedded YouTube content fields against the DB-managed channel allowlist                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -34,7 +35,9 @@ function isYoutubeField(field: ContentTemplateFieldDefinition): boolean {
 	);
 }
 
-function getYoutubeValidationLabel(field: ContentTemplateFieldDefinition): string {
+function getYoutubeValidationLabel(
+	field: ContentTemplateFieldDefinition,
+): string {
 	return field.label || "YouTube video";
 }
 
@@ -77,7 +80,10 @@ export async function assertContentYoutubeChannelsAllowed(args: {
 	fields: ContentTemplateFieldDefinition[];
 	fieldValues: ContentFieldValueDbInput[];
 }): Promise<void> {
-	const references = readYoutubeValidationReferences(args.fields, args.fieldValues);
+	const references = readYoutubeValidationReferences(
+		args.fields,
+		args.fieldValues,
+	);
 	if (references.length === 0) {
 		return;
 	}
@@ -107,8 +113,13 @@ export async function assertContentYoutubeChannelsAllowed(args: {
 				],
 			);
 		} catch (error: unknown) {
-			const message = error instanceof Error ? error.message : "YouTube channel validation failed.";
+			const message =
+				error instanceof Error
+					? error.message
+					: "YouTube channel validation failed.";
 			throw new Error(`${reference.label}: ${message}`);
 		}
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

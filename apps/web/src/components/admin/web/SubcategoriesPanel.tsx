@@ -4,6 +4,8 @@
 //// Subcategory editor with row-aligned props, shared error parsing, and inherited policy summaries               ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -369,9 +371,7 @@ export default function SubcategoriesPanel({
 				name: "title",
 				label: "Title",
 				validate: (value) =>
-					String(value ?? "").trim().length > 0
-						? undefined
-						: "Title is required.",
+					String(value ?? "").trim().length > 0 ? undefined : "Title is required.",
 			},
 			{
 				type: "text",
@@ -482,9 +482,7 @@ export default function SubcategoriesPanel({
 				label: "Icon",
 				options: iconOptions,
 				validate: (value) =>
-					String(value ?? "").trim().length > 0
-						? undefined
-						: "Icon is required.",
+					String(value ?? "").trim().length > 0 ? undefined : "Icon is required.",
 			},
 			{
 				type: "select-single",
@@ -511,9 +509,7 @@ export default function SubcategoriesPanel({
 
 					return (
 						<div className="media-icon-preview-row">
-							<div
-								className="media-icon-preview-frame"
-							>
+							<div className="media-icon-preview-frame">
 								{selectedIcon && selectedColor ? (
 									<IconRender
 										iconKey={selectedIcon}
@@ -678,3 +674,5 @@ export default function SubcategoriesPanel({
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

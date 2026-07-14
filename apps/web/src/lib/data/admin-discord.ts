@@ -4,16 +4,13 @@
 //// DB-first admin Discord role and user data helpers extracted from route handlers.                           ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
 import { query } from "@/lib/data/pg";
 
-export type DiscordRoleAdminSortBy =
-	| "name"
-	| "source"
-	| "roleId"
-	| "rank";
+export type DiscordRoleAdminSortBy = "name" | "source" | "roleId" | "rank";
 
 export type DiscordUserAdminSortBy =
 	| "discordId"
@@ -154,8 +151,9 @@ function normalizeRoleSource(value: unknown): DiscordRoleSourceCode {
 	return value === "virtual" ? "virtual" : "discord";
 }
 
-
-function normalizeSortDir(sortDir: DiscordAdminSortDir | undefined): DiscordAdminSortDir {
+function normalizeSortDir(
+	sortDir: DiscordAdminSortDir | undefined,
+): DiscordAdminSortDir {
 	return sortDir === "desc" ? "desc" : "asc";
 }
 
@@ -623,3 +621,5 @@ export async function findDiscordUserAdminDetail(
 		})),
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

@@ -4,6 +4,7 @@
 //// DB-first Mafiosopedia section helpers for public hub, filters, media samples, and section detail pages.      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import "server-only";
 
@@ -277,7 +278,9 @@ function mapSectionMediaSampleRow(
 	};
 }
 
-function mapSectionItemRow(row: MafiosopediaSectionItemRow): MafiosopediaSectionItemDoc {
+function mapSectionItemRow(
+	row: MafiosopediaSectionItemRow,
+): MafiosopediaSectionItemDoc {
 	return {
 		sectionId: String(row.section_id),
 		sectionCode: row.section_code,
@@ -309,7 +312,9 @@ function mapSectionItemRow(row: MafiosopediaSectionItemRow): MafiosopediaSection
 	};
 }
 
-export async function listMafiosopediaSections(): Promise<MafiosopediaSectionDoc[]> {
+export async function listMafiosopediaSections(): Promise<
+	MafiosopediaSectionDoc[]
+> {
 	const result = await query<MafiosopediaSectionRow>(
 		`SELECT section_id,
 				section_code,
@@ -494,3 +499,5 @@ export async function listMafiosopediaSectionItems(
 		totalPages: pageCount,
 	};
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

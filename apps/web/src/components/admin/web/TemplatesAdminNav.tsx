@@ -4,6 +4,8 @@
 //// Shared grouped navigation for the templates admin family                                                      ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import type { JSX } from "react";
@@ -73,7 +75,7 @@ export default function TemplatesAdminNav({
 				<ButtonLink
 					key={link.href}
 					href={link.href}
-					variant={active === link.key ? "green" : "neutral"}
+					variant={active === link.key ? "primary" : "secondary"}
 				>
 					{link.label}
 				</ButtonLink>
@@ -81,3 +83,5 @@ export default function TemplatesAdminNav({
 		</div>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

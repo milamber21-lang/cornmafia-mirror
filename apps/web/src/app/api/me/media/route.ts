@@ -4,6 +4,8 @@
 //// Member API route for owned/manageable media list, uploads, metadata updates, and deletes.                  ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 import { NextRequest, NextResponse } from "next/server";
 
 import {
@@ -84,11 +86,17 @@ export async function GET(): Promise<Response> {
 	}
 }
 
-async function handleUpload(request: NextRequest, actorDiscordId: string): Promise<Response> {
+async function handleUpload(
+	request: NextRequest,
+	actorDiscordId: string,
+): Promise<Response> {
 	const formData = await request.formData();
 	const fileValue = formData.get("file");
 	if (!(typeof File !== "undefined" && fileValue instanceof File)) {
-		return NextResponse.json({ message: 'Field "file" is required.' }, { status: 400 });
+		return NextResponse.json(
+			{ message: 'Field "file" is required.' },
+			{ status: 400 },
+		);
 	}
 
 	let validatedFile: ValidatedUploadFile;
@@ -111,11 +119,17 @@ async function handleUpload(request: NextRequest, actorDiscordId: string): Promi
 	const credit = sanitizeFreeText(readString(formData.get("credit")), 500) ?? "";
 
 	if (!categoryId || !subcategoryId) {
-		return NextResponse.json({ message: "Collection is required." }, { status: 400 });
+		return NextResponse.json(
+			{ message: "Collection is required." },
+			{ status: 400 },
+		);
 	}
 
 	if (!alt) {
-		return NextResponse.json({ message: "Alt text is required." }, { status: 400 });
+		return NextResponse.json(
+			{ message: "Alt text is required." },
+			{ status: 400 },
+		);
 	}
 
 	const collections = await listMemberAuthorableCollections(actorDiscordId);
@@ -183,7 +197,10 @@ async function handleUpload(request: NextRequest, actorDiscordId: string): Promi
 	}
 }
 
-async function handleJsonMutation(request: NextRequest, actorDiscordId: string): Promise<Response> {
+async function handleJsonMutation(
+	request: NextRequest,
+	actorDiscordId: string,
+): Promise<Response> {
 	const body = await readBody(request);
 	if (!body) {
 		return NextResponse.json({ message: "Invalid JSON body." }, { status: 400 });
@@ -194,7 +211,10 @@ async function handleJsonMutation(request: NextRequest, actorDiscordId: string):
 	const data = isRecord(body.data) ? body.data : {};
 
 	if (!id) {
-		return NextResponse.json({ message: "Media id is required." }, { status: 400 });
+		return NextResponse.json(
+			{ message: "Media id is required." },
+			{ status: 400 },
+		);
 	}
 
 	try {
@@ -202,7 +222,10 @@ async function handleJsonMutation(request: NextRequest, actorDiscordId: string):
 			const alt = sanitizeFreeText(readString(data.alt), 500);
 			const credit = sanitizeFreeText(readString(data.credit), 500) ?? "";
 			if (!alt) {
-				return NextResponse.json({ message: "Alt text is required." }, { status: 400 });
+				return NextResponse.json(
+					{ message: "Alt text is required." },
+					{ status: 400 },
+				);
 			}
 			await updateMemberMediaMeta({ actorDiscordId, mediaId: id, alt, credit });
 			const rows = await listMemberMedia(actorDiscordId);
@@ -210,7 +233,10 @@ async function handleJsonMutation(request: NextRequest, actorDiscordId: string):
 		}
 
 		if (op === "delete") {
-			const storageRelPath = await deleteMemberMedia({ actorDiscordId, mediaId: id });
+			const storageRelPath = await deleteMemberMedia({
+				actorDiscordId,
+				mediaId: id,
+			});
 			if (storageRelPath) {
 				await deleteMediaFileIfExists(storageRelPath);
 			}
@@ -237,7 +263,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 	const contentType = (request.headers.get("content-type") ?? "").toLowerCase();
 	const isUpload = contentType.includes("multipart/form-data");
-	const rateLimitResponse = checkRateLimit({
+	const rateLimitResponse = await checkRateLimit({
 		request,
 		bucket: isUpload ? "member:media:upload" : "member:media:mutation",
 		identity: actorDiscordId,
@@ -254,3 +280,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 	return handleJsonMutation(request, actorDiscordId);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

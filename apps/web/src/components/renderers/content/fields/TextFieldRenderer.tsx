@@ -4,6 +4,7 @@
 //// Renders plain text, long text, discord id, and fallback primitive content fields.                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { JSX } from "react";
 
@@ -33,7 +34,11 @@ export default function TextFieldRenderer({
 			showLabel={showLabel}
 			valueTextClassName={valueTextClassName}
 		>
-			<p className="content-field-value content-field-value--prewrap">{formattedValue}</p>
+			<p className="content-field-value content-field-value--prewrap">
+				{formattedValue}
+			</p>
 		</ContentFieldFrame>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

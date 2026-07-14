@@ -4,6 +4,7 @@
 //// Admin API route for classification-level Riseopedia patch publication overrides.                            ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -71,7 +72,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 			const actionCode = getRequiredCode(data, "actionCode");
 			const entityTypeCode = getRequiredCode(data, "entityTypeCode");
 			if (!actionCode || !entityTypeCode) {
-				return jsonError("VALIDATION_REQUIRED", "Entity type and action are required.", 400);
+				return jsonError(
+					"VALIDATION_REQUIRED",
+					"Entity type and action are required.",
+					400,
+				);
 			}
 
 			const id = await upsertRiseopediaPatchScopeOverrideAdmin({
@@ -98,7 +103,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 				return jsonError("VALIDATION_REQUIRED", "Missing id.", 400);
 			}
 
-			await deleteRiseopediaPatchScopeOverrideAdmin({ actorDiscordId: actorOrResponse, patchPublicationScopeOverrideId });
+			await deleteRiseopediaPatchScopeOverrideAdmin({
+				actorDiscordId: actorOrResponse,
+				patchPublicationScopeOverrideId,
+			});
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 
@@ -108,3 +116,5 @@ export async function POST(request: NextRequest): Promise<Response> {
 		return jsonError(classified.code, classified.message, classified.status);
 	}
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

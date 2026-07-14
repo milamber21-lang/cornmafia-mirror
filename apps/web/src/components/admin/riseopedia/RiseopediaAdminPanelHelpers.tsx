@@ -4,6 +4,7 @@
 //// Shared low-level form helpers used by dedicated Riseopedia admin panels.                                     ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type { FieldDef, RowDef } from "@/components/ui/PanelForm";
 
@@ -72,7 +73,9 @@ export function buildRiseopediaPanelFieldDef(
 	};
 }
 
-export function buildRiseopediaPanelRows(fields: RiseopediaAdminFieldConfig[]): RowDef[] {
+export function buildRiseopediaPanelRows(
+	fields: RiseopediaAdminFieldConfig[],
+): RowDef[] {
 	const rows: RowDef[] = [];
 	let pending: RowDef = [];
 
@@ -103,3 +106,5 @@ export function buildRiseopediaPanelRows(fields: RiseopediaAdminFieldConfig[]): 
 
 	return rows;
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

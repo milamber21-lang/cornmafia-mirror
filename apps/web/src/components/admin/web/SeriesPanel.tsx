@@ -4,6 +4,8 @@
 //// Series editor with rank-safe policy submission and dynamic effective summaries                                ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
+
 "use client";
 
 import * as React from "react";
@@ -338,9 +340,7 @@ export default function SeriesPanel(
 				name: "title",
 				label: "Title",
 				validate: (value) =>
-					String(value ?? "").trim().length > 0
-						? undefined
-						: "Title is required.",
+					String(value ?? "").trim().length > 0 ? undefined : "Title is required.",
 			},
 			{
 				type: "text",
@@ -381,10 +381,7 @@ export default function SeriesPanel(
 
 					return sortAdminPickerOptions(
 						subcategories
-							.filter(
-								(subcategory) =>
-									subcategory.categoryId === selectedCategoryId,
-							)
+							.filter((subcategory) => subcategory.categoryId === selectedCategoryId)
 							.map((subcategory) => ({
 								value: subcategory.id,
 								label: buildSubcategoryLabel(subcategory),
@@ -485,9 +482,7 @@ export default function SeriesPanel(
 				label: "Icon",
 				options: iconOptions,
 				validate: (value) =>
-					String(value ?? "").trim().length > 0
-						? undefined
-						: "Icon is required.",
+					String(value ?? "").trim().length > 0 ? undefined : "Icon is required.",
 			},
 			{
 				type: "select-single",
@@ -512,9 +507,7 @@ export default function SeriesPanel(
 
 					return (
 						<div className="media-icon-preview-row">
-							<div
-								className="media-icon-preview-frame"
-							>
+							<div className="media-icon-preview-frame">
 								{selectedIcon && selectedColor ? (
 									<IconRender
 										iconKey={selectedIcon}
@@ -673,3 +666,5 @@ export default function SeriesPanel(
 		/>
 	);
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

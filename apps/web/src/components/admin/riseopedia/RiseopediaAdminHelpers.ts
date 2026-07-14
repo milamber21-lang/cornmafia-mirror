@@ -4,6 +4,7 @@
 //// Pure helpers for Riseopedia admin tables, panel defaults, labels, and option lists.                         ////
 //// ------------------------------------------Powered by Wooden Engine------------------------------------------ ////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE
 
 import type {
 	RiseopediaAdminFieldConfig,
@@ -71,7 +72,7 @@ export function buildOptionsFromRows(
 				? {
 						value,
 						label: label.length > 0 ? label : value,
-				  }
+					}
 				: null;
 		})
 		.filter((option): option is RiseopediaAdminOption => option !== null)
@@ -85,9 +86,12 @@ export function buildInitialValues(
 	const values: { [key: string]: unknown } = {};
 
 	for (const field of fields) {
-		const rowValue = row ? field.readValue?.(row) ?? readRowValue(row, field.rowKey) : undefined;
+		const rowValue = row
+			? (field.readValue?.(row) ?? readRowValue(row, field.rowKey))
+			: undefined;
 		if (field.type === "checkbox") {
-			values[field.valueKey] = rowValue === undefined ? Boolean(field.defaultValue) : toBoolean(rowValue);
+			values[field.valueKey] =
+				rowValue === undefined ? Boolean(field.defaultValue) : toBoolean(rowValue);
 			continue;
 		}
 
@@ -166,19 +170,23 @@ export function buildEntityOptionsForType(
 	}
 
 	return rows
-		.filter((row) => toDisplayText(readRowValue(row, "entity_type_code")) === selectedType)
+		.filter(
+			(row) =>
+				toDisplayText(readRowValue(row, "entity_type_code")) === selectedType,
+		)
 		.map((row) => {
 			const value = toDisplayText(readRowValue(row, "entity_key")).trim();
 			const name = toDisplayText(readRowValue(row, "entity_name")).trim();
 			const subtitle = toDisplayText(readRowValue(row, "entity_subtitle")).trim();
-			const labelParts = [name.length > 0 ? name : value, subtitle]
-				.filter((part) => part.length > 0);
+			const labelParts = [name.length > 0 ? name : value, subtitle].filter(
+				(part) => part.length > 0,
+			);
 
 			return value.length > 0
 				? {
 						value,
 						label: labelParts.join(" · "),
-				  }
+					}
 				: null;
 		})
 		.filter((option): option is RiseopediaAdminOption => option !== null)
@@ -206,3 +214,5 @@ export function buildUniqueCodeOptions(
 
 	return options.sort((left, right) => left.label.localeCompare(right.label));
 }
+
+// WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE

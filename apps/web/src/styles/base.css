@@ -1,6 +1,7 @@
 /* FILE: apps/web/src/styles/base.css
    Base reset, typography, scrollbars, focus, and content link defaults.
 */
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */
 
 /* FILE: apps/web/src/app/globals.css*/
 
@@ -12,28 +13,28 @@ Corn Mafia — Global Styles
 *,
 *::before,
 *::after {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html,
 body {
-	height: 100%;
+  height: 100%;
 }
 html {
-	overflow-y: scroll;
+  overflow-y: scroll;
 }
 
 body {
-	padding-top: var(--chrome-offset);
-	font-family: Arial, Helvetica, sans-serif;
-	background: var(--theme-bg);
-	color: var(--theme-text);
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+  padding-top: var(--chrome-offset);
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 :focus-visible {
-	outline: 3px solid var(--theme-focus);
-	outline-offset: 2px;
+  outline: 3px solid var(--theme-focus);
+  outline-offset: 2px;
 }
 
 /* ===== Typography ===== */
@@ -43,42 +44,40 @@ h3,
 h4,
 h5,
 h6 {
-	margin: 0 0 var(--space-4);
-	line-height: 1.15;
-	font-weight: 700;
+  margin: 0 0 var(--space-4);
+  line-height: 1.15;
+  font-weight: 700;
 }
 
 h1 {
-	color: var(--theme-accent);
-	font-size: 34px;
+  color: var(--theme-accent);
+  font-size: 34px;
 }
 
 h2 {
-	font-size: 30px;
+  font-size: 30px;
 }
 
 h3 {
-	font-size: 28px;
+  font-size: 28px;
 }
 
 h4 {
-	font-size: 24px;
+  font-size: 24px;
 }
 
 h5 {
-	font-size: 20px;
+  font-size: 20px;
 }
 
 h6 {
-	font-size: 16px;
+  font-size: 16px;
 }
-
 
 p {
-	margin: 0 0 var(--space-4);
-	font-size: var(--font-size-base);
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-base);
 }
-
 
 /* ===== Scroll bars ===== */
 .ui-scroll {
@@ -96,7 +95,7 @@ p {
 .ui-scroll::-webkit-scrollbar-thumb {
   background-color: var(--theme-text-alpha-28);
   border-radius: 10px;
-  border: 3px solid transparent; 
+  border: 3px solid transparent;
   background-clip: padding-box;
 }
 .ui-scroll::-webkit-scrollbar-thumb:hover {
@@ -110,34 +109,35 @@ p {
   scrollbar-gutter: stable both-edges;
 }
 
-
 /* Limit red link styling to content surfaces only (main/card) */
 .main a:not(.ui-btn),
 .card a:not(.ui-btn) {
-	color: var(--theme-accent);
-	text-decoration: none;
+  color: var(--theme-accent);
+  text-decoration: none;
 }
 .main a:not(.ui-btn):hover,
 .card a:not(.ui-btn):hover {
-	text-decoration: underline;
+  text-decoration: underline;
 }
 .main a:not(.ui-btn):active,
 .card a:not(.ui-btn):active {
-	color: var(--theme-accent-strong);
+  color: var(--theme-accent-strong);
 }
 
 /* Ensure editor content (<div class="richtext">) uses the same link styling */
 .richtext a:not(.ui-btn) {
-	color: var(--theme-accent);
-	text-decoration: none;
+  color: var(--theme-accent);
+  text-decoration: none;
 }
 .richtext a:not(.ui-btn):hover {
-	text-decoration: underline;
+  text-decoration: underline;
 }
 .richtext a:not(.ui-btn):active {
-	color: var(--theme-accent-strong);
+  color: var(--theme-accent-strong);
 }
 
 .muted {
-	color: var(--theme-text-muted);
+  color: var(--theme-text-muted);
 }
+
+/* WE[ 	 	 			 		 				 		 				 		  	   		  	 	 		 			   	      	   	 	 		 			  		  			 		 	  	 		 			  		  	 	]WE */
