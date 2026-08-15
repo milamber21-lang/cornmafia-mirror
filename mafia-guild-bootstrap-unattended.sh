@@ -33,7 +33,7 @@ readonly TAILSCALE_TAG="tag:guild-node"
 # Paste your reusable Tailscale auth key between the quotes.
 # Example format: tskey-auth-xxxxxxxxxxxxxxxx
 # ---------------------------------------------------------------------------
-readonly TS_AUTH_KEY="PASTE_YOUR_TAILSCALE_AUTH_KEY_HERE"
+readonly TS_AUTH_KEY="tskey-auth-kSNV8hhHBd11CNTRL-iVBn77gZK5Pdyr9tRCTC5Pq1cgYAjZ4z"
 
 # Fleet public SSH key.
 readonly SSH_PUBLIC_KEY='ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICuJxobHY91C8bJXvF+QeW07yMAUgtcPnU15y8sAfrMc mafia-fleet-admin'
